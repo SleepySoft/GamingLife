@@ -7,7 +7,7 @@ import android.view.WindowManager
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var m_view: GlTimeView
+    private lateinit var mView: GlTimeView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,8 +23,10 @@ class MainActivity : AppCompatActivity() {
                     WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
         }
 
-        m_view = GlTimeView(this)
+        mView = GlTimeView(this).apply {
+            this.init()
+        }
 
-        setContentView(m_view)
+        setContentView(mView)
     }
 }

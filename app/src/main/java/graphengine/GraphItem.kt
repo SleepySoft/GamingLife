@@ -34,31 +34,40 @@ abstract class GraphItem {
 
 
 class GraphCircle : GraphItem() {
-    private var mRadius: Float = 0.0f
-    private var mCenter: PointF = PointF(0.0f, 0.0f)
+    var radius: Float = 0.0f
+        set(value) {
+            field = value
+            needRender = true
+        }
+
+    var origin: PointF = PointF(0.0f, 0.0f)
+        set(value) {
+            field = value
+            needRender = true
+        }
 
     override fun render(canvas: Canvas) {
-        val rCenter = realCenter()
+        val rCenter = realOrigin()
         val rRadius = realRadius()
         canvas.drawCircle(rCenter.x, rCenter.y, rRadius, shapePaint)
     }
 
     override fun getBoundRect() : RectF {
-        val rCenter = realCenter()
+        val rCenter = realOrigin()
         val rRadius = realRadius()
         return RectF(
-            rCenter.x - rRadius, rCenter.y - mRadius,
-            rCenter.x + mRadius, rCenter.y + mRadius)
+            rCenter.x - rRadius, rCenter.y - radius,
+            rCenter.x + radius, rCenter.y + radius)
     }
 
     // ---------------------------------------------------------------------
 
-    private fun realCenter() : PointF {
-        return PointF(mCenter.x + offsetPixel.x, mCenter.y + offsetPixel.y)
+    private fun realOrigin() : PointF {
+        return PointF(origin.x + offsetPixel.x, origin.y + offsetPixel.y)
     }
 
     private fun realRadius() : Float {
-        return mRadius * (1.0f + inflatePct)
+        return radius * (1.0f + inflatePct)
     }
 }
 
