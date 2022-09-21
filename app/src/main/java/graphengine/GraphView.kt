@@ -1,11 +1,8 @@
 package graphengine
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Paint
+import android.graphics.*
 import android.graphics.Paint.ANTI_ALIAS_FLAG
-import android.graphics.PointF
-import android.graphics.RectF
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -37,6 +34,10 @@ interface GraphViewObserver {
     }
 
     fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
+
+    }
+
+    fun onItemLayout() {
 
     }
 }
@@ -74,9 +75,10 @@ open class GraphView(context: Context) :
             updateItemProperty()
         }
 
+    var mObserver: GraphViewObserver? = null
     var mGestureDetector = GestureDetector(context, this)
 
-    // -------------------------------------------------------------------------
+    // ------------------------------- Window event handler override -------------------------------
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -96,14 +98,18 @@ open class GraphView(context: Context) :
 
         updateItemProperty()
         layoutItems()
+
+        mObserver?.onViewSizeChanged(w, h, oldw, oldh)
     }
+
+    // --------------------------------- Action & Gesture Handler ----------------------------------
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         event ?: return super.onTouchEvent(event)
 
         when (event.actionMasked) {
-            MotionEvent.ACTION_UP -> mSelItem = null
+            MotionEvent.ACTION_UP -> onUp(event)
         }
 
         if (mGestureDetector.onTouchEvent(event)) {
@@ -121,67 +127,89 @@ open class GraphView(context: Context) :
         return super.onTouchEvent(event)
     }
 
-    // -------------------------------------------------------------------------
+    private fun onUp(e: MotionEvent) {
+        Log.i(DEBUG_TAG, "onUp")
+        mSelItem?.apply {
+            val itemBound = this.getBoundRect()
+            val insectItems = mutableListOf< GraphItem >()
+
+            // Calc dragging intersect
+            for (item in mGraphItems) {
+                if (item.getBoundRect().intersect(itemBound)) {
+                    insectItems.add(item)
+                }
+            }
+            if (insectItems.size > 0) {
+                mObserver?.onItemDropIntersecting(this, insectItems)
+            }
+
+            // Reset graph item offset and repaint
+            this.offsetPixel = PointF(0.0f, 0.0f)
+            this@GraphView.invalidate()
+        }
+
+        // Clear select item and notify observer
+        mSelItem?.run {
+            mSelItem = null
+            mObserver?.onItemDropped(this)
+        }
+    }
 
     override fun onDown(e: MotionEvent): Boolean {
-        Log.i("Default", "onDown")
+        Log.i(DEBUG_TAG, "onDown")
         return true
     }
 
     override fun onShowPress(e: MotionEvent) {
-        Log.i("Default", "onShowPress")
+        Log.i(DEBUG_TAG, "onShowPress")
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        Log.i("Default", "onSingleTapUp")
+        Log.i(DEBUG_TAG, "onSingleTapUp")
+        val selItem = itemFromPoint(PointF(e.x, e.y))
+        selItem?.run {
+            mObserver?.onItemClicked(selItem)
+        }
         return true
     }
 
-    override fun onScroll(
-        e1: MotionEvent, e2: MotionEvent, distanceX: Float,
-        distanceY: Float
-    ): Boolean {
-        Log.i("Default", "onScroll - x = $distanceX, y = $distanceY")
+    override fun onScroll(e1: MotionEvent, e2: MotionEvent,
+                          distanceX: Float,distanceY: Float): Boolean {
+        Log.i(DEBUG_TAG, "onScroll - x = $distanceX, y = $distanceY")
 
         mSelItem?.run {
             this.shiftItem(-distanceX, -distanceY)
             this@GraphView.invalidate()
+
+            val pos = PointF(
+                this.getBoundRect().centerX(),
+                this.getBoundRect().centerY())
+            mObserver?.onItemDragging(this, pos)
         }
         return true
     }
 
+    // https://stackoverflow.com/a/56545079
+
     override fun onLongPress(e: MotionEvent) {
-        // https://stackoverflow.com/a/56545079
-
-        Log.i("Default", "onLongPress - e.x = $e.x, e.y = $e.y")
-
-        mSelItem = null
         mIsLongPressed = true
+        Log.i(DEBUG_TAG, "onLongPress - e.x = $e.x, e.y = $e.y")
 
-        for (item in mGraphItems) {
-            if (item.getBoundRect().contains(e.x, e.y)) {
-                mSelItem = item
-                Log.i("Default", "Adapted item: $mSelItem")
-                break
-            }
+        mSelItem = itemFromPoint(PointF(e.x, e.y))
+        Log.i(DEBUG_TAG, "Adapted item: $mSelItem")
+
+        mSelItem?.run {
+            mObserver?.onItemPicked(this)
         }
     }
 
-    override fun onFling(
-        e1: MotionEvent, e2: MotionEvent, velocityX: Float,
-        velocityY: Float
-    ): Boolean {
-        Log.i("Default", "onFling - x = $velocityX, y = $velocityY")
+    override fun onFling(e1: MotionEvent, e2: MotionEvent,
+                         velocityX: Float, velocityY: Float): Boolean {
+        Log.i(DEBUG_TAG, "onFling - x = $velocityX, y = $velocityY")
         return false
     }
 
-    // -------------------------------------------------------------------------
-
-    open fun layoutItems() {
-
-    }
-
-    // -------------------------------------------------------------------------
+    // ------------------------------------- Public functions --------------------------------------
 
     fun isPortrait(): Boolean {
         return paintArea.height() >= paintArea.width()
@@ -191,7 +219,13 @@ open class GraphView(context: Context) :
         mGraphItems.add(item)
     }
 
-    // -------------------------------------------------------------------------
+    // -------------------------------- Function need to override  ---------------------------------
+
+    open fun layoutItems() {
+
+    }
+
+    // ------------------------------------- Private functions -------------------------------------
 
     private fun renderItems(canvas: Canvas) {
         for (item in mGraphItems) {
@@ -207,8 +241,15 @@ open class GraphView(context: Context) :
         }
     }
 
-    private fun itemFromPoint() {
-
+    private fun itemFromPoint(pos: PointF): GraphItem? {
+        var selItem: GraphItem? = null
+        for (item in mGraphItems) {
+            if (item.getBoundRect().contains(pos.x, pos.y)) {
+                selItem = item
+                break
+            }
+        }
+        return selItem
     }
 
     private fun handleActionDown(event: MotionEvent) {

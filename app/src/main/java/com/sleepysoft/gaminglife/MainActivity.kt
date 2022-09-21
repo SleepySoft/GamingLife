@@ -4,10 +4,12 @@ import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.WindowManager
+import graphengine.GraphView
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var mView: GlTimeView
+    private lateinit var mView: GraphView
+    private lateinit var mController: GlTimeViewController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,7 +25,8 @@ class MainActivity : AppCompatActivity() {
                     WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
         }
 
-        mView = GlTimeView(this).apply {
+        mView = GraphView(this)
+        mController = GlTimeViewController(mView).apply {
             this.init()
         }
 

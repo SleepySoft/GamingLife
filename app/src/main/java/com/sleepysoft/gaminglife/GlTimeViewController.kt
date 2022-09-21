@@ -1,6 +1,5 @@
 package com.sleepysoft.gaminglife
 
-import android.content.Context
 import android.graphics.*
 import graphengine.*
 import kotlin.math.cos
@@ -10,14 +9,16 @@ import kotlin.math.sin
 const val DEBUG_TAG = "DefaultDbg"
 
 
-class GlTimeView(context: Context) : GraphView(context) {
+class GlTimeViewController(graphView: GraphView) : GraphViewObserver {
+    
+    private val mGraphView = graphView
 
     private var mCenterItem: GraphCircle = GraphCircle().apply {
         this.radius = 50.0f * unitScale
         this.itemData = "Center"
         this.mainText = "Center"
-        this.fontPaint = this@GlTimeView.fontPaint
-        this.shapePaint = this@GlTimeView.shapePaint
+        this.fontPaint = mGraphView.fontPaint
+        this.shapePaint = mGraphView.shapePaint
     }
 
     private var mCenterRadius = 0.1f
@@ -30,17 +31,23 @@ class GlTimeView(context: Context) : GraphView(context) {
                 this.radius = 40.0f * unitScale
                 this.itemData = "$i"
                 this.mainText = "Item $i"
-                this.fontPaint = this@GlTimeView.fontPaint
-                this.shapePaint = this@GlTimeView.shapePaint
+                this.fontPaint = mGraphView.fontPaint
+                this.shapePaint = mGraphView.shapePaint
             }
-            addGraphItem(item)
+            mGraphView.addGraphItem(item)
             mSurroundItems.add(item)
         }
-        addGraphItem(mCenterItem)
+        mGraphView.addGraphItem(mCenterItem)
     }
 
-    override fun layoutItems() {
-        if (isPortrait()) {
+    // -------------------------- Implements GraphViewObserver interface ---------------------------
+
+    override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
+
+    }
+
+    override fun onItemLayout() {
+        if (mGraphView.isPortrait()) {
             layoutPortrait()
         }
         else {
@@ -48,16 +55,18 @@ class GlTimeView(context: Context) : GraphView(context) {
         }
     }
 
+    // ------------------------------------- Private Functions -------------------------------------
+
     private fun layoutPortrait() {
-        val layoutArea = RectF(paintArea)
+        val layoutArea = RectF(mGraphView.paintArea)
         layoutArea.top = layoutArea.bottom - layoutArea.height()
         layoutArea.apply {
-            this.top += 10.0f * unitScale
-            this.bottom += 10.0f * unitScale
+            this.top += 10.0f * mGraphView.unitScale
+            this.bottom += 10.0f * mGraphView.unitScale
         }
 
-        mCenterRadius = 12 * unitScale
-        mSurroundRadius = 8 * unitScale
+        mCenterRadius = 12 * mGraphView.unitScale
+        mSurroundRadius = 8 * mGraphView.unitScale
 
         val center = PointF(layoutArea.centerX(), layoutArea.centerY())
         val radius = layoutArea.width() / 2
