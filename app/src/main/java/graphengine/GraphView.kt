@@ -1,12 +1,15 @@
 package graphengine
 import android.annotation.SuppressLint
-import android.view.View
 import android.content.Context
-import android.graphics.*
-import android.view.MotionEvent
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.Paint.ANTI_ALIAS_FLAG
+import android.graphics.PointF
+import android.graphics.RectF
 import android.util.Log
-import android.graphics.*
+import android.view.GestureDetector
+import android.view.MotionEvent
+import android.view.View
 
 
 const val DEBUG_TAG = "DefaultDbg"
@@ -39,8 +42,11 @@ interface GraphViewObserver {
 }
 
 
-open class GraphView(context: Context) : View(context) {
+open class GraphView(context: Context) :
+    View(context), GestureDetector.OnGestureListener {
 
+    private var mIsLongPressed = false
+    private var mSelItem: GraphItem? = null;
     private var mGraphItems: MutableList< GraphItem > = mutableListOf()
 
     var paintArea: RectF = RectF()
@@ -68,6 +74,8 @@ open class GraphView(context: Context) : View(context) {
             updateItemProperty()
         }
 
+    var mGestureDetector = GestureDetector(context, this)
+
     // -------------------------------------------------------------------------
 
     override fun onDraw(canvas: Canvas?) {
@@ -92,30 +100,79 @@ open class GraphView(context: Context) : View(context) {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return when (event?.actionMasked ?: 0xFF) {
+        event ?: return super.onTouchEvent(event)
 
-            MotionEvent.ACTION_DOWN -> {
-                Log.d(DEBUG_TAG, "Action was DOWN")
-                true
-            }
-            MotionEvent.ACTION_MOVE -> {
-                Log.d(DEBUG_TAG, "Action was MOVE")
-                true
-            }
-            MotionEvent.ACTION_UP -> {
-                Log.d(DEBUG_TAG, "Action was UP")
-                true
-            }
-            MotionEvent.ACTION_CANCEL -> {
-                Log.d(DEBUG_TAG, "Action was CANCEL")
-                true
-            }
-            MotionEvent.ACTION_OUTSIDE -> {
-                Log.d(DEBUG_TAG, "Movement occurred outside bounds of current screen element")
-                true
-            }
-            else -> super.onTouchEvent(event)
+        when (event.actionMasked) {
+            MotionEvent.ACTION_UP -> mSelItem = null
         }
+
+        if (mGestureDetector.onTouchEvent(event)) {
+            return true
+        }
+
+        when (event.actionMasked) {
+            MotionEvent.ACTION_MOVE -> if (mIsLongPressed) {
+                mIsLongPressed = false
+                val cancel = MotionEvent.obtain(event)
+                cancel.action = MotionEvent.ACTION_CANCEL
+                mGestureDetector.onTouchEvent(cancel)
+            }
+        }
+        return super.onTouchEvent(event)
+    }
+
+    // -------------------------------------------------------------------------
+
+    override fun onDown(e: MotionEvent): Boolean {
+        Log.i("Default", "onDown")
+        return true
+    }
+
+    override fun onShowPress(e: MotionEvent) {
+        Log.i("Default", "onShowPress")
+    }
+
+    override fun onSingleTapUp(e: MotionEvent): Boolean {
+        Log.i("Default", "onSingleTapUp")
+        return true
+    }
+
+    override fun onScroll(
+        e1: MotionEvent, e2: MotionEvent, distanceX: Float,
+        distanceY: Float
+    ): Boolean {
+        Log.i("Default", "onScroll - x = $distanceX, y = $distanceY")
+
+        mSelItem?.run {
+            this.shiftItem(-distanceX, -distanceY)
+            this@GraphView.invalidate()
+        }
+        return true
+    }
+
+    override fun onLongPress(e: MotionEvent) {
+        // https://stackoverflow.com/a/56545079
+
+        Log.i("Default", "onLongPress - e.x = $e.x, e.y = $e.y")
+
+        mSelItem = null
+        mIsLongPressed = true
+
+        for (item in mGraphItems) {
+            if (item.getBoundRect().contains(e.x, e.y)) {
+                mSelItem = item
+                Log.i("Default", "Adapted item: $mSelItem")
+                break
+            }
+        }
+    }
+
+    override fun onFling(
+        e1: MotionEvent, e2: MotionEvent, velocityX: Float,
+        velocityY: Float
+    ): Boolean {
+        Log.i("Default", "onFling - x = $velocityX, y = $velocityY")
+        return false
     }
 
     // -------------------------------------------------------------------------
@@ -148,6 +205,22 @@ open class GraphView(context: Context) : View(context) {
             item.fontPaint = shapePaint
             item.unitScale = unitScale
         }
+    }
+
+    private fun itemFromPoint() {
+
+    }
+
+    private fun handleActionDown(event: MotionEvent) {
+
+    }
+
+    private fun handleActionMove(event: MotionEvent) {
+
+    }
+
+    private fun handleActionUp(event: MotionEvent) {
+
     }
 }
 

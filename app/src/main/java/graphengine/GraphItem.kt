@@ -30,6 +30,18 @@ abstract class GraphItem {
 
     abstract fun getBoundRect() : RectF
     abstract fun render(canvas: Canvas)
+
+    fun shiftItem(cx: Float, cy: Float) {
+        offsetPixel.x += cx
+        offsetPixel.y += cy
+        needRender = true
+    }
+
+    fun cancelShift() {
+        offsetPixel.x = 0.0f
+        offsetPixel.y = 0.0f
+        needRender = true
+    }
 }
 
 
