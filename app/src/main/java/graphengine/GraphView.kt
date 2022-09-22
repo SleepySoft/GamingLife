@@ -219,10 +219,8 @@ open class GraphView(context: Context) :
         mGraphItems.add(item)
     }
 
-    // -------------------------------- Function need to override  ---------------------------------
-
-    open fun layoutItems() {
-
+    fun setObserver(observer: GraphViewObserver) {
+        mObserver = observer
     }
 
     // ------------------------------------- Private functions -------------------------------------
@@ -231,6 +229,10 @@ open class GraphView(context: Context) :
         for (item in mGraphItems) {
             item.render(canvas)
         }
+    }
+
+    private fun layoutItems() {
+        mObserver?.onItemLayout()
     }
 
     private fun updateItemProperty() {
@@ -250,18 +252,6 @@ open class GraphView(context: Context) :
             }
         }
         return selItem
-    }
-
-    private fun handleActionDown(event: MotionEvent) {
-
-    }
-
-    private fun handleActionMove(event: MotionEvent) {
-
-    }
-
-    private fun handleActionUp(event: MotionEvent) {
-
     }
 }
 

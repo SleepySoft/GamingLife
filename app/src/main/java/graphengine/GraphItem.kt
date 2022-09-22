@@ -79,7 +79,7 @@ class GraphCircle : GraphItem() {
     }
 
     private fun realRadius() : Float {
-        return radius * (1.0f + inflatePct)
+        return radius * (1.0f + inflatePct / 100)
     }
 }
 

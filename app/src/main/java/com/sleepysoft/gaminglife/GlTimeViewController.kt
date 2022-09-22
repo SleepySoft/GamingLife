@@ -42,6 +42,16 @@ class GlTimeViewController(graphView: GraphView) : GraphViewObserver {
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
 
+    override fun onItemPicked(pickedItem: GraphItem) {
+        pickedItem.inflatePct = 10.0f
+        mGraphView.invalidate()
+    }
+
+    override fun onItemDropped(droppedItem: GraphItem) {
+        droppedItem.inflatePct = 0.0f
+        mGraphView.invalidate()
+    }
+
     override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
 
     }

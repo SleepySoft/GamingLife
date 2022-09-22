@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
         mView = GraphView(this)
         mController = GlTimeViewController(mView).apply {
             this.init()
+            mView.setObserver(this)
         }
 
         setContentView(mView)
