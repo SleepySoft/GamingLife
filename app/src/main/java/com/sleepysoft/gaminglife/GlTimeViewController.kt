@@ -1,6 +1,11 @@
 package com.sleepysoft.gaminglife
 
+import android.content.Context
 import android.graphics.*
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import graphengine.*
 import kotlin.math.cos
 import kotlin.math.sin
@@ -9,9 +14,11 @@ import kotlin.math.sin
 const val DEBUG_TAG = "DefaultDbg"
 
 
-class GlTimeViewController(graphView: GraphView) : GraphViewObserver {
+class GlTimeViewController(context: Context, graphView: GraphView) : GraphViewObserver {
     
+    private val mContext = context
     private val mGraphView = graphView
+    private var mVibrator: Vibrator? = null
 
     private var mCenterItem: GraphCircle = GraphCircle().apply {
         this.radius = 50.0f * unitScale
@@ -38,6 +45,15 @@ class GlTimeViewController(graphView: GraphView) : GraphViewObserver {
             mSurroundItems.add(item)
         }
         mGraphView.addGraphItem(mCenterItem)
+
+        mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager =
+                mContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            mContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
@@ -45,6 +61,13 @@ class GlTimeViewController(graphView: GraphView) : GraphViewObserver {
     override fun onItemPicked(pickedItem: GraphItem) {
         pickedItem.inflatePct = 10.0f
         mGraphView.invalidate()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            mVibrator?.vibrate(VibrationEffect.createOneShot(
+                100, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            mVibrator?.vibrate(100)
+        }
     }
 
     override fun onItemDropped(droppedItem: GraphItem) {

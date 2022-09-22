@@ -1,0 +1,5 @@
+package glcore
+
+object GlRoot {
+    
+}
