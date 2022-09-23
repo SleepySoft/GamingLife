@@ -1,7 +1,6 @@
 package com.sleepysoft.gaminglife
 
 import org.junit.Test
-
 import org.junit.Assert.*
 
 /**

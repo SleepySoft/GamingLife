@@ -1,8 +1,5 @@
 package glcore
-import android.os.Parcel
-import android.os.Parcelable
 import java.util.*
-import kotlin.reflect.typeOf
 
 
 // https://kotlinlang.org/docs/multiplatform-connect-to-apis.html#generate-a-uuid
@@ -17,28 +14,32 @@ fun isNullOrEmpty(str: String?): Boolean {
 
 
 class PathDict() {
-    var mDict = mutableMapOf< String, Any >()
+    var rootDict = mutableMapOf< String, Any >()
+        private set
 
     val keys: Set< String >
-        get() = mDict.keys
+        get() = rootDict.keys
 
     val values: Collection< Any >
-        get() = mDict.values
+        get() = rootDict.values
 
-    fun isEmpty(): Boolean = mDict.isEmpty()
-    fun clear(): Unit = mDict.clear()
+    fun isEmpty(): Boolean = rootDict.isEmpty()
+    fun clear(): Unit = rootDict.clear()
 
     var separator: String = "/"
 
-    fun put(key: String, value: Any): Boolean {
+    fun put(key: String, value: Any, forceWrite: Boolean = false): Boolean {
         var ret = false
         val keys = splitKey(key)
 
         if (keys.isNotEmpty()) {
             val dict = parentDictOf(keys, true)
             dict?.run {
-                this.set(keys.last(), value)
-                ret = true
+                // If the target place already has a dict saved, forceWrite flag has to be specified
+                if ((dict[keys.last()] !is MutableMap<*, *>) || forceWrite) {
+                    this.set(keys.last(), value)
+                    ret = true
+                }
             }
         }
 
@@ -50,7 +51,7 @@ class PathDict() {
         val keys = splitKey(key)
 
         if (keys.isNotEmpty()) {
-            val dict = parentDictOf(keys, true)
+            val dict = parentDictOf(keys, false)
             ret = dict?.get(keys.last())
         }
 
@@ -60,28 +61,28 @@ class PathDict() {
     fun remove(key: String) {
         val keys = splitKey(key)
         if (keys.isNotEmpty()) {
-            val dict = parentDictOf(keys, true)
+            val dict = parentDictOf(keys, false)
             dict?.remove(keys.last())
         }
+    }
+
+    fun attach(newRootDict: MutableMap< String, Any >) {
+        rootDict = newRootDict
     }
 
     // ------------------------------------- Private Functions -------------------------------------
 
     private fun splitKey(key: String): List< String > {
-        return if (key.trim().endsWith(separator)) {
-            listOf(key.substring(0, key.length - 1))
-        } else {
-            val ckeys = key.split(separator).map { it.trim() }
-            val keys = ckeys.toMutableList()
-            keys.removeAll(listOf(null,""))
-            keys
-        }
+        val ckeys = key.split(separator).map { it.trim() }
+        val keys = ckeys.toMutableList()
+        keys.removeAll(listOf(null,""))
+        return keys
     }
 
-    private fun parentDictOf(keys: List< String >, create: Boolean): MutableMap< String, Any >? {
+    private fun parentDictOf(keys: List< String >, createPath: Boolean): MutableMap< String, Any >? {
         val iterator = keys.iterator()
-        var returnDict: MutableMap< String, Any >? = null
-        var currentDict: MutableMap< String, Any > = mDict
+        var returnDict: MutableMap< String, Any >? = rootDict
+        var currentDict: MutableMap< String, Any > = rootDict
 
         while (iterator.hasNext()) {
             val k = iterator.next()
@@ -93,7 +94,7 @@ class PathDict() {
 
             val v = currentDict[k]
             if (v == null) {
-                if (create) {
+                if (createPath) {
                     val newDict = mutableMapOf< String, Any >()
                     currentDict[k] = newDict
                     currentDict = newDict
