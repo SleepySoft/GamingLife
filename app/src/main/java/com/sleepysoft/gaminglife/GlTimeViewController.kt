@@ -14,9 +14,8 @@ import kotlin.math.sin
 const val DEBUG_TAG = "DefaultDbg"
 
 
-class GlTimeViewController(context: Context, graphView: GraphView) : GraphViewObserver {
-    
-    private val mContext = context
+class GlTimeViewController(graphView: GraphView) : GraphViewObserver {
+
     private val mGraphView = graphView
     private var mVibrator: Vibrator? = null
 
@@ -48,11 +47,11 @@ class GlTimeViewController(context: Context, graphView: GraphView) : GraphViewOb
 
         mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager =
-                mContext.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                mGraphView.context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
             vibratorManager.defaultVibrator
         } else {
             @Suppress("DEPRECATION")
-            mContext.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            mGraphView.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
     }
 

@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         mView = GraphView(this)
-        mController = GlTimeViewController(this, mView).apply {
+        mController = GlTimeViewController(mView).apply {
             this.init()
             mView.setObserver(this)
         }
