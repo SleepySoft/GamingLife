@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import glcore.GlRoot
 import graphengine.*
 import kotlin.math.cos
 import kotlin.math.sin
@@ -32,6 +33,8 @@ class GlTimeViewController(graphView: GraphView) : GraphViewObserver {
     private var mSurroundItems = mutableListOf< GraphCircle >()
 
     fun init() {
+        GlRoot.glDatabase.getMetaData("")
+
         for (i in 0 until 1) {
             val item = GraphCircle().apply {
                 this.radius = 40.0f * unitScale
