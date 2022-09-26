@@ -11,24 +11,21 @@ val PRESET_TOP_CLASS = mapOf(
 )
 
 
-const val SEPERATOR = "/"
-const val META_ROOT = "GL_META_ROOT"
-const val DAILY_ROOT = "GL_DAILY_ROOT"
-const val CONFIG_ROOT = "GL_CONFIG_ROOT"
+const val SEPARATOR = "/"
 
 
 class GlDatabase: GlObject() {
 
     val mMetaData = PathDict().apply {
-        this.separator = SEPERATOR
+        this.separator = SEPARATOR
     }
 
     val mDailyRecord = PathDict().apply {
-        this.separator = SEPERATOR
+        this.separator = SEPARATOR
     }
 
     val mGlobalConfig = PathDict().apply {
-        this.separator = SEPERATOR
+        this.separator = SEPARATOR
     }
 
     // ----------------------------------------------------------
