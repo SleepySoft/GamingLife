@@ -95,9 +95,21 @@ internal class PathDictTest {
         assert(x["data2"] == 20)
         assert(x["data3"] == 30)
 
+        // ------------------------------------------------
+
         assert(pathDict.put("/A/B/Y/data1", "A"))
         assert(pathDict.put("/A/B/Y/data2", "B"))
         assert(pathDict.put("/A/B/Y/data3", "C"))
+
+        val yt = pathDict.get("/A/B/Y")
+        assert(yt is MutableMap< *, * >)
+
+        @Suppress("UNCHECKED_CAST")
+        val y = yt as MutableMap< String, Any >
+
+        assert(y["data1"] == "A")
+        assert(y["data2"] == "B")
+        assert(y["data3"] == "C")
 
         print(pathDict.rootDict)
     }

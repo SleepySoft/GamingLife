@@ -19,39 +19,72 @@ const val CONFIG_ROOT = "GL_CONFIG_ROOT"
 
 class GlDatabase: GlObject() {
 
-
-    fun getMetaData(path: String): Any {
-        return ""
+    val mMetaData = PathDict().apply {
+        this.separator = SEPERATOR
     }
 
-    fun updateMetaData(path: String, data: Map< String, Any >) {
-
+    val mDailyRecord = PathDict().apply {
+        this.separator = SEPERATOR
     }
 
-    // ----------------------------------------------------------
-
-    fun getDailyRecord(path: String): Any {
-        return ""
-    }
-
-    fun updateDailyRecord(path: String, data: Map< String, Any >) {
-
+    val mGlobalConfig = PathDict().apply {
+        this.separator = SEPERATOR
     }
 
     // ----------------------------------------------------------
 
-    fun getGlobalConfig(path: String): Any {
-        return ""
+    fun init(): Boolean {
+        return true
     }
 
-    fun updateGlobalConfig(path: String, data: Map< String, Any >) {
-
+    fun save(): Boolean {
+        return true
     }
 
-    // ------------------------------------- Private Functions -------------------------------------
+    fun load(): Boolean {
+        return true
+    }
 
-    private fun getData(path: String): Any? {
-        return ""
+    // ----------------------------------------------------------
+
+    fun getMetaData(path: String): Any? {
+        return mMetaData.get(path)
+    }
+
+    fun setMetaData(path: String, data: Any) {
+        mMetaData.put(path, data)
+    }
+
+    fun updateMetaData(path: String, data: MutableMap<String, Any>) {
+        mMetaData.put(path, data, true)
+    }
+
+    // ----------------------------------------------------------
+
+    fun getDailyRecord(path: String): Any? {
+        return mDailyRecord.get(path)
+    }
+
+    fun setDailyRecord(path: String, data: Any) {
+        mDailyRecord.put(path, data)
+    }
+
+    fun updateDailyRecord(path: String, data: MutableMap<String, Any>) {
+        mDailyRecord.put(path, data, true)
+    }
+
+    // ----------------------------------------------------------
+
+    fun getGlobalConfig(path: String): Any? {
+        return mGlobalConfig.get(path)
+    }
+
+    fun setGlobalConfig(path: String, data: Any) {
+        mGlobalConfig.put(path, data)
+    }
+
+    fun updateGlobalConfig(path: String, data: MutableMap<String, Any>) {
+        mGlobalConfig.put(path, data, true)
     }
 }
 

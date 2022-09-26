@@ -13,8 +13,8 @@ fun isNullOrEmpty(str: String?): Boolean {
 }
 
 
-class PathDict() {
-    var rootDict = mutableMapOf< String, Any >()
+class PathDict(attachMap: MutableMap<String, Any>? = null) {
+    var rootDict: MutableMap<String, Any> = attachMap ?: mutableMapOf()
         private set
 
     val keys: Set< String >
@@ -46,12 +46,12 @@ class PathDict() {
         return ret
     }
 
-    fun get(key: String): Any? {
+    fun get(key: String, createIfMissing: Boolean = false): Any? {
         var ret: Any? = null
         val keys = splitKey(key)
 
         if (keys.isNotEmpty()) {
-            val dict = parentDictOf(keys, false)
+            val dict = parentDictOf(keys, createIfMissing)
             ret = dict?.get(keys.last())
         }
 
