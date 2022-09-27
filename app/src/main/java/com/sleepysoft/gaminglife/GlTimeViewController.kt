@@ -6,7 +6,7 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import glcore.GlRoot
+import glcore.GlData
 import graphengine.*
 import kotlin.math.cos
 import kotlin.math.sin
@@ -15,9 +15,10 @@ import kotlin.math.sin
 const val DEBUG_TAG = "DefaultDbg"
 
 
-class GlTimeViewController(graphView: GraphView) : GraphViewObserver {
+class GlTimeViewController(
+    private val mGraphView: GraphView,
+    private val mGlData: GlData) : GraphViewObserver {
 
-    private val mGraphView = graphView
     private var mVibrator: Vibrator? = null
 
     private var mCenterItem: GraphCircle = GraphCircle().apply {
@@ -33,7 +34,7 @@ class GlTimeViewController(graphView: GraphView) : GraphViewObserver {
     private var mSurroundItems = mutableListOf< GraphCircle >()
 
     fun init() {
-        GlRoot.glDatabase.getMetaData("")
+        val taskGroupTop = mGlData.getTaskGroupTop()
 
         for (i in 0 until 1) {
             val item = GraphCircle().apply {

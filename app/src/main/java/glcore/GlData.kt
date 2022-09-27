@@ -22,6 +22,9 @@ class GlData(private val mDatabase: GlDatabase) {
         mDatabase.metaData.put(META_TASK_GROUP_LINK, mTaskGroupLink)
     }
 
+    fun getTaskGroupTop(): Map< String, String > = mTaskGroupTop
+    fun getTaskGroupSub(): Map< String, String > = mTaskGroupSub
+
     fun nameOfTask(glId: String): String = (mTaskGroupTop[glId] ?: mTaskGroupSub[glId]) ?: ""
 
     fun subTaskOfRoot(glId: String): List< String > {
