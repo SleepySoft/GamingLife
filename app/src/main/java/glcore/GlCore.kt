@@ -57,4 +57,24 @@ class GlPair(var first: Any, var second: Any): GlObject() {
     }
 }
 
+class GlList(var internalList: MutableList< Any > = mutableListOf()): GlObject() {
 
+    override fun pack(): Map< String, Any> {
+        val dictPack = super.pack().toMutableMap()
+        dictPack["internalList"] = internalList
+        return dictPack
+    }
+
+    override fun unpack(pack: Map< String, Any>): Boolean {
+        var ret = false
+        if (super.unpack(pack)) {
+            val unpackData = pack["internalList"]
+            if (unpackData is MutableList<*>) {
+                ret = true
+                @Suppress("UNCHECKED_CAST")
+                internalList = unpackData as MutableList< Any >
+            }
+        }
+        return ret
+    }
+}

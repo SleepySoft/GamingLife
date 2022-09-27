@@ -58,6 +58,19 @@ class PathDict(attachMap: MutableMap<String, Any>? = null) {
         return ret
     }
 
+    fun getDictAny(key: String): MutableMap<String, Any>? {
+        val data = get(key)
+        @Suppress("UNCHECKED_CAST")
+        return if (dictKeysAreStr(data)) data as MutableMap< String, Any > else null
+    }
+
+    fun getDictStr(key: String): MutableMap<String, String>? {
+        val data = get(key)
+        @Suppress("UNCHECKED_CAST")
+        return if (dictKeysAreStr(data) && dictValuesAreStr(data))
+            data as MutableMap< String, String > else null
+    }
+
     fun remove(key: String) {
         val keys = splitKey(key)
         if (keys.isNotEmpty()) {
@@ -118,6 +131,34 @@ class PathDict(attachMap: MutableMap<String, Any>? = null) {
         }
 
         return returnDict
+    }
+
+    fun dictKeysAreStr(dict: Any?): Boolean {
+        var ret = false
+        if (dict is MutableMap< *, * >) {
+            ret = true
+            for (k in dict.keys) {
+                if (k !is String) {
+                    ret = false
+                    break
+                }
+            }
+        }
+        return ret
+    }
+
+    fun dictValuesAreStr(dict: Any?): Boolean {
+        var ret = false
+        if (dict is MutableMap< *, * >) {
+            ret = true
+            for (k in dict.values) {
+                if (k !is String) {
+                    ret = false
+                    break
+                }
+            }
+        }
+        return ret
     }
 }
 
