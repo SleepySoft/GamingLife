@@ -56,7 +56,7 @@ open class GraphView(context: Context) :
     var unitScale: Float = 1.0f
         private set
 
-    var fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+/*    var fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
         this.setARGB(0xFF, 0x00, 0x00, 0x00)
         this.textAlign = Paint.Align.CENTER
     }
@@ -73,7 +73,7 @@ open class GraphView(context: Context) :
         set(value) {
             field = value
             updateItemProperty()
-        }
+        }*/
 
     var mObserver: GraphViewObserver? = null
     var mGestureDetector = GestureDetector(context, this)
@@ -94,9 +94,9 @@ open class GraphView(context: Context) :
         unitScale = w * 0.01f
         paintArea.set(0.0f, 0.0f, w.toFloat(), h.toFloat())
 
-        shapePaint.strokeWidth = unitScale * 1.0f
+/*        shapePaint.strokeWidth = unitScale * 1.0f
 
-        updateItemProperty()
+        updateItemProperty()*/
         layoutItems()
 
         mObserver?.onViewSizeChanged(w, h, oldw, oldh)
@@ -235,13 +235,13 @@ open class GraphView(context: Context) :
         mObserver?.onItemLayout()
     }
 
-    private fun updateItemProperty() {
+/*    private fun updateItemProperty() {
         for (item in mGraphItems) {
             item.fontPaint = fontPaint
             item.fontPaint = shapePaint
             item.unitScale = unitScale
         }
-    }
+    }*/
 
     private fun itemFromPoint(pos: PointF): GraphItem? {
         var selItem: GraphItem? = null

@@ -2,6 +2,7 @@ package com.sleepysoft.gaminglife
 
 import android.content.Context
 import android.graphics.*
+import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -22,11 +23,18 @@ class GlTimeViewController(
     private var mVibrator: Vibrator? = null
 
     private var mCenterItem: GraphCircle = GraphCircle().apply {
-        this.radius = 50.0f * unitScale
+        this.radius = 4.5f * unitScale
         this.itemData = "Center"
         this.mainText = "Center"
-        this.fontPaint = mGraphView.fontPaint
-        this.shapePaint = mGraphView.shapePaint
+        this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+            this.setARGB(0xFF, 0x00, 0x00, 0x00)
+            this.textAlign = Paint.Align.CENTER
+        }
+        this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+            this.setARGB(0xFF, 0x00, 0x00, 0x00)
+            this.style = Paint.Style.STROKE
+            this.strokeWidth = unitScale * 0.5f
+        }
     }
 
     private var mCenterRadius = 0.1f
@@ -36,13 +44,20 @@ class GlTimeViewController(
     fun init() {
         val taskGroupTop = mGlData.getTaskGroupTop()
 
-        for (i in 0 until 1) {
+        for ((k, v) in taskGroupTop) {
             val item = GraphCircle().apply {
-                this.radius = 40.0f * unitScale
-                this.itemData = "$i"
-                this.mainText = "Item $i"
-                this.fontPaint = mGraphView.fontPaint
-                this.shapePaint = mGraphView.shapePaint
+                this.radius = 4.0f * unitScale
+                this.itemData = k
+                this.mainText = v
+                this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                    this.setARGB(0xFF, 0x00, 0x00, 0x00)
+                    this.textAlign = Paint.Align.CENTER
+                }
+                this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+                    this.setARGB(0xFF, 0x00, 0x00, 0x00)
+                    this.style = Paint.Style.STROKE
+                    this.strokeWidth = unitScale * 0.5f
+                }
             }
             mGraphView.addGraphItem(item)
             mSurroundItems.add(item)
@@ -60,6 +75,16 @@ class GlTimeViewController(
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
+
+    override fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        mCenterItem.radius = 8.0f * mGraphView.unitScale
+        mCenterItem.shapePaint.strokeWidth = mGraphView.unitScale * 1.0f
+
+        for (item in mSurroundItems) {
+            item.radius = 6.5f * mGraphView.unitScale
+            item.shapePaint.strokeWidth = mGraphView.unitScale * 1.0f
+        }
+    }
 
     override fun onItemPicked(pickedItem: GraphItem) {
         pickedItem.inflatePct = 10.0f

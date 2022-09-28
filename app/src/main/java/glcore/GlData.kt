@@ -3,7 +3,13 @@ package glcore
 
 class GlData(private val mDatabase: GlDatabase) {
 
+    fun init() {
+        groupDataFromDatabase()
+    }
+
     // ---------------------------------------- Task Group -----------------------------------------
+
+    // ------------------- Data, Load and Write -------------------
 
     var mTaskGroupTop: MutableMap< String, String > = mutableMapOf()         // id: name
     var mTaskGroupSub: MutableMap< String, String > = mutableMapOf()         // id: name
@@ -21,6 +27,8 @@ class GlData(private val mDatabase: GlDatabase) {
         mDatabase.metaData.put(META_TASK_GROUP_SUB, mTaskGroupSub)
         mDatabase.metaData.put(META_TASK_GROUP_LINK, mTaskGroupLink)
     }
+
+    // --------------------------- Gets ---------------------------
 
     fun getTaskGroupTop(): Map< String, String > = mTaskGroupTop
     fun getTaskGroupSub(): Map< String, String > = mTaskGroupSub
@@ -40,9 +48,12 @@ class GlData(private val mDatabase: GlDatabase) {
         return subTasks
     }
 
+    // --------------------------- Sets ---------------------------
+
     fun renameTaskRootGroup(glId: String, newName: String) {
         if (mTaskGroupTop.containsKey(glId)) {
             mTaskGroupTop[glId] = newName
+            groupDataToDatabase()
         }
     }
 
@@ -60,5 +71,6 @@ class GlData(private val mDatabase: GlDatabase) {
             mTaskGroupSub[glId] = subName
             mTaskGroupLink[glId] = belongsRootGroupId
         }
+        groupDataToDatabase()
     }
 }

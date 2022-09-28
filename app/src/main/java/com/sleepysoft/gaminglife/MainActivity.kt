@@ -1,9 +1,11 @@
 package com.sleepysoft.gaminglife
 
+import Example.ExampleView
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.WindowManager
+import glcore.GlRoot
 import graphengine.GraphView
 
 class MainActivity : AppCompatActivity() {
@@ -13,6 +15,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        GlRoot.init()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
         {
@@ -26,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         mView = GraphView(this)
-        mController = GlTimeViewController(mView).apply {
+        mController = GlTimeViewController(mView, GlRoot.glData).apply {
             this.init()
             mView.setObserver(this)
         }

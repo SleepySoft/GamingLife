@@ -58,10 +58,38 @@ class GraphCircle : GraphItem() {
             needRender = true
         }
 
+    private var boundaryOfText: Rect = Rect()
+    private var drawableContainer: Rect = Rect()
+
     override fun render(canvas: Canvas) {
         val rCenter = realOrigin()
         val rRadius = realRadius()
+
         canvas.drawCircle(rCenter.x, rCenter.y, rRadius, shapePaint)
+
+        if (needRender) {
+            val bound = getBoundRect()
+            bound.apply {
+                val inflateHori = this.width() * 0.2f
+                val inflateVert = this.height() * 0.2f
+                this.top += inflateVert
+                this.left += inflateHori
+                this.right -= inflateHori
+                this.bottom -= inflateVert
+            }
+            drawableContainer = RectF2Rect(bound)
+            val fontSize = calculateFontSize(boundaryOfText, drawableContainer, mainText)
+            fontPaint.setTextSize(fontSize)
+            needRender = false
+        }
+
+        val halfTextHeight: Float = boundaryOfText.height() / 2.0f
+        canvas.drawText(
+            mainText,
+            drawableContainer.centerX().toFloat(),
+            (drawableContainer.centerY().toFloat() + halfTextHeight),
+            fontPaint
+        )
     }
 
     override fun getBoundRect() : RectF {
