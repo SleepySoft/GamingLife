@@ -8,6 +8,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import glcore.GlData
+import glcore.TASK_ID_RELAX
 import graphengine.*
 import kotlin.math.cos
 import kotlin.math.sin
@@ -135,17 +136,28 @@ class GlTimeViewController(
         mCenterItem.origin = center
         mCenterItem.radius = mCenterRadius
 
-        val startAngle = 90.0f - mSurroundItems.size * 30.0f / 2
-        val endAngle = 90.0f + mSurroundItems.size * 30.0f / 2
+/*        val startAngle = 90.0f - mSurroundItems.size * 30.0f / 2
+        val endAngle = 90.0f + mSurroundItems.size * 30.0f / 2*/
+
+        val relaxItemPos = calcPointByAngle(center, radius - mSurroundRadius, 90.0f)
 
         val circumferencePoints = calcCircumferencePoints(
             center, radius - mSurroundRadius,
             // Make the angle 0 since left.
-            startAngle - 180.0f, endAngle - 180.0f, mSurroundItems.size)
+            0.0f - 180.0f, 360.0f - 180.0f, mSurroundItems.size - 1)
 
-        for ((index, value) in mSurroundItems.withIndex()) {
-            value.origin = circumferencePoints[index]
-            value.radius = mSurroundRadius
+        var index = 0
+        for (value in mSurroundItems) {
+            if (value.itemData == TASK_ID_RELAX) {
+                // The relax item, special process
+                value.origin = relaxItemPos
+                value.radius = mSurroundRadius
+            }
+            else {
+                value.origin = circumferencePoints[index]
+                value.radius = mSurroundRadius
+                index++
+            }
         }
     }
 
@@ -155,7 +167,7 @@ class GlTimeViewController(
 
     private fun calcCircumferencePoints(origin: PointF, radius: Float, startAngle: Float,
                                         endAngle: Float, count: Int): List< PointF > {
-        val unitAngle = (endAngle - startAngle) / (count + 1)
+        val unitAngle = (endAngle - startAngle) / count
         val circumferencePoints = mutableListOf< PointF >()
         for (index in 1 .. count) {
             val angle = (startAngle + index * unitAngle)
@@ -166,5 +178,13 @@ class GlTimeViewController(
             ))
         }
         return circumferencePoints
+    }
+
+    private fun calcPointByAngle(origin: PointF, radius: Float, angle: Float): PointF {
+        val radian = (angle * Math.PI / 180.0f).toFloat()
+        return PointF(
+            origin.x + radius * cos(radian),
+            origin.y + radius * sin(radian),
+        )
     }
 }
