@@ -144,7 +144,7 @@ class GlTimeViewController(
         val circumferencePoints = calcCircumferencePoints(
             center, radius - mSurroundRadius,
             // Make the angle 0 since left.
-            0.0f - 180.0f, 360.0f - 180.0f, mSurroundItems.size - 1)
+            0.0f + 180.0f, 180.0f + 180.0f, mSurroundItems.size - 1)
 
         var index = 0
         for (value in mSurroundItems) {
@@ -167,15 +167,16 @@ class GlTimeViewController(
 
     private fun calcCircumferencePoints(origin: PointF, radius: Float, startAngle: Float,
                                         endAngle: Float, count: Int): List< PointF > {
-        val unitAngle = (endAngle - startAngle) / count
         val circumferencePoints = mutableListOf< PointF >()
-        for (index in 1 .. count) {
-            val angle = (startAngle + index * unitAngle)
-            val radian = (angle * Math.PI / 180.0f).toFloat()
-            circumferencePoints.add(PointF(
-                origin.x + radius * cos(radian),
-                origin.y + radius * sin(radian),
-            ))
+        if (count == 1) {
+            circumferencePoints.add(calcPointByAngle(origin, radius, (endAngle - startAngle) / 2))
+        }
+        else {
+            val unitAngle = (endAngle - startAngle) / (count - 1)
+            for (index in 0 until count) {
+                val angle = (startAngle + index * unitAngle)
+                circumferencePoints.add(calcPointByAngle(origin, radius, angle))
+            }
         }
         return circumferencePoints
     }
