@@ -4,17 +4,12 @@ import android.graphics.*
 
 abstract class GraphItem {
     var itemData: Any? = null
+    var subText: String = ""
     var mainText: String = ""
     var needRender: Boolean = true
 
     var fontPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     var shapePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
-
-    var unitScale: Float = 1.0f
-        set(value) {
-            field = value
-            needRender = true
-        }
 
     var inflatePct: Float = 0.0f
         set(value) {

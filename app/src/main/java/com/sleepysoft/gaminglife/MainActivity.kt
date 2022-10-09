@@ -4,12 +4,15 @@ import Example.ExampleView
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.WindowManager
 import glcore.GlRoot
 import graphengine.GraphView
 
 class MainActivity : AppCompatActivity() {
-
+    private lateinit var mHandler : Handler
+    private lateinit var mRunnable : Runnable
     private lateinit var mView: GraphView
     private lateinit var mController: GlTimeViewController
 
@@ -29,6 +32,11 @@ class MainActivity : AppCompatActivity() {
                     WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
         }
 
+        mHandler = Handler(Looper.getMainLooper())
+        mRunnable = Runnable {
+            doPeriod()
+        }
+
         mView = GraphView(this)
         mController = GlTimeViewController(mView, GlRoot.glData).apply {
             this.init()
@@ -36,5 +44,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContentView(mView)
+        mHandler.postDelayed(mRunnable, 1000)
+    }
+
+    private fun doPeriod() {
+        mController.polling()
+        mHandler.postDelayed(mRunnable, 1000)
     }
 }

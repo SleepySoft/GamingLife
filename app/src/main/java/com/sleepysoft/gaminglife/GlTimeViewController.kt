@@ -7,8 +7,9 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.support.annotation.RequiresApi
 import glcore.GlData
-import glcore.TASK_ID_RELAX
+import glcore.GROUP_ID_RELAX
 import graphengine.*
 import kotlin.math.cos
 import kotlin.math.sin
@@ -24,17 +25,12 @@ class GlTimeViewController(
     private var mVibrator: Vibrator? = null
 
     private var mCenterItem: GraphCircle = GraphCircle().apply {
-        this.radius = 4.5f * unitScale
-        this.itemData = "Center"
-        this.mainText = "Center"
+        this.itemData = GROUP_ID_RELAX
         this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-            this.setARGB(0xFF, 0x00, 0x00, 0x00)
             this.textAlign = Paint.Align.CENTER
         }
         this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-            this.setARGB(0xFF, 0x00, 0x00, 0x00)
-            this.style = Paint.Style.STROKE
-            this.strokeWidth = unitScale * 0.5f
+            this.style = Paint.Style.FILL
         }
     }
 
@@ -43,28 +39,6 @@ class GlTimeViewController(
     private var mSurroundItems = mutableListOf< GraphCircle >()
 
     fun init() {
-        val taskGroupTop = mGlData.getTaskGroupTop()
-
-        for ((k, v) in taskGroupTop) {
-            val item = GraphCircle().apply {
-                this.radius = 4.0f * unitScale
-                this.itemData = k
-                this.mainText = v
-                this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-                    this.setARGB(0xFF, 0x00, 0x00, 0x00)
-                    this.textAlign = Paint.Align.CENTER
-                }
-                this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                    this.setARGB(0xFF, 0x00, 0x00, 0x00)
-                    this.style = Paint.Style.STROKE
-                    this.strokeWidth = unitScale * 0.5f
-                }
-            }
-            mGraphView.addGraphItem(item)
-            mSurroundItems.add(item)
-        }
-        mGraphView.addGraphItem(mCenterItem)
-
         mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager =
                 mGraphView.context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -73,6 +47,24 @@ class GlTimeViewController(
             @Suppress("DEPRECATION")
             mGraphView.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
+
+        buildItems()
+        refreshItems()
+    }
+
+    fun polling() {
+        val currentTimeMs = System.currentTimeMillis()
+        val currentTimeS = currentTimeMs / 1000
+
+        val ms = currentTimeMs % 1000
+        val hour = currentTimeS / 3600
+        val remainingSec = currentTimeS % 3600
+        val minutes = remainingSec / 60
+        val seconds = remainingSec % 60
+
+        mCenterItem.mainText = "%02d:%02d:%02d".format(hour, minutes, seconds)
+        // mCenterItem.mainText = "%02d:%02d:%02d.%03d".format(hour, minutes, seconds, ms)
+        mGraphView.invalidate()
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
@@ -85,6 +77,8 @@ class GlTimeViewController(
             item.radius = 6.5f * mGraphView.unitScale
             item.shapePaint.strokeWidth = mGraphView.unitScale * 1.0f
         }
+
+        mGraphView.invalidate()
     }
 
     override fun onItemPicked(pickedItem: GraphItem) {
@@ -115,9 +109,40 @@ class GlTimeViewController(
         else {
             layoutLandscape()
         }
+        refreshItems()
     }
 
     // ------------------------------------- Private Functions -------------------------------------
+
+    private fun buildItems() {
+        val taskGroupTop = mGlData.getTaskGroupTop()
+        for ((k, v) in taskGroupTop) {
+            val item = GraphCircle().apply {
+                this.itemData = k
+                this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                    this.textAlign = Paint.Align.CENTER
+                }
+                this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+                    this.style = Paint.Style.FILL
+                }
+            }
+            mGraphView.addGraphItem(item)
+            mSurroundItems.add(item)
+        }
+        mGraphView.addGraphItem(mCenterItem)
+    }
+
+    private fun refreshItems() {
+        for (item in mSurroundItems) {
+            item.apply {
+                // this.mainText = mGlData.g
+                this.fontPaint.color = mGlData.getGroupColor(this.itemData as String).toInt()
+            }
+        }
+
+        val color = mGlData.getGroupColor(mCenterItem.itemData as String)
+        mCenterItem.shapePaint.color = Color.parseColor("#000000")
+    }
 
     private fun layoutPortrait() {
         val layoutArea = RectF(mGraphView.paintArea)
@@ -136,9 +161,6 @@ class GlTimeViewController(
         mCenterItem.origin = center
         mCenterItem.radius = mCenterRadius
 
-/*        val startAngle = 90.0f - mSurroundItems.size * 30.0f / 2
-        val endAngle = 90.0f + mSurroundItems.size * 30.0f / 2*/
-
         val relaxItemPos = calcPointByAngle(center, radius - mSurroundRadius, 90.0f)
 
         val circumferencePoints = calcCircumferencePoints(
@@ -147,15 +169,15 @@ class GlTimeViewController(
             0.0f + 180.0f, 180.0f + 180.0f, mSurroundItems.size - 1)
 
         var index = 0
-        for (value in mSurroundItems) {
-            if (value.itemData == TASK_ID_RELAX) {
+        for (item in mSurroundItems) {
+            if (item.itemData == GROUP_ID_RELAX) {
                 // The relax item, special process
-                value.origin = relaxItemPos
-                value.radius = mSurroundRadius
+                item.origin = relaxItemPos
+                item.radius = mSurroundRadius
             }
             else {
-                value.origin = circumferencePoints[index]
-                value.radius = mSurroundRadius
+                item.origin = circumferencePoints[index]
+                item.radius = mSurroundRadius
                 index++
             }
         }

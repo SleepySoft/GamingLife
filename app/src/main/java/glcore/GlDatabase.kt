@@ -6,7 +6,7 @@ const val SEPARATOR = "/"
 
 class GlDatabase: GlObject() {
 
-    val metaData = PathDict().apply {
+    val runtimeData = PathDict().apply {
         this.separator = SEPARATOR
     }
 
@@ -14,7 +14,7 @@ class GlDatabase: GlObject() {
         this.separator = SEPARATOR
     }
 
-    val globalConfig = PathDict().apply {
+    val systemConfig = PathDict().apply {
         this.separator = SEPARATOR
     }
 
