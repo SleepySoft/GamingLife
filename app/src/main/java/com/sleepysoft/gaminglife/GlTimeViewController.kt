@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import android.support.annotation.RequiresApi
 import glcore.GlData
 import glcore.GROUP_ID_RELAX
 import glcore.GlStrStruct
@@ -92,11 +91,22 @@ class GlTimeViewController(
     override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
         if (droppedItem == mCenterItem) {
             // Drag center item to surround
-            mCenterItem.shapePaint.color = intersectingItems[0].shapePaint.color
+            val surroundItem = intersectingItems[0]
+            mCenterItem.itemData = surroundItem.itemData
+            mCenterItem.shapePaint.color = surroundItem.shapePaint.color
+
+            @Suppress("UNCHECKED_CAST")
+            handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
+                                surroundItem.itemData as GlStrStruct?)
         }
         else if (intersectingItems.contains(mCenterItem)) {
             // Drag surround item to center
+            mCenterItem.itemData = droppedItem.itemData
             mCenterItem.shapePaint.color = droppedItem.shapePaint.color
+
+            @Suppress("UNCHECKED_CAST")
+            handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
+                                droppedItem.itemData as GlStrStruct?)
         }
     }
 
@@ -112,9 +122,12 @@ class GlTimeViewController(
     // ------------------------------------- Private Functions -------------------------------------
 
     private fun buildItems() {
+        val currentTaskInfo = mGlData.getCurrentTaskInfo()
+        val currentTaskGroupData = mGlData.getTaskData(currentTaskInfo["groupID"] ?: "") ?:
+                                   mGlData.getTaskData(GROUP_ID_RELAX)
 
         mCenterItem = GraphCircle().apply {
-            this.itemData = mGlData.getTaskData(GROUP_ID_RELAX)
+            this.itemData = currentTaskGroupData
             this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
                 this.color = Color.parseColor("#FFFFFF")
                 this.textAlign = Paint.Align.CENTER
@@ -214,5 +227,17 @@ class GlTimeViewController(
             origin.x + radius * cos(radian),
             origin.y + radius * sin(radian),
         )
+    }
+
+    private fun handleTaskSwitching(fromTask: GlStrStruct?, toTask: GlStrStruct?) {
+        if (toTask == null) {
+            System.out.println("The toTask should not be null")
+        }
+        fromTask?.run {
+
+        }
+        toTask?.run {
+            mGlData.switchToTask(toTask)
+        }
     }
 }

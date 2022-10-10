@@ -6,6 +6,7 @@ abstract class GraphItem {
     var itemData: Any? = null
     var subText: String = ""
     var mainText: String = ""
+    var draggable: Boolean = true
     var needRender: Boolean = true
 
     var fontPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)

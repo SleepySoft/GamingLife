@@ -162,6 +162,19 @@ open class GraphView(context: Context) :
 
     override fun onShowPress(e: MotionEvent) {
         Log.i(DEBUG_TAG, "onShowPress")
+
+        mSelItem = itemFromPoint(PointF(e.x, e.y))
+        Log.i(DEBUG_TAG, "Adapted item: $mSelItem")
+
+        mSelItem?.run {
+            if (this.draggable) {
+                bringToFront(this)
+                mObserver?.onItemPicked(this)
+            }
+            else {
+                mSelItem = null
+            }
+        }
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
@@ -193,15 +206,6 @@ open class GraphView(context: Context) :
 
     override fun onLongPress(e: MotionEvent) {
         mIsLongPressed = true
-        Log.i(DEBUG_TAG, "onLongPress - e.x = $e.x, e.y = $e.y")
-
-        mSelItem = itemFromPoint(PointF(e.x, e.y))
-        Log.i(DEBUG_TAG, "Adapted item: $mSelItem")
-
-        mSelItem?.run {
-            bringToFront(this)
-            mObserver?.onItemPicked(this)
-        }
     }
 
     override fun onFling(e1: MotionEvent, e2: MotionEvent,

@@ -86,7 +86,13 @@ class GlData(private val mDatabase: GlDatabase) {
         mDatabase.systemConfig.put(PATH_TASK_GROUP_LINK, mTaskGroupLink, forceWrite = true)
     }
 
-    fun getCurrentTaskData() : Map< String , Any > {
+    // ----------------------- Current Task -----------------------
+
+    fun switchToTask(taskData: GlStrStruct) {
+
+    }
+
+    fun getCurrentTaskInfo() : GlStrStruct {
         try {
             when(val currentTaskData = mDatabase.runtimeData.getDictAny(PATH_CURRENT_TASK)) {
                 null -> {
@@ -100,7 +106,8 @@ class GlData(private val mDatabase: GlDatabase) {
                     if (groupID.isEmpty() || (startTime <= 0)) {
                         throw java.lang.Exception("Current task data invalid")
                     }
-                    return currentTaskData
+                    @Suppress("UNCHECKED_CAST")
+                    return currentTaskData as GlStrStruct
                 }
             }
         }
@@ -109,7 +116,9 @@ class GlData(private val mDatabase: GlDatabase) {
                 this["startTime"] = System.currentTimeMillis()
             }
             mDatabase.runtimeData.put(PATH_CURRENT_TASK, currentTaskData, true)
-            return currentTaskData
+
+            @Suppress("UNCHECKED_CAST")
+            return currentTaskData as GlStrStruct
         }
     }
 
