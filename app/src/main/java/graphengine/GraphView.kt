@@ -199,6 +199,7 @@ open class GraphView(context: Context) :
         Log.i(DEBUG_TAG, "Adapted item: $mSelItem")
 
         mSelItem?.run {
+            bringToFront(this)
             mObserver?.onItemPicked(this)
         }
     }
@@ -223,6 +224,20 @@ open class GraphView(context: Context) :
         mObserver = observer
     }
 
+    fun bringToFront(item: GraphItem) {
+        if (item in mGraphItems) {
+            mGraphItems.remove(item)
+            mGraphItems.add(item)
+        }
+    }
+
+    fun sendToBack(item: GraphItem) {
+        if (item in mGraphItems) {
+            mGraphItems.remove(item)
+            mGraphItems.add(0, item)
+        }
+    }
+
     // ------------------------------------- Private functions -------------------------------------
 
     private fun renderItems(canvas: Canvas) {
@@ -234,14 +249,6 @@ open class GraphView(context: Context) :
     private fun layoutItems() {
         mObserver?.onItemLayout()
     }
-
-/*    private fun updateItemProperty() {
-        for (item in mGraphItems) {
-            item.fontPaint = fontPaint
-            item.fontPaint = shapePaint
-            item.unitScale = unitScale
-        }
-    }*/
 
     private fun itemFromPoint(pos: PointF): GraphItem? {
         var selItem: GraphItem? = null

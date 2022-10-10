@@ -10,6 +10,7 @@ import android.os.VibratorManager
 import android.support.annotation.RequiresApi
 import glcore.GlData
 import glcore.GROUP_ID_RELAX
+import glcore.GlStrStruct
 import graphengine.*
 import kotlin.math.cos
 import kotlin.math.sin
@@ -22,17 +23,8 @@ class GlTimeViewController(
     private val mGraphView: GraphView,
     private val mGlData: GlData) : GraphViewObserver {
 
-    private var mVibrator: Vibrator? = null
-
-    private var mCenterItem: GraphCircle = GraphCircle().apply {
-        this.itemData = GROUP_ID_RELAX
-        this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-            this.textAlign = Paint.Align.CENTER
-        }
-        this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-            this.style = Paint.Style.FILL
-        }
-    }
+    private lateinit var mVibrator: Vibrator
+    private lateinit var mCenterItem: GraphCircle
 
     private var mCenterRadius = 0.1f
     private var mSurroundRadius = 0.1f
@@ -49,7 +41,6 @@ class GlTimeViewController(
         }
 
         buildItems()
-        refreshItems()
     }
 
     fun polling() {
@@ -86,10 +77,10 @@ class GlTimeViewController(
         mGraphView.invalidate()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mVibrator?.vibrate(VibrationEffect.createOneShot(
+            mVibrator.vibrate(VibrationEffect.createOneShot(
                 100, VibrationEffect.DEFAULT_AMPLITUDE))
         } else {
-            mVibrator?.vibrate(100)
+            mVibrator.vibrate(100)
         }
     }
 
@@ -99,7 +90,14 @@ class GlTimeViewController(
     }
 
     override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
-
+        if (droppedItem == mCenterItem) {
+            // Drag center item to surround
+            mCenterItem.shapePaint.color = intersectingItems[0].shapePaint.color
+        }
+        else if (intersectingItems.contains(mCenterItem)) {
+            // Drag surround item to center
+            mCenterItem.shapePaint.color = droppedItem.shapePaint.color
+        }
     }
 
     override fun onItemLayout() {
@@ -109,20 +107,35 @@ class GlTimeViewController(
         else {
             layoutLandscape()
         }
-        refreshItems()
     }
 
     // ------------------------------------- Private Functions -------------------------------------
 
     private fun buildItems() {
+
+        mCenterItem = GraphCircle().apply {
+            this.itemData = mGlData.getTaskData(GROUP_ID_RELAX)
+            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#FFFFFF")
+                this.textAlign = Paint.Align.CENTER
+            }
+            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor(mGlData.colorOfTask(GROUP_ID_RELAX))
+                this.style = Paint.Style.FILL
+            }
+        }
+
         val taskGroupTop = mGlData.getTaskGroupTop()
         for ((k, v) in taskGroupTop) {
             val item = GraphCircle().apply {
-                this.itemData = k
+                this.itemData = v
+                this.mainText = v["name"] ?: ""
                 this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                    this.color = Color.parseColor("#FFFFFF")
                     this.textAlign = Paint.Align.CENTER
                 }
                 this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+                    this.color = Color.parseColor(mGlData.colorOfTask(k))
                     this.style = Paint.Style.FILL
                 }
             }
@@ -130,18 +143,6 @@ class GlTimeViewController(
             mSurroundItems.add(item)
         }
         mGraphView.addGraphItem(mCenterItem)
-    }
-
-    private fun refreshItems() {
-/*        for (item in mSurroundItems) {
-            item.apply {
-                // this.mainText = mGlData.g
-                this.fontPaint.color = mGlData.getGroupColor(this.itemData as String).toInt()
-            }
-        }
-
-        val color = mGlData.getGroupColor(mCenterItem.itemData as String)
-        mCenterItem.shapePaint.color = Color.parseColor("#000000")*/
     }
 
     private fun layoutPortrait() {
@@ -170,15 +171,19 @@ class GlTimeViewController(
 
         var index = 0
         for (item in mSurroundItems) {
-            if (item.itemData == GROUP_ID_RELAX) {
-                // The relax item, special process
-                item.origin = relaxItemPos
+            item.itemData?.run {
+                @Suppress("UNCHECKED_CAST")
+                val groupData = item.itemData as GlStrStruct
+
+                if (groupData["id"] == GROUP_ID_RELAX) {
+                    // The relax item, special process
+                    item.origin = relaxItemPos
+                }
+                else {
+                    item.origin = circumferencePoints[index]
+                    index++
+                }
                 item.radius = mSurroundRadius
-            }
-            else {
-                item.origin = circumferencePoints[index]
-                item.radius = mSurroundRadius
-                index++
             }
         }
     }
