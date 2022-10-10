@@ -17,12 +17,12 @@ class GlData(private val mDatabase: GlDatabase) {
     var mTaskGroupLink: MutableMap< String, String > = mutableMapOf()        // sub id: top id
 
     private fun groupDataFromDatabase() {
-        mTaskGroupTop = mDatabase.systemConfig.getDictStr(
+/*        mTaskGroupTop = mDatabase.systemConfig.getDictStr(
             PATH_TASK_GROUP_TOP) ?: TASK_GROUP_TOP_PRESET.toMutableMap()
         mTaskGroupSub = mDatabase.systemConfig.getDictStr(
             PATH_TASK_GROUP_SUB) ?: mutableMapOf()
         mTaskGroupLink = mDatabase.systemConfig.getDictStr(
-            PATH_TASK_GROUP_LINK) ?: mutableMapOf()
+            PATH_TASK_GROUP_LINK) ?: mutableMapOf()*/
     }
 
     private fun groupDataToDatabase() {
@@ -51,10 +51,10 @@ class GlData(private val mDatabase: GlDatabase) {
         return subTasks
     }
 
-    fun getGroupColor(glId: String) : Long {
+/*    fun getGroupColor(glId: String) : Long {
         val color = mDatabase.systemConfig.get(PATH_TASK_GROUP_COLOR + "/${glId}")
         return if (color is Long) color else (TASK_GROUP_COLOR_PRESET[glId] ?: 0x00FFFFFF)
-    }
+    }*/
 
     fun getCurrentTaskData() : Map< String , Any > {
         try {

@@ -38,6 +38,10 @@ val STRUCT_DEC_TASK_RECORD = mapOf< String, KClass< * > >(
 fun checkStruct(structDict: Map< String, Any >,
                 structDeclare: Map< String, KClass< * > >) : Boolean {
     for ((k, v) in structDeclare) {
+        if (v == Any::class) {
+            // Accept all
+            continue
+        }
         if ((structDict[k] == null) || (structDict[k]!!::class != v)) {
             System.out.println(
                 "Structure mismatch: Field [$k], Expect [$v], But [${structDict[k]}]")
@@ -45,6 +49,16 @@ fun checkStruct(structDict: Map< String, Any >,
         }
     }
     return true;
+}
+
+fun checkListOfStruct(structDictList: List< Map< String, Any > >,
+                      structDeclare: Map< String, KClass< * > >) : Boolean {
+    for (structDict in structDictList) {
+        if (!checkStruct(structDict, structDeclare)) {
+            return false
+        }
+    }
+    return true
 }
 
 
@@ -57,43 +71,34 @@ val TASK_GROUP_TOP_PRESET = mapOf(
     GROUP_ID_RELAX to mapOf(
         "id" to GROUP_ID_RELAX,
         "name" to "放松",
-        "color" to "#BBDEFB"),                        // Blue 100
+        "color" to "#BBDEFB"),      // Blue 100
 
     GROUP_ID_ENJOY to mapOf(
         "id" to GROUP_ID_ENJOY,
         "name" to "玩乐",
-        "color" to "#FBBC05"),       // Yellow
+        "color" to "#FBBC05"),      // Yellow
 
     GROUP_ID_LIFE to mapOf(
         "id" to GROUP_ID_LIFE,
         "name" to "生活",
-        "color" to ""),
+        "color" to "#34A853"),      // Green
 
     GROUP_ID_WORK to mapOf(
         "id" to GROUP_ID_WORK,
         "name" to "工作",
-        "color" to ""),
+        "color" to "#EA4335"),      // Red
 
     GROUP_ID_STUDY to mapOf(
         "id" to GROUP_ID_STUDY,
         "name" to "学习",
-        "color" to ""),
+        "color" to "#F9A825"),      // Yellow 800
 
     GROUP_ID_CREATE to mapOf(
         "id" to GROUP_ID_CREATE,
         "name" to "创作",
-        "color" to ""),
+        "color" to "#4485F4"),      // Blue
 )
 
-
-val TASK_GROUP_COLOR_PRESET = mapOf< String, Long >(
-    GROUP_ID_RELAX to 0x00,
-    "f9fb401a-dc28-463f-92a6-0d30bd8730bb" to 0x00,
-    "3e9fd903-9c51-4301-b610-715205983573" to 0x0034A853,       // Green
-    "11000041-0376-4876-9efa-8a6a7028140d" to 0x00EA4335,       // Red
-    "1841978a-3adc-413a-a9ae-a34e019205f8" to 0x00F9A825,       // Yellow 800
-    "fa94a546-beeb-4570-b266-c066a4a31233" to 0x004485F4,       // Blue
-)
 
 val TASK_RECORD_TEMPLATE = mapOf(
     "taskID" to "",

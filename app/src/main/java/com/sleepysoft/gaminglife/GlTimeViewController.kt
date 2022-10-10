@@ -133,7 +133,7 @@ class GlTimeViewController(
     }
 
     private fun refreshItems() {
-        for (item in mSurroundItems) {
+/*        for (item in mSurroundItems) {
             item.apply {
                 // this.mainText = mGlData.g
                 this.fontPaint.color = mGlData.getGroupColor(this.itemData as String).toInt()
@@ -141,7 +141,7 @@ class GlTimeViewController(
         }
 
         val color = mGlData.getGroupColor(mCenterItem.itemData as String)
-        mCenterItem.shapePaint.color = Color.parseColor("#000000")
+        mCenterItem.shapePaint.color = Color.parseColor("#000000")*/
     }
 
     private fun layoutPortrait() {
