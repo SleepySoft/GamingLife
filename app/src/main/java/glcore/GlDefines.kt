@@ -21,28 +21,28 @@ const val GROUP_ID_STUDY  = "1841978a-3adc-413a-a9ae-a34e019205f8"
 const val GROUP_ID_CREATE = "fa94a546-beeb-4570-b266-c066a4a31233"
 
 
-// ---------------------------------------- Struct Defines -----------------------------------------
+// ---------------------------------------- Struct Support -----------------------------------------
 
-val STRUCT_DEC_TASK_DATA = mapOf< String, KClass< * > >(
-    "id" to String::class,
-    "name" to String::class,
-    "color" to String::class
-)
+typealias GlAnyStruct = MutableMap< String, Any >
+typealias GlStrStruct = MutableMap< String, String >
 
-val STRUCT_DEC_TASK_RECORD = mapOf< String, KClass< * > >(
-    "taskID" to String::class,
-    "groupID" to String::class,
-    "startTime" to Long::class
-)
+typealias GlAnyStructList = MutableList< GlAnyStruct >
+typealias GlStrStructList = MutableList< GlStrStruct >
 
-fun checkStruct(structDict: Map< String, Any >,
-                structDeclare: Map< String, KClass< * > >) : Boolean {
+typealias GlAnyStructDict = MutableMap< String, GlAnyStruct >
+typealias GlStrStructDict = MutableMap< String, GlStrStruct >
+
+typealias GlStructDeclare = Map< String, KClass< * > >
+
+fun checkStruct(structDict: GlAnyStruct,
+                structDeclare: GlStructDeclare) : Boolean {
     for ((k, v) in structDeclare) {
         if (v == Any::class) {
             // Accept all
             continue
         }
         if ((structDict[k] == null) || (structDict[k]!!::class != v)) {
+            // User println for Unit Test
             System.out.println(
                 "Structure mismatch: Field [$k], Expect [$v], But [${structDict[k]}]")
             return false
@@ -51,8 +51,8 @@ fun checkStruct(structDict: Map< String, Any >,
     return true;
 }
 
-fun checkListOfStruct(structDictList: List< Map< String, Any > >,
-                      structDeclare: Map< String, KClass< * > >) : Boolean {
+fun checkListOfStruct(structDictList: List< GlAnyStruct >,
+                      structDeclare: GlStructDeclare) : Boolean {
     for (structDict in structDictList) {
         if (!checkStruct(structDict, structDeclare)) {
             return false
@@ -60,6 +60,21 @@ fun checkListOfStruct(structDictList: List< Map< String, Any > >,
     }
     return true
 }
+
+
+// ---------------------------------------- Struct Defines -----------------------------------------
+
+val STRUCT_DEC_TASK_DATA : GlStructDeclare = mapOf< String, KClass< * > >(
+    "id" to String::class,
+    "name" to String::class,
+    "color" to String::class
+)
+
+val STRUCT_DEC_TASK_RECORD : GlStructDeclare = mapOf< String, KClass< * > >(
+    "taskID" to String::class,
+    "groupID" to String::class,
+    "startTime" to Long::class
+)
 
 
 // -------------------------------------------- Preset ---------------------------------------------
