@@ -1,13 +1,18 @@
 package graphengine
 
 import android.graphics.*
+import kotlin.math.sqrt
 
 
-fun RectF2Rect(rectF: RectF): Rect {
+fun rectF2Rect(rectF: RectF): Rect {
     val rect = Rect()
     rectF.round(rect)
     return rect
 }
+
+fun centerFOfRect(rect: Rect) : PointF = PointF(rect.centerX().toFloat(), rect.centerY().toFloat())
+
+fun centerFOfRectF(rectF: RectF) : PointF = PointF(rectF.centerX(), rectF.centerY())
 
 
 fun calculateFontSize(textBounds: Rect, textContainer: Rect, text: String): Float {
@@ -28,3 +33,26 @@ fun calculateFontSize(textBounds: Rect, textContainer: Rect, text: String): Floa
     }
     return textSize
 }
+
+
+fun distanceOf(pos1: PointF, pos2: PointF): Float {
+    val dx = pos1.x - pos2.x
+    val dy = pos1.y - pos2.y
+    return sqrt(dx * dx + dy * dy)
+}
+
+
+fun closestGraphItem(refPos: PointF, graphItems: List< GraphItem >) : GraphItem? {
+    var selDist = 0.0f
+    var selItem : GraphItem? = null
+    for (item in graphItems) {
+        val itemDist = distanceOf(refPos, centerFOfRectF(item.getBoundRect()))
+        if ((selItem == null) || (itemDist < selDist)) {
+            selItem = item
+            selDist = itemDist
+        }
+    }
+    return selItem
+}
+
+

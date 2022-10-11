@@ -135,7 +135,7 @@ open class GraphView(context: Context) :
 
             // Calc dragging intersect
             for (item in mGraphItems) {
-                if (item.getBoundRect().intersect(itemBound)) {
+                if ((item != mSelItem) && (item.getBoundRect().intersect(itemBound))) {
                     insectItems.add(item)
                 }
             }

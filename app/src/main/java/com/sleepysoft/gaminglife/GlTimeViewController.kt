@@ -90,17 +90,23 @@ class GlTimeViewController(
 
     override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
         if (droppedItem == mCenterItem) {
-            // Drag center item to surround
-            val surroundItem = intersectingItems[0]
-            mCenterItem.itemData = surroundItem.itemData
-            mCenterItem.shapePaint.color = surroundItem.shapePaint.color
+            // Drag center item to surround, closestItem as surroundItem
 
-            @Suppress("UNCHECKED_CAST")
-            handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
-                                surroundItem.itemData as GlStrStruct?)
+            val closestItem : GraphItem? = closestGraphItem(
+                centerFOfRectF(droppedItem.getBoundRect()), intersectingItems)
+
+            closestItem?.run {
+                mCenterItem.itemData = closestItem.itemData
+                mCenterItem.shapePaint.color = closestItem.shapePaint.color
+
+                @Suppress("UNCHECKED_CAST")
+                handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
+                    closestItem.itemData as GlStrStruct?)
+            }
         }
         else if (intersectingItems.contains(mCenterItem)) {
             // Drag surround item to center
+
             mCenterItem.itemData = droppedItem.itemData
             mCenterItem.shapePaint.color = droppedItem.shapePaint.color
 

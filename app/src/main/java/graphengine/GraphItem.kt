@@ -73,7 +73,7 @@ class GraphCircle : GraphItem() {
                 this.right -= inflateHori
                 this.bottom -= inflateVert
             }
-            drawableContainer = RectF2Rect(bound)
+            drawableContainer = rectF2Rect(bound)
             val fontSize = calculateFontSize(boundaryOfText, drawableContainer, mainText)
             fontPaint.setTextSize(fontSize)
             needRender = false
