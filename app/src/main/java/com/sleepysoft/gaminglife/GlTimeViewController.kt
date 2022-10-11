@@ -10,6 +10,7 @@ import android.os.VibratorManager
 import glcore.GlData
 import glcore.GROUP_ID_RELAX
 import glcore.GlStrStruct
+import glcore.PATH_TASK_HISTORY
 import graphengine.*
 import kotlin.math.cos
 import kotlin.math.sin
@@ -43,16 +44,25 @@ class GlTimeViewController(
     }
 
     fun polling() {
-        val currentTimeMs = System.currentTimeMillis()
-        val currentTimeS = currentTimeMs / 1000
+        val currentTaskData = mGlData.getCurrentTaskInfo()
+        val currentTaskStartTimeMs = currentTaskData["startTime"] as Long
 
-        val ms = currentTimeMs % 1000
-        val hour = currentTimeS / 3600
-        val remainingSec = currentTimeS % 3600
-        val minutes = remainingSec / 60
-        val seconds = remainingSec % 60
+        val deltaTimeMs: Long = System.currentTimeMillis() - currentTaskStartTimeMs
+        val deltaTimeS: Long = deltaTimeMs / 1000
 
-        mCenterItem.mainText = "%02d:%02d:%02d".format(hour, minutes, seconds)
+        val ms: Long = deltaTimeMs % 1000
+        val hour: Long = deltaTimeS / 3600
+        val remainingSec: Long = deltaTimeS % 3600
+        val minutes: Long = remainingSec / 60
+        val seconds: Long = remainingSec % 60
+
+        if (hour != 0L) {
+            mCenterItem.mainText = "%02d:%02d:%02d".format(hour, minutes, seconds)
+        }
+        else {
+            mCenterItem.mainText = "%02d:%02d".format(minutes, seconds)
+        }
+
         // mCenterItem.mainText = "%02d:%02d:%02d.%03d".format(hour, minutes, seconds, ms)
         mGraphView.invalidate()
     }
@@ -129,8 +139,9 @@ class GlTimeViewController(
 
     private fun buildItems() {
         val currentTaskInfo = mGlData.getCurrentTaskInfo()
-        val currentTaskGroupData = mGlData.getTaskData(currentTaskInfo["groupID"] ?: "") ?:
-                                   mGlData.getTaskData(GROUP_ID_RELAX)
+        val currentTaskGroupData =
+            mGlData.getTaskData(currentTaskInfo["groupID"].toString() ?: "") ?:
+            mGlData.getTaskData(GROUP_ID_RELAX)
 
         mCenterItem = GraphCircle().apply {
             this.itemData = currentTaskGroupData

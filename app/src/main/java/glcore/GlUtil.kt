@@ -28,6 +28,9 @@ class PathDict(attachMap: MutableMap<String, Any>? = null) {
 
     var separator: String = "/"
 
+    fun set(key: String, value: Any, forceWrite: Boolean = false): Boolean =
+        put(key, value, forceWrite)
+
     fun put(key: String, value: Any, forceWrite: Boolean = false): Boolean {
         var ret = false
         val keys = splitKey(key)

@@ -90,12 +90,31 @@ class GlData(private val mDatabase: GlDatabase) {
 
     fun switchToTask(taskData: GlStrStruct) {
         @Suppress("UNCHECKED_CAST")
-        checkStruct(taskData as GlAnyStruct, STRUCT_DEC_TASK_DATA)
+        if (!checkStruct(taskData as GlAnyStruct, STRUCT_DEC_TASK_DATA)) {
+            return
+        }
 
+        // Put current task into task history
+
+        val currentTask = getCurrentTaskInfo()
         val taskHistory = mDatabase.dailyRecord.get(PATH_TASK_HISTORY)
+
+        if (taskHistory is MutableList< * >) {
+            @Suppress("UNCHECKED_CAST")
+            (taskHistory as GlAnyStructList).add(currentTask)
+        }
+        else {
+            mDatabase.dailyRecord.set(PATH_TASK_HISTORY, mutableListOf(currentTask))
+        }
+
+        // Set new current task
+
+        mDatabase.runtimeData.set("$PATH_CURRENT_TASK/taskID", "")
+        mDatabase.runtimeData.set("$PATH_CURRENT_TASK/groupID", taskData["id"] ?: GROUP_ID_RELAX)
+        mDatabase.runtimeData.set("$PATH_CURRENT_TASK/startTime", System.currentTimeMillis())
     }
 
-    fun getCurrentTaskInfo() : GlStrStruct {
+    fun getCurrentTaskInfo() : GlAnyStruct {
         try {
             when(val currentTaskData = mDatabase.runtimeData.getDictAny(PATH_CURRENT_TASK)) {
                 null -> {
@@ -110,7 +129,7 @@ class GlData(private val mDatabase: GlDatabase) {
                         throw java.lang.Exception("Current task data invalid")
                     }
                     @Suppress("UNCHECKED_CAST")
-                    return currentTaskData as GlStrStruct
+                    return currentTaskData
                 }
             }
         }
@@ -121,7 +140,7 @@ class GlData(private val mDatabase: GlDatabase) {
             mDatabase.runtimeData.put(PATH_CURRENT_TASK, currentTaskData, true)
 
             @Suppress("UNCHECKED_CAST")
-            return currentTaskData as GlStrStruct
+            return currentTaskData
         }
     }
 

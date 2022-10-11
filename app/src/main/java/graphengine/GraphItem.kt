@@ -4,8 +4,17 @@ import android.graphics.*
 
 abstract class GraphItem {
     var itemData: Any? = null
+
     var subText: String = ""
+        set(value) {
+            field = value
+            needRender = true
+        }
     var mainText: String = ""
+        set(value) {
+            field = value
+            needRender = true
+        }
     var draggable: Boolean = true
     var needRender: Boolean = true
 
