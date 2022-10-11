@@ -86,10 +86,13 @@ class GlData(private val mDatabase: GlDatabase) {
         mDatabase.systemConfig.put(PATH_TASK_GROUP_LINK, mTaskGroupLink, forceWrite = true)
     }
 
-    // ----------------------- Current Task -----------------------
+    // ----------------------- Task Switching -----------------------
 
     fun switchToTask(taskData: GlStrStruct) {
+        @Suppress("UNCHECKED_CAST")
+        checkStruct(taskData as GlAnyStruct, STRUCT_DEC_TASK_DATA)
 
+        val taskHistory = mDatabase.dailyRecord.get(PATH_TASK_HISTORY)
     }
 
     fun getCurrentTaskInfo() : GlStrStruct {

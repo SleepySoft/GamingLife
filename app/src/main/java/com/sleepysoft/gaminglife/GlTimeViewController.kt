@@ -166,8 +166,8 @@ class GlTimeViewController(
             this.bottom += 10.0f * mGraphView.unitScale
         }
 
-        mCenterRadius = 12 * mGraphView.unitScale
-        mSurroundRadius = 8 * mGraphView.unitScale
+        mCenterRadius = 20 * mGraphView.unitScale
+        mSurroundRadius = 15 * mGraphView.unitScale
 
         val center = PointF(layoutArea.centerX(), layoutArea.centerY())
         val radius = layoutArea.width() / 2
@@ -175,7 +175,7 @@ class GlTimeViewController(
         mCenterItem.origin = center
         mCenterItem.radius = mCenterRadius
 
-        val relaxItemPos = calcPointByAngle(center, radius - mSurroundRadius, 90.0f)
+        val relaxItemPos = calcPointByAngle(center, (radius) * 4 / 5 - mSurroundRadius, 90.0f)
 
         val circumferencePoints = calcCircumferencePoints(
             center, radius - mSurroundRadius,

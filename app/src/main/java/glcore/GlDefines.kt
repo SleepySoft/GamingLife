@@ -3,12 +3,12 @@ import kotlin.reflect.KClass
 
 // --------------------------------------------- Path ----------------------------------------------
 
-const val PATH_TASK_GROUP_TOP = "/Config/Meta/TaskGroup/TopGroups"
-const val PATH_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"
-const val PATH_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"
-const val PATH_TASK_GROUP_COLOR = "/Config/Meta/TaskGroup/GroupColor"
+const val PATH_TASK_GROUP_TOP = "/Config/Meta/TaskGroup/TopGroups"      // v as STRUCT_DEC_TASK_DATA
+const val PATH_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"      // v as STRUCT_DEC_TASK_DATA
+const val PATH_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"    // v as MutableMap< String, String >
 
-const val PATH_CURRENT_TASK = "/Runtime/TimeModule/CurrentTask"
+const val PATH_CURRENT_TASK = "/Runtime/TimeModule/CurrentTask"         // v as STRUCT_DEC_TASK_RECORD
+const val PATH_TASK_HISTORY = "/Runtime/TimeModule/TaskHistory"         // v as list of STRUCT_DEC_TASK_RECORD
 
 
 // --------------------------------------------- Value ---------------------------------------------
@@ -86,12 +86,12 @@ val TASK_GROUP_TOP_PRESET = mapOf(
     GROUP_ID_RELAX to mapOf(
         "id" to GROUP_ID_RELAX,
         "name" to "放松",
-        "color" to "#BBDEFB"),      // Blue 100
+        "color" to "#00BCD4"),      // Cyan 500
 
     GROUP_ID_ENJOY to mapOf(
         "id" to GROUP_ID_ENJOY,
         "name" to "玩乐",
-        "color" to "#FBBC05"),      // Yellow
+        "color" to "#7E57C2"),      // Deep Purple 400
 
     GROUP_ID_LIFE to mapOf(
         "id" to GROUP_ID_LIFE,
@@ -106,7 +106,7 @@ val TASK_GROUP_TOP_PRESET = mapOf(
     GROUP_ID_STUDY to mapOf(
         "id" to GROUP_ID_STUDY,
         "name" to "学习",
-        "color" to "#F9A825"),      // Yellow 800
+        "color" to "#FBBC05"),      // Yellow
 
     GROUP_ID_CREATE to mapOf(
         "id" to GROUP_ID_CREATE,
