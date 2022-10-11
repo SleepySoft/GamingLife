@@ -17,6 +17,8 @@ class PathDict(attachMap: MutableMap<String, Any>? = null) {
     var rootDict: MutableMap<String, Any> = attachMap ?: mutableMapOf()
         private set
 
+    var hasUpdate: Boolean = false
+
     val keys: Set< String >
         get() = rootDict.keys
 
@@ -41,6 +43,7 @@ class PathDict(attachMap: MutableMap<String, Any>? = null) {
                 // If the target place already has a dict saved, forceWrite flag has to be specified
                 if ((dict[keys.last()] !is MutableMap<*, *>) || forceWrite) {
                     this.set(keys.last(), value)
+                    hasUpdate = true
                     ret = true
                 }
             }
@@ -79,11 +82,13 @@ class PathDict(attachMap: MutableMap<String, Any>? = null) {
         if (keys.isNotEmpty()) {
             val dict = parentDictOf(keys, false)
             dict?.remove(keys.last())
+            hasUpdate = true
         }
     }
 
     fun attach(newRootDict: MutableMap< String, Any >) {
         rootDict = newRootDict
+        hasUpdate = true
     }
 
     // ------------------------------------- Private Functions -------------------------------------

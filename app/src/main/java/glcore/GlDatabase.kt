@@ -25,6 +25,18 @@ class GlDatabase: GlObject() {
     }
 
     fun save(): Boolean {
+        if (runtimeData.hasUpdate) {
+
+        }
+
+        if (dailyRecord.hasUpdate) {
+
+        }
+
+        if (systemConfig.hasUpdate) {
+
+        }
+
         return true
     }
 
