@@ -1,4 +1,12 @@
 package glcore
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.encodeCollection
 import java.util.*
 
 
@@ -62,6 +70,10 @@ class PathDict(attachMap: MutableMap<String, Any>? = null) {
         }
 
         return ret
+    }
+
+    fun isDictNode(key: String) : Boolean {
+        return get(key) is Map< * , * >
     }
 
     fun getDictAny(key: String): MutableMap<String, Any>? {
@@ -171,4 +183,35 @@ class PathDict(attachMap: MutableMap<String, Any>? = null) {
 }
 
 
+/*
+
+
+object SortedMapSerializer: KSerializer<Map<String, Int>> {
+    private val mapSerializer = MapSerializer(String.serializer(), Int.serializer())
+
+    override val descriptor: SerialDescriptor = mapSerializer.descriptor
+
+    override fun serialize(encoder: Encoder, value: Map<String, Int>) {
+        mapSerializer.serialize(encoder, value.toSortedMap())
+    }
+
+    override fun deserialize(decoder: Decoder): Map<String, Int> {
+        return mapSerializer.deserialize(decoder)
+    }
+}
+
+
+object PathDictSerializer : KSerializer< PathDict > {
+
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("pathdict")
+
+    override fun serialize(encoder: Encoder, value: PathDict) {
+        encoder.encodeCollection()
+    }
+
+    override fun deserialize(decoder: Decoder): PathDict {
+        return LocalDateTime.ofInstant(Instant.ofEpochMilli(decoder.decodeLong()), ZoneOffset.UTC)
+    }
+}
+*/
 
