@@ -1,12 +1,10 @@
 package glcore
-import kotlinx.serialization.*
-import kotlinx.serialization.json.*
 
 
 const val SEPARATOR = "/"
 
 
-class GlDatabase: GlObject() {
+class GlDatabase {
 
     val runtimeData = PathDict().apply {
         this.separator = SEPARATOR
@@ -48,13 +46,13 @@ class GlDatabase: GlObject() {
 
     // ------------------------------------------------------------
 
-    private fun toJson(dict: GlAnyStruct) {
+/*    private fun toJson(dict: GlAnyStruct) {
         val json: String = Json.encodeToString< GlAnyStruct >(dict)
     }
 
     private fun persistsJson() {
 
-    }
+    }*/
 }
 
 

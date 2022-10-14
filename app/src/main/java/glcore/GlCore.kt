@@ -5,6 +5,8 @@ class GlContext {
 
 }
 
+/*
+
 
 open class GlObject {
     var uuid: String = randomUUID()
@@ -19,7 +21,6 @@ open class GlObject {
         return true
     }
 
-    @kotlinx.serialization.ExperimentalSerializationApi
     open fun serialize(): String {
         val dictPack = pack()
         // jsonString variant for debug
@@ -74,3 +75,4 @@ class GlList(var internalList: MutableList< Any > = mutableListOf()): GlObject()
         return ret
     }
 }
+*/
