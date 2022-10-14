@@ -27,6 +27,7 @@ const val GROUP_ID_CREATE = "fa94a546-beeb-4570-b266-c066a4a31233"
 
 // ---------------------------------------- Struct Support -----------------------------------------
 
+typealias GlAnyList = MutableList< Any >
 typealias GlAnyDict = MutableMap< String, Any >
 
 typealias GlAnyStruct = GlAnyDict
