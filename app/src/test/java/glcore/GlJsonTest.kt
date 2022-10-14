@@ -12,8 +12,17 @@ internal class GlJsonTest {
     }
 
     @Test
-    fun testBasicSerialize() {
+    fun testEmptyDeserialize() {
+        assert(GlJson.deseralizeAnyDict("").isEmpty())
+        assert(GlJson.deseralizeAnyDict("  ").isEmpty())
+        assert(GlJson.deseralizeAnyDict("{}").isEmpty())
+        assert(GlJson.deseralizeAnyDict("  { }  ").isEmpty())
+    }
+
+    @Test
+    fun testBasicSerializeAndDeserialize() {
         val pathDict = PathDict()
+        pathDict.set(PATH_TASK_GROUP_TOP, TASK_GROUP_TOP_PRESET)
         val jsonText = GlJson.serializeAnyDict(pathDict.rootDict)
     }
 

@@ -112,4 +112,42 @@ internal class PathDictTest {
 
         print(pathDict.rootDict)
     }
+
+    @Test
+    fun testAutoConvertMapToMutable() {
+        val pathDict = PathDict()
+
+        assert(pathDict.put("/A/B/C", mapOf(
+            "X" to 1,
+            "Y" to "foo",
+            "Z" to 3.14f
+        )))
+
+        assert(pathDict.get("/A/B/C") is MutableMap<*, *>)
+        assert(pathDict.get("/A/B/C/X") == 1)
+        assert(pathDict.set("/A/B/C/X", 2))
+        assert(pathDict.get("/A/B/C/X") == 2)
+
+        val dict = mapOf< String, Any >(
+            "A" to mapOf< String, Any >(
+                "B" to mapOf< String, Any >(
+                    "C" to mapOf< String, Any >(
+                        "X" to 100,
+                        "Y" to "bar",
+                        "Z" to 1.66f
+                    )
+                )
+            )
+        )
+
+        pathDict.attach(dict.toMutableMap())
+
+        assert(pathDict.get("/A") is MutableMap<*, *>)
+        assert(pathDict.get("/A/B") is MutableMap<*, *>)
+        assert(pathDict.get("/A/B/C") is MutableMap<*, *>)
+
+        assert(pathDict.get("/A/B/C/Y") == "bar")
+        assert(pathDict.set("/A/B/C/Y", "foobar"))
+        assert(pathDict.get("/A/B/C/Y") == "foobar")
+    }
 }
