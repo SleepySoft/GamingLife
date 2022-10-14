@@ -1,4 +1,7 @@
 package glcore
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.jsonObject
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -56,6 +59,20 @@ internal class GlJsonTest {
             TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_STUDY },
             TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_CREATE },
         ))
-        verifyJsonText(GlJson.serializeAnyDict(pathDict.rootDict))
+
+        val jsonText = GlJson.serializeAnyDict(pathDict.rootDict)
+        verifyJsonText(jsonText)
+
+        val jsonElements: Map<String, JsonElement> = Json.parseToJsonElement(jsonText).jsonObject
+
+        for ((k, v) in jsonElements) {
+            print(k)
+            print(v)
+        }
+
+
+/*        val anyDict = GlJson.deseralizeAnyDict(jsonText)
+        pathDict.attach(anyDict)*/
+
     }
 }

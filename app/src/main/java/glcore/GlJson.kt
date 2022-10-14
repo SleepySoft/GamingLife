@@ -1,6 +1,13 @@
 package glcore
 
 
+
+
+// ============================================================================ //
+// I don't use existing JSon library because they are not fit for this program  //
+// ============================================================================ //
+
+
 object GlJson {
 
     // ----------------------------------------- Serialize -----------------------------------------
@@ -11,7 +18,9 @@ object GlJson {
 
     private fun wrapQuotes(text: String) : String = "\"$text\""
 
-    fun escapeJsonString(text: String): String =
+    // https://stackoverflow.com/a/58689286
+
+    private fun escapeJsonString(text: String): String =
         text.replace("\\", "\\\\").
              replace("\"", "\\\"").
              replace("\b", "\\b").
@@ -59,7 +68,7 @@ object GlJson {
         return deseralizeDict(jsonText.trim())
     }
 
-    fun checkWrapper(trimmedText: String): String {
+    private fun checkWrapper(trimmedText: String): String {
         return when {
             trimmedText.startsWith("{") && trimmedText.endsWith("}") -> "{}"
             trimmedText.startsWith("[") && trimmedText.endsWith("]") -> "[]]"
@@ -71,17 +80,17 @@ object GlJson {
     private fun unwrapQuotes(trimmedText: String) : String =
         trimmedText.removePrefix("\"").removeSuffix("\"")
 
-    fun splitByComma(jsonText: String) : List< String > {
+    private fun splitByComma(jsonText: String) : List< String > {
         // https://stackoverflow.com/a/51356605
-        return jsonText.split(",(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*\$)".toRegex())
+        return jsonText.split(",(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*\$)".toRegex(), limit = 2)
     }
 
-    fun splitByColon(jsonText: String) : List< String > {
-        // Just follow the upper format
-        return jsonText.split(":(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*\$)".toRegex())
+    private fun splitByColon(jsonText: String) : List< String > {
+        // https://stackoverflow.com/a/17904715
+        return jsonText.split("(?:,|\\{)?([^:]*):(\"[^\"]*\"|\\{[^}]*\\}|[^},]*)".toRegex())
     }
 
-    fun unescapeJsonString(text: String): String =
+    private fun unescapeJsonString(text: String): String =
         text.replace("\\t", "\t").
         replace("\\r", "\r").
         replace("\\n", "\n").
@@ -90,7 +99,7 @@ object GlJson {
         replace("\\\"", "\"").
         replace("\\\\", "\\")
 
-    fun deseralizeList(trimmedText: String) : GlAnyList {
+    private fun deseralizeList(trimmedText: String) : GlAnyList {
         val anyList = mutableListOf< Any >()
 
         if (checkWrapper(trimmedText) != "[]") {
@@ -107,14 +116,14 @@ object GlJson {
         return anyList
     }
 
-    fun deseralizeDict(trimmedText: String) : GlAnyDict {
+    private fun deseralizeDict(trimmedText: String) : GlAnyDict {
         val anyDict = mutableMapOf< String, Any >()
 
         if (checkWrapper(trimmedText) != "{}") {
             return anyDict
         }
 
-        val dictItems = splitByComma(trimmedText.removePrefix("{").removeSuffix("}"))
+        val dictItems = splitByColon(trimmedText)
         for (dictItem in dictItems) {
             val dictKv = splitByColon(dictItem)
             if (dictKv.size != 2) {
@@ -131,7 +140,7 @@ object GlJson {
         return anyDict
     }
 
-    fun deseralizeAny(jsonText: String) : Any? {
+    private fun deseralizeAny(jsonText: String) : Any? {
         val trimmedText = jsonText.trim()
         val wrapper = checkWrapper(trimmedText)
         return when (wrapper) {
