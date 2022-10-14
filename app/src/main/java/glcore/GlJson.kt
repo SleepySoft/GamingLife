@@ -32,7 +32,7 @@ object GlJson {
         val jsonLine = mutableListOf< String >()
         for ((k, v) in data) {
             if (k is String) {
-                jsonLine.add("${escapeJsonString(k)}: ${serializeAny(v)}")
+                jsonLine.add("${wrapQuotes(escapeJsonString(k))}: ${serializeAny(v)}")
             }
             else {
                 // Error case

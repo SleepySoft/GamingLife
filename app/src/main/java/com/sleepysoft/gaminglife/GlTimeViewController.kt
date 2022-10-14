@@ -8,9 +8,8 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import glcore.GlData
-import glcore.GROUP_ID_RELAX
+import glcore.GROUP_ID_IDLE
 import glcore.GlStrStruct
-import glcore.PATH_TASK_HISTORY
 import graphengine.*
 import kotlin.math.cos
 import kotlin.math.sin
@@ -141,7 +140,7 @@ class GlTimeViewController(
         val currentTaskInfo = mGlData.getCurrentTaskInfo()
         val currentTaskGroupData =
             mGlData.getTaskData(currentTaskInfo["groupID"].toString() ?: "") ?:
-            mGlData.getTaskData(GROUP_ID_RELAX)
+            mGlData.getTaskData(GROUP_ID_IDLE)
 
         mCenterItem = GraphCircle().apply {
             this.itemData = currentTaskGroupData
@@ -150,7 +149,7 @@ class GlTimeViewController(
                 this.textAlign = Paint.Align.CENTER
             }
             this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor(mGlData.colorOfTask(GROUP_ID_RELAX))
+                this.color = Color.parseColor(mGlData.colorOfTask(GROUP_ID_IDLE))
                 this.style = Paint.Style.FILL
             }
         }
@@ -205,7 +204,7 @@ class GlTimeViewController(
                 @Suppress("UNCHECKED_CAST")
                 val groupData = item.itemData as GlStrStruct
 
-                if (groupData["id"] == GROUP_ID_RELAX) {
+                if (groupData["id"] == GROUP_ID_IDLE) {
                     // The relax item, special process
                     item.origin = relaxItemPos
                 }
