@@ -5,27 +5,6 @@ import org.json.JSONObject
 import org.junit.Test
 
 
-fun isJSONValid(test: String): Boolean {
-    try {
-        JSONObject(test);
-    } catch (ex: JSONException) {
-        try {
-            JSONArray(test);
-        } catch (ex1: JSONException) {
-            return false;
-        }
-    }
-    return true;
-}
-
-
-fun verifyJsonText(text: String) {
-    System.out.println(text)
-    assert(isJSONValid(text))
-}
-
-
-
 internal class GlJsonTest {
 
     @Test
@@ -44,28 +23,41 @@ internal class GlJsonTest {
     }
 
     @Test
-    fun testBasicSerializeAndDeserialize() {
-        val pathDict = PathDict()
-        pathDict.set(PATH_TASK_GROUP_TOP, TASK_GROUP_TOP_PRESET)
-        pathDict.set(PATH_CURRENT_TASK, TASK_RECORD_TEMPLATE)
-        pathDict.set(PATH_TASK_HISTORY, listOf(
-            TASK_RECORD_TEMPLATE,
-            TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_ENJOY },
-            TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_LIFE },
-            TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_WORK },
-            TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_STUDY },
-            TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_CREATE },
-        ))
+    fun testEscapeCharacters() {
+        val escapeChars = "\b\u000C\n\r\t\"\\"
+        val escapedEscapeChars = "\\b\\f\\n\\r\\t\\\"\\\\"
+        val mixedEscapeChars = "a\bb\u000Cc\nd\re\tf\"g\\"
+        val mixedEscapedEscapeChars = "u\\bv\\u000Cw\\nx\\ry\\tz\\z\"a\\b\\c"
+
+        val dict = mutableMapOf< String, Any >(
+            "EscapeChars" to escapeChars,
+            "EscapedEscapeChars" to escapedEscapeChars,
+
+            "MixedEscapeChars" to mixedEscapeChars,
+            "MixedEscapedEscapeChars" to mixedEscapedEscapeChars
+        )
+        val jsonText1 = GlJson.serializeAnyDict(dict)
+        verifyJsonText(jsonText1)
+
+        val anyDict = GlJson.deserializeAnyDict(jsonText1)
+
+        assert(anyDict["EscapeChars"] as String == escapeChars)
+        assert(anyDict["EscapedEscapeChars"] as String == escapedEscapeChars)
+
+        assert(anyDict["MixedEscapeChars"] as String == mixedEscapeChars)
+        assert(anyDict["MixedEscapedEscapeChars"] as String == mixedEscapedEscapeChars)
+
+        val jsonText2 = GlJson.serializeAnyDict(anyDict)
+
+        assert(jsonText1 == jsonText2)
+    }
+
+    @Test
+    fun testNormalSerializeAndDeserialize() {
+        val pathDict = generateSystemGeneralPathDict()
 
         val jsonText1 = GlJson.serializeAnyDict(pathDict.rootDict)
         verifyJsonText(jsonText1)
-
-/*        val jsonElements: Map<String, JsonElement> = Json.parseToJsonElement(jsonText).jsonObject
-
-        for ((k, v) in jsonElements) {
-            print(k)
-            print(v)
-        }*/
 
         val anyDict = GlJson.deserializeAnyDict(jsonText1)
         val jsonText2 = GlJson.serializeAnyDict(anyDict)

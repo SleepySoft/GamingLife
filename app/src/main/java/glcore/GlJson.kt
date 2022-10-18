@@ -80,24 +80,17 @@ object GlJson {
     private fun unwrapQuotes(trimmedText: String) : String =
         trimmedText.removePrefix("\"").removeSuffix("\"")
 
-/*    private fun splitByComma(jsonText: String) : List< String > {
-        // https://stackoverflow.com/a/51356605
-        return jsonText.split(",(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*\$)".toRegex(), limit = 2)
-    }
-
-    private fun splitByColon(jsonText: String) : List< String > {
-        // https://stackoverflow.com/a/17904715
-        return jsonText.split("(?:,|\\{)?([^:]*):(\"[^\"]*\"|\\{[^}]*\\}|[^},]*)".toRegex())
-    }*/
+    val DUMMY_CHARS = "\\u2222\\u3333\\u5555\\u7777"
 
     private fun unescapeJsonString(text: String): String =
-        text.replace("\\t", "\t").
-        replace("\\r", "\r").
-        replace("\\n", "\n").
-        replace("\\f", "\u000C").
-        replace("\\b", "\b").
-        replace("\\\"", "\"").
-        replace("\\\\", "\\")
+        text.replace("\\\\", DUMMY_CHARS).
+             replace("\\t", "\t").
+             replace("\\r", "\r").
+             replace("\\n", "\n").
+             replace("\\f", "\u000C").
+             replace("\\b", "\b").
+             replace("\\\"", "\"").
+             replace(DUMMY_CHARS, "\\")
 
     private fun jsonTokenSplit(text: String, splitter: Char) : MutableList< String > {
         var inQuote = false
