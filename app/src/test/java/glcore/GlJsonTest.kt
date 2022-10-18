@@ -1,7 +1,4 @@
 package glcore
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.jsonObject
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -40,10 +37,10 @@ internal class GlJsonTest {
 
     @Test
     fun testEmptyDeserialize() {
-        assert(GlJson.deseralizeAnyDict("").isEmpty())
-        assert(GlJson.deseralizeAnyDict("  ").isEmpty())
-        assert(GlJson.deseralizeAnyDict("{}").isEmpty())
-        assert(GlJson.deseralizeAnyDict("  { }  ").isEmpty())
+        assert(GlJson.deserializeAnyDict("").isEmpty())
+        assert(GlJson.deserializeAnyDict("  ").isEmpty())
+        assert(GlJson.deserializeAnyDict("{}").isEmpty())
+        assert(GlJson.deserializeAnyDict("  { }  ").isEmpty())
     }
 
     @Test
@@ -60,19 +57,19 @@ internal class GlJsonTest {
             TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_CREATE },
         ))
 
-        val jsonText = GlJson.serializeAnyDict(pathDict.rootDict)
-        verifyJsonText(jsonText)
+        val jsonText1 = GlJson.serializeAnyDict(pathDict.rootDict)
+        verifyJsonText(jsonText1)
 
-        val jsonElements: Map<String, JsonElement> = Json.parseToJsonElement(jsonText).jsonObject
+/*        val jsonElements: Map<String, JsonElement> = Json.parseToJsonElement(jsonText).jsonObject
 
         for ((k, v) in jsonElements) {
             print(k)
             print(v)
-        }
+        }*/
 
+        val anyDict = GlJson.deserializeAnyDict(jsonText1)
+        val jsonText2 = GlJson.serializeAnyDict(anyDict)
 
-/*        val anyDict = GlJson.deseralizeAnyDict(jsonText)
-        pathDict.attach(anyDict)*/
-
+        assert(jsonText1 == jsonText2)
     }
 }

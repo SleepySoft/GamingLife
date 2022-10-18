@@ -64,14 +64,14 @@ object GlJson {
 
     // ---------------------------------------- Deserialize ----------------------------------------
 
-    fun deseralizeAnyDict(jsonText: String) : GlAnyDict {
-        return deseralizeDict(jsonText.trim())
+    fun deserializeAnyDict(jsonText: String) : GlAnyDict {
+        return deserializeDict(jsonText.trim())
     }
 
     private fun checkWrapper(trimmedText: String): String {
         return when {
             trimmedText.startsWith("{") && trimmedText.endsWith("}") -> "{}"
-            trimmedText.startsWith("[") && trimmedText.endsWith("]") -> "[]]"
+            trimmedText.startsWith("[") && trimmedText.endsWith("]") -> "[]"
             trimmedText.startsWith("\"") && trimmedText.endsWith("\"") -> "\"\""
             else -> ""
             }
@@ -80,7 +80,7 @@ object GlJson {
     private fun unwrapQuotes(trimmedText: String) : String =
         trimmedText.removePrefix("\"").removeSuffix("\"")
 
-    private fun splitByComma(jsonText: String) : List< String > {
+/*    private fun splitByComma(jsonText: String) : List< String > {
         // https://stackoverflow.com/a/51356605
         return jsonText.split(",(?=(?:[^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*\$)".toRegex(), limit = 2)
     }
@@ -88,7 +88,7 @@ object GlJson {
     private fun splitByColon(jsonText: String) : List< String > {
         // https://stackoverflow.com/a/17904715
         return jsonText.split("(?:,|\\{)?([^:]*):(\"[^\"]*\"|\\{[^}]*\\}|[^},]*)".toRegex())
-    }
+    }*/
 
     private fun unescapeJsonString(text: String): String =
         text.replace("\\t", "\t").
@@ -99,16 +99,77 @@ object GlJson {
         replace("\\\"", "\"").
         replace("\\\\", "\\")
 
-    private fun deseralizeList(trimmedText: String) : GlAnyList {
+    private fun jsonTokenSplit(text: String, splitter: Char) : MutableList< String > {
+        var inQuote = false
+        var inEscape = false
+        var curlyBracketsLevel = 0
+        var squareBracketsLevel = 0
+
+        var basePos = 0
+        val splitItems = mutableListOf< String >()
+
+        for (checkPos in text.indices) {
+            val ch: Char = text[checkPos]
+
+            if (inEscape) {
+                inEscape = false
+                continue
+            }
+            if (ch == '\\') {
+                inEscape = true
+                continue
+            }
+            if (inQuote) {
+                if (ch == '\"') {
+                    inQuote = false
+                }
+                continue
+            }
+
+            when (ch) {
+                splitter -> {
+                    if ((curlyBracketsLevel == 0) && (squareBracketsLevel == 0))
+                    {
+                        if (basePos < checkPos) {
+                            splitItems.add(text.substring(basePos, checkPos).trim())
+                        } else {
+                            splitItems.add("")
+                        }
+                        basePos = checkPos + 1
+                    }
+                }
+                '"' -> {
+                    inQuote = true
+                }
+                '{' -> curlyBracketsLevel += 1
+                '}' -> curlyBracketsLevel -= 1
+                '[' -> squareBracketsLevel += 1
+                ']' -> squareBracketsLevel -= 1
+            }
+        }
+
+        splitItems.add(text.substring(basePos, text.length).trim())
+
+/*        if (text.isNotEmpty()) {
+            val remainingText = if (basePos < text.length - 1)
+                text.substring(basePos, text.length - 1).trim() else ""
+            splitItems.add(remainingText)
+        }*/
+
+        return splitItems
+    }
+
+    private fun deserializeList(trimmedText: String) : GlAnyList {
         val anyList = mutableListOf< Any >()
 
         if (checkWrapper(trimmedText) != "[]") {
             return mutableListOf()
         }
 
-        val listItems = splitByComma(trimmedText.removePrefix("\"").removeSuffix("\""))
+        val listItems = jsonTokenSplit(
+            trimmedText.removePrefix("[").removeSuffix("]"), ',')
         for (listItem in listItems) {
-            val v = deseralizeAny(listItem)
+            val v = deserializeAny(listItem)
             v?.run {
                 anyList.add(this)
             }
@@ -116,22 +177,24 @@ object GlJson {
         return anyList
     }
 
-    private fun deseralizeDict(trimmedText: String) : GlAnyDict {
+    private fun deserializeDict(trimmedText: String) : GlAnyDict {
         val anyDict = mutableMapOf< String, Any >()
 
         if (checkWrapper(trimmedText) != "{}") {
             return anyDict
         }
 
-        val dictItems = splitByColon(trimmedText)
-        for (dictItem in dictItems) {
-            val dictKv = splitByColon(dictItem)
+        val listItems = jsonTokenSplit(
+            trimmedText.removePrefix("{").removeSuffix("}"), ',')
+        for (dictItem in listItems) {
+            val dictKv = jsonTokenSplit(dictItem, ':')
             if (dictKv.size != 2) {
                 // Error
+                System.out.println("The dict k,v item expect 2 but ${dictKv.size}")
             }
             else {
-                val k = unescapeJsonString(dictKv[0])
-                val v = deseralizeAny(dictKv[1])
+                val k = unescapeJsonString(unwrapQuotes(dictKv[0]))
+                val v = deserializeAny(dictKv[1])
                 v?.run {
                     anyDict[k] = this
                 }
@@ -140,12 +203,11 @@ object GlJson {
         return anyDict
     }
 
-    private fun deseralizeAny(jsonText: String) : Any? {
+    private fun deserializeAny(jsonText: String) : Any? {
         val trimmedText = jsonText.trim()
-        val wrapper = checkWrapper(trimmedText)
-        return when (wrapper) {
-            "{}" -> return deseralizeDict(trimmedText)
-            "[]" -> return deseralizeList(trimmedText)
+        return when (checkWrapper(trimmedText)) {
+            "{}" -> return deserializeDict(trimmedText)
+            "[]" -> return deserializeList(trimmedText)
             "\"\"" -> return unescapeJsonString(unwrapQuotes(trimmedText))
             else -> {
                 trimmedText.toIntOrNull() ?:
