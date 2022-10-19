@@ -21,6 +21,10 @@ class GlDatabase {
         this.separator = SEPARATOR
     }
 
+    val environment = PathDict().apply {
+        this.separator = SEPARATOR
+    }
+
     // ----------------------------------------------------------
 
     fun init(): Boolean {
@@ -28,41 +32,33 @@ class GlDatabase {
     }
 
     fun save(): Boolean {
-        if (runtimeData.hasUpdate) {
-            doSave(FILE_RUNTIME_DATA, GlJson.serializeAnyDict(runtimeData.rootDict))
-            runtimeData.hasUpdate = false
-
-        }
-
-        if (dailyRecord.hasUpdate) {
-            doSave(FILE_DAILY_RECORD, GlJson.serializeAnyDict(dailyRecord.rootDict))
-            dailyRecord.hasUpdate = false
-        }
-
-        if (systemConfig.hasUpdate) {
-            doSave(FILE_SYSTEM_CONFIG, GlJson.serializeAnyDict(systemConfig.rootDict))
-            systemConfig.hasUpdate = false
-        }
-
-        return true
+        return  savePathDict(FILE_RUNTIME_DATA, runtimeData) and
+                savePathDict(FILE_DAILY_RECORD, dailyRecord) and
+                savePathDict(FILE_SYSTEM_CONFIG, systemConfig) and
+                savePathDict(FILE_ENVIRONMENT, environment)
     }
 
     fun load(): Boolean {
-        runtimeData.attach(GlJson.deserializeAnyDict(doLoad(FILE_RUNTIME_DATA)))
-        dailyRecord.attach(GlJson.deserializeAnyDict(doLoad(FILE_DAILY_RECORD)))
-        systemConfig.attach(GlJson.deserializeAnyDict(doLoad(FILE_SYSTEM_CONFIG)))
+        return  loadPathDict(FILE_RUNTIME_DATA, runtimeData) and
+                loadPathDict(FILE_DAILY_RECORD, dailyRecord) and
+                loadPathDict(FILE_SYSTEM_CONFIG, systemConfig) and
+                loadPathDict(FILE_ENVIRONMENT, environment)
+    }
+
+    private fun savePathDict(fileName: String, pathDict: PathDict, force: Boolean = false) : Boolean {
+        if (pathDict.hasUpdate || force) {
+            val fileContent: String = GlJson.serializeAnyDict(pathDict.rootDict)
+            GlRoot.saveFile(fileName, fileContent)
+            pathDict.hasUpdate = false
+        }
         return true
     }
 
-    private fun doSave(fileName: String, fileContent: String) {
-        val ctx: Context = GlApplication.applicationContext()
-        File(ctx.filesDir.absolutePath, fileName).writeText(fileContent)
-    }
-
-    private fun doLoad(fileName: String) : String {
-        val ctx: Context = GlApplication.applicationContext()
-        val file = File(ctx.filesDir.absolutePath, fileName)
-        return file.readText()
+    private fun loadPathDict(fileName: String, pathDict: PathDict) : Boolean {
+        val fileContent: String = GlRoot.loadFile(fileName)
+        pathDict.attach(GlJson.deserializeAnyDict(fileContent))
+        pathDict.hasUpdate = false
+        return true
     }
 
     // ------------------------------------------------------------
