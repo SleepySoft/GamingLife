@@ -149,7 +149,8 @@ class GlTimeViewController(
                 this.textAlign = Paint.Align.CENTER
             }
             this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor(mGlData.colorOfTask(GROUP_ID_IDLE))
+                this.color = Color.parseColor(
+                    mGlData.colorOfTask(currentTaskGroupData?.get("id") ?: GROUP_ID_IDLE))
                 this.style = Paint.Style.FILL
             }
         }

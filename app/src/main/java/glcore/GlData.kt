@@ -112,6 +112,8 @@ class GlData(private val mDatabase: GlDatabase) {
         mDatabase.runtimeData.set("$PATH_CURRENT_TASK/taskID", "")
         mDatabase.runtimeData.set("$PATH_CURRENT_TASK/groupID", taskData["id"] ?: GROUP_ID_IDLE)
         mDatabase.runtimeData.set("$PATH_CURRENT_TASK/startTime", System.currentTimeMillis())
+
+        mDatabase.save()
     }
 
     fun getCurrentTaskInfo() : GlAnyStruct {

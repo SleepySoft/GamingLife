@@ -23,14 +23,26 @@ object GlRoot {
     }
 
     fun saveFile(fileName: String, fileContent: String) : Boolean {
-        val ctx: Context = GlApplication.applicationContext()
-        File(ctx.filesDir.absolutePath, fileName).writeText(fileContent)
-        return true
+        return try {
+            val ctx: Context = GlApplication.applicationContext()
+            File(ctx.filesDir.absolutePath, fileName).writeText(fileContent)
+            return true
+        } catch (ex: Exception) {
+            false
+        } finally {
+
+        }
     }
 
     fun loadFile(fileName: String) : String {
-        val ctx: Context = GlApplication.applicationContext()
-        val file = File(ctx.filesDir.absolutePath, fileName)
-        return file.readText()
+        return  try {
+            val ctx: Context = GlApplication.applicationContext()
+            val file = File(ctx.filesDir.absolutePath, fileName)
+            file.readText()
+        } catch (ex: Exception) {
+            ""
+        } finally {
+
+        }
     }
 }

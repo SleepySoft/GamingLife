@@ -28,7 +28,7 @@ class GlDatabase {
     // ----------------------------------------------------------
 
     fun init(): Boolean {
-        return true
+        return load()
     }
 
     fun save(): Boolean {
@@ -38,7 +38,7 @@ class GlDatabase {
                 savePathDict(FILE_ENVIRONMENT, environment)
     }
 
-    fun load(): Boolean {
+    private fun load(): Boolean {
         return  loadPathDict(FILE_RUNTIME_DATA, runtimeData) and
                 loadPathDict(FILE_DAILY_RECORD, dailyRecord) and
                 loadPathDict(FILE_SYSTEM_CONFIG, systemConfig) and
