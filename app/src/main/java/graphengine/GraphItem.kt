@@ -15,6 +15,8 @@ abstract class GraphItem {
             field = value
             needRender = true
         }
+
+    var visible: Boolean = true
     var draggable: Boolean = true
     var needRender: Boolean = true
 
@@ -116,6 +118,18 @@ class GraphCircle : GraphItem() {
     }
 }
 
+
+class GraphCircleProgress(val mWrapCircle: GraphCircle) : GraphItem() {
+
+    override fun getBoundRect(): RectF {
+        return mWrapCircle.getBoundRect()
+    }
+
+    override fun render(canvas: Canvas) {
+        TODO("Not yet implemented")
+    }
+
+}
 
 
 

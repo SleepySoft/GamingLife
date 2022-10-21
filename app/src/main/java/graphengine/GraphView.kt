@@ -246,7 +246,9 @@ open class GraphView(context: Context) :
 
     private fun renderItems(canvas: Canvas) {
         for (item in mGraphItems) {
-            item.render(canvas)
+            if (item.visible) {
+                item.render(canvas)
+            }
         }
     }
 

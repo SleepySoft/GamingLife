@@ -14,6 +14,10 @@ fun centerFOfRect(rect: Rect) : PointF = PointF(rect.centerX().toFloat(), rect.c
 
 fun centerFOfRectF(rectF: RectF) : PointF = PointF(rectF.centerX(), rectF.centerY())
 
+fun inflateRectF(rectF: RectF) {
+
+}
+
 
 fun calculateFontSize(textBounds: Rect, textContainer: Rect, text: String): Float {
     val textPaint = Paint()
