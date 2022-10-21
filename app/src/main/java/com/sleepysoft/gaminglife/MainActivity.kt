@@ -1,6 +1,5 @@
 package com.sleepysoft.gaminglife
 
-import Example.ExampleView
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -38,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         mView = GraphView(this)
-        mController = GlTimeViewController(mView, GlRoot.glData).apply {
+        mController = GlTimeViewController(mView, GlRoot.glTaskModule).apply {
             this.init()
             mView.setObserver(this)
         }

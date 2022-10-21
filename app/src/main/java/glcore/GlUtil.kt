@@ -40,8 +40,7 @@ class PathDict(attachMap: MutableMap<String, Any>? = null) {
         if (keys.isNotEmpty()) {
             val dict = parentDictOf(keys, true)
             dict?.run {
-                val v = if ((value is Map<*, *>) &&
-                    (value !is MutableMap<*, *>)) value.toMutableMap() else value
+                val v = if (value is Map<*, *>) value.toMutableMap() else value
 
                 // If the target place already has a dict saved, forceWrite flag has to be specified
                 if ((dict[keys.last()] !is MutableMap<*, *>) || forceWrite) {

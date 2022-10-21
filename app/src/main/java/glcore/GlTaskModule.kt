@@ -1,7 +1,7 @@
 package glcore
 
 
-class GlData(private val mDatabase: GlDatabase) {
+class GlTaskModule(private val mDatabase: GlDatabase) {
 
     fun init() {
         groupDataFromDatabase()

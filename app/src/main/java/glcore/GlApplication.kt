@@ -17,8 +17,4 @@ class GlApplication : Application() {
             return instance!!.applicationContext
         }
     }
-
-    override fun onCreate() {
-        super.onCreate()
-    }
 }

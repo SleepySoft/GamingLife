@@ -7,7 +7,7 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import glcore.GlData
+import glcore.GlTaskModule
 import glcore.GROUP_ID_IDLE
 import glcore.GlStrStruct
 import graphengine.*
@@ -20,7 +20,7 @@ const val DEBUG_TAG = "DefaultDbg"
 
 class GlTimeViewController(
     private val mGraphView: GraphView,
-    private val mGlData: GlData) : GraphViewObserver {
+    private val mGlTaskModule: GlTaskModule) : GraphViewObserver {
 
     private lateinit var mVibrator: Vibrator
     private lateinit var mCenterItem: GraphCircle
@@ -43,7 +43,7 @@ class GlTimeViewController(
     }
 
     fun polling() {
-        val currentTaskData = mGlData.getCurrentTaskInfo()
+        val currentTaskData = mGlTaskModule.getCurrentTaskInfo()
         val currentTaskStartTimeMs = currentTaskData["startTime"] as Long
 
         val deltaTimeMs: Long = System.currentTimeMillis() - currentTaskStartTimeMs
@@ -137,10 +137,10 @@ class GlTimeViewController(
     // ------------------------------------- Private Functions -------------------------------------
 
     private fun buildItems() {
-        val currentTaskInfo = mGlData.getCurrentTaskInfo()
+        val currentTaskInfo = mGlTaskModule.getCurrentTaskInfo()
         val currentTaskGroupData =
-            mGlData.getTaskData(currentTaskInfo["groupID"].toString() ?: "") ?:
-            mGlData.getTaskData(GROUP_ID_IDLE)
+            mGlTaskModule.getTaskData(currentTaskInfo["groupID"].toString() ?: "") ?:
+            mGlTaskModule.getTaskData(GROUP_ID_IDLE)
 
         mCenterItem = GraphCircle().apply {
             this.itemData = currentTaskGroupData
@@ -150,12 +150,12 @@ class GlTimeViewController(
             }
             this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
                 this.color = Color.parseColor(
-                    mGlData.colorOfTask(currentTaskGroupData?.get("id") ?: GROUP_ID_IDLE))
+                    mGlTaskModule.colorOfTask(currentTaskGroupData?.get("id") ?: GROUP_ID_IDLE))
                 this.style = Paint.Style.FILL
             }
         }
 
-        val taskGroupTop = mGlData.getTaskGroupTop()
+        val taskGroupTop = mGlTaskModule.getTaskGroupTop()
         for ((k, v) in taskGroupTop) {
             val item = GraphCircle().apply {
                 this.itemData = v
@@ -165,7 +165,7 @@ class GlTimeViewController(
                     this.textAlign = Paint.Align.CENTER
                 }
                 this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                    this.color = Color.parseColor(mGlData.colorOfTask(k))
+                    this.color = Color.parseColor(mGlTaskModule.colorOfTask(k))
                     this.style = Paint.Style.FILL
                 }
             }
@@ -254,7 +254,7 @@ class GlTimeViewController(
 
         }
         toTask?.run {
-            mGlData.switchToTask(toTask)
+            mGlTaskModule.switchToTask(toTask)
         }
     }
 }
