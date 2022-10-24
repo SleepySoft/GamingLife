@@ -17,7 +17,7 @@ abstract class GraphItem {
         }
 
     var visible: Boolean = true
-    var draggable: Boolean = true
+    var pickable: Boolean = true
     var needRender: Boolean = true
 
     var fontPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -130,7 +130,8 @@ class GraphCircleProgress(
     }
 
     override fun render(canvas: Canvas) {
-        canvas.drawArc(getBoundRect(), -90.0f, -90.0f + 360.0f * progress, true, shapePaint)
+        canvas.drawArc(getBoundRect(), -90.0f, 360.0f * progress, true, shapePaint)
+        // canvas.drawRect(getBoundRect(), shapePaint)
     }
 }
 

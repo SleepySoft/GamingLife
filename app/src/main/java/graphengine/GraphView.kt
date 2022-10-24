@@ -2,7 +2,6 @@ package graphengine
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
-import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -163,23 +162,16 @@ open class GraphView(context: Context) :
     override fun onShowPress(e: MotionEvent) {
         Log.i(DEBUG_TAG, "onShowPress")
 
-        mSelItem = itemFromPoint(PointF(e.x, e.y))
-        Log.i(DEBUG_TAG, "Adapted item: $mSelItem")
-
+        mSelItem = pickableItemFromPoint(PointF(e.x, e.y))
         mSelItem?.run {
-            if (this.draggable) {
-                bringToFront(this)
-                mObserver?.onItemPicked(this)
-            }
-            else {
-                mSelItem = null
-            }
+            Log.i(DEBUG_TAG, "Adapted item: $this")
+            mObserver?.onItemPicked(this)
         }
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
         Log.i(DEBUG_TAG, "onSingleTapUp")
-        val selItem = itemFromPoint(PointF(e.x, e.y))
+        val selItem = pickableItemFromPoint(PointF(e.x, e.y))
         selItem?.run {
             mObserver?.onItemClicked(selItem)
         }
@@ -221,14 +213,10 @@ open class GraphView(context: Context) :
     }
 
     fun addGraphItem(newItem: GraphItem) : Boolean {
-        if (newItem in mGraphItems) {
-            return false
-        }
-        mGraphItems.add(newItem)
-        return true
+        return insertGraphItem(newItem, 0)
     }
 
-    fun insertItem(newItem: GraphItem, atIndex: Int) : Boolean {
+    fun insertGraphItem(newItem: GraphItem, atIndex: Int) : Boolean {
         if (newItem in mGraphItems) {
             return false
         }
@@ -239,7 +227,7 @@ open class GraphView(context: Context) :
     fun insertGraphItemBefore(newItem: GraphItem, refItem: GraphItem) : Boolean {
         val refItemPos = mGraphItems.indexOf(refItem)
         if (refItemPos >= 0) {
-            return insertItem(newItem, refItemPos + 1)
+            return insertGraphItem(newItem, refItemPos)
         }
         return false
     }
@@ -247,7 +235,7 @@ open class GraphView(context: Context) :
     fun insertGraphItemAfter(newItem: GraphItem, refItem: GraphItem) : Boolean {
         val refItemPos = mGraphItems.indexOf(refItem)
         if (refItemPos >= 0) {
-            return insertItem(newItem, refItemPos)
+            return insertGraphItem(newItem, refItemPos + 1)
         }
         return false
     }
@@ -259,14 +247,14 @@ open class GraphView(context: Context) :
     fun bringToFront(item: GraphItem) {
         if (item in mGraphItems) {
             mGraphItems.remove(item)
-            mGraphItems.add(item)
+            mGraphItems.add(0, item)
         }
     }
 
     fun sendToBack(item: GraphItem) {
         if (item in mGraphItems) {
             mGraphItems.remove(item)
-            mGraphItems.add(0, item)
+            mGraphItems.add(item)
         }
     }
 
@@ -289,7 +277,7 @@ open class GraphView(context: Context) :
     // ------------------------------------- Private functions -------------------------------------
 
     private fun renderItems(canvas: Canvas) {
-        for (item in mGraphItems) {
+        for (item in mGraphItems.reversed()) {
             if (item.visible) {
                 item.render(canvas)
             }
@@ -300,10 +288,21 @@ open class GraphView(context: Context) :
         mObserver?.onItemLayout()
     }
 
-    private fun itemFromPoint(pos: PointF): GraphItem? {
-        var selItem: GraphItem? = null
+    private fun itemFromPoint(pos: PointF) : MutableList< GraphItem > {
+        val items = mutableListOf< GraphItem >()
         for (item in mGraphItems) {
             if (item.getBoundRect().contains(pos.x, pos.y)) {
+                items.add(item)
+            }
+        }
+        return items
+    }
+
+    private fun pickableItemFromPoint(pos: PointF) : GraphItem? {
+        var selItem: GraphItem? = null
+        val selItems = itemFromPoint(pos)
+        for (item in selItems) {
+            if (item.pickable) {
                 selItem = item
                 break
             }

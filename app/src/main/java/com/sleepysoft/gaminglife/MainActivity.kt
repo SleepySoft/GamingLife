@@ -48,6 +48,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun doPeriod() {
         mController.polling()
-        mHandler.postDelayed(mRunnable, 1000)
+        mHandler.postDelayed(mRunnable, 100)
     }
 }

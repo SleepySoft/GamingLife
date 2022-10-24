@@ -74,7 +74,7 @@ class GlTimeViewController(
         if (!mRecording && (mPressSince > 0)) {
             val duration: Int = (System.currentTimeMillis() - mPressSince).toInt()
             if (duration >= LONG_LONG_PRESS_TIMEOUT) {
-                GlAudioRecorder.startRecord()
+                // GlAudioRecorder.startRecord()
                 mRecording = true
                 mLongLongPressProgress.visible = false
             }
@@ -102,7 +102,7 @@ class GlTimeViewController(
 
     override fun onItemPicked(pickedItem: GraphItem) {
         pickedItem.inflatePct = 10.0f
-        mGraphView.invalidate()
+        mGraphView.bringToFront(pickedItem)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mVibrator.vibrate(VibrationEffect.createOneShot(
@@ -115,15 +115,14 @@ class GlTimeViewController(
         if (pickedItem == mCenterItem) {
             mPressSince = System.currentTimeMillis()
         }
+
+        mGraphView.invalidate()
     }
 
     override fun onItemDropped(droppedItem: GraphItem) {
         droppedItem.inflatePct = 0.0f
+        cancelLongLongPress()
         mGraphView.invalidate()
-
-        // Process Long Long Press
-        mPressSince = 0
-        mRecording = false
     }
 
     override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
@@ -131,7 +130,8 @@ class GlTimeViewController(
             // Drag center item to surround, closestItem as surroundItem
 
             val closestItem : GraphItem? = closestGraphItem(
-                centerFOfRectF(droppedItem.getBoundRect()), intersectingItems)
+                centerFOfRectF(droppedItem.getBoundRect()),
+                intersectingItems.intersect(mSurroundItems.toSet()).toList())
 
             closestItem?.run {
                 mCenterItem.itemData = closestItem.itemData
@@ -152,6 +152,8 @@ class GlTimeViewController(
             handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
                                 droppedItem.itemData as GlStrStruct?)
         }
+
+        cancelLongLongPress()
     }
 
     override fun onItemLayout() {
@@ -187,6 +189,7 @@ class GlTimeViewController(
         mLongLongPressProgress = GraphCircleProgress(
             mCenterItem, 1.2f).apply {
             this.visible = false
+            this.pickable = false
             this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
                 this.color = Color.parseColor("#000000")
                 this.style = Paint.Style.FILL
@@ -295,6 +298,18 @@ class GlTimeViewController(
         }
         toTask?.run {
             mGlTaskModule.switchToTask(toTask)
+        }
+    }
+
+    private fun cancelLongLongPress() {
+        if (mPressSince > 0) {
+            mPressSince = 0
+            mLongLongPressProgress.visible = false
+            mLongLongPressProgress.progress = 0.0f
+        }
+        if (mRecording) {
+            // GlAudioRecorder.stopRecord()
+            mRecording = false
         }
     }
 }
