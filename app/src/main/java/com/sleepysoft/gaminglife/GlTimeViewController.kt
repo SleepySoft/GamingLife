@@ -9,6 +9,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import glcore.*
 import graphengine.*
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -119,6 +120,15 @@ class GlTimeViewController(
         mGraphView.invalidate()
     }
 
+    override fun onItemDragging(draggingItem: GraphItem, pos: PointF) {
+        if (draggingItem == mCenterItem) {
+            if ((abs(mCenterItem.offsetPixel.x) > mGraphView.unitScale * 0.1) ||
+                (abs(mCenterItem.offsetPixel.y) > mGraphView.unitScale * 0.1)) {
+                cancelLongLongPress()
+            }
+        }
+    }
+
     override fun onItemDropped(droppedItem: GraphItem) {
         droppedItem.inflatePct = 0.0f
         cancelLongLongPress()
@@ -187,11 +197,11 @@ class GlTimeViewController(
         }
 
         mLongLongPressProgress = GraphCircleProgress(
-            mCenterItem, 1.2f).apply {
+            mCenterItem, 1.3f).apply {
             this.visible = false
             this.pickable = false
             this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#000000")
+                this.color = Color.parseColor("#FFA500")
                 this.style = Paint.Style.FILL
                 }
             }
