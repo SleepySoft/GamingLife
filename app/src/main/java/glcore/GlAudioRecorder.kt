@@ -1,6 +1,7 @@
 package glcore
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
@@ -31,17 +32,17 @@ object GlAudioRecorder {
     private const val Channel = AudioFormat.CHANNEL_IN_MONO
     private const val EncodingType = AudioFormat.ENCODING_PCM_16BIT
 
-    @RequiresApi(Build.VERSION_CODES.R)
-    private val PCMPath: String = "${Environment.getStorageDirectory().path}/temp/RawAudio.pcm"
-
-    @RequiresApi(Build.VERSION_CODES.R)
-    private val WAVPath: String = "${Environment.getStorageDirectory().path}/temp/WavAudio.wav"
+    private lateinit var PCMPath: String
+    private lateinit var WAVPath: String
 
     private var bufferSizeInByte: Int = 0
     private var audioRecorder: AudioRecord? = null
     private var isRecording = false
 
-    private fun init() {
+    fun init() {
+        val ctx: Context = GlApplication.applicationContext()
+        PCMPath = "${ctx.filesDir.absolutePath}/temp/RawAudio.pcm"
+        WAVPath = "${ctx.filesDir.absolutePath}/temp/WavAudio.pcm"
         bufferSizeInByte = AudioRecord.getMinBufferSize(SampleRate, Channel, EncodingType)
         createRecorder()
     }

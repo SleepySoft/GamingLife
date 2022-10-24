@@ -220,8 +220,36 @@ open class GraphView(context: Context) :
         return paintArea.height() >= paintArea.width()
     }
 
-    fun addGraphItem(item: GraphItem) {
-        mGraphItems.add(item)
+    fun addGraphItem(newItem: GraphItem) : Boolean {
+        if (newItem in mGraphItems) {
+            return false
+        }
+        mGraphItems.add(newItem)
+        return true
+    }
+
+    fun insertItem(newItem: GraphItem, atIndex: Int) : Boolean {
+        if (newItem in mGraphItems) {
+            return false
+        }
+        mGraphItems.add(atIndex, newItem)
+        return true
+    }
+
+    fun insertGraphItemBefore(newItem: GraphItem, refItem: GraphItem) : Boolean {
+        val refItemPos = mGraphItems.indexOf(refItem)
+        if (refItemPos >= 0) {
+            return insertItem(newItem, refItemPos + 1)
+        }
+        return false
+    }
+
+    fun insertGraphItemAfter(newItem: GraphItem, refItem: GraphItem) : Boolean {
+        val refItemPos = mGraphItems.indexOf(refItem)
+        if (refItemPos >= 0) {
+            return insertItem(newItem, refItemPos)
+        }
+        return false
     }
 
     fun setObserver(observer: GraphViewObserver) {
@@ -240,6 +268,22 @@ open class GraphView(context: Context) :
             mGraphItems.remove(item)
             mGraphItems.add(0, item)
         }
+    }
+
+    fun bringToFrontOf(operateItem: GraphItem, refItem: GraphItem) : Boolean {
+        if (operateItem in mGraphItems) {
+            mGraphItems.remove(operateItem)
+            return insertGraphItemBefore(operateItem, refItem)
+        }
+        return false
+    }
+
+    fun sendToBackOf(operateItem: GraphItem, refItem: GraphItem) : Boolean {
+        if (operateItem in mGraphItems) {
+            mGraphItems.remove(operateItem)
+            return insertGraphItemAfter(operateItem, refItem)
+        }
+        return false
     }
 
     // ------------------------------------- Private functions -------------------------------------

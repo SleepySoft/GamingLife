@@ -10,6 +10,7 @@ object GlRoot {
     val glTaskModule = GlTaskModule(glDatabase)
 
     fun init() {
+        GlAudioRecorder.init()
         glDatabase.init()
         glTaskModule.init()
     }

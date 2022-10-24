@@ -123,20 +123,15 @@ class GraphCircleProgress(
     private val mWrapCircle: GraphCircle,
     private val mAroundInflatePct: Float) : GraphItem() {
 
+    var progress: Float = 0.0f
+
     override fun getBoundRect(): RectF {
-        return inflateRectF(mWrapCircle.getBoundRect(), 1.0f + mAroundInflatePct)
+        return inflateRectF(mWrapCircle.getBoundRect(), mAroundInflatePct)
     }
 
     override fun render(canvas: Canvas) {
-        TODO("Not yet implemented")
+        canvas.drawArc(getBoundRect(), -90.0f, -90.0f + 360.0f * progress, true, shapePaint)
     }
-
-    // ---------------------------------------------------------
-
-    fun setProgress(progress: Float) {
-
-    }
-
 }
 
 

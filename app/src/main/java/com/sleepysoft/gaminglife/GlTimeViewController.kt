@@ -76,10 +76,12 @@ class GlTimeViewController(
             if (duration >= LONG_LONG_PRESS_TIMEOUT) {
                 GlAudioRecorder.startRecord()
                 mRecording = true
+                mLongLongPressProgress.visible = false
             }
             else {
-                mLongLongPressProgress.setProgress(
-                    duration.toFloat() / LONG_LONG_PRESS_TIMEOUT.toFloat())
+                mLongLongPressProgress.progress =
+                    duration.toFloat() / LONG_LONG_PRESS_TIMEOUT.toFloat()
+                mLongLongPressProgress.visible = true
             }
         }
     }
@@ -121,6 +123,7 @@ class GlTimeViewController(
 
         // Process Long Long Press
         mPressSince = 0
+        mRecording = false
     }
 
     override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
@@ -182,7 +185,13 @@ class GlTimeViewController(
         }
 
         mLongLongPressProgress = GraphCircleProgress(
-            mCenterItem, 1.10f).apply { this.visible = false }
+            mCenterItem, 1.2f).apply {
+            this.visible = false
+            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#000000")
+                this.style = Paint.Style.FILL
+                }
+            }
 
         val taskGroupTop = mGlTaskModule.getTaskGroupTop()
         for ((k, v) in taskGroupTop) {
@@ -198,10 +207,12 @@ class GlTimeViewController(
                     this.style = Paint.Style.FILL
                 }
             }
+
             mGraphView.addGraphItem(item)
             mSurroundItems.add(item)
         }
         mGraphView.addGraphItem(mCenterItem)
+        mGraphView.insertGraphItemAfter(mLongLongPressProgress, mCenterItem)
     }
 
     private fun layoutPortrait() {

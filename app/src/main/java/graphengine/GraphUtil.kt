@@ -17,7 +17,8 @@ fun centerFOfRectF(rectF: RectF) : PointF = PointF(rectF.centerX(), rectF.center
 fun inflateRectF(rectF: RectF, inflatePct: Float): RectF {
     val horiInflate: Float = rectF.width() * inflatePct / 2.0f
     val vertInflate: Float = rectF.height() * inflatePct / 2.0f
-    return RectF(rectF.left + horiInflate, rectF.top + vertInflate, rectF.bottom - vertInflate)
+    return RectF(rectF.left - horiInflate, rectF.top - vertInflate,
+            rectF.left + horiInflate, rectF.bottom + vertInflate)
 }
 
 
