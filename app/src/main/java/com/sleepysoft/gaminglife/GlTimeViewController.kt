@@ -7,9 +7,7 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
-import glcore.GlTaskModule
-import glcore.GROUP_ID_IDLE
-import glcore.GlStrStruct
+import glcore.*
 import graphengine.*
 import kotlin.math.cos
 import kotlin.math.sin
@@ -24,10 +22,14 @@ class GlTimeViewController(
 
     private lateinit var mVibrator: Vibrator
     private lateinit var mCenterItem: GraphCircle
+    private lateinit var mLongLongPressProgress: GraphCircleProgress
 
     private var mCenterRadius = 0.1f
     private var mSurroundRadius = 0.1f
     private var mSurroundItems = mutableListOf< GraphCircle >()
+
+    private var mRecording: Boolean = false
+    private var mPressSince: Long = 0
 
     fun init() {
         mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -62,8 +64,24 @@ class GlTimeViewController(
             mCenterItem.mainText = "%02d:%02d".format(minutes, seconds)
         }
 
+        processRecordProgress()
+
         // mCenterItem.mainText = "%02d:%02d:%02d.%03d".format(hour, minutes, seconds, ms)
         mGraphView.invalidate()
+    }
+
+    private fun processRecordProgress() {
+        if (!mRecording && (mPressSince > 0)) {
+            val duration: Int = (System.currentTimeMillis() - mPressSince).toInt()
+            if (duration >= LONG_LONG_PRESS_TIMEOUT) {
+                GlAudioRecorder.startRecord()
+                mRecording = true
+            }
+            else {
+                mLongLongPressProgress.setProgress(
+                    duration.toFloat() / LONG_LONG_PRESS_TIMEOUT.toFloat())
+            }
+        }
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
@@ -90,11 +108,19 @@ class GlTimeViewController(
         } else {
             mVibrator.vibrate(100)
         }
+
+        // Process Long Long Press
+        if (pickedItem == mCenterItem) {
+            mPressSince = System.currentTimeMillis()
+        }
     }
 
     override fun onItemDropped(droppedItem: GraphItem) {
         droppedItem.inflatePct = 0.0f
         mGraphView.invalidate()
+
+        // Process Long Long Press
+        mPressSince = 0
     }
 
     override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
@@ -154,6 +180,9 @@ class GlTimeViewController(
                 this.style = Paint.Style.FILL
             }
         }
+
+        mLongLongPressProgress = GraphCircleProgress(
+            mCenterItem, 1.10f).apply { this.visible = false }
 
         val taskGroupTop = mGlTaskModule.getTaskGroupTop()
         for ((k, v) in taskGroupTop) {
