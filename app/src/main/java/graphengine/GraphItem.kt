@@ -2,7 +2,20 @@ package graphengine
 import android.graphics.*
 
 
-abstract class GraphItem {
+abstract class GraphObject(
+    var id: String = "",
+    var visible: Boolean = true) {
+
+    abstract fun getBoundRect() : RectF
+    abstract fun render(canvas: Canvas)
+}
+
+
+abstract class GraphItem(
+    id: String = "",
+    visible: Boolean = true) :
+    GraphObject(id, visible) {
+
     var itemData: Any? = null
 
     var subText: String = ""
@@ -16,7 +29,6 @@ abstract class GraphItem {
             needRender = true
         }
 
-    var visible: Boolean = true
     var pickable: Boolean = true
     var needRender: Boolean = true
 
@@ -35,9 +47,6 @@ abstract class GraphItem {
             needRender = true
         }
 
-    abstract fun getBoundRect() : RectF
-    abstract fun render(canvas: Canvas)
-
     fun shiftItem(cx: Float, cy: Float) {
         offsetPixel.x += cx
         offsetPixel.y += cy
@@ -50,6 +59,128 @@ abstract class GraphItem {
         needRender = true
     }
 }
+
+
+class GraphLayer : GraphObject() {
+    private var mGraphItems: MutableList< GraphItem > = mutableListOf()
+
+    // -------------------------- Public --------------------------
+
+    fun addGraphItem(newItem: GraphItem) : Boolean {
+        return insertGraphItem(newItem, 0)
+    }
+
+    fun insertGraphItem(newItem: GraphItem, atIndex: Int) : Boolean {
+        if (newItem in mGraphItems) {
+            return false
+        }
+        mGraphItems.add(atIndex, newItem)
+        return true
+    }
+
+    fun insertGraphItemBefore(newItem: GraphItem, refItem: GraphItem) : Boolean {
+        val refItemPos = mGraphItems.indexOf(refItem)
+        if (refItemPos >= 0) {
+            return insertGraphItem(newItem, refItemPos)
+        }
+        return false
+    }
+
+    fun insertGraphItemAfter(newItem: GraphItem, refItem: GraphItem) : Boolean {
+        val refItemPos = mGraphItems.indexOf(refItem)
+        if (refItemPos >= 0) {
+            return insertGraphItem(newItem, refItemPos + 1)
+        }
+        return false
+    }
+
+    fun bringGraphItemToFront(item: GraphItem) {
+        if (item in mGraphItems) {
+            mGraphItems.remove(item)
+            mGraphItems.add(0, item)
+        }
+    }
+
+    fun sendGraphItemToBack(item: GraphItem) {
+        if (item in mGraphItems) {
+            mGraphItems.remove(item)
+            mGraphItems.add(item)
+        }
+    }
+
+    fun bringGraphItemToFrontOf(operateItem: GraphItem, refItem: GraphItem) : Boolean {
+        if (operateItem in mGraphItems) {
+            mGraphItems.remove(operateItem)
+            return insertGraphItemBefore(operateItem, refItem)
+        }
+        return false
+    }
+
+    fun sendGraphItemToBackOf(operateItem: GraphItem, refItem: GraphItem) : Boolean {
+        if (operateItem in mGraphItems) {
+            mGraphItems.remove(operateItem)
+            return insertGraphItemAfter(operateItem, refItem)
+        }
+        return false
+    }
+
+    private fun itemFromPoint(pos: PointF, filter: ) : MutableList< GraphItem > {
+        val items = mutableListOf< GraphItem >()
+        for (item in mGraphItems) {
+            if (item.getBoundRect().contains(pos.x, pos.y)) {
+                if (onlyVisible) {
+                    if () {
+
+                    }
+                }
+                else {
+                    items.add(item)
+                }
+            }
+        }
+        return items
+    }
+
+    private fun pickableItemFromPoint(pos: PointF) : GraphItem? {
+        var selItem: GraphItem? = null
+        val selItems = itemFromPoint(pos)
+        for (item in selItems) {
+            if (item.pickable) {
+                selItem = item
+                break
+            }
+        }
+        return selItem
+    }
+
+    // -------------------------- Override --------------------------
+
+    override fun getBoundRect(): RectF {
+        var rect: RectF = RectF()
+        for (item in mGraphItems) {
+            if (item.visible) {
+                if (rect.isEmpty) {
+                    rect = item.getBoundRect()
+                }
+                else {
+                    rect.union(item.getBoundRect())
+                }
+            }
+        }
+        return rect
+    }
+
+    override fun render(canvas: Canvas) {
+        for (item in mGraphItems.reversed()) {
+            if (item.visible) {
+                item.render(canvas)
+            }
+        }
+    }
+
+}
+
+
 
 
 class GraphCircle : GraphItem() {
