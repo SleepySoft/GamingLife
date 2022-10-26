@@ -53,7 +53,7 @@ fun closestGraphItem(refPos: PointF, graphItems: List< GraphItem >) : GraphItem?
     var selDist = 0.0f
     var selItem : GraphItem? = null
     for (item in graphItems) {
-        val itemDist = distanceOf(refPos, centerFOfRectF(item.getBoundRect()))
+        val itemDist = distanceOf(refPos, centerFOfRectF(item.boundRect()))
         if ((selItem == null) || (itemDist < selDist)) {
             selItem = item
             selDist = itemDist

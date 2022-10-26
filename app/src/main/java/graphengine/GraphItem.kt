@@ -6,7 +6,7 @@ abstract class GraphObject(
     var id: String = "",
     var visible: Boolean = true) {
 
-    abstract fun getBoundRect() : RectF
+    abstract fun boundRect() : RectF
     abstract fun render(canvas: Canvas)
 }
 
@@ -29,8 +29,8 @@ abstract class GraphItem(
             needRender = true
         }
 
-    var pickable: Boolean = true
     var needRender: Boolean = true
+    var interactive: Boolean = true
 
     var fontPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     var shapePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -124,46 +124,45 @@ class GraphLayer : GraphObject() {
         return false
     }
 
-    private fun itemFromPoint(pos: PointF, filter: ) : MutableList< GraphItem > {
+    fun pickItems(filter: (input: GraphItem) -> Boolean) : MutableList< GraphItem > {
         val items = mutableListOf< GraphItem >()
         for (item in mGraphItems) {
-            if (item.getBoundRect().contains(pos.x, pos.y)) {
-                if (onlyVisible) {
-                    if () {
-
-                    }
-                }
-                else {
-                    items.add(item)
-                }
+            if (filter(item)) {
+                items.add(item)
             }
         }
         return items
     }
 
-    private fun pickableItemFromPoint(pos: PointF) : GraphItem? {
-        var selItem: GraphItem? = null
-        val selItems = itemFromPoint(pos)
-        for (item in selItems) {
-            if (item.pickable) {
-                selItem = item
-                break
-            }
-        }
-        return selItem
+    fun itemFromPoint(pos: PointF) : MutableList< GraphItem > {
+        return pickItems() { it.boundRect().contains(pos.x, pos.y) }
+    }
+
+    fun itemFromPoint(pos: PointF,
+                      filter: (input: GraphItem) -> Boolean) : MutableList< GraphItem > {
+        return pickItems() { it.boundRect().contains(pos.x, pos.y) && filter(it) }
+    }
+
+    fun itemIntersectRect(rect: RectF): MutableList<GraphItem> {
+        return pickItems() { it.boundRect().intersect(rect) }
+    }
+
+    fun itemIntersectRect(rect: RectF,
+                          filter: (input: GraphItem) -> Boolean): MutableList<GraphItem> {
+        return pickItems() { it.boundRect().intersect(rect) && filter(it)}
     }
 
     // -------------------------- Override --------------------------
 
-    override fun getBoundRect(): RectF {
+    override fun boundRect(): RectF {
         var rect: RectF = RectF()
         for (item in mGraphItems) {
             if (item.visible) {
                 if (rect.isEmpty) {
-                    rect = item.getBoundRect()
+                    rect = item.boundRect()
                 }
                 else {
-                    rect.union(item.getBoundRect())
+                    rect.union(item.boundRect())
                 }
             }
         }
@@ -179,8 +178,6 @@ class GraphLayer : GraphObject() {
     }
 
 }
-
-
 
 
 class GraphCircle : GraphItem() {
@@ -206,7 +203,7 @@ class GraphCircle : GraphItem() {
         canvas.drawCircle(rCenter.x, rCenter.y, rRadius, shapePaint)
 
         if (needRender) {
-            val bound = getBoundRect()
+            val bound = boundRect()
             bound.apply {
                 val inflateHori = this.width() * 0.2f
                 val inflateVert = this.height() * 0.2f
@@ -230,7 +227,7 @@ class GraphCircle : GraphItem() {
         )
     }
 
-    override fun getBoundRect() : RectF {
+    override fun boundRect() : RectF {
         val rCenter = realOrigin()
         val rRadius = realRadius()
         return RectF(
@@ -256,12 +253,12 @@ class GraphCircleProgress(
 
     var progress: Float = 0.0f
 
-    override fun getBoundRect(): RectF {
-        return inflateRectF(mWrapCircle.getBoundRect(), mAroundInflatePct)
+    override fun boundRect(): RectF {
+        return inflateRectF(mWrapCircle.boundRect(), mAroundInflatePct)
     }
 
     override fun render(canvas: Canvas) {
-        canvas.drawArc(getBoundRect(), -90.0f, 360.0f * progress, true, shapePaint)
+        canvas.drawArc(boundRect(), -90.0f, 360.0f * progress, true, shapePaint)
         // canvas.drawRect(getBoundRect(), shapePaint)
     }
 }

@@ -42,12 +42,12 @@ interface GraphViewObserver {
 }
 
 
-open class GraphView(context: Context) :
+class GraphView(context: Context) :
     View(context), GestureDetector.OnGestureListener {
 
     private var mIsLongPressed = false
     private var mSelItem: GraphItem? = null;
-    private var mGraphItems: MutableList< GraphItem > = mutableListOf()
+    private var mLayers: MutableList< GraphLayer > = mutableListOf()
 
     var paintArea: RectF = RectF()
         private set
@@ -55,27 +55,8 @@ open class GraphView(context: Context) :
     var unitScale: Float = 1.0f
         private set
 
-/*    var fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-        this.setARGB(0xFF, 0x00, 0x00, 0x00)
-        this.textAlign = Paint.Align.CENTER
-    }
-        set(value) {
-            field = value
-            updateItemProperty()
-        }
-
-    var shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-        this.setARGB(0xFF, 0x00, 0x00, 0x00)
-        this.style = Paint.Style.STROKE
-        this.strokeWidth = unitScale * 0.5f
-    }
-        set(value) {
-            field = value
-            updateItemProperty()
-        }*/
-
-    var mObserver: GraphViewObserver? = null
-    var mGestureDetector = GestureDetector(context, this)
+    private var mObserver: GraphViewObserver? = null
+    private var mGestureDetector = GestureDetector(context, this)
 
     // ------------------------------- Window event handler override -------------------------------
 
@@ -83,7 +64,11 @@ open class GraphView(context: Context) :
         super.onDraw(canvas)
 
         canvas?.run {
-            renderItems(this)
+            for (item in mLayers.reversed()) {
+                if (item.visible) {
+                    item.render(this)
+                }
+            }
         }
     }
 
@@ -93,9 +78,6 @@ open class GraphView(context: Context) :
         unitScale = w * 0.01f
         paintArea.set(0.0f, 0.0f, w.toFloat(), h.toFloat())
 
-/*        shapePaint.strokeWidth = unitScale * 1.0f
-
-        updateItemProperty()*/
         layoutItems()
 
         mObserver?.onViewSizeChanged(w, h, oldw, oldh)
@@ -129,15 +111,10 @@ open class GraphView(context: Context) :
     private fun onUp(e: MotionEvent) {
         Log.i(DEBUG_TAG, "onUp")
         mSelItem?.apply {
-            val itemBound = this.getBoundRect()
-            val insectItems = mutableListOf< GraphItem >()
+            val itemBound = this.boundRect()
+            val insectItems = itemsFromLayer() {it.boundRect().contains(e.x, e.y) &&
+                    it.boundRect().intersect(itemBound) && it.interactive}
 
-            // Calc dragging intersect
-            for (item in mGraphItems) {
-                if ((item != mSelItem) && (item.getBoundRect().intersect(itemBound))) {
-                    insectItems.add(item)
-                }
-            }
             if (insectItems.size > 0) {
                 mObserver?.onItemDropIntersecting(this, insectItems)
             }
@@ -162,18 +139,21 @@ open class GraphView(context: Context) :
     override fun onShowPress(e: MotionEvent) {
         Log.i(DEBUG_TAG, "onShowPress")
 
-        mSelItem = pickableItemFromPoint(PointF(e.x, e.y))
-        mSelItem?.run {
-            Log.i(DEBUG_TAG, "Adapted item: $this")
-            mObserver?.onItemPicked(this)
+        val selItem = itemsFromLayer() {
+            it.boundRect().contains(e.x, e.y) && it.visible && it.interactive}
+        if (selItem.isNotEmpty()) {
+            Log.i(DEBUG_TAG, "Adapted item: ${selItem[0]}")
+            mObserver?.onItemPicked(selItem[0])
         }
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
         Log.i(DEBUG_TAG, "onSingleTapUp")
-        val selItem = pickableItemFromPoint(PointF(e.x, e.y))
-        selItem?.run {
-            mObserver?.onItemClicked(selItem)
+
+        val selItem = itemsFromLayer() {
+            it.boundRect().contains(e.x, e.y) && it.visible && it.interactive}
+        if (selItem.isNotEmpty()) {
+            mObserver?.onItemClicked(selItem[0])
         }
         return true
     }
@@ -187,8 +167,8 @@ open class GraphView(context: Context) :
             this@GraphView.invalidate()
 
             val pos = PointF(
-                this.getBoundRect().centerX(),
-                this.getBoundRect().centerY())
+                this.boundRect().centerX(),
+                this.boundRect().centerY())
             mObserver?.onItemDragging(this, pos)
         }
         return true
@@ -202,96 +182,43 @@ open class GraphView(context: Context) :
 
     override fun onFling(e1: MotionEvent, e2: MotionEvent,
                          velocityX: Float, velocityY: Float): Boolean {
-        Log.i(DEBUG_TAG, "onFling - x = $velocityX, y = $velocityY")
+        // Log.i(DEBUG_TAG, "onFling - x = $velocityX, y = $velocityY")
         return false
     }
 
     // ------------------------------------- Public functions --------------------------------------
 
-    fun isPortrait(): Boolean {
-        return paintArea.height() >= paintArea.width()
-    }
-
-    fun addGraphItem(newItem: GraphItem) : Boolean {
-        return insertGraphItem(newItem, 0)
-    }
-
-    fun insertGraphItem(newItem: GraphItem, atIndex: Int) : Boolean {
-        if (newItem in mGraphItems) {
-            return false
-        }
-        mGraphItems.add(atIndex, newItem)
-        return true
-    }
-
-    fun insertGraphItemBefore(newItem: GraphItem, refItem: GraphItem) : Boolean {
-        val refItemPos = mGraphItems.indexOf(refItem)
-        if (refItemPos >= 0) {
-            return insertGraphItem(newItem, refItemPos)
-        }
-        return false
-    }
-
-    fun insertGraphItemAfter(newItem: GraphItem, refItem: GraphItem) : Boolean {
-        val refItemPos = mGraphItems.indexOf(refItem)
-        if (refItemPos >= 0) {
-            return insertGraphItem(newItem, refItemPos + 1)
-        }
-        return false
+    fun addLayer(newLayer: GraphLayer) : Int {
+        mLayers.add(newLayer)
+        return mLayers.size - 1
     }
 
     fun setObserver(observer: GraphViewObserver) {
         mObserver = observer
     }
 
-    fun bringToFront(item: GraphItem) {
-        if (item in mGraphItems) {
-            mGraphItems.remove(item)
-            mGraphItems.add(0, item)
-        }
-    }
-
-    fun sendToBack(item: GraphItem) {
-        if (item in mGraphItems) {
-            mGraphItems.remove(item)
-            mGraphItems.add(item)
-        }
-    }
-
-    fun bringToFrontOf(operateItem: GraphItem, refItem: GraphItem) : Boolean {
-        if (operateItem in mGraphItems) {
-            mGraphItems.remove(operateItem)
-            return insertGraphItemBefore(operateItem, refItem)
-        }
-        return false
-    }
-
-    fun sendToBackOf(operateItem: GraphItem, refItem: GraphItem) : Boolean {
-        if (operateItem in mGraphItems) {
-            mGraphItems.remove(operateItem)
-            return insertGraphItemAfter(operateItem, refItem)
-        }
-        return false
+    fun isPortrait(): Boolean {
+        return paintArea.height() >= paintArea.width()
     }
 
     // ------------------------------------- Private functions -------------------------------------
-
-    private fun renderItems(canvas: Canvas) {
-        for (item in mGraphItems.reversed()) {
-            if (item.visible) {
-                item.render(canvas)
-            }
-        }
-    }
 
     private fun layoutItems() {
         mObserver?.onItemLayout()
     }
 
-    private fun itemFromPoint(pos: PointF) : MutableList< GraphItem > {
+    private fun itemsFromLayer(filter: (input: GraphItem) -> Boolean): MutableList< GraphItem > {
+        val items = mutableListOf< GraphItem >()
+        for (layer in mLayers) {
+            items.addAll(layer.pickItems(filter))
+        }
+        return items
+    }
+
+/*    private fun itemFromPoint(pos: PointF) : MutableList< GraphItem > {
         val items = mutableListOf< GraphItem >()
         for (item in mGraphItems) {
-            if (item.getBoundRect().contains(pos.x, pos.y)) {
+            if (item.boundRect().contains(pos.x, pos.y)) {
                 items.add(item)
             }
         }
@@ -302,12 +229,12 @@ open class GraphView(context: Context) :
         var selItem: GraphItem? = null
         val selItems = itemFromPoint(pos)
         for (item in selItems) {
-            if (item.pickable) {
+            if (item.interactive) {
                 selItem = item
                 break
             }
         }
         return selItem
-    }
+    }*/
 }
 

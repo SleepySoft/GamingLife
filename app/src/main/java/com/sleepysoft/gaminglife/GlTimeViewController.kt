@@ -140,7 +140,7 @@ class GlTimeViewController(
             // Drag center item to surround, closestItem as surroundItem
 
             val closestItem : GraphItem? = closestGraphItem(
-                centerFOfRectF(droppedItem.getBoundRect()),
+                centerFOfRectF(droppedItem.boundRect()),
                 intersectingItems.intersect(mSurroundItems.toSet()).toList())
 
             closestItem?.run {
@@ -199,7 +199,7 @@ class GlTimeViewController(
         mLongLongPressProgress = GraphCircleProgress(
             mCenterItem, 1.3f).apply {
             this.visible = false
-            this.pickable = false
+            this.interactive = false
             this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
                 this.color = Color.parseColor("#FFA500")
                 this.style = Paint.Style.FILL
