@@ -13,7 +13,7 @@ const val PATH_TASK_HISTORY = "/Runtime/TimeModule/TaskHistory"         // v as 
 
 // --------------------------------------------- Value ---------------------------------------------
 
-const val LONG_LONG_PRESS_TIMEOUT = 3000       // ms
+const val LONG_LONG_PRESS_TIMEOUT = 1500       // ms
 
 const val FILE_RUNTIME_DATA = "RuntimeData.json"
 const val FILE_DAILY_RECORD = "DailyRecord.json"

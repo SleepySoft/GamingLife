@@ -22,12 +22,16 @@ class GlTimeViewController(
     private val mGlTaskModule: GlTaskModule) : GraphViewObserver {
 
     private lateinit var mVibrator: Vibrator
-    private lateinit var mCenterItem: GraphCircle
-    private lateinit var mLongLongPressProgress: GraphCircleProgress
-    private lateinit var mTimeViewBaseLayer: GraphLayer
 
+    private lateinit var mVoiceRecordEffectLayer: GraphLayer
+    private lateinit var mTextCircle: GraphCircle
+    private lateinit var mAudioCircle: GraphCircle
+
+    private lateinit var mTimeViewBaseLayer: GraphLayer
     private var mCenterRadius = 0.1f
     private var mSurroundRadius = 0.1f
+    private lateinit var mCenterItem: GraphCircle
+    private lateinit var mLongLongPressProgress: GraphCircleProgress
     private var mSurroundItems = mutableListOf< GraphCircle >()
 
     private var mRecording: Boolean = false
@@ -44,6 +48,7 @@ class GlTimeViewController(
         }
 
         checkBuildTimeViewLayer()
+        checkBuildVoiceRecordEffectLayer()
     }
 
     fun polling() {
@@ -79,27 +84,32 @@ class GlTimeViewController(
                 // GlAudioRecorder.startRecord()
                 mRecording = true
                 mLongLongPressProgress.visible = false
+                mVoiceRecordEffectLayer.visible = true
+                mAudioCircle.origin = mCenterItem.origin
+                mGraphView.specifySelItem(mAudioCircle)
+                mGraphView.bringLayerToFront(mVoiceRecordEffectLayer)
             }
             else {
                 mLongLongPressProgress.progress =
                     duration.toFloat() / LONG_LONG_PRESS_TIMEOUT.toFloat()
                 mLongLongPressProgress.visible = true
             }
+            mGraphView.invalidate()
         }
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
 
     override fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        mCenterItem.radius = 8.0f * mGraphView.unitScale
-        mCenterItem.shapePaint.strokeWidth = mGraphView.unitScale * 1.0f
+        val strokeWidth = mGraphView.unitScale * 1.0f
 
         for (item in mSurroundItems) {
-            item.radius = 6.5f * mGraphView.unitScale
-            item.shapePaint.strokeWidth = mGraphView.unitScale * 1.0f
+            item.shapePaint.strokeWidth = strokeWidth
         }
 
-        mGraphView.invalidate()
+        mCenterItem.shapePaint.strokeWidth = strokeWidth
+        mTextCircle.shapePaint.strokeWidth = strokeWidth
+        mAudioCircle.shapePaint.strokeWidth = strokeWidth
     }
 
     override fun onItemPicked(pickedItem: GraphItem) {
@@ -156,12 +166,14 @@ class GlTimeViewController(
         else if (intersectingItems.contains(mCenterItem)) {
             // Drag surround item to center
 
-            mCenterItem.itemData = droppedItem.itemData
-            mCenterItem.shapePaint.color = droppedItem.shapePaint.color
+            if (droppedItem in mSurroundItems) {
+                mCenterItem.itemData = droppedItem.itemData
+                mCenterItem.shapePaint.color = droppedItem.shapePaint.color
 
-            @Suppress("UNCHECKED_CAST")
-            handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
-                                droppedItem.itemData as GlStrStruct?)
+                @Suppress("UNCHECKED_CAST")
+                handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
+                    droppedItem.itemData as GlStrStruct?)
+            }
         }
 
         cancelLongLongPress()
@@ -242,6 +254,52 @@ class GlTimeViewController(
         mTimeViewBaseLayer = layer
     }
 
+    private fun checkBuildVoiceRecordEffectLayer() {
+        val layers = mGraphView.pickLayer { it.id == "TimeView.RecordLayer" }
+        val layer = if (layers.isNotEmpty()) {
+            layers[0]
+        } else {
+            GraphLayer("TimeView.RecordLayer", false).apply {
+                this.setBackgroundAlpha(128)
+                mGraphView.addLayer(this)
+            }
+        }
+
+        layer.removeGraphItem() { true }
+
+        mTextCircle = GraphCircle().apply {
+            this.id = "TimeView.RecordLayer.Text"
+            this.mainText = "T"
+
+            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#000000")
+                this.textAlign = Paint.Align.CENTER
+            }
+            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#90D7EC")
+                this.style = Paint.Style.FILL
+            }
+        }
+        layer.addGraphItem(mTextCircle)
+
+        mAudioCircle = GraphCircle().apply {
+            this.id = "TimeView.RecordLayer.Audio"
+            this.mainText = "A"
+
+            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#FFFFFF")
+                this.textAlign = Paint.Align.CENTER
+            }
+            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#90D7EC")
+                this.style = Paint.Style.FILL
+            }
+        }
+        layer.addGraphItem(mAudioCircle)
+
+        mVoiceRecordEffectLayer = layer
+    }
+
     private fun layoutPortrait() {
         val layoutArea = RectF(mGraphView.paintArea)
         layoutArea.top = layoutArea.bottom - layoutArea.height()
@@ -250,8 +308,8 @@ class GlTimeViewController(
             this.bottom += 10.0f * mGraphView.unitScale
         }
 
-        mCenterRadius = 20 * mGraphView.unitScale
-        mSurroundRadius = 15 * mGraphView.unitScale
+        mCenterRadius = 8.0f * mGraphView.unitScale
+        mSurroundRadius = 6.5f * mGraphView.unitScale
 
         val center = PointF(layoutArea.centerX(), layoutArea.centerY())
         val radius = layoutArea.width() / 2
@@ -283,6 +341,14 @@ class GlTimeViewController(
                 item.radius = mSurroundRadius
             }
         }
+
+        // ---------------------------------------------------------
+
+        mTextCircle.origin = PointF(layoutArea.width() / 2, layoutArea.height() / 4)
+        mTextCircle.radius = 20 * mGraphView.unitScale
+
+        mAudioCircle.origin = PointF(layoutArea.width() / 2, 3 * layoutArea.height() / 4)
+        mAudioCircle.radius = 20 * mGraphView.unitScale
     }
 
     private fun layoutLandscape() {
@@ -334,6 +400,7 @@ class GlTimeViewController(
         if (mRecording) {
             // GlAudioRecorder.stopRecord()
             mRecording = false
+            mVoiceRecordEffectLayer.visible = false
         }
     }
 }

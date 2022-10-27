@@ -78,6 +78,9 @@ class GraphView(context: Context) :
         unitScale = w * 0.01f
         paintArea.set(0.0f, 0.0f, w.toFloat(), h.toFloat())
 
+        // Update Layer cover area
+        mLayers.map { it.coverArea.set(0.0f, 0.0f, w.toFloat(), h.toFloat()) }
+
         layoutItems()
 
         mObserver?.onViewSizeChanged(w, h, oldw, oldh)
@@ -194,14 +197,6 @@ class GraphView(context: Context) :
         return mLayers.size - 1
     }
 
-    fun setObserver(observer: GraphViewObserver) {
-        mObserver = observer
-    }
-
-    fun isPortrait(): Boolean {
-        return paintArea.height() >= paintArea.width()
-    }
-
     fun pickLayer(filter: (input: GraphLayer) -> Boolean): MutableList<GraphLayer> {
         val layers: MutableList< GraphLayer > = mutableListOf()
         for (layer in mLayers) {
@@ -210,6 +205,25 @@ class GraphView(context: Context) :
             }
         }
         return layers
+    }
+
+    fun bringLayerToFront(layer: GraphLayer) {
+        if (layer in mLayers) {
+            mLayers.remove(layer)
+            mLayers.add(0, layer)
+        }
+    }
+
+    fun setObserver(observer: GraphViewObserver) {
+        mObserver = observer
+    }
+
+    fun isPortrait(): Boolean {
+        return paintArea.height() >= paintArea.width()
+    }
+
+    fun specifySelItem(item: GraphItem) {
+        mSelItem = item
     }
 
     // ------------------------------------- Private functions -------------------------------------
@@ -221,7 +235,9 @@ class GraphView(context: Context) :
     private fun itemsFromLayer(filter: (input: GraphItem) -> Boolean): MutableList< GraphItem > {
         val items = mutableListOf< GraphItem >()
         for (layer in mLayers) {
-            items.addAll(layer.pickGraphItems(filter))
+            if (layer.visible) {
+                items.addAll(layer.pickGraphItems(filter))
+            }
         }
         return items
     }

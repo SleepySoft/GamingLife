@@ -64,7 +64,26 @@ abstract class GraphItem(
 class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
     private var mGraphItems: MutableList< GraphItem > = mutableListOf()
 
+    private val mBackGroundPaint: Paint = Paint().apply {
+        this.color = 0x00FFFFFF
+    }
+
+    var coverArea: RectF = RectF()
+
     // -------------------------- Public --------------------------
+
+    fun setBackgroundColor(color: String) {
+        val alpha = mBackGroundPaint.alpha
+        mBackGroundPaint.color = Color.parseColor(color)
+        mBackGroundPaint.alpha = alpha
+
+    }
+
+    fun setBackgroundAlpha(alpha: Int) {
+        mBackGroundPaint.alpha = alpha
+    }
+
+    // ---------------- GraphItem Management ----------------
 
     fun addGraphItem(newItem: GraphItem) : Boolean {
         return insertGraphItem(newItem, 0)
@@ -169,6 +188,7 @@ class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
     }
 
     override fun render(canvas: Canvas) {
+        canvas.drawRect(coverArea, mBackGroundPaint)
         for (item in mGraphItems.reversed()) {
             if (item.visible) {
                 item.render(canvas)
