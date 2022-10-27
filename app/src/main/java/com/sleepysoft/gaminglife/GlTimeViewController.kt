@@ -24,8 +24,9 @@ class GlTimeViewController(
     private lateinit var mVibrator: Vibrator
 
     private lateinit var mVoiceRecordEffectLayer: GraphLayer
-    private lateinit var mTextCircle: GraphCircle
     private lateinit var mAudioCircle: GraphCircle
+    private lateinit var mCancelCircle: GraphCircle
+    private lateinit var mTextRectangle: GraphRectangle
 
     private lateinit var mTimeViewBaseLayer: GraphLayer
     private var mCenterRadius = 0.1f
@@ -82,12 +83,16 @@ class GlTimeViewController(
             val duration: Int = (System.currentTimeMillis() - mPressSince).toInt()
             if (duration >= LONG_LONG_PRESS_TIMEOUT) {
                 // GlAudioRecorder.startRecord()
+
                 mRecording = true
                 mLongLongPressProgress.visible = false
                 mVoiceRecordEffectLayer.visible = true
+
+                // Select the audio cycle and bring it to front
                 mAudioCircle.origin = mCenterItem.origin
                 mGraphView.specifySelItem(mAudioCircle)
                 mGraphView.bringLayerToFront(mVoiceRecordEffectLayer)
+                mVoiceRecordEffectLayer.bringGraphItemToFront(mAudioCircle)
             }
             else {
                 mLongLongPressProgress.progress =
@@ -108,8 +113,9 @@ class GlTimeViewController(
         }
 
         mCenterItem.shapePaint.strokeWidth = strokeWidth
-        mTextCircle.shapePaint.strokeWidth = strokeWidth
         mAudioCircle.shapePaint.strokeWidth = strokeWidth
+        mCancelCircle.shapePaint.strokeWidth = strokeWidth
+        mTextRectangle.shapePaint.strokeWidth = strokeWidth
     }
 
     override fun onItemPicked(pickedItem: GraphItem) {
@@ -267,21 +273,6 @@ class GlTimeViewController(
 
         layer.removeGraphItem() { true }
 
-        mTextCircle = GraphCircle().apply {
-            this.id = "TimeView.RecordLayer.Text"
-            this.mainText = "T"
-
-            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#000000")
-                this.textAlign = Paint.Align.CENTER
-            }
-            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#90D7EC")
-                this.style = Paint.Style.FILL
-            }
-        }
-        layer.addGraphItem(mTextCircle)
-
         mAudioCircle = GraphCircle().apply {
             this.id = "TimeView.RecordLayer.Audio"
             this.mainText = "A"
@@ -296,6 +287,36 @@ class GlTimeViewController(
             }
         }
         layer.addGraphItem(mAudioCircle)
+
+        mCancelCircle = GraphCircle().apply {
+            this.id = "TimeView.RecordLayer.Cancel"
+            this.mainText = "Cancel"
+
+            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#000000")
+                this.textAlign = Paint.Align.CENTER
+            }
+            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#90D7EC")
+                this.style = Paint.Style.FILL
+            }
+        }
+        layer.addGraphItem(mCancelCircle)
+
+        mTextRectangle = GraphRectangle().apply {
+            this.id = "TimeView.RecordLayer.Text"
+            this.mainText = "Text"
+
+            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#000000")
+                this.textAlign = Paint.Align.CENTER
+            }
+            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#90D7EC")
+                this.style = Paint.Style.FILL
+            }
+        }
+        layer.addGraphItem(mTextRectangle)
 
         mVoiceRecordEffectLayer = layer
     }
@@ -344,11 +365,18 @@ class GlTimeViewController(
 
         // ---------------------------------------------------------
 
-        mTextCircle.origin = PointF(layoutArea.width() / 2, layoutArea.height() / 4)
-        mTextCircle.radius = 20 * mGraphView.unitScale
-
         mAudioCircle.origin = PointF(layoutArea.width() / 2, 3 * layoutArea.height() / 4)
         mAudioCircle.radius = 20 * mGraphView.unitScale
+
+        mCancelCircle.origin = PointF(layoutArea.width() / 2, layoutArea.height() / 4)
+        mCancelCircle.radius = 15 * mGraphView.unitScale
+
+        mTextRectangle.rect = RectF(mGraphView.paintArea).apply {
+            this.left += mGraphView.unitScale * 15.0f
+            this.right -= mGraphView.unitScale * 15.0f
+            this.bottom -= mGraphView.unitScale * 15.0f
+            this.top = this.bottom - mGraphView.unitScale * 20.0f
+        }
     }
 
     private fun layoutLandscape() {

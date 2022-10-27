@@ -222,16 +222,7 @@ class GraphCircle : GraphItem() {
         canvas.drawCircle(rCenter.x, rCenter.y, rRadius, shapePaint)
 
         if (needRender) {
-            val bound = boundRect()
-            bound.apply {
-                val inflateHori = this.width() * 0.2f
-                val inflateVert = this.height() * 0.2f
-                this.top += inflateVert
-                this.left += inflateHori
-                this.right -= inflateHori
-                this.bottom -= inflateVert
-            }
-            drawableContainer = rectF2Rect(bound)
+            drawableContainer = rectF2Rect(inflateRectF(boundRect(), 0.7f))
             val fontSize = calculateFontSize(boundaryOfText, drawableContainer, mainText)
             fontPaint.setTextSize(fontSize)
             needRender = false
@@ -282,5 +273,55 @@ class GraphCircleProgress(
     }
 }
 
+
+class GraphRectangle : GraphItem() {
+    var rect: RectF = RectF()
+        set(value) {
+            field = value
+            needRender = true
+        }
+
+    var roundRadius: Float = 0.0f
+        set(value) {
+            field = value
+            needRender = true
+        }
+
+    private var boundaryOfText: Rect = Rect()
+    private var drawableContainer: Rect = Rect()
+
+    override fun render(canvas: Canvas) {
+        val rRect = realRectangle()
+
+        if (roundRadius < 0.001f) {
+            canvas.drawRect(rRect, shapePaint)
+        }
+        else {
+            canvas.drawRoundRect(rRect, roundRadius, roundRadius, shapePaint)
+        }
+
+        if (needRender) {
+            drawableContainer = rectF2Rect(inflateRectF(boundRect(), 0.8f))
+            val fontSize = calculateFontSize(boundaryOfText, drawableContainer, mainText)
+            fontPaint.setTextSize(fontSize)
+            needRender = false
+        }
+
+        val halfTextHeight: Float = boundaryOfText.height() / 2.0f
+        canvas.drawText(
+            mainText,
+            drawableContainer.centerX().toFloat(),
+            (drawableContainer.centerY().toFloat() + halfTextHeight),
+            fontPaint
+        )
+    }
+
+    override fun boundRect() : RectF  = rect
+
+    // ---------------------------------------------------------------------
+
+    private fun realRectangle() : RectF =
+        RectF(rect).apply { this.offset(offsetPixel.x, offsetPixel.y) }
+}
 
 
