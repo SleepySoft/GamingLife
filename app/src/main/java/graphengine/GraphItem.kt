@@ -61,7 +61,7 @@ abstract class GraphItem(
 }
 
 
-class GraphLayer : GraphObject() {
+class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
     private var mGraphItems: MutableList< GraphItem > = mutableListOf()
 
     // -------------------------- Public --------------------------
@@ -124,32 +124,31 @@ class GraphLayer : GraphObject() {
         return false
     }
 
-    fun pickItems(filter: (input: GraphItem) -> Boolean) : MutableList< GraphItem > {
-        val items = mutableListOf< GraphItem >()
-        for (item in mGraphItems) {
-            if (filter(item)) {
-                items.add(item)
-            }
-        }
-        return items
+    fun pickGraphItems(filter: (input: GraphItem) -> Boolean) : List< GraphItem > {
+        return mGraphItems.filter(filter)
     }
 
-    fun itemFromPoint(pos: PointF) : MutableList< GraphItem > {
-        return pickItems() { it.boundRect().contains(pos.x, pos.y) }
+    fun removeGraphItem(filter: (input: GraphItem) -> Boolean) {
+        val remainingItems = mGraphItems.filter { !filter(it) }
+        mGraphItems = remainingItems.toMutableList()
+    }
+
+    fun itemFromPoint(pos: PointF) : List< GraphItem > {
+        return pickGraphItems() { it.boundRect().contains(pos.x, pos.y) }
     }
 
     fun itemFromPoint(pos: PointF,
-                      filter: (input: GraphItem) -> Boolean) : MutableList< GraphItem > {
-        return pickItems() { it.boundRect().contains(pos.x, pos.y) && filter(it) }
+                      filter: (input: GraphItem) -> Boolean) : List< GraphItem > {
+        return pickGraphItems() { it.boundRect().contains(pos.x, pos.y) && filter(it) }
     }
 
-    fun itemIntersectRect(rect: RectF): MutableList<GraphItem> {
-        return pickItems() { it.boundRect().intersect(rect) }
+    fun itemIntersectRect(rect: RectF): List<GraphItem> {
+        return pickGraphItems() { it.boundRect().intersect(rect) }
     }
 
     fun itemIntersectRect(rect: RectF,
-                          filter: (input: GraphItem) -> Boolean): MutableList<GraphItem> {
-        return pickItems() { it.boundRect().intersect(rect) && filter(it)}
+                          filter: (input: GraphItem) -> Boolean): List<GraphItem> {
+        return pickGraphItems() { it.boundRect().intersect(rect) && filter(it)}
     }
 
     // -------------------------- Override --------------------------

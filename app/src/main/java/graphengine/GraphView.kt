@@ -112,8 +112,8 @@ class GraphView(context: Context) :
         Log.i(DEBUG_TAG, "onUp")
         mSelItem?.apply {
             val itemBound = this.boundRect()
-            val insectItems = itemsFromLayer() {it.boundRect().contains(e.x, e.y) &&
-                    it.boundRect().intersect(itemBound) && it.interactive}
+            val insectItems = itemsFromLayer() {
+                it.boundRect().intersect(itemBound) && it.interactive}
 
             if (insectItems.size > 0) {
                 mObserver?.onItemDropIntersecting(this, insectItems)
@@ -142,7 +142,8 @@ class GraphView(context: Context) :
         val selItem = itemsFromLayer() {
             it.boundRect().contains(e.x, e.y) && it.visible && it.interactive}
         if (selItem.isNotEmpty()) {
-            Log.i(DEBUG_TAG, "Adapted item: ${selItem[0]}")
+            mSelItem = selItem[0]
+            Log.i(DEBUG_TAG, "Adapted item: $mSelItem")
             mObserver?.onItemPicked(selItem[0])
         }
     }
@@ -201,6 +202,16 @@ class GraphView(context: Context) :
         return paintArea.height() >= paintArea.width()
     }
 
+    fun pickLayer(filter: (input: GraphLayer) -> Boolean): MutableList<GraphLayer> {
+        val layers: MutableList< GraphLayer > = mutableListOf()
+        for (layer in mLayers) {
+            if (filter(layer)) {
+                layers.add(layer)
+            }
+        }
+        return layers
+    }
+
     // ------------------------------------- Private functions -------------------------------------
 
     private fun layoutItems() {
@@ -210,7 +221,7 @@ class GraphView(context: Context) :
     private fun itemsFromLayer(filter: (input: GraphItem) -> Boolean): MutableList< GraphItem > {
         val items = mutableListOf< GraphItem >()
         for (layer in mLayers) {
-            items.addAll(layer.pickItems(filter))
+            items.addAll(layer.pickGraphItems(filter))
         }
         return items
     }

@@ -24,6 +24,7 @@ class GlTimeViewController(
     private lateinit var mVibrator: Vibrator
     private lateinit var mCenterItem: GraphCircle
     private lateinit var mLongLongPressProgress: GraphCircleProgress
+    private lateinit var mTimeViewBaseLayer: GraphLayer
 
     private var mCenterRadius = 0.1f
     private var mSurroundRadius = 0.1f
@@ -42,7 +43,7 @@ class GlTimeViewController(
             mGraphView.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
 
-        buildItems()
+        checkBuildTimeViewLayer()
     }
 
     fun polling() {
@@ -103,7 +104,7 @@ class GlTimeViewController(
 
     override fun onItemPicked(pickedItem: GraphItem) {
         pickedItem.inflatePct = 10.0f
-        mGraphView.bringToFront(pickedItem)
+        mTimeViewBaseLayer.bringGraphItemToFront(pickedItem)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             mVibrator.vibrate(VibrationEffect.createOneShot(
@@ -177,7 +178,18 @@ class GlTimeViewController(
 
     // ------------------------------------- Private Functions -------------------------------------
 
-    private fun buildItems() {
+    private fun checkBuildTimeViewLayer() {
+        val layers = mGraphView.pickLayer { it.id == "TimeView.BaseLayer" }
+        val layer = if (layers.isNotEmpty()) {
+            layers[0]
+        } else {
+            GraphLayer("TimeView.BaseLayer", true).apply {
+                mGraphView.addLayer(this)
+            }
+        }
+
+        layer.removeGraphItem() { true }
+
         val currentTaskInfo = mGlTaskModule.getCurrentTaskInfo()
         val currentTaskGroupData =
             mGlTaskModule.getTaskData(currentTaskInfo["groupID"].toString() ?: "") ?:
@@ -203,8 +215,8 @@ class GlTimeViewController(
             this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
                 this.color = Color.parseColor("#FFA500")
                 this.style = Paint.Style.FILL
-                }
             }
+        }
 
         val taskGroupTop = mGlTaskModule.getTaskGroupTop()
         for ((k, v) in taskGroupTop) {
@@ -221,11 +233,13 @@ class GlTimeViewController(
                 }
             }
 
-            mGraphView.addGraphItem(item)
+            layer.addGraphItem(item)
             mSurroundItems.add(item)
         }
-        mGraphView.addGraphItem(mCenterItem)
-        mGraphView.insertGraphItemAfter(mLongLongPressProgress, mCenterItem)
+        layer.addGraphItem(mCenterItem)
+        layer.insertGraphItemAfter(mLongLongPressProgress, mCenterItem)
+
+        mTimeViewBaseLayer = layer
     }
 
     private fun layoutPortrait() {
