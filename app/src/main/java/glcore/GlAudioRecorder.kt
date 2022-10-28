@@ -32,17 +32,18 @@ object GlAudioRecorder {
     private const val Channel = AudioFormat.CHANNEL_IN_MONO
     private const val EncodingType = AudioFormat.ENCODING_PCM_16BIT
 
-    private lateinit var PCMPath: String
-    private lateinit var WAVPath: String
+    lateinit var PCMPath: String
+    lateinit var WAVPath: String
 
     private var bufferSizeInByte: Int = 0
     private var audioRecorder: AudioRecord? = null
+    private var toFileTask: AudioRecordToFile? = null
     private var isRecording = false
 
     fun init() {
         val ctx: Context = GlApplication.applicationContext()
-        PCMPath = "${ctx.filesDir.absolutePath}/temp/RawAudio.pcm"
-        WAVPath = "${ctx.filesDir.absolutePath}/temp/WavAudio.pcm"
+        PCMPath = "${ctx.filesDir.absolutePath}/${FILE_AUDIO_TEMP_PCM}"
+        WAVPath = "${ctx.filesDir.absolutePath}/${FILE_AUDIO_TEMP_WAV}"
         bufferSizeInByte = AudioRecord.getMinBufferSize(SampleRate, Channel, EncodingType)
         createRecorder()
     }
@@ -79,7 +80,9 @@ object GlAudioRecorder {
             audioRecorder?.startRecording()
 
             isRecording = true
-            AudioRecordToFile().start()
+            toFileTask = AudioRecordToFile().apply {
+                this.start()
+            }
             true
         }
     }
@@ -89,6 +92,19 @@ object GlAudioRecorder {
         audioRecorder?.release()
         isRecording = false
         audioRecorder = null
+    }
+
+    fun join(timeoutMs: Long = 0) {
+        try {
+            toFileTask?.join(timeoutMs)
+            toFileTask = null
+        }
+        catch (_: java.lang.Exception) {
+
+        }
+        finally {
+
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.R)

@@ -2,6 +2,8 @@ package glcore
 
 import android.content.Context
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 object GlRoot {
@@ -15,9 +17,8 @@ object GlRoot {
         glTaskModule.init()
     }
 
-    fun getFileNameTs() : String {
-        // TODO:
-        return ""
+    fun getFileNameTsString() : String {
+        return SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.getDefault()).format(Date())
     }
 
     fun saveFile(fileName: String, fileContent: String) : Boolean {

@@ -9,6 +9,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import glcore.*
 import graphengine.*
+import java.io.File
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -22,11 +23,6 @@ class GlTimeViewController(
     private val mGlTaskModule: GlTaskModule) : GraphViewObserver {
 
     private lateinit var mVibrator: Vibrator
-
-    private lateinit var mVoiceRecordEffectLayer: GraphLayer
-    private lateinit var mAudioCircle: GraphCircle
-    private lateinit var mCancelCircle: GraphCircle
-    private lateinit var mTextRectangle: GraphRectangle
 
     private lateinit var mTimeViewBaseLayer: GraphLayer
     private var mCenterRadius = 0.1f
@@ -49,7 +45,6 @@ class GlTimeViewController(
         }
 
         checkBuildTimeViewLayer()
-        checkBuildVoiceRecordEffectLayer()
     }
 
     fun polling() {
@@ -78,31 +73,6 @@ class GlTimeViewController(
         mGraphView.invalidate()
     }
 
-    private fun processRecordProgress() {
-        if (!mRecording && (mPressSince > 0)) {
-            val duration: Int = (System.currentTimeMillis() - mPressSince).toInt()
-            if (duration >= LONG_LONG_PRESS_TIMEOUT) {
-                // GlAudioRecorder.startRecord()
-
-                mRecording = true
-                mLongLongPressProgress.visible = false
-                mVoiceRecordEffectLayer.visible = true
-
-                // Select the audio cycle and bring it to front
-                mAudioCircle.origin = mCenterItem.origin
-                mGraphView.specifySelItem(mAudioCircle)
-                mGraphView.bringLayerToFront(mVoiceRecordEffectLayer)
-                mVoiceRecordEffectLayer.bringGraphItemToFront(mAudioCircle)
-            }
-            else {
-                mLongLongPressProgress.progress =
-                    duration.toFloat() / LONG_LONG_PRESS_TIMEOUT.toFloat()
-                mLongLongPressProgress.visible = true
-            }
-            mGraphView.invalidate()
-        }
-    }
-
     // -------------------------- Implements GraphViewObserver interface ---------------------------
 
     override fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -113,9 +83,6 @@ class GlTimeViewController(
         }
 
         mCenterItem.shapePaint.strokeWidth = strokeWidth
-        mAudioCircle.shapePaint.strokeWidth = strokeWidth
-        mCancelCircle.shapePaint.strokeWidth = strokeWidth
-        mTextRectangle.shapePaint.strokeWidth = strokeWidth
     }
 
     override fun onItemPicked(pickedItem: GraphItem) {
@@ -141,18 +108,17 @@ class GlTimeViewController(
         if (draggingItem == mCenterItem) {
             if ((abs(mCenterItem.offsetPixel.x) > mGraphView.unitScale * 0.1) ||
                 (abs(mCenterItem.offsetPixel.y) > mGraphView.unitScale * 0.1)) {
-                cancelLongLongPress()
+                endLongLongPress()
             }
         }
     }
 
     override fun onItemDropped(droppedItem: GraphItem) {
-        droppedItem.inflatePct = 0.0f
-        cancelLongLongPress()
-        mGraphView.invalidate()
-    }
+        val intersectingItems: List< GraphItem > =
+            mTimeViewBaseLayer.itemIntersectRect(droppedItem.boundRect()) {
+                it.visible && it.interactive
+            }
 
-    override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
         if (droppedItem == mCenterItem) {
             // Drag center item to surround, closestItem as surroundItem
 
@@ -182,8 +148,42 @@ class GlTimeViewController(
             }
         }
 
-        cancelLongLongPress()
+        droppedItem.inflatePct = 0.0f
+        endLongLongPress()
     }
+
+/*    override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
+        if (droppedItem == mCenterItem) {
+            // Drag center item to surround, closestItem as surroundItem
+
+            val closestItem : GraphItem? = closestGraphItem(
+                centerFOfRectF(droppedItem.boundRect()),
+                intersectingItems.intersect(mSurroundItems.toSet()).toList())
+
+            closestItem?.run {
+                mCenterItem.itemData = closestItem.itemData
+                mCenterItem.shapePaint.color = closestItem.shapePaint.color
+
+                @Suppress("UNCHECKED_CAST")
+                handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
+                    closestItem.itemData as GlStrStruct?)
+            }
+        }
+        else if (intersectingItems.contains(mCenterItem)) {
+            // Drag surround item to center
+
+            if (droppedItem in mSurroundItems) {
+                mCenterItem.itemData = droppedItem.itemData
+                mCenterItem.shapePaint.color = droppedItem.shapePaint.color
+
+                @Suppress("UNCHECKED_CAST")
+                handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
+                    droppedItem.itemData as GlStrStruct?)
+            }
+        }
+
+        endLongLongPress()
+    }*/
 
     override fun onItemLayout() {
         if (mGraphView.isPortrait()) {
@@ -260,67 +260,6 @@ class GlTimeViewController(
         mTimeViewBaseLayer = layer
     }
 
-    private fun checkBuildVoiceRecordEffectLayer() {
-        val layers = mGraphView.pickLayer { it.id == "TimeView.RecordLayer" }
-        val layer = if (layers.isNotEmpty()) {
-            layers[0]
-        } else {
-            GraphLayer("TimeView.RecordLayer", false).apply {
-                this.setBackgroundAlpha(128)
-                mGraphView.addLayer(this)
-            }
-        }
-
-        layer.removeGraphItem() { true }
-
-        mAudioCircle = GraphCircle().apply {
-            this.id = "TimeView.RecordLayer.Audio"
-            this.mainText = "A"
-
-            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#FFFFFF")
-                this.textAlign = Paint.Align.CENTER
-            }
-            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#90D7EC")
-                this.style = Paint.Style.FILL
-            }
-        }
-        layer.addGraphItem(mAudioCircle)
-
-        mCancelCircle = GraphCircle().apply {
-            this.id = "TimeView.RecordLayer.Cancel"
-            this.mainText = "Cancel"
-
-            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#000000")
-                this.textAlign = Paint.Align.CENTER
-            }
-            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#90D7EC")
-                this.style = Paint.Style.FILL
-            }
-        }
-        layer.addGraphItem(mCancelCircle)
-
-        mTextRectangle = GraphRectangle().apply {
-            this.id = "TimeView.RecordLayer.Text"
-            this.mainText = "Text"
-
-            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#000000")
-                this.textAlign = Paint.Align.CENTER
-            }
-            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#90D7EC")
-                this.style = Paint.Style.FILL
-            }
-        }
-        layer.addGraphItem(mTextRectangle)
-
-        mVoiceRecordEffectLayer = layer
-    }
-
     private fun layoutPortrait() {
         val layoutArea = RectF(mGraphView.paintArea)
         layoutArea.top = layoutArea.bottom - layoutArea.height()
@@ -361,21 +300,6 @@ class GlTimeViewController(
                 }
                 item.radius = mSurroundRadius
             }
-        }
-
-        // ---------------------------------------------------------
-
-        mAudioCircle.origin = PointF(layoutArea.width() / 2, 3 * layoutArea.height() / 4)
-        mAudioCircle.radius = 20 * mGraphView.unitScale
-
-        mCancelCircle.origin = PointF(layoutArea.width() / 2, layoutArea.height() / 4)
-        mCancelCircle.radius = 15 * mGraphView.unitScale
-
-        mTextRectangle.rect = RectF(mGraphView.paintArea).apply {
-            this.left += mGraphView.unitScale * 15.0f
-            this.right -= mGraphView.unitScale * 15.0f
-            this.bottom -= mGraphView.unitScale * 15.0f
-            this.top = this.bottom - mGraphView.unitScale * 20.0f
         }
     }
 
@@ -419,16 +343,52 @@ class GlTimeViewController(
         }
     }
 
-    private fun cancelLongLongPress() {
+    private fun processRecordProgress() {
+        if (!mRecording && (mPressSince > 0)) {
+            val duration: Int = (System.currentTimeMillis() - mPressSince).toInt()
+            if (duration >= LONG_LONG_PRESS_TIMEOUT) {
+                // GlAudioRecorder.startRecord()
+
+                mRecording = true
+                mLongLongPressProgress.visible = false
+/*                mVoiceRecordEffectLayer.visible = true
+
+                // Select the audio cycle and bring it to front
+                mAudioCircle.origin = mCenterItem.origin
+                mGraphView.specifySelItem(mAudioCircle)
+                mGraphView.bringLayerToFront(mVoiceRecordEffectLayer)
+                mVoiceRecordEffectLayer.bringGraphItemToFront(mAudioCircle)*/
+            }
+            else {
+                mLongLongPressProgress.progress =
+                    duration.toFloat() / LONG_LONG_PRESS_TIMEOUT.toFloat()
+                mLongLongPressProgress.visible = true
+            }
+            mGraphView.invalidate()
+        }
+    }
+
+    private fun endLongLongPress() {
         if (mPressSince > 0) {
             mPressSince = 0
             mLongLongPressProgress.visible = false
             mLongLongPressProgress.progress = 0.0f
         }
         if (mRecording) {
-            // GlAudioRecorder.stopRecord()
+            GlAudioRecorder.stopRecord()
             mRecording = false
-            mVoiceRecordEffectLayer.visible = false
         }
+    }
+
+    private fun archiveAudio() : String {
+        val archiveFileName = "voice_${GlRoot.getFileNameTsString()}.wav"
+        System.out.println("Archiving voice record to file: $archiveFileName")
+
+        File(GlAudioRecorder.WAVPath).let { sourceFile ->
+            sourceFile.copyTo(File(archiveFileName))
+            sourceFile.delete()
+        }
+
+        return archiveAudio()
     }
 }

@@ -32,9 +32,9 @@ interface GraphViewObserver {
 
     }
 
-    fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
+/*    fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
 
-    }
+    }*/
 
     fun onItemLayout() {
 
@@ -55,7 +55,7 @@ class GraphView(context: Context) :
     var unitScale: Float = 1.0f
         private set
 
-    private var mObserver: GraphViewObserver? = null
+    private var mObserverStack: MutableList< GraphViewObserver > = mutableListOf()
     private var mGestureDetector = GestureDetector(context, this)
 
     // ------------------------------- Window event handler override -------------------------------
@@ -83,7 +83,7 @@ class GraphView(context: Context) :
 
         layoutItems()
 
-        mObserver?.onViewSizeChanged(w, h, oldw, oldh)
+        topObserver()?.onViewSizeChanged(w, h, oldw, oldh)
     }
 
     // --------------------------------- Action & Gesture Handler ----------------------------------
@@ -113,25 +113,28 @@ class GraphView(context: Context) :
 
     private fun onUp(e: MotionEvent) {
         Log.i(DEBUG_TAG, "onUp")
-        mSelItem?.apply {
+
+/*        mSelItem?.apply {
             val itemBound = this.boundRect()
             val insectItems = itemsFromLayer() {
                 it.boundRect().intersect(itemBound) && it.interactive}
 
             if (insectItems.size > 0) {
-                mObserver?.onItemDropIntersecting(this, insectItems)
+                topObserver()?.onItemDropIntersecting(this, insectItems)
             }
 
             // Reset graph item offset and repaint
             this.offsetPixel = PointF(0.0f, 0.0f)
-            this@GraphView.invalidate()
-        }
+        }*/
 
         // Clear select item and notify observer
         mSelItem?.run {
-            mSelItem = null
-            mObserver?.onItemDropped(this)
+            this@GraphView.invalidate()
+            this.offsetPixel = PointF(0.0f, 0.0f)
+            topObserver()?.onItemDropped(this)
         }
+
+        mSelItem = null
     }
 
     override fun onDown(e: MotionEvent): Boolean {
@@ -147,7 +150,7 @@ class GraphView(context: Context) :
         if (selItem.isNotEmpty()) {
             mSelItem = selItem[0]
             Log.i(DEBUG_TAG, "Adapted item: $mSelItem")
-            mObserver?.onItemPicked(selItem[0])
+            topObserver()?.onItemPicked(selItem[0])
         }
     }
 
@@ -157,7 +160,7 @@ class GraphView(context: Context) :
         val selItem = itemsFromLayer() {
             it.boundRect().contains(e.x, e.y) && it.visible && it.interactive}
         if (selItem.isNotEmpty()) {
-            mObserver?.onItemClicked(selItem[0])
+            topObserver()?.onItemClicked(selItem[0])
         }
         return true
     }
@@ -173,7 +176,7 @@ class GraphView(context: Context) :
             val pos = PointF(
                 this.boundRect().centerX(),
                 this.boundRect().centerY())
-            mObserver?.onItemDragging(this, pos)
+            topObserver()?.onItemDragging(this, pos)
         }
         return true
     }
@@ -214,8 +217,17 @@ class GraphView(context: Context) :
         }
     }
 
-    fun setObserver(observer: GraphViewObserver) {
-        mObserver = observer
+    fun pushObserver(observer: GraphViewObserver) {
+        mObserverStack.add(observer)
+    }
+
+    fun popObserver() : GraphViewObserver? {
+        var poppedLayer: GraphViewObserver? = null
+        if (mObserverStack.isNotEmpty()) {
+            poppedLayer = mObserverStack[mObserverStack.size - 1]
+            mObserverStack.removeAt(mObserverStack.size - 1)
+        }
+        return poppedLayer
     }
 
     fun isPortrait(): Boolean {
@@ -229,7 +241,11 @@ class GraphView(context: Context) :
     // ------------------------------------- Private functions -------------------------------------
 
     private fun layoutItems() {
-        mObserver?.onItemLayout()
+        topObserver()?.onItemLayout()
+    }
+    
+    private fun topObserver() : GraphViewObserver? {
+        return if (mObserverStack.isNotEmpty()) mObserverStack[mObserverStack.size - 1] else null
     }
 
     private fun itemsFromLayer(filter: (input: GraphItem) -> Boolean): MutableList< GraphItem > {
