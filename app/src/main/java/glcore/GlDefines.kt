@@ -1,4 +1,6 @@
 package glcore
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.reflect.KClass
 
 // --------------------------------------------- Path ----------------------------------------------
@@ -22,6 +24,8 @@ const val FILE_ENVIRONMENT = "Environment.json"
 
 const val FILE_AUDIO_TEMP_PCM = "temp/RawAudio.pcm"
 const val FILE_AUDIO_TEMP_WAV = "temp/RawAudio.wav"
+
+const val DAILY_FOLDER_TEMPLATE = "GL_DAILY_%s"
 
 const val GROUP_ID_IDLE  = "5084b76d-4e75-4c44-9786-bdf94075f94d"
 const val GROUP_ID_ENJOY  = "f9fb401a-dc28-463f-92a6-0d30bd8730bb"

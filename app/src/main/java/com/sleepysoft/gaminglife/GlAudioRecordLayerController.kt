@@ -24,11 +24,12 @@ class GlAudioRecordLayerController(
         checkBuildVoiceRecordEffectLayer()
     }
 
-    fun takeControl(pos: PointF) {
+    fun takeControl(operatingPos: PointF) {
         layoutItems()
-        mVoiceRecordEffectLayer.visible = true
+        mAudioCircle.origin = operatingPos
         mGraphView.specifySelItem(mAudioCircle)
         mGraphView.pushObserver(this)
+        mVoiceRecordEffectLayer.visible = true
     }
 
     private fun releaseControl() {
@@ -115,21 +116,25 @@ class GlAudioRecordLayerController(
 
         if (intersectingItems.isEmpty()) {
             // Just release the record button
-            GlAudioRecorder.join()
+
+            GlAudioRecorder.join(1500)
+
             // Copy wav to daily folder and rename
+
         }
         else {
             // Drag the record button to give up or text
-            if (intersectingItems[0].id == "TimeView.RecordLayer.Text") {
-                // Open text editor
-
-            }
-            else if (intersectingItems[0].id == "TimeView.RecordLayer.Cancel") {
-                // Do nothing
-            }
-            else {
-                // Should not reach here
-                assert(false)
+            when (intersectingItems[0].id) {
+                "TimeView.RecordLayer.Text" -> {
+                    // Open text editor
+                }
+                "TimeView.RecordLayer.Cancel" -> {
+                    // Do nothing
+                }
+                else -> {
+                    // Should not reach here
+                    assert(false)
+                }
             }
         }
     }

@@ -45,7 +45,6 @@ object GlAudioRecorder {
         PCMPath = "${ctx.filesDir.absolutePath}/${FILE_AUDIO_TEMP_PCM}"
         WAVPath = "${ctx.filesDir.absolutePath}/${FILE_AUDIO_TEMP_WAV}"
         bufferSizeInByte = AudioRecord.getMinBufferSize(SampleRate, Channel, EncodingType)
-        createRecorder()
     }
 
     private fun createRecorder() : Boolean {
@@ -88,9 +87,9 @@ object GlAudioRecorder {
     }
 
     fun stopRecord() {
+        isRecording = false
         audioRecorder?.stop()
         audioRecorder?.release()
-        isRecording = false
         audioRecorder = null
     }
 
@@ -107,7 +106,17 @@ object GlAudioRecorder {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
+    // ----------------------------------------------------------
+
+    private class AudioRecordToFile : Thread() {
+
+        override fun run() {
+            super.run()
+            writeDateTOFile()
+            copyWaveFile()
+        }
+    }
+
     private fun writeDateTOFile() {
 
         val audioData = ByteArray(bufferSizeInByte)
@@ -119,19 +128,28 @@ object GlAudioRecorder {
             file.delete()
         }
         file.createNewFile()
+
         val out = BufferedOutputStream(FileOutputStream(file))
-        var length = 0
-        while (isRecording && audioRecorder != null) {
-            length = audioRecorder!!.read(audioData, 0, bufferSizeInByte)
-            if (AudioRecord.ERROR_INVALID_OPERATION != length) {
-                out.write(audioData, 0, length)
-                out.flush()
+        try {
+            while (isRecording && audioRecorder != null) {
+                // To ensure the audioRecorder keeping valid during operation
+                audioRecorder?.run {
+                    val length = this.read(audioData, 0, bufferSizeInByte)
+                    if (AudioRecord.ERROR_INVALID_OPERATION != length) {
+                        out.write(audioData, 0, length)
+                        out.flush()
+                    }
+                }
             }
         }
-        out.close()
+        catch (_: Exception) {
+            System.out.println("Audio recording got exception.")
+        }
+        finally {
+            out.close()
+        }
     }
 
-    //将pcm格式的文件转换为WAV格式的
     private fun copyWaveFile() {
 
         val fileIn = FileInputStream(PCMPath)
@@ -150,7 +168,6 @@ object GlAudioRecorder {
         fileOut.close()
     }
 
-    //添加WAV格式的文件头
     private fun writeWaveFileHeader(
         out: FileOutputStream, totalAudioLen: Long,
         totalDataLen: Long) {
@@ -203,15 +220,5 @@ object GlAudioRecorder {
         header[42] = (totalAudioLen shr 16 and 0xff).toByte()
         header[43] = (totalAudioLen shr 24 and 0xff).toByte()
         out.write(header, 0, 44)
-    }
-
-    private class AudioRecordToFile : Thread() {
-
-        @RequiresApi(Build.VERSION_CODES.R)
-        override fun run() {
-            super.run()
-            writeDateTOFile()
-            copyWaveFile()
-        }
     }
 }

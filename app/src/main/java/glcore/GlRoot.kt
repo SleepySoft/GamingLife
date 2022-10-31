@@ -16,9 +16,13 @@ object GlRoot {
         glDatabase.init()
         glTaskModule.init()
     }
+    
+    fun getFileNameTs() : String  {
+        return GlDateTime.formatToMSec(GlDateTime.datetime())
+    }
 
-    fun getFileNameTsString() : String {
-        return SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.getDefault()).format(Date())
+    fun getDailyFolderName(offset: Int) : String {
+        return ""
     }
 
     fun saveFile(fileName: String, fileContent: String) : Boolean {

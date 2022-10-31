@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         mView = GraphView(this)
         mController = GlTimeViewController(mView, GlRoot.glTaskModule).apply {
             this.init()
-            mView.setObserver(this)
+            mView.pushObserver(this)
         }
 
         setContentView(mView)

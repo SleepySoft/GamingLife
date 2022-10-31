@@ -381,7 +381,7 @@ class GlTimeViewController(
     }
 
     private fun archiveAudio() : String {
-        val archiveFileName = "voice_${GlRoot.getFileNameTsString()}.wav"
+        val archiveFileName = "voice_${GlRoot.getFileNameTs()}.wav"
         System.out.println("Archiving voice record to file: $archiveFileName")
 
         File(GlAudioRecorder.WAVPath).let { sourceFile ->
