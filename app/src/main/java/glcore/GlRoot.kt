@@ -1,10 +1,5 @@
 package glcore
 
-import android.content.Context
-import android.os.Environment
-import java.io.File
-import java.util.*
-
 
 object GlRoot {
     val glContext = GlContext()
@@ -21,7 +16,7 @@ object GlRoot {
         return GlDateTime.formatToMSec(GlDateTime.datetime())
     }
 
-    fun getDailyFolderName(offset: Int) : String {
+    fun getDailyFolder(offset: Int) : String {
         return DAILY_FOLDER_TEMPLATE.format(
             GlDateTime.formatToDay(GlDateTime.datetime(offsetDays = offset)))
     }
