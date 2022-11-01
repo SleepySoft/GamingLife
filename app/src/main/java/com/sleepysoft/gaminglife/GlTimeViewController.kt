@@ -333,7 +333,7 @@ class GlTimeViewController(
 
     private fun handleTaskSwitching(fromTask: GlStrStruct?, toTask: GlStrStruct?) {
         if (toTask == null) {
-            System.out.println("The toTask should not be null")
+            println("The toTask should not be null")
         }
         fromTask?.run {
 
@@ -382,7 +382,7 @@ class GlTimeViewController(
 
     private fun archiveAudio() : String {
         val archiveFileName = "voice_${GlRoot.getFileNameTs()}.wav"
-        System.out.println("Archiving voice record to file: $archiveFileName")
+        println("Archiving voice record to file: $archiveFileName")
 
         File(GlAudioRecorder.WAVPath).let { sourceFile ->
             sourceFile.copyTo(File(archiveFileName))

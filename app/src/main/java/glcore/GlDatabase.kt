@@ -48,14 +48,14 @@ class GlDatabase {
     private fun savePathDict(fileName: String, pathDict: PathDict, force: Boolean = false) : Boolean {
         if (pathDict.hasUpdate || force) {
             val fileContent: String = GlJson.serializeAnyDict(pathDict.rootDict)
-            GlRoot.saveFile(fileName, fileContent)
+            GlFile.saveFile(fileName, fileContent.toByteArray())
             pathDict.hasUpdate = false
         }
         return true
     }
 
     private fun loadPathDict(fileName: String, pathDict: PathDict) : Boolean {
-        val fileContent: String = GlRoot.loadFile(fileName)
+        val fileContent: String = GlFile.loadFile(fileName).toString()
         pathDict.attach(GlJson.deserializeAnyDict(fileContent))
         pathDict.hasUpdate = false
         return true

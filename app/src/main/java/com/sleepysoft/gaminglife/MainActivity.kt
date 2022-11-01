@@ -1,13 +1,38 @@
 package com.sleepysoft.gaminglife
 
-import android.os.Build
+import android.content.Context
+import android.content.Intent
+import android.os.*
+import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.WindowManager
 import glcore.GlRoot
 import graphengine.GraphView
+
+@RequiresApi(Build.VERSION_CODES.N)
+fun testInternalStorage(ctx: Context) {
+    println(ctx.dataDir.absolutePath)
+    println(ctx.filesDir.absolutePath)
+    println(ctx.cacheDir.absolutePath)
+
+    println(ctx.getExternalFilesDir( Environment.DIRECTORY_DCIM)?.absolutePath)
+    println(ctx.getExternalFilesDirs( Environment.DIRECTORY_DCIM))
+
+    println(ctx.externalCacheDir?.absolutePath)
+    println(ctx.externalCacheDirs)
+}
+
+
+fun testExternalStorage() {
+    println(Environment.getExternalStorageState())
+
+    println(Environment.getRootDirectory().absolutePath)
+    println(Environment.getDataDirectory().absolutePath)
+    println(Environment.getExternalStorageDirectory().absolutePath)
+    println(Environment.getDownloadCacheDirectory().absolutePath)
+    println(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).absolutePath)
+}
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mHandler : Handler
@@ -17,6 +42,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val intent = Intent(this, PermissionActivity::class.java)
+        startActivity(intent)
 
         GlRoot.init()
 

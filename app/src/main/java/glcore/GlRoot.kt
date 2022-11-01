@@ -1,8 +1,8 @@
 package glcore
 
 import android.content.Context
+import android.os.Environment
 import java.io.File
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -16,36 +16,13 @@ object GlRoot {
         glDatabase.init()
         glTaskModule.init()
     }
-    
+
     fun getFileNameTs() : String  {
         return GlDateTime.formatToMSec(GlDateTime.datetime())
     }
 
     fun getDailyFolderName(offset: Int) : String {
-        return ""
-    }
-
-    fun saveFile(fileName: String, fileContent: String) : Boolean {
-        return try {
-            val ctx: Context = GlApplication.applicationContext()
-            File(ctx.filesDir.absolutePath, fileName).writeText(fileContent)
-            return true
-        } catch (ex: Exception) {
-            false
-        } finally {
-
-        }
-    }
-
-    fun loadFile(fileName: String) : String {
-        return  try {
-            val ctx: Context = GlApplication.applicationContext()
-            val file = File(ctx.filesDir.absolutePath, fileName)
-            file.readText()
-        } catch (ex: Exception) {
-            ""
-        } finally {
-
-        }
+        return DAILY_FOLDER_TEMPLATE.format(
+            GlDateTime.formatToDay(GlDateTime.datetime(offsetDays = offset)))
     }
 }

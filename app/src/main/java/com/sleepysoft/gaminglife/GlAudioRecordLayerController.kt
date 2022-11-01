@@ -1,15 +1,17 @@
 package com.sleepysoft.gaminglife
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.RectF
-import android.os.Build
-import android.os.VibrationEffect
-import glcore.GROUP_ID_IDLE
+import android.text.InputType
+import android.view.Gravity
+import android.widget.EditText
+import glcore.GlApplication
 import glcore.GlAudioRecorder
 import graphengine.*
-import kotlin.math.abs
 
 
 class GlAudioRecordLayerController(
@@ -120,16 +122,18 @@ class GlAudioRecordLayerController(
             GlAudioRecorder.join(1500)
 
             // Copy wav to daily folder and rename
-
+            onAudioRecordOk()
         }
         else {
             // Drag the record button to give up or text
             when (intersectingItems[0].id) {
                 "TimeView.RecordLayer.Text" -> {
                     // Open text editor
+                    popupTextEditor()
                 }
                 "TimeView.RecordLayer.Cancel" -> {
                     // Do nothing
+                    onUserInputCancel()
                 }
                 else -> {
                     // Should not reach here
@@ -137,6 +141,8 @@ class GlAudioRecordLayerController(
                 }
             }
         }
+
+        releaseControl()
     }
 
     override fun onItemLayout() {
@@ -172,6 +178,42 @@ class GlAudioRecordLayerController(
     }
 
     private fun layoutLandscape() {
+
+    }
+
+    // -----------------------------------------------------------------
+
+    private fun popupTextEditor() {
+        val builder = AlertDialog.Builder(GlApplication.applicationContext()).apply {
+            this.setTitle("Input")
+        }
+
+        val input = EditText(GlApplication.applicationContext()).apply {
+            this.setText("")
+            this.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            this.isSingleLine = false
+            this.setLines(5)
+            this.maxLines = 5
+            this.gravity = Gravity.LEFT or Gravity.TOP
+        }
+
+        builder.setView(input)
+        builder.setPositiveButton("OK") { _, _ -> onTextInputOk() }
+        builder.setNegativeButton("Cancel") { _, _ -> onUserInputCancel() }
+
+        val alert: AlertDialog = builder.create()
+        alert.show()
+    }
+
+    private fun onTextInputOk() {
+
+    }
+
+    private fun onAudioRecordOk() {
+
+    }
+
+    private fun onUserInputCancel() {
 
     }
 }
