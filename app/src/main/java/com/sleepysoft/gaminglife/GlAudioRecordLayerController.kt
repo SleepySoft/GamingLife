@@ -22,6 +22,9 @@ class GlAudioRecordLayerController(
     private lateinit var mCancelCircle: GraphCircle
     private lateinit var mTextRectangle: GraphRectangle
 
+    private val mTextDialogBuilder = AlertDialog.Builder(
+        GlApplication.applicationContext()).apply { this.setTitle("文字输入") }
+
     fun init() {
         checkBuildVoiceRecordEffectLayer()
     }
@@ -184,9 +187,6 @@ class GlAudioRecordLayerController(
     // -----------------------------------------------------------------
 
     private fun popupTextEditor() {
-        val builder = AlertDialog.Builder(GlApplication.applicationContext()).apply {
-            this.setTitle("Input")
-        }
 
         val input = EditText(GlApplication.applicationContext()).apply {
             this.setText("")
@@ -197,9 +197,9 @@ class GlAudioRecordLayerController(
             this.gravity = Gravity.LEFT or Gravity.TOP
         }
 
-        builder.setView(input)
-        builder.setPositiveButton("OK") { _, _ -> onTextInputOk() }
-        builder.setNegativeButton("Cancel") { _, _ -> onUserInputCancel() }
+        mTextDialogBuilder.setView(input)
+        mTextDialogBuilder.setPositiveButton("OK") { _, _ -> onTextInputOk() }
+        mTextDialogBuilder.setNegativeButton("Cancel") { _, _ -> onUserInputCancel() }
 
         val alert: AlertDialog = builder.create()
         alert.show()
