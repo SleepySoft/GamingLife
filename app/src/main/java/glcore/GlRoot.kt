@@ -1,5 +1,7 @@
 package glcore
 
+import java.io.File
+
 
 object GlRoot {
     val glContext = GlContext()
@@ -16,8 +18,22 @@ object GlRoot {
         return GlDateTime.formatToMSec(GlDateTime.datetime())
     }
 
-    fun getDailyFolder(offset: Int) : String {
-        return DAILY_FOLDER_TEMPLATE.format(
+    fun getDailyFolderName(offset: Int)  =
+        DAILY_FOLDER_TEMPLATE.format(
             GlDateTime.formatToDay(GlDateTime.datetime(offsetDays = offset)))
+
+    fun saveContentToDailyFolder(content: ByteArray, fileSuffix: String, dayOffset: Int = 0) {
+        val desFileName = GlFile.joinPaths(
+            getDailyFolderName(dayOffset), "${getFileNameTs()}.$fileSuffix")
+        GlFile.saveFile(desFileName, content)
+    }
+
+    fun archiveTemporaryFileToDailyFolder(tempFileName: String, dayOffset: Int = 0) {
+        val srcFile = File(GlFile.glRoot(), tempFileName)
+        val desFileName = GlFile.joinPaths(GlFile.glRoot(),
+            getDailyFolderName(dayOffset), "${getFileNameTs()}.${srcFile.extension}")
+        GlFile.copyFileAbsolute(srcFile.absolutePath, desFileName)
     }
 }
+
+

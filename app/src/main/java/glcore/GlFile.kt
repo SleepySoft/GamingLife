@@ -3,9 +3,26 @@ package glcore
 import android.content.Context
 import android.os.Environment
 import java.io.File
+import kotlin.io.path.Path
 
 
 object GlFile {
+
+    fun joinPaths(vararg paths: String) : String {
+        return when (paths.size) {
+            0 -> ""
+            1 -> paths[0]
+            else -> {
+                var joinedPath = File(paths[0], paths[1])
+                for (i in 2 until paths.size) {
+                    joinedPath = File(joinedPath, paths[i])
+                }
+                joinedPath.absolutePath
+            }
+        }
+    }
+
+    fun glRoot() : String = glExternalRoot()
 
     fun glInternalRoot() : String =
         GlApplication.applicationContext().filesDir.absolutePath

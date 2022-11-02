@@ -33,6 +33,7 @@ class GlTimeViewController(
 
     private var mRecording: Boolean = false
     private var mPressSince: Long = 0
+    private lateinit var mRecordController: GlAudioRecordLayerController
 
     fun init() {
         mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -43,6 +44,8 @@ class GlTimeViewController(
             @Suppress("DEPRECATION")
             mGraphView.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
+
+        mRecordController = GlAudioRecordLayerController(mGraphView).apply { init() }
 
         checkBuildTimeViewLayer()
     }
@@ -347,17 +350,11 @@ class GlTimeViewController(
         if (!mRecording && (mPressSince > 0)) {
             val duration: Int = (System.currentTimeMillis() - mPressSince).toInt()
             if (duration >= LONG_LONG_PRESS_TIMEOUT) {
-                // GlAudioRecorder.startRecord()
-
-                mRecording = true
                 mLongLongPressProgress.visible = false
-/*                mVoiceRecordEffectLayer.visible = true
-
-                // Select the audio cycle and bring it to front
-                mAudioCircle.origin = mCenterItem.origin
-                mGraphView.specifySelItem(mAudioCircle)
-                mGraphView.bringLayerToFront(mVoiceRecordEffectLayer)
-                mVoiceRecordEffectLayer.bringGraphItemToFront(mAudioCircle)*/
+                mRecordController.popupInput(mCenterItem.origin) {
+                    inputType: String, result: Any? -> handleInputComplete(
+                    inputType, if (result is String) result else "")
+                }
             }
             else {
                 mLongLongPressProgress.progress =
@@ -380,15 +377,17 @@ class GlTimeViewController(
         }
     }
 
-    private fun archiveAudio() : String {
-        val archiveFileName = "voice_${GlRoot.getFileNameTs()}.wav"
-        println("Archiving voice record to file: $archiveFileName")
+    private fun handleInputComplete(inputType: String, result: String) {
+        when (inputType) {
+            "Text" -> {
+                GlRoot.saveContentToDailyFolder(result.toByteArray(), ".md")
+            }
+            "Audio" -> {
+                GlRoot.archiveTemporaryFileToDailyFolder(GlAudioRecorder.WAVPath)
+            }
+            else -> {
 
-        File(GlAudioRecorder.WAVPath).let { sourceFile ->
-            sourceFile.copyTo(File(archiveFileName))
-            sourceFile.delete()
+            }
         }
-
-        return archiveAudio()
     }
 }

@@ -1,6 +1,7 @@
 package com.sleepysoft.gaminglife
 
 import android.app.AlertDialog
+import android.content.Context
 import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.Paint
@@ -15,26 +16,45 @@ import graphengine.*
 
 
 class GlAudioRecordLayerController(
+    private val mContext: Context,
     private val mGraphView: GraphView) : GraphViewObserver {
 
     private lateinit var mVoiceRecordEffectLayer: GraphLayer
     private lateinit var mAudioCircle: GraphCircle
     private lateinit var mCancelCircle: GraphCircle
     private lateinit var mTextRectangle: GraphRectangle
+    private var mReturnFunction: ((inputType: String, result: Any?) -> Unit)? = null
+
+
+    private val mTextInput = EditText(GlApplication.applicationContext()).apply {
+        this.setText("")
+        this.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+        this.isSingleLine = false
+        this.setLines(5)
+        this.maxLines = 5
+        this.gravity = Gravity.LEFT or Gravity.TOP
+    }
 
     private val mTextDialogBuilder = AlertDialog.Builder(
-        GlApplication.applicationContext()).apply { this.setTitle("文字输入") }
+        GlApplication.applicationContext()).apply {
+            this.setTitle("文字输入")
+            this.setView(mTextInput)
+            this.setPositiveButton("OK") { _, _ -> onTextInputOk() }
+            this.setNegativeButton("Cancel") { _, _ -> onUserInputCancel() }
+    }
 
     fun init() {
         checkBuildVoiceRecordEffectLayer()
     }
 
-    fun takeControl(operatingPos: PointF) {
-        layoutItems()
+    fun popupInput(operatingPos: PointF,
+                   returnFunction: (inputType: String, result: Any?) -> Unit) {
+        mReturnFunction = returnFunction
         mAudioCircle.origin = operatingPos
         mGraphView.specifySelItem(mAudioCircle)
         mGraphView.pushObserver(this)
         mVoiceRecordEffectLayer.visible = true
+        layoutItems()
     }
 
     private fun releaseControl() {
@@ -187,33 +207,20 @@ class GlAudioRecordLayerController(
     // -----------------------------------------------------------------
 
     private fun popupTextEditor() {
-
-        val input = EditText(GlApplication.applicationContext()).apply {
-            this.setText("")
-            this.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
-            this.isSingleLine = false
-            this.setLines(5)
-            this.maxLines = 5
-            this.gravity = Gravity.LEFT or Gravity.TOP
-        }
-
-        mTextDialogBuilder.setView(input)
-        mTextDialogBuilder.setPositiveButton("OK") { _, _ -> onTextInputOk() }
-        mTextDialogBuilder.setNegativeButton("Cancel") { _, _ -> onUserInputCancel() }
-
-        val alert: AlertDialog = builder.create()
-        alert.show()
+        val inputDlg = mTextDialogBuilder.create()
+        inputDlg.show()
     }
 
     private fun onTextInputOk() {
-
+        println(mTextInput.text)
+        mReturnFunction?.run { this("Text", mTextInput.text) }
     }
 
     private fun onAudioRecordOk() {
-
+        mReturnFunction?.run { this("Audio", GlAudioRecorder.WAVPath) }
     }
 
     private fun onUserInputCancel() {
-
+        mReturnFunction?.run { this("Nothing", null) }
     }
 }

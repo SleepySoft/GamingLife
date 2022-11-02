@@ -96,6 +96,7 @@ class PermissionActivity : AppCompatActivity() {
     }
 
     private fun tryWriteFile() : Boolean {
+        finish()
         return true
     }
 }
