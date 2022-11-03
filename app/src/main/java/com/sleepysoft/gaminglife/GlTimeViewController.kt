@@ -19,6 +19,7 @@ const val DEBUG_TAG = "DefaultDbg"
 
 
 class GlTimeViewController(
+    private val mContext: Context,
     private val mGraphView: GraphView,
     private val mGlTaskModule: GlTaskModule) : GraphViewObserver {
 
@@ -45,7 +46,7 @@ class GlTimeViewController(
             mGraphView.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
 
-        mRecordController = GlAudioRecordLayerController(mGraphView).apply { init() }
+        mRecordController = GlAudioRecordLayerController(mContext, mGraphView).apply { init() }
 
         checkBuildTimeViewLayer()
     }

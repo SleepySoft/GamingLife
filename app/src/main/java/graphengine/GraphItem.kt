@@ -162,12 +162,16 @@ class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
     }
 
     fun itemIntersectRect(rect: RectF): List<GraphItem> {
-        return pickGraphItems() { it.boundRect().intersect(rect) }
+        return pickGraphItems() {
+            it.boundRect().intersects(rect.left, rect.top, rect.right, rect.bottom)
+        }
     }
 
     fun itemIntersectRect(rect: RectF,
                           filter: (input: GraphItem) -> Boolean): List<GraphItem> {
-        return pickGraphItems() { it.boundRect().intersect(rect) && filter(it)}
+        return pickGraphItems() {
+            it.boundRect().intersects(rect.left, rect.top, rect.right, rect.bottom) && filter(it)
+        }
     }
 
     // -------------------------- Override --------------------------

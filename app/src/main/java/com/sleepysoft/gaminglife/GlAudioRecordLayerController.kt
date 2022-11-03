@@ -30,17 +30,16 @@ class GlAudioRecordLayerController(
         this.setText("")
         this.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
         this.isSingleLine = false
-        this.setLines(5)
-        this.maxLines = 5
-        this.gravity = Gravity.LEFT or Gravity.TOP
+        this.setLines(6)
+        // this.maxLines = 5
+        this.gravity = Gravity.START or Gravity.TOP
     }
 
-    private val mTextDialogBuilder = AlertDialog.Builder(
-        GlApplication.applicationContext()).apply {
-            this.setTitle("文字输入")
-            this.setView(mTextInput)
-            this.setPositiveButton("OK") { _, _ -> onTextInputOk() }
-            this.setNegativeButton("Cancel") { _, _ -> onUserInputCancel() }
+    private val mTextDialogBuilder = AlertDialog.Builder(mContext).apply {
+        this.setTitle("文字输入")
+        this.setView(mTextInput)
+        this.setPositiveButton("OK") { _, _ -> onTextInputOk() }
+        this.setNegativeButton("Cancel") { _, _ -> onUserInputCancel() }
     }
 
     fun init() {
@@ -49,12 +48,13 @@ class GlAudioRecordLayerController(
 
     fun popupInput(operatingPos: PointF,
                    returnFunction: (inputType: String, result: Any?) -> Unit) {
+        layoutItems()
         mReturnFunction = returnFunction
         mAudioCircle.origin = operatingPos
         mGraphView.specifySelItem(mAudioCircle)
         mGraphView.pushObserver(this)
         mVoiceRecordEffectLayer.visible = true
-        layoutItems()
+        mGraphView.invalidate()
     }
 
     private fun releaseControl() {
@@ -137,7 +137,9 @@ class GlAudioRecordLayerController(
     override fun onItemDropped(droppedItem: GraphItem) {
         GlAudioRecorder.stopRecord()
         val intersectingItems: List< GraphItem > =
-            mVoiceRecordEffectLayer.itemIntersectRect(droppedItem.boundRect())
+            mVoiceRecordEffectLayer.itemIntersectRect(droppedItem.boundRect()) {
+                it != droppedItem
+            }
 
         if (intersectingItems.isEmpty()) {
             // Just release the record button
@@ -214,13 +216,16 @@ class GlAudioRecordLayerController(
     private fun onTextInputOk() {
         println(mTextInput.text)
         mReturnFunction?.run { this("Text", mTextInput.text) }
+        releaseControl()
     }
 
     private fun onAudioRecordOk() {
         mReturnFunction?.run { this("Audio", GlAudioRecorder.WAVPath) }
+        releaseControl()
     }
 
     private fun onUserInputCancel() {
         mReturnFunction?.run { this("Nothing", null) }
+        releaseControl()
     }
 }

@@ -43,21 +43,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val intent = Intent(this, PermissionActivity::class.java)
-        startActivity(intent)
+        requireLockScreenShow()
+        checkRequireExtStoragePermission()
 
         GlRoot.init()
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
-        {
-            setShowWhenLocked(true)
-        }
-        else
-        {
-            window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
-        }
 
         mHandler = Handler(Looper.getMainLooper())
         mRunnable = Runnable {
@@ -65,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         mView = GraphView(this)
-        mController = GlTimeViewController(mView, GlRoot.glTaskModule).apply {
+        mController = GlTimeViewController(this, mView, GlRoot.glTaskModule).apply {
             this.init()
             mView.pushObserver(this)
         }
@@ -77,5 +66,23 @@ class MainActivity : AppCompatActivity() {
     private fun doPeriod() {
         mController.polling()
         mHandler.postDelayed(mRunnable, 100)
+    }
+
+    private fun requireLockScreenShow() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
+        {
+            setShowWhenLocked(true)
+        }
+        else
+        {
+            window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+        }
+    }
+
+    private fun checkRequireExtStoragePermission() {
+        val intent = Intent(this, PermissionActivity::class.java)
+        startActivity(intent)
     }
 }
