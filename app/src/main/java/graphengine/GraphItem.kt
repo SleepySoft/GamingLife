@@ -8,6 +8,7 @@ abstract class GraphObject(
 
     abstract fun boundRect() : RectF
     abstract fun render(canvas: Canvas)
+    abstract fun moveCenter(pos: PointF)
 }
 
 
@@ -204,6 +205,9 @@ class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
         }
     }
 
+    override fun moveCenter(pos: PointF) {
+        // Not available for Layer
+    }
 }
 
 
@@ -262,6 +266,10 @@ class GraphCircle : GraphItem() {
     private fun realRadius() : Float {
         return radius * (1.0f + inflatePct / 100)
     }
+
+    override fun moveCenter(pos: PointF) {
+        origin = pos
+    }
 }
 
 
@@ -278,6 +286,10 @@ class GraphCircleProgress(
     override fun render(canvas: Canvas) {
         canvas.drawArc(boundRect(), -90.0f, 360.0f * progress, true, shapePaint)
         // canvas.drawRect(getBoundRect(), shapePaint)
+    }
+
+    override fun moveCenter(pos: PointF) {
+
     }
 }
 
@@ -324,7 +336,11 @@ class GraphRectangle : GraphItem() {
         )
     }
 
-    override fun boundRect() : RectF  = rect
+    override fun boundRect() : RectF  = RectF(rect).apply { offset(offsetPixel.x, offsetPixel.y) }
+
+    override fun moveCenter(pos: PointF) {
+        rect.offset(pos.x - rect.centerX(), pos.y - rect.centerY())
+    }
 
     // ---------------------------------------------------------------------
 
