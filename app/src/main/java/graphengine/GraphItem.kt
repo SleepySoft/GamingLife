@@ -163,14 +163,18 @@ class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
 
     fun itemIntersectRect(rect: RectF): List<GraphItem> {
         return pickGraphItems() {
-            it.boundRect().intersects(rect.left, rect.top, rect.right, rect.bottom)
+            val intersect = it.boundRect().intersects(rect.left, rect.top, rect.right, rect.bottom)
+            // println("Item $it [${it.id}] bound ${it.boundRect()} intersect with $rect - $intersect")
+            intersect
         }
     }
 
     fun itemIntersectRect(rect: RectF,
                           filter: (input: GraphItem) -> Boolean): List<GraphItem> {
         return pickGraphItems() {
-            it.boundRect().intersects(rect.left, rect.top, rect.right, rect.bottom) && filter(it)
+            val intersect = it.boundRect().intersects(rect.left, rect.top, rect.right, rect.bottom)
+            // println("Item $it [${it.id}] bound ${it.boundRect()} intersect with $rect - $intersect")
+            intersect && filter(it)
         }
     }
 

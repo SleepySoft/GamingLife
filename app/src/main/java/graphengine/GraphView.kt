@@ -112,7 +112,7 @@ class GraphView(context: Context) :
     }
 
     private fun onUp(e: MotionEvent) {
-        Log.i(DEBUG_TAG, "onUp")
+        // Log.i(DEBUG_TAG, "onUp")
 
 /*        mSelItem?.apply {
             val itemBound = this.boundRect()
@@ -129,33 +129,33 @@ class GraphView(context: Context) :
 
         // Clear select item and notify observer
         mSelItem?.run {
-            this@GraphView.invalidate()
-            this.offsetPixel = PointF(0.0f, 0.0f)
             topObserver()?.onItemDropped(this)
+            this.offsetPixel = PointF(0.0f, 0.0f)
+            this@GraphView.invalidate()
         }
 
         mSelItem = null
     }
 
     override fun onDown(e: MotionEvent): Boolean {
-        Log.i(DEBUG_TAG, "onDown")
+        // Log.i(DEBUG_TAG, "onDown")
         return true
     }
 
     override fun onShowPress(e: MotionEvent) {
-        Log.i(DEBUG_TAG, "onShowPress")
+        // Log.i(DEBUG_TAG, "onShowPress")
 
         val selItem = itemsFromLayer() {
             it.boundRect().contains(e.x, e.y) && it.visible && it.interactive}
         if (selItem.isNotEmpty()) {
             mSelItem = selItem[0]
-            Log.i(DEBUG_TAG, "Adapted item: $mSelItem")
+            // Log.i(DEBUG_TAG, "Adapted item: $mSelItem")
             topObserver()?.onItemPicked(selItem[0])
         }
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        Log.i(DEBUG_TAG, "onSingleTapUp")
+        // Log.i(DEBUG_TAG, "onSingleTapUp")
 
         val selItem = itemsFromLayer() {
             it.boundRect().contains(e.x, e.y) && it.visible && it.interactive}
@@ -167,7 +167,7 @@ class GraphView(context: Context) :
 
     override fun onScroll(e1: MotionEvent, e2: MotionEvent,
                           distanceX: Float,distanceY: Float): Boolean {
-        Log.i(DEBUG_TAG, "onScroll - x = $distanceX, y = $distanceY")
+        // Log.i(DEBUG_TAG, "onScroll - x = $distanceX, y = $distanceY")
 
         mSelItem?.run {
             this.shiftItem(-distanceX, -distanceY)
@@ -189,7 +189,7 @@ class GraphView(context: Context) :
 
     override fun onFling(e1: MotionEvent, e2: MotionEvent,
                          velocityX: Float, velocityY: Float): Boolean {
-        // Log.i(DEBUG_TAG, "onFling - x = $velocityX, y = $velocityY")
+        // // Log.i(DEBUG_TAG, "onFling - x = $velocityX, y = $velocityY")
         return false
     }
 

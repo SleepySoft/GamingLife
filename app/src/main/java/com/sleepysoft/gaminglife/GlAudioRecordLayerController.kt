@@ -61,6 +61,7 @@ class GlAudioRecordLayerController(
         mVoiceRecordEffectLayer.visible = false
         val poppedLayer = mGraphView.popObserver()
         assert(poppedLayer == this)
+        mGraphView.invalidate()
     }
 
     private fun checkBuildVoiceRecordEffectLayer() {
@@ -166,7 +167,6 @@ class GlAudioRecordLayerController(
                 }
             }
         }
-
         releaseControl()
     }
 
@@ -215,17 +215,14 @@ class GlAudioRecordLayerController(
 
     private fun onTextInputOk() {
         println(mTextInput.text)
-        mReturnFunction?.run { this("Text", mTextInput.text) }
-        releaseControl()
+        mReturnFunction?.run { this("Text", mTextInput.text.toString()) }
     }
 
     private fun onAudioRecordOk() {
         mReturnFunction?.run { this("Audio", GlAudioRecorder.WAVPath) }
-        releaseControl()
     }
 
     private fun onUserInputCancel() {
         mReturnFunction?.run { this("Nothing", null) }
-        releaseControl()
     }
 }

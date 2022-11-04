@@ -218,6 +218,7 @@ class GlTimeViewController(
             mGlTaskModule.getTaskData(GROUP_ID_IDLE)
 
         mCenterItem = GraphCircle().apply {
+            this.id = "TimeView.CenterItem"
             this.itemData = currentTaskGroupData
             this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
                 this.color = Color.parseColor("#FFFFFF")
@@ -243,6 +244,7 @@ class GlTimeViewController(
         val taskGroupTop = mGlTaskModule.getTaskGroupTop()
         for ((k, v) in taskGroupTop) {
             val item = GraphCircle().apply {
+                this.id = "TimeView.$k"
                 this.itemData = v
                 this.mainText = v["name"] ?: ""
                 this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
@@ -356,6 +358,7 @@ class GlTimeViewController(
                     inputType: String, result: Any? -> handleInputComplete(
                     inputType, if (result is String) result else "")
                 }
+                endLongLongPress()
             }
             else {
                 mLongLongPressProgress.progress =

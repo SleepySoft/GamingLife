@@ -10,6 +10,24 @@ fun rectF2Rect(rectF: RectF): Rect {
     return rect
 }
 
+// https://www.geeksforgeeks.org/find-two-rectangles-overlap/
+
+fun rectOverlap(rect1: RectF, rect2: RectF): Boolean {
+    if (rect1.isEmpty || rect2.isEmpty) {
+        println("false - 1")
+        return false
+    }
+    if ((rect1.left > rect2.right) || (rect2.left > rect1.right)) {
+        println("false - 2")
+        return false
+    }
+    if ((rect1.bottom < rect2.top) || (rect2.bottom < rect1.top)) {
+        println("false - 3")
+        return false
+    }
+    return true
+}
+
 fun centerFOfRect(rect: Rect) : PointF = PointF(rect.centerX().toFloat(), rect.centerY().toFloat())
 
 fun centerFOfRectF(rectF: RectF) : PointF = PointF(rectF.centerX(), rectF.centerY())
