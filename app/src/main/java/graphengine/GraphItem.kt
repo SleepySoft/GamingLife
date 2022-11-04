@@ -1,5 +1,13 @@
 package graphengine
+import android.R
 import android.graphics.*
+import android.graphics.drawable.Drawable
+import android.graphics.BitmapFactory
+
+import android.graphics.Bitmap
+
+
+
 
 
 abstract class GraphObject(
@@ -310,8 +318,10 @@ class GraphRectangle : GraphItem() {
     private var boundaryOfText: Rect = Rect()
     private var drawableContainer: Rect = Rect()
 
+    // ---------------------------------------------------------------------
+
     override fun render(canvas: Canvas) {
-        val rRect = realRectangle()
+        val rRect = boundRect()
 
         if (roundRadius < 0.001f) {
             canvas.drawRect(rRect, shapePaint)
@@ -336,16 +346,52 @@ class GraphRectangle : GraphItem() {
         )
     }
 
-    override fun boundRect() : RectF  = RectF(rect).apply { offset(offsetPixel.x, offsetPixel.y) }
+    override fun boundRect() : RectF =
+        RectF(rect).apply { this.offset(offsetPixel.x, offsetPixel.y) }
 
     override fun moveCenter(pos: PointF) {
         rect.offset(pos.x - rect.centerX(), pos.y - rect.centerY())
     }
-
-    // ---------------------------------------------------------------------
-
-    private fun realRectangle() : RectF =
-        RectF(rect).apply { this.offset(offsetPixel.x, offsetPixel.y) }
 }
 
 
+class GraphImage(
+    private val mBitmapImage: Bitmap) : GraphItem() {
+
+    var imageBounds: Rect = Rect(
+        0, mBitmapImage.width,
+        0, mBitmapImage.height)
+        private set
+
+    private var mImageArea: RectF = rect2RectF(imageBounds)
+
+    fun scaleReset() {
+        mImageArea = rect2RectF(imageBounds)
+    }
+
+    fun scaleToFit(refRect: RectF) {
+        val ratioHori = refRect.width() / imageBounds.width().toFloat()
+        val ratioVert = refRect.height() / imageBounds.height().toFloat()
+        val scaleRatio = minOf(ratioHori, ratioVert)
+
+        val imageBoundsF = rect2RectF(imageBounds)
+        val centerBackup = PointF(mImageArea.centerX(), mImageArea.centerY())
+        mImageArea = RectF(
+            imageBoundsF.left, imageBoundsF.left + imageBoundsF.width() * scaleRatio,
+            imageBoundsF.top, imageBoundsF.top + imageBoundsF.height() * scaleRatio)
+        moveCenter(centerBackup)
+    }
+
+    // ---------------------------------------------------------------------
+
+    override fun boundRect(): RectF =
+        RectF(mImageArea).apply { offset(offsetPixel.x, offsetPixel.y) }
+
+    override fun render(canvas: Canvas) {
+        canvas.drawBitmap(mBitmapImage, imageBounds, mImageArea, shapePaint)
+    }
+
+    override fun moveCenter(pos: PointF) {
+        mImageArea.offset(pos.x - mImageArea.centerX(), pos.y - mImageArea.centerY())
+    }
+}

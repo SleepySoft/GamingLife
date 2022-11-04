@@ -10,6 +10,15 @@ fun rectF2Rect(rectF: RectF): Rect {
     return rect
 }
 
+fun rect2RectF(rect: Rect): RectF {
+    return RectF(
+        rect.left.toFloat(),
+        rect.top.toFloat(),
+        rect.right.toFloat(),
+        rect.bottom.toFloat()
+    )
+}
+
 // https://www.geeksforgeeks.org/find-two-rectangles-overlap/
 
 fun rectOverlap(rect1: RectF, rect2: RectF): Boolean {

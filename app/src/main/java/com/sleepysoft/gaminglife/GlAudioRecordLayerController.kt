@@ -2,11 +2,8 @@ package com.sleepysoft.gaminglife
 
 import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.PointF
-import android.graphics.RectF
+import android.graphics.*
+import android.graphics.drawable.Drawable
 import android.text.InputType
 import android.view.Gravity
 import android.widget.EditText
@@ -20,11 +17,14 @@ class GlAudioRecordLayerController(
     private val mGraphView: GraphView) : GraphViewObserver {
 
     private lateinit var mVoiceRecordEffectLayer: GraphLayer
-    private lateinit var mAudioCircle: GraphCircle
-    private lateinit var mCancelCircle: GraphCircle
-    private lateinit var mTextRectangle: GraphRectangle
+    private lateinit var mAudioCircle: GraphImage
+    private lateinit var mCancelCircle: GraphImage
+    private lateinit var mTextRectangle: GraphImage
     private var mReturnFunction: ((inputType: String, result: Any?) -> Unit)? = null
 
+    private lateinit var mIconAudio: Bitmap
+    private lateinit var mIconInput: Bitmap
+    private lateinit var mIconTrash: Bitmap
 
     private val mTextInput = EditText(GlApplication.applicationContext()).apply {
         this.setText("")
@@ -43,6 +43,7 @@ class GlAudioRecordLayerController(
     }
 
     fun init() {
+        loadResource()
         checkBuildVoiceRecordEffectLayer()
     }
 
@@ -50,7 +51,7 @@ class GlAudioRecordLayerController(
                    returnFunction: (inputType: String, result: Any?) -> Unit) {
         layoutItems()
         mReturnFunction = returnFunction
-        mAudioCircle.origin = operatingPos
+        mAudioCircle.moveCenter(operatingPos)
         mGraphView.specifySelItem(mAudioCircle)
         mGraphView.pushObserver(this)
         mVoiceRecordEffectLayer.visible = true
@@ -62,6 +63,12 @@ class GlAudioRecordLayerController(
         val poppedLayer = mGraphView.popObserver()
         assert(poppedLayer == this)
         mGraphView.invalidate()
+    }
+
+    private fun loadResource() {
+        mIconAudio = BitmapFactory.decodeResource(mContext.resources, R.drawable.icon_audio_recording)
+        mIconInput = BitmapFactory.decodeResource(mContext.resources, R.drawable.icon_text_input)
+        mIconTrash = BitmapFactory.decodeResource(mContext.resources, R.drawable.icon_trush)
     }
 
     private fun checkBuildVoiceRecordEffectLayer() {
@@ -77,7 +84,7 @@ class GlAudioRecordLayerController(
 
         layer.removeGraphItem() { true }
 
-        mAudioCircle = GraphCircle().apply {
+/*        mAudioCircle = GraphCircle().apply {
             this.id = "TimeView.RecordLayer.Audio"
             this.mainText = "A"
 
@@ -89,10 +96,11 @@ class GlAudioRecordLayerController(
                 this.color = Color.parseColor("#90D7EC")
                 this.style = Paint.Style.FILL
             }
-        }
+        }*/
+        mAudioCircle = GraphImage(mIconAudio)
         layer.addGraphItem(mAudioCircle)
 
-        mCancelCircle = GraphCircle().apply {
+/*        mCancelCircle = GraphCircle().apply {
             this.id = "TimeView.RecordLayer.Cancel"
             this.mainText = "Cancel"
 
@@ -104,10 +112,11 @@ class GlAudioRecordLayerController(
                 this.color = Color.parseColor("#90D7EC")
                 this.style = Paint.Style.FILL
             }
-        }
+        }*/
+        mCancelCircle = GraphImage(mIconTrash)
         layer.addGraphItem(mCancelCircle)
 
-        mTextRectangle = GraphRectangle().apply {
+/*        mTextRectangle = GraphRectangle().apply {
             this.id = "TimeView.RecordLayer.Text"
             this.mainText = "Text"
 
@@ -119,7 +128,8 @@ class GlAudioRecordLayerController(
                 this.color = Color.parseColor("#90D7EC")
                 this.style = Paint.Style.FILL
             }
-        }
+        }*/
+        mTextRectangle = GraphImage(mIconInput)
         layer.addGraphItem(mTextRectangle)
 
         mVoiceRecordEffectLayer = layer
@@ -188,18 +198,25 @@ class GlAudioRecordLayerController(
     private fun layoutPortrait() {
         val area = mGraphView.paintArea
 
-        mAudioCircle.origin = PointF(area.width() / 2, 3 * area.height() / 4)
-        mAudioCircle.radius = 20 * mGraphView.unitScale
+/*        mAudioCircle.origin = PointF(area.width() / 2, 3 * area.height() / 4)
+        mAudioCircle.radius = 20 * mGraphView.unitScale*/
+        mAudioCircle.moveCenter(PointF(area.width() / 2, 3 * area.height() / 4))
 
-        mCancelCircle.origin = PointF(area.width() / 2, area.height() / 4)
-        mCancelCircle.radius = 15 * mGraphView.unitScale
+/*        mCancelCircle.origin = PointF(area.width() / 2, area.height() / 4)
+        mCancelCircle.radius = 15 * mGraphView.unitScale*/
+        mCancelCircle.moveCenter(PointF(area.width() / 2, area.height() / 4))
 
-        mTextRectangle.rect = RectF(mGraphView.paintArea).apply {
+/*        mTextRectangle.rect = RectF(mGraphView.paintArea).apply {
             this.left += mGraphView.unitScale * 15.0f
             this.right -= mGraphView.unitScale * 15.0f
             this.bottom -= mGraphView.unitScale * 15.0f
             this.top = this.bottom - mGraphView.unitScale * 20.0f
-        }
+        }*/
+        mTextRectangle.moveCenter(
+            PointF(
+                mGraphView.paintArea.width() / 2.0f,
+                mGraphView.paintArea.bottom - 50.0f
+        ))
     }
 
     private fun layoutLandscape() {
