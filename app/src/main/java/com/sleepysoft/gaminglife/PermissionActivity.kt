@@ -12,6 +12,8 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import glcore.GlFile
+import java.io.File
 
 
 class PermissionActivity : AppCompatActivity() {
@@ -96,7 +98,17 @@ class PermissionActivity : AppCompatActivity() {
     }
 
     private fun tryWriteFile() : Boolean {
+        var ret = false
+        val file = File(GlFile.glExternalRoot())
+        if (file.exists()) {
+            if (file.canRead()) {
+                ret = true
+                Toast.makeText(this, "External Storage OK", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "External Storage Fail", Toast.LENGTH_SHORT).show()
+            }
+        }
         finish()
-        return true
+        return ret
     }
 }
