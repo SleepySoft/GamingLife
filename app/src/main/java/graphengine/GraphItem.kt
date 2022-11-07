@@ -242,7 +242,7 @@ class GraphCircle : GraphItem() {
         canvas.drawCircle(rCenter.x, rCenter.y, rRadius, shapePaint)
 
         if (needRender) {
-            drawableContainer = rectF2Rect(inflateRectF(boundRect(), 0.7f))
+            drawableContainer = boundRect().apply { inflate(0.7f) }.toRect()
             val fontSize = calculateFontSize(boundaryOfText, drawableContainer, mainText)
             fontPaint.setTextSize(fontSize)
             needRender = false
@@ -288,7 +288,7 @@ class GraphCircleProgress(
     var progress: Float = 0.0f
 
     override fun boundRect(): RectF {
-        return inflateRectF(mWrapCircle.boundRect(), mAroundInflatePct)
+        return mWrapCircle.boundRect().apply { inflate(mAroundInflatePct) }
     }
 
     override fun render(canvas: Canvas) {
@@ -331,7 +331,7 @@ class GraphRectangle : GraphItem() {
         }
 
         if (needRender) {
-            drawableContainer = rectF2Rect(inflateRectF(boundRect(), 0.8f))
+            drawableContainer = boundRect().apply { inflate(0.8f) }.toRect()
             val fontSize = calculateFontSize(boundaryOfText, drawableContainer, mainText)
             fontPaint.setTextSize(fontSize)
             needRender = false
@@ -358,40 +358,68 @@ class GraphRectangle : GraphItem() {
 class GraphImage(
     private val mBitmapImage: Bitmap) : GraphItem() {
 
-    var imageBounds: Rect = Rect(
-        0, mBitmapImage.width,
-        0, mBitmapImage.height)
-        private set
-
-    private var mImageArea: RectF = rect2RectF(imageBounds)
-
-    fun scaleReset() {
-        mImageArea = rect2RectF(imageBounds)
+    enum class PAINT_MODE {
+        SCALE, ORIGIN, STRETCH
     }
 
-    fun scaleToFit(refRect: RectF) {
-        val ratioHori = refRect.width() / imageBounds.width().toFloat()
-        val ratioVert = refRect.height() / imageBounds.height().toFloat()
-        val scaleRatio = minOf(ratioHori, ratioVert)
+    var blitArea: RectF = RectF()
+        private set
 
-        val imageBoundsF = rect2RectF(imageBounds)
-        val centerBackup = PointF(mImageArea.centerX(), mImageArea.centerY())
-        mImageArea = RectF(
-            imageBoundsF.left, imageBoundsF.left + imageBoundsF.width() * scaleRatio,
-            imageBoundsF.top, imageBoundsF.top + imageBoundsF.height() * scaleRatio)
-        moveCenter(centerBackup)
+    var imageBounds: Rect = Rect(0, 0, mBitmapImage.width, mBitmapImage.height)
+        private set
+
+    var paintMode: PAINT_MODE = PAINT_MODE.SCALE
+        set(value) {
+            field = value
+            updateBlitArea()
+        }
+
+    var paintArea: RectF = imageBounds.toRectF()
+        set(value) {
+            field = value
+            updateBlitArea()
+        }
+
+    private fun updateBlitArea() {
+        val centerBackup = paintArea.centerPoint()
+
+        when (paintMode) {
+            PAINT_MODE.SCALE -> {
+                val ratioHori = paintArea.width() / imageBounds.width().toFloat()
+                val ratioVert = paintArea.height() / imageBounds.height().toFloat()
+                val scaleRatio = minOf(ratioHori, ratioVert)
+
+                val imageBoundsF = imageBounds.toRectF()
+                blitArea = RectF(
+                    imageBoundsF.left, imageBoundsF.top,
+                    imageBoundsF.left + imageBoundsF.width() * scaleRatio,
+                    imageBoundsF.top + imageBoundsF.height() * scaleRatio)
+            }
+            PAINT_MODE.ORIGIN -> {
+                blitArea = RectF(imageBounds)
+            }
+            PAINT_MODE.STRETCH -> {
+                blitArea = paintArea
+            }
+        }
+
+        blitArea.moveCenter(centerBackup)
     }
 
     // ---------------------------------------------------------------------
 
     override fun boundRect(): RectF =
-        RectF(mImageArea).apply { offset(offsetPixel.x, offsetPixel.y) }
+        RectF(blitArea).apply { offset(offsetPixel.x, offsetPixel.y) }
 
     override fun render(canvas: Canvas) {
-        canvas.drawBitmap(mBitmapImage, imageBounds, mImageArea, shapePaint)
+        if (blitArea.isEmpty) {
+            updateBlitArea()
+        }
+        canvas.drawBitmap(mBitmapImage, imageBounds, boundRect(), shapePaint)
     }
 
     override fun moveCenter(pos: PointF) {
-        mImageArea.offset(pos.x - mImageArea.centerX(), pos.y - mImageArea.centerY())
+        paintArea.moveCenter(pos)
+        updateBlitArea()
     }
 }

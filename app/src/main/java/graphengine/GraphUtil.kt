@@ -4,7 +4,7 @@ import android.graphics.*
 import kotlin.math.sqrt
 
 
-fun rectF2Rect(rectF: RectF): Rect {
+/*fun rectF2Rect(rectF: RectF): Rect {
     val rect = Rect()
     rectF.round(rect)
     return rect
@@ -17,7 +17,7 @@ fun rect2RectF(rect: Rect): RectF {
         rect.right.toFloat(),
         rect.bottom.toFloat()
     )
-}
+}*/
 
 // https://www.geeksforgeeks.org/find-two-rectangles-overlap/
 
@@ -37,17 +37,62 @@ fun rectOverlap(rect1: RectF, rect2: RectF): Boolean {
     return true
 }
 
-fun centerFOfRect(rect: Rect) : PointF = PointF(rect.centerX().toFloat(), rect.centerY().toFloat())
+/*fun centerFOfRectF(rectF: RectF) : PointF = PointF(rectF.centerX(), rectF.centerY())*/
 
-fun centerFOfRectF(rectF: RectF) : PointF = PointF(rectF.centerX(), rectF.centerY())
-
-fun inflateRectF(rectF: RectF, inflatePct: Float): RectF {
+/*fun inflateRectF(rectF: RectF, inflatePct: Float): RectF {
     val horiInflate: Float = rectF.width() * (inflatePct - 1.0f) / 2.0f
     val vertInflate: Float = rectF.height() * (inflatePct - 1.0f) / 2.0f
     return RectF(rectF.left - horiInflate, rectF.top - vertInflate,
-            rectF.right + horiInflate, rectF.bottom + vertInflate)
+        rectF.right + horiInflate, rectF.bottom + vertInflate)
+}*/
+
+
+// ---------------------------------------- Extend of Rect -----------------------------------------
+
+fun Rect.toRectF() : RectF {
+    return RectF(
+        left.toFloat(),
+        top.toFloat(),
+        right.toFloat(),
+        bottom.toFloat()
+    )
 }
 
+
+// ---------------------------------------- Extend of RectF ----------------------------------------
+
+fun RectF.fromCenterSides(center: PointF, vertLen: Float, horiLen: Float) {
+    left = center.x - vertLen / 2
+    top = center.y - horiLen / 2
+    right = left + vertLen
+    bottom = bottom + horiLen
+}
+
+fun RectF.centerPoint() : PointF = PointF(centerX(), centerY())
+
+fun RectF.moveCenter(center: PointF) {
+    this.offset(center.x - this.centerX(), center.y - this.centerY())
+}
+
+fun RectF.inflate(inflatePct: Float) {
+    val horiInflate: Float = width() * (inflatePct - 1.0f) / 2.0f
+    val vertInflate: Float = height() * (inflatePct - 1.0f) / 2.0f
+
+    left -= horiInflate
+    top -= vertInflate
+
+    right += horiInflate
+    bottom += vertInflate
+}
+
+fun RectF.toRect() : Rect {
+    val rect = Rect()
+    round(rect)
+    return rect
+}
+
+
+// -------------------------------------------------------------------------------------------------
 
 fun calculateFontSize(textBounds: Rect, textContainer: Rect, text: String): Float {
     val textPaint = Paint()
@@ -80,7 +125,7 @@ fun closestGraphItem(refPos: PointF, graphItems: List< GraphItem >) : GraphItem?
     var selDist = 0.0f
     var selItem : GraphItem? = null
     for (item in graphItems) {
-        val itemDist = distanceOf(refPos, centerFOfRectF(item.boundRect()))
+        val itemDist = distanceOf(refPos, item.boundRect().centerPoint())
         if ((selItem == null) || (itemDist < selDist)) {
             selItem = item
             selDist = itemDist

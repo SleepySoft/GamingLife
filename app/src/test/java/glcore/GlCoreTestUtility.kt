@@ -35,7 +35,7 @@ fun generateSystemGeneralPathDict() : PathDict {
                 TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_ENJOY },
                 TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_LIFE },
                 TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_WORK },
-                TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_STUDY },
+                TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_PROMOTE },
                 TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_CREATE },
             )
         )

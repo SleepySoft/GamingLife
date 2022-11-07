@@ -1,6 +1,4 @@
 package glcore
-import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.reflect.KClass
 
 // --------------------------------------------- Path ----------------------------------------------
@@ -31,7 +29,7 @@ const val GROUP_ID_IDLE  = "5084b76d-4e75-4c44-9786-bdf94075f94d"
 const val GROUP_ID_ENJOY  = "f9fb401a-dc28-463f-92a6-0d30bd8730bb"
 const val GROUP_ID_LIFE   = "3e9fd903-9c51-4301-b610-715205983573"
 const val GROUP_ID_WORK   = "11000041-0376-4876-9efa-8a6a7028140d"
-const val GROUP_ID_STUDY  = "1841978a-3adc-413a-a9ae-a34e019205f8"
+const val GROUP_ID_PROMOTE  = "1841978a-3adc-413a-a9ae-a34e019205f8"
 const val GROUP_ID_CREATE = "fa94a546-beeb-4570-b266-c066a4a31233"
 
 
@@ -120,9 +118,9 @@ val TASK_GROUP_TOP_PRESET = mapOf(
         "name" to "工作",
         "color" to "#EA4335"),      // Red
 
-    GROUP_ID_STUDY to mapOf(
-        "id" to GROUP_ID_STUDY,
-        "name" to "学习",
+    GROUP_ID_PROMOTE to mapOf(
+        "id" to GROUP_ID_PROMOTE,
+        "name" to "提升",
         "color" to "#FBBC05"),      // Yellow
 
     GROUP_ID_CREATE to mapOf(

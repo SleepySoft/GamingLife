@@ -127,7 +127,7 @@ class GlTimeViewController(
             // Drag center item to surround, closestItem as surroundItem
 
             val closestItem : GraphItem? = closestGraphItem(
-                centerFOfRectF(droppedItem.boundRect()),
+                droppedItem.boundRect().centerPoint(),
                 intersectingItems.intersect(mSurroundItems.toSet()).toList())
 
             closestItem?.run {

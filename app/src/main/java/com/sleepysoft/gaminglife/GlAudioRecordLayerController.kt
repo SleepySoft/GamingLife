@@ -97,8 +97,9 @@ class GlAudioRecordLayerController(
                 this.style = Paint.Style.FILL
             }
         }*/
-        mAudioCircle = GraphImage(mIconAudio)
-        layer.addGraphItem(mAudioCircle)
+        mAudioCircle = GraphImage(mIconAudio).apply {
+            this.id = "TimeView.RecordLayer.Audio"
+        }
 
 /*        mCancelCircle = GraphCircle().apply {
             this.id = "TimeView.RecordLayer.Cancel"
@@ -113,8 +114,9 @@ class GlAudioRecordLayerController(
                 this.style = Paint.Style.FILL
             }
         }*/
-        mCancelCircle = GraphImage(mIconTrash)
-        layer.addGraphItem(mCancelCircle)
+        mCancelCircle = GraphImage(mIconTrash).apply {
+            this.id = "TimeView.RecordLayer.Cancel"
+        }
 
 /*        mTextRectangle = GraphRectangle().apply {
             this.id = "TimeView.RecordLayer.Text"
@@ -129,8 +131,13 @@ class GlAudioRecordLayerController(
                 this.style = Paint.Style.FILL
             }
         }*/
-        mTextRectangle = GraphImage(mIconInput)
+        mTextRectangle = GraphImage(mIconInput).apply {
+            this.id = "TimeView.RecordLayer.Text"
+        }
+
         layer.addGraphItem(mTextRectangle)
+        layer.addGraphItem(mCancelCircle)
+        layer.addGraphItem(mAudioCircle)
 
         mVoiceRecordEffectLayer = layer
     }
@@ -200,11 +207,18 @@ class GlAudioRecordLayerController(
 
 /*        mAudioCircle.origin = PointF(area.width() / 2, 3 * area.height() / 4)
         mAudioCircle.radius = 20 * mGraphView.unitScale*/
-        mAudioCircle.moveCenter(PointF(area.width() / 2, 3 * area.height() / 4))
+
+        mAudioCircle.paintArea.fromCenterSides(
+            PointF(area.width() / 2, 3 * area.height() / 4),
+            20 * mGraphView.unitScale, 20 * mGraphView.unitScale
+        )
 
 /*        mCancelCircle.origin = PointF(area.width() / 2, area.height() / 4)
         mCancelCircle.radius = 15 * mGraphView.unitScale*/
-        mCancelCircle.moveCenter(PointF(area.width() / 2, area.height() / 4))
+        mCancelCircle.paintArea.fromCenterSides(
+            PointF(area.width() / 2, area.height() / 8),
+            20 * mGraphView.unitScale, 20 * mGraphView.unitScale
+        )
 
 /*        mTextRectangle.rect = RectF(mGraphView.paintArea).apply {
             this.left += mGraphView.unitScale * 15.0f
@@ -212,11 +226,13 @@ class GlAudioRecordLayerController(
             this.bottom -= mGraphView.unitScale * 15.0f
             this.top = this.bottom - mGraphView.unitScale * 20.0f
         }*/
-        mTextRectangle.moveCenter(
-            PointF(
-                mGraphView.paintArea.width() / 2.0f,
-                mGraphView.paintArea.bottom - 50.0f
-        ))
+
+        mTextRectangle.paintArea = RectF(mGraphView.paintArea).apply {
+            left += mGraphView.unitScale * 5.0f
+            right -= mGraphView.unitScale * 5.0f
+            bottom -= mGraphView.unitScale * 5.0f
+            top = bottom - mGraphView.unitScale * 15.0f
+        }
     }
 
     private fun layoutLandscape() {
