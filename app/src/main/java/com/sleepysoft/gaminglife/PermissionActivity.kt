@@ -103,9 +103,11 @@ class PermissionActivity : AppCompatActivity() {
         if (file.exists()) {
             if (file.canRead()) {
                 ret = true
-                Toast.makeText(this, "External Storage OK", Toast.LENGTH_SHORT).show()
+                toast("External Storage Permission OK")
+                // Toast.makeText(this, "External Storage Permission OK", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "External Storage Fail", Toast.LENGTH_SHORT).show()
+                toast("External Storage Permission Fail")
+                // Toast.makeText(this, "External Storage Permission Fail", Toast.LENGTH_SHORT).show()
             }
         }
         finish()

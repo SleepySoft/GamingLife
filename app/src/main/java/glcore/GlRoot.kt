@@ -28,6 +28,10 @@ object GlRoot {
         GlFile.saveFile(desFileName, content)
     }
 
+    fun loadContentFromDailyFolder() {
+
+    }
+
     fun archiveTemporaryFileToDailyFolder(tempFileName: String, dayOffset: Int = 0) {
         val srcFile = File(GlFile.glRoot(), tempFileName)
         val desFileName = GlFile.joinPaths(GlFile.glRoot(),
