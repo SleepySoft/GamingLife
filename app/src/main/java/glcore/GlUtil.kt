@@ -1,9 +1,18 @@
 package glcore
 import java.util.*
+import kotlin.collections.HashMap
 
 
 // https://kotlinlang.org/docs/multiplatform-connect-to-apis.html#generate-a-uuid
 fun randomUUID() = UUID.randomUUID().toString()
+
+
+// https://stackoverflow.com/a/60910036
+fun Map< String, Any >.deepCopy() : MutableMap< String, Any > {
+    return HashMap< String, Any >(this).mapValues {
+        if (it.value is Map<*, *>) (it.value as Map<*, *>).toMutableMap() else it.value
+    }.toMutableMap()
+}
 
 
 fun isNullOrEmpty(str: String?): Boolean {

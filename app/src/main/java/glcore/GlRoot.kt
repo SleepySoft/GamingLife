@@ -39,31 +39,6 @@ object GlRoot {
             getDailyFolderName(dayOffset), "${getFileNameTs()}.${srcFile.extension}")
         GlFile.copyFileAbsolute(srcFile.absolutePath, desFileName)
     }
-
-    fun checkSettleDailyData() {
-        val tsData: Any? = glDatabase.dailyRecord.get(PATH_DAILY_START_TS)
-        if (tsData is Long) {
-            val dailyStartTs: Long = tsData
-            val todayStartTs: Long = GlDateTime.dayStartTimeStamp()
-            if (todayStartTs > dailyStartTs) {
-                settleDailyData()
-            }
-        }
-        else {
-            createNewDayDailyData()
-        }
-    }
-
-    fun settleDailyData() {
-
-    }
-
-    fun createNewDayDailyData() {
-        glDatabase.dailyRecord.clear()
-        glDatabase.dailyRecord.set(PATH_DAILY_START_TS, GlDateTime.dayStartTimeStamp())
-        glDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf< GlAnyDict >())
-        glDatabase.save()
-    }
 }
 
 

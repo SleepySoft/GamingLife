@@ -150,4 +150,13 @@ internal class PathDictTest {
         assert(pathDict.set("/A/B/C/Y", "foobar"))
         assert(pathDict.get("/A/B/C/Y") == "foobar")
     }
+
+    @Test
+    fun testPathDictDeepCopy() {
+        val pathDict: PathDict = generateSystemGeneralPathDict()
+        val originalDict = pathDict.rootDict
+        val copyDict = originalDict.deepCopy()
+
+        assert(copyDict == originalDict)
+    }
 }

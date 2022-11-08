@@ -146,6 +146,53 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
         }
     }
 
+    // ---------------------------------------- Daily data ----------------------------------------
+
+    fun checkSettleDailyData() {
+        val tsData: Any? = GlRoot.glDatabase.dailyRecord.get(PATH_DAILY_START_TS)
+        if (tsData is Long) {
+            val dailyStartTs: Long = tsData
+            val todayStartTs: Long = GlDateTime.dayStartTimeStamp()
+            if (todayStartTs > dailyStartTs) {
+                settleDailyData()
+                createNewDayDailyData()
+            }
+            else {
+                // The daily data is the current day, everything is OK.
+            }
+        }
+        else {
+            createNewDayDailyData()
+        }
+    }
+
+    fun settleDailyData() {
+       /* val currentTask = getCurrentTaskInfo()
+        val taskHistory = mDatabase.dailyRecord.get(PATH_DAILY_TASK_HISTORY)
+        val currentTaskCopy = currentTask.toDeeplyMutableMap()
+
+        if (taskHistory is MutableList< * >) {
+            @Suppress("UNCHECKED_CAST")
+            (taskHistory as GlAnyStructList).add(currentTask)
+        }
+        else {
+            mDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf(currentTask))
+        }
+
+        // Set new current task
+
+        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/taskID", "")
+        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/groupID", taskData["id"] ?: GROUP_ID_IDLE)
+        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/startTime", System.currentTimeMillis())*/
+    }
+
+    fun createNewDayDailyData() {
+        GlRoot.glDatabase.dailyRecord.clear()
+        GlRoot.glDatabase.dailyRecord.set(PATH_DAILY_START_TS, GlDateTime.dayStartTimeStamp())
+        GlRoot.glDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf< GlAnyDict >())
+        GlRoot.glDatabase.save()
+    }
+
     // ------------------------------------------ Others -------------------------------------------
 
     private fun checkInitRuntimeData() {
