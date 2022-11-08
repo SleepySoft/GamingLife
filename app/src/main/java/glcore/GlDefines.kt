@@ -3,12 +3,14 @@ import kotlin.reflect.KClass
 
 // --------------------------------------------- Path ----------------------------------------------
 
-const val PATH_TASK_GROUP_TOP = "/Config/Meta/TaskGroup/TopGroups"      // v as STRUCT_DEC_TASK_DATA
-const val PATH_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"      // v as STRUCT_DEC_TASK_DATA
-const val PATH_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"    // v as MutableMap< String, String >
+const val PATH_SYSTEM_TASK_GROUP_TOP = "/Config/Meta/TaskGroup/TopGroups"       // v as STRUCT_DEC_TASK_DATA
+const val PATH_SYSTEM_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"       // v as STRUCT_DEC_TASK_DATA
+const val PATH_SYSTEM_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"     // v as MutableMap< String, String >
 
-const val PATH_CURRENT_TASK = "/Runtime/TimeModule/CurrentTask"         // v as STRUCT_DEC_TASK_RECORD
-const val PATH_TASK_HISTORY = "/Runtime/TimeModule/TaskHistory"         // v as list of STRUCT_DEC_TASK_RECORD
+const val PATH_RUNTIME_CURRENT_TASK = "/Runtime/TimeModule/CurrentTask"         // v as STRUCT_DEC_TASK_RECORD
+
+const val PATH_DAILY_START_TS = "/Daily/StartTimestamp"                         // The start seconds of the day since January 1, 1970, 00:00:00 GMT
+const val PATH_DAILY_TASK_HISTORY = "/Daily/TimeModule/TaskHistory"             // v as list of STRUCT_DEC_TASK_RECORD
 
 
 // --------------------------------------------- Value ---------------------------------------------

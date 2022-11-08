@@ -18,22 +18,22 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
 
     private fun groupDataFromDatabase() {
         @Suppress("UNCHECKED_CAST")
-        mTaskGroupTop = (mDatabase.systemConfig.getDictAny(PATH_TASK_GROUP_TOP) ?:
+        mTaskGroupTop = (mDatabase.systemConfig.getDictAny(PATH_SYSTEM_TASK_GROUP_TOP) ?:
                         TASK_GROUP_TOP_PRESET.toMutableMap()) as GlStrStructDict
 
         @Suppress("UNCHECKED_CAST")
-        mTaskGroupSub = (mDatabase.systemConfig.getDictAny(PATH_TASK_GROUP_SUB) ?:
+        mTaskGroupSub = (mDatabase.systemConfig.getDictAny(PATH_SYSTEM_TASK_GROUP_SUB) ?:
                         mutableMapOf()) as GlStrStructDict
 
         @Suppress("UNCHECKED_CAST")
-        mTaskGroupLink = (mDatabase.systemConfig.getDictStr(PATH_TASK_GROUP_LINK) ?:
+        mTaskGroupLink = (mDatabase.systemConfig.getDictStr(PATH_SYSTEM_TASK_GROUP_LINK) ?:
                           mutableMapOf())
     }
 
     private fun groupDataToDatabase() {
-        mDatabase.systemConfig.put(PATH_TASK_GROUP_TOP, mTaskGroupTop, forceWrite = true)
-        mDatabase.systemConfig.put(PATH_TASK_GROUP_SUB, mTaskGroupSub, forceWrite = true)
-        mDatabase.systemConfig.put(PATH_TASK_GROUP_LINK, mTaskGroupLink, forceWrite = true)
+        mDatabase.systemConfig.put(PATH_SYSTEM_TASK_GROUP_TOP, mTaskGroupTop, forceWrite = true)
+        mDatabase.systemConfig.put(PATH_SYSTEM_TASK_GROUP_SUB, mTaskGroupSub, forceWrite = true)
+        mDatabase.systemConfig.put(PATH_SYSTEM_TASK_GROUP_LINK, mTaskGroupLink, forceWrite = true)
     }
 
     // --------------------------- Gets ---------------------------
@@ -83,7 +83,7 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
                 mTaskGroupSub.remove(glId)
             }
         }
-        mDatabase.systemConfig.put(PATH_TASK_GROUP_LINK, mTaskGroupLink, forceWrite = true)
+        mDatabase.systemConfig.put(PATH_SYSTEM_TASK_GROUP_LINK, mTaskGroupLink, forceWrite = true)
     }
 
     // ----------------------- Task Switching -----------------------
@@ -97,28 +97,28 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
         // Put current task into task history
 
         val currentTask = getCurrentTaskInfo()
-        val taskHistory = mDatabase.dailyRecord.get(PATH_TASK_HISTORY)
+        val taskHistory = mDatabase.dailyRecord.get(PATH_DAILY_TASK_HISTORY)
 
         if (taskHistory is MutableList< * >) {
             @Suppress("UNCHECKED_CAST")
             (taskHistory as GlAnyStructList).add(currentTask)
         }
         else {
-            mDatabase.dailyRecord.set(PATH_TASK_HISTORY, mutableListOf(currentTask))
+            mDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf(currentTask))
         }
 
         // Set new current task
 
-        mDatabase.runtimeData.set("$PATH_CURRENT_TASK/taskID", "")
-        mDatabase.runtimeData.set("$PATH_CURRENT_TASK/groupID", taskData["id"] ?: GROUP_ID_IDLE)
-        mDatabase.runtimeData.set("$PATH_CURRENT_TASK/startTime", System.currentTimeMillis())
+        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/taskID", "")
+        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/groupID", taskData["id"] ?: GROUP_ID_IDLE)
+        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/startTime", System.currentTimeMillis())
 
         mDatabase.save()
     }
 
     fun getCurrentTaskInfo() : GlAnyStruct {
         try {
-            when(val currentTaskData = mDatabase.runtimeData.getDictAny(PATH_CURRENT_TASK)) {
+            when(val currentTaskData = mDatabase.runtimeData.getDictAny(PATH_RUNTIME_CURRENT_TASK)) {
                 null -> {
                     throw java.lang.Exception("No current task data")
                 }
@@ -139,7 +139,7 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
             val currentTaskData = TASK_RECORD_TEMPLATE.toMutableMap().apply {
                 this["startTime"] = System.currentTimeMillis()
             }
-            mDatabase.runtimeData.put(PATH_CURRENT_TASK, currentTaskData, true)
+            mDatabase.runtimeData.put(PATH_RUNTIME_CURRENT_TASK, currentTaskData, true)
 
             @Suppress("UNCHECKED_CAST")
             return currentTaskData

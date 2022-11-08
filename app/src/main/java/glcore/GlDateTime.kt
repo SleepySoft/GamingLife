@@ -33,6 +33,8 @@ object GlDateTime {
         return SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.getDefault()).format(dt)
     }
 
+    // ---------------------------------------------------------------------
+
     fun daysBetween(baseDate: Date, targetDate: Date) : Int {
         val deltaSecs: Long = zeroDateHMS(targetDate).time - zeroDateHMS(baseDate).time
         val deltaDays: Int = ((deltaSecs + 24 * 3600 - 1) / 24 * 3600).toInt()
@@ -47,4 +49,6 @@ object GlDateTime {
             set(Calendar.SECOND, 0)
         }.time
     }
+
+    fun dayStartTimeStamp(offsetDays: Int = 0) = zeroDateHMS(datetime(offsetDays)).time
 }

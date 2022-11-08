@@ -1,6 +1,7 @@
 package glcore
 
 import java.io.File
+import java.util.*
 
 
 object GlRoot {
@@ -14,8 +15,8 @@ object GlRoot {
         glTaskModule.init()
     }
 
-    fun getFileNameTs() : String  {
-        return GlDateTime.formatToMSec(GlDateTime.datetime())
+    fun getFileNameTs(date: Date? = null) : String  {
+        return GlDateTime.formatToMSec(date ?: GlDateTime.datetime())
     }
 
     fun getDailyFolderName(offset: Int)  =
@@ -37,6 +38,31 @@ object GlRoot {
         val desFileName = GlFile.joinPaths(GlFile.glRoot(),
             getDailyFolderName(dayOffset), "${getFileNameTs()}.${srcFile.extension}")
         GlFile.copyFileAbsolute(srcFile.absolutePath, desFileName)
+    }
+
+    fun checkSettleDailyData() {
+        val tsData: Any? = glDatabase.dailyRecord.get(PATH_DAILY_START_TS)
+        if (tsData is Long) {
+            val dailyStartTs: Long = tsData
+            val todayStartTs: Long = GlDateTime.dayStartTimeStamp()
+            if (todayStartTs > dailyStartTs) {
+                settleDailyData()
+            }
+        }
+        else {
+            createNewDayDailyData()
+        }
+    }
+
+    fun settleDailyData() {
+
+    }
+
+    fun createNewDayDailyData() {
+        glDatabase.dailyRecord.clear()
+        glDatabase.dailyRecord.set(PATH_DAILY_START_TS, GlDateTime.dayStartTimeStamp())
+        glDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf< GlAnyDict >())
+        glDatabase.save()
     }
 }
 
