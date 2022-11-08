@@ -63,12 +63,13 @@ object GlFile {
 
     private fun doSaveFile(filePath: String, fileContent: ByteArray) : Boolean {
         return try {
+            println("Save file: $filePath")
             File(filePath).apply {
                 ensureFileDirExists(this)
             }.writeBytes(fileContent)
             true
         } catch (e: Exception) {
-            println("File write fail: $filePath - $e")
+            println("Save file fail: $filePath - $e")
             false
         } finally {
 
@@ -77,9 +78,10 @@ object GlFile {
 
     private fun doLoadFile(filePath: String) : ByteArray {
         return try {
+            println("Load file: $filePath")
             File(filePath).readBytes()
         } catch (e: Exception) {
-            println("Load write fail: $filePath - $e")
+            println("Load file fail: $filePath - $e")
             ByteArray(0)
         } finally {
 
@@ -88,6 +90,7 @@ object GlFile {
 
     fun doCopyFile(srcFile: File, desFile: File, overwrite: Boolean = true) : Boolean {
         return try {
+            println("Copy file $srcFile to $desFile")
             srcFile.copyTo(desFile, overwrite)
             true
         } catch (e: Exception) {
