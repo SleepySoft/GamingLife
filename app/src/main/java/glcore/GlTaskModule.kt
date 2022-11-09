@@ -1,11 +1,12 @@
 package glcore
 
+import java.util.Date
+
 
 class GlTaskModule(private val mDatabase: GlDatabase) {
 
     fun init() {
         groupDataFromDatabase()
-        checkInitRuntimeData()
     }
 
     // ---------------------------------------- Task Group -----------------------------------------
@@ -42,8 +43,10 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
         return mTaskGroupTop[glId] ?: mTaskGroupSub[glId]
     }
 
-    fun nameOfTask(glId: String) = getTaskProperty(glId, "name")
-    fun colorOfTask(glId: String) = getTaskProperty(glId, "color")
+    fun nameOfTask(glId: String): String = getTaskProperty(glId, "name")
+    fun colorOfTask(glId: String): String = getTaskProperty(glId, "color")
+    fun groupOfTask(glId: String): String =
+        if (mTaskGroupTop.containsKey(glId)) glId else mTaskGroupLink[glId] ?: GROUP_ID_IDLE
 
     private fun getTaskProperty(glId: String, key: String): String {
         return getTaskData(glId)?.get(key) ?: ""
@@ -95,23 +98,27 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
         }
 
         // Put current task into task history
-
+/*
         val currentTask = getCurrentTaskInfo()
+        val currentTaskCopy = currentTask.deepCopy()
         val taskHistory = mDatabase.dailyRecord.get(PATH_DAILY_TASK_HISTORY)
 
         if (taskHistory is MutableList< * >) {
             @Suppress("UNCHECKED_CAST")
-            (taskHistory as GlAnyStructList).add(currentTask)
+            (taskHistory as GlAnyStructList).add(currentTaskCopy)
         }
         else {
-            mDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf(currentTask))
-        }
+            mDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf(currentTaskCopy))
+        }*/
+
+        currentTaskToHistory()
+        setCurrentTask(taskData["id"])
 
         // Set new current task
 
-        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/taskID", "")
+/*        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/taskID", "")
         mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/groupID", taskData["id"] ?: GROUP_ID_IDLE)
-        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/startTime", System.currentTimeMillis())
+        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/startTime", System.currentTimeMillis())*/
 
         mDatabase.save()
     }
@@ -149,56 +156,71 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
     // ---------------------------------------- Daily data ----------------------------------------
 
     fun checkSettleDailyData() {
-        val tsData: Any? = GlRoot.glDatabase.dailyRecord.get(PATH_DAILY_START_TS)
-        if (tsData is Long) {
-            val dailyStartTs: Long = tsData
-            val todayStartTs: Long = GlDateTime.dayStartTimeStamp()
-            if (todayStartTs > dailyStartTs) {
-                settleDailyData()
-                createNewDayDailyData()
+        /*******************************************************************************************
+         *
+         * The algorithm of settling daily data:
+         * If daily data's timestamp does not match current day's start time, it means we should do
+         *      the daily data settling.
+         * 1. Duplicate and record the current task data to history data
+         * 2. Reset the current task's start time to current day's start time
+         * 3. Archive the daily data to it's daily folder (by its time stamp).
+         *
+         *******************************************************************************************/
+
+        val dataTs: Any? = GlRoot.glDatabase.dailyRecord.get(PATH_DAILY_START_TS)
+        if (dataTs is Long) {
+            val dailyDataTs: Long = dataTs
+            val currentDayTs: Long = GlDateTime.dayStartTimeStamp()
+            if (currentDayTs != dailyDataTs) {
+                settleDailyData(dailyDataTs, currentDayTs)
+                resetDayDailyData()
             }
             else {
                 // The daily data is the current day, everything is OK.
             }
         }
         else {
-            createNewDayDailyData()
+            resetDayDailyData()
         }
     }
 
-    fun settleDailyData() {
-       /* val currentTask = getCurrentTaskInfo()
-        val taskHistory = mDatabase.dailyRecord.get(PATH_DAILY_TASK_HISTORY)
-        val currentTaskCopy = currentTask.toDeeplyMutableMap()
+    private fun settleDailyData(dailyDataTs: Long, currentDayTs: Long) {
+        val currentTask = currentTaskToHistory()
+        setCurrentTask(currentTask["id"], currentDayTs)
+        GlRoot.glDatabase.save()
 
-        if (taskHistory is MutableList< * >) {
-            @Suppress("UNCHECKED_CAST")
-            (taskHistory as GlAnyStructList).add(currentTask)
-        }
-        else {
-            mDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf(currentTask))
-        }
-
-        // Set new current task
-
-        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/taskID", "")
-        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/groupID", taskData["id"] ?: GROUP_ID_IDLE)
-        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/startTime", System.currentTimeMillis())*/
+        val archiveFolderName: String = GlRoot.getDailyFolderName(Date(dailyDataTs))
     }
 
-    fun createNewDayDailyData() {
+    private fun resetDayDailyData() {
         GlRoot.glDatabase.dailyRecord.clear()
         GlRoot.glDatabase.dailyRecord.set(PATH_DAILY_START_TS, GlDateTime.dayStartTimeStamp())
         GlRoot.glDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf< GlAnyDict >())
         GlRoot.glDatabase.save()
     }
 
-    // ------------------------------------------ Others -------------------------------------------
+    private fun currentTaskToHistory() : GlAnyStruct {
+        val currentTask = getCurrentTaskInfo()
+        val currentTaskCopy = currentTask.deepCopy()
+        val taskHistory = mDatabase.dailyRecord.get(PATH_DAILY_TASK_HISTORY)
 
-    private fun checkInitRuntimeData() {
-        checkInitCurrentTask()
+        if (taskHistory is MutableList< * >) {
+            @Suppress("UNCHECKED_CAST")
+            (taskHistory as GlAnyStructList).add(currentTaskCopy)
+        }
+        else {
+            mDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf(currentTaskCopy))
+        }
+
+        return currentTask
     }
 
-    private fun checkInitCurrentTask() {
+    private fun setCurrentTask(taskId: Any?, ts: Long? = null) {
+        val taskIdStr: String = (taskId ?: GROUP_ID_IDLE) as String
+        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/taskID", taskIdStr)
+        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/groupID", groupOfTask(taskIdStr))
+        mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/startTime", ts ?: System.currentTimeMillis())
     }
+
+    // ------------------------------------------ Private ------------------------------------------
 }

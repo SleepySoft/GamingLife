@@ -15,13 +15,17 @@ object GlRoot {
         glTaskModule.init()
     }
 
-    fun getFileNameTs(date: Date? = null) : String  {
-        return GlDateTime.formatToMSec(date ?: GlDateTime.datetime())
-    }
+    fun getFileNameTs(date: Date? = null) : String =
+        GlDateTime.formatToMSec(date ?: GlDateTime.datetime())
 
-    fun getDailyFolderName(offset: Int)  =
-        DAILY_FOLDER_TEMPLATE.format(
-            GlDateTime.formatToDay(GlDateTime.datetime(offsetDays = offset)))
+    fun getFileNameTs(offsetDays: Int) : String =
+        getFileNameTs(GlDateTime.datetime(offsetDays = offsetDays))
+
+    fun getDailyFolderName(date: Date) : String =
+        DAILY_FOLDER_TEMPLATE.format(GlDateTime.formatToDay(date))
+
+    fun getDailyFolderName(offsetDays: Int) =
+        getDailyFolderName(GlDateTime.datetime(offsetDays = offsetDays))
 
     fun saveContentToDailyFolder(content: ByteArray, fileSuffix: String, dayOffset: Int = 0) {
         val desFileName = GlFile.joinPaths(
