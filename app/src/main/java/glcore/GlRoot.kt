@@ -33,15 +33,20 @@ object GlRoot {
         GlFile.saveFile(desFileName, content)
     }
 
-    fun loadContentFromDailyFolder() {
-
-    }
-
-    fun archiveTemporaryFileToDailyFolder(tempFileName: String, dayOffset: Int = 0) {
+    fun archiveTemporaryFileToDailyFolder(tempFileName: String, archiveDate: Date) {
         val srcFile = File(GlFile.glRoot(), tempFileName)
         val desFileName = GlFile.joinPaths(GlFile.glRoot(),
-            getDailyFolderName(dayOffset), "${getFileNameTs()}.${srcFile.extension}")
+            getDailyFolderName(archiveDate), "${getFileNameTs()}.${srcFile.extension}")
         GlFile.copyFileAbsolute(srcFile.absolutePath, desFileName)
+    }
+
+    fun archiveTemporaryFileToDailyFolder(tempFileName: String, offsetDays: Int = 0) =
+        archiveTemporaryFileToDailyFolder(tempFileName, GlDateTime.datetime(offsetDays = offsetDays))
+
+    fun archiveJsonFilesToDailyFolder(archiveDate: Date) {
+        for (fileName in GL_FILES) {
+            archiveTemporaryFileToDailyFolder(fileName, archiveDate)
+        }
     }
 }
 

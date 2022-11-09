@@ -17,10 +17,17 @@ const val PATH_DAILY_TASK_HISTORY = "/Daily/TimeModule/TaskHistory"             
 
 const val LONG_LONG_PRESS_TIMEOUT = 1500       // ms
 
-const val FILE_RUNTIME_DATA = "RuntimeData.json"
-const val FILE_DAILY_RECORD = "DailyRecord.json"
-const val FILE_SYSTEM_CONFIG = "SystemConfig.json"
-const val FILE_ENVIRONMENT = "Environment.json"
+const val GL_FILE_RUNTIME_DATA = "RuntimeData.json"
+const val GL_FILE_DAILY_RECORD = "DailyRecord.json"
+const val GL_FILE_SYSTEM_CONFIG = "SystemConfig.json"
+const val GL_FILE_ENVIRONMENT = "Environment.json"
+
+val GL_FILES = listOf< String >(
+    GL_FILE_RUNTIME_DATA,
+    GL_FILE_DAILY_RECORD,
+    GL_FILE_SYSTEM_CONFIG,
+    GL_FILE_ENVIRONMENT
+)
 
 const val FILE_AUDIO_TEMP_PCM = "temp/RawAudio.pcm"
 const val FILE_AUDIO_TEMP_WAV = "temp/RawAudio.wav"

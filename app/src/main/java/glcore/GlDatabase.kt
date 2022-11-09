@@ -1,8 +1,5 @@
 package glcore
 
-import java.io.File
-import android.content.Context
-
 
 const val SEPARATOR = "/"
 
@@ -32,17 +29,17 @@ class GlDatabase {
     }
 
     fun save(): Boolean {
-        return  savePathDict(FILE_RUNTIME_DATA, runtimeData) and
-                savePathDict(FILE_DAILY_RECORD, dailyRecord) and
-                savePathDict(FILE_SYSTEM_CONFIG, systemConfig) and
-                savePathDict(FILE_ENVIRONMENT, environment)
+        return  savePathDict(GL_FILE_RUNTIME_DATA, runtimeData) and
+                savePathDict(GL_FILE_DAILY_RECORD, dailyRecord) and
+                savePathDict(GL_FILE_SYSTEM_CONFIG, systemConfig) and
+                savePathDict(GL_FILE_ENVIRONMENT, environment)
     }
 
     private fun load(): Boolean {
-        return  loadPathDict(FILE_RUNTIME_DATA, runtimeData) and
-                loadPathDict(FILE_DAILY_RECORD, dailyRecord) and
-                loadPathDict(FILE_SYSTEM_CONFIG, systemConfig) and
-                loadPathDict(FILE_ENVIRONMENT, environment)
+        return  loadPathDict(GL_FILE_RUNTIME_DATA, runtimeData) and
+                loadPathDict(GL_FILE_DAILY_RECORD, dailyRecord) and
+                loadPathDict(GL_FILE_SYSTEM_CONFIG, systemConfig) and
+                loadPathDict(GL_FILE_ENVIRONMENT, environment)
     }
 
     private fun savePathDict(fileName: String, pathDict: PathDict, force: Boolean = false) : Boolean {

@@ -184,12 +184,13 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
         }
     }
 
+    // ------------------------------------------ Private ------------------------------------------
+
     private fun settleDailyData(dailyDataTs: Long, currentDayTs: Long) {
         val currentTask = currentTaskToHistory()
         setCurrentTask(currentTask["id"], currentDayTs)
         GlRoot.glDatabase.save()
-
-        val archiveFolderName: String = GlRoot.getDailyFolderName(Date(dailyDataTs))
+        GlRoot.archiveJsonFilesToDailyFolder(Date(dailyDataTs))
     }
 
     private fun resetDayDailyData() {
@@ -221,6 +222,4 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
         mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/groupID", groupOfTask(taskIdStr))
         mDatabase.runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/startTime", ts ?: System.currentTimeMillis())
     }
-
-    // ------------------------------------------ Private ------------------------------------------
 }
