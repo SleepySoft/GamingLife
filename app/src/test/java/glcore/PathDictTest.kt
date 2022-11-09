@@ -154,9 +154,21 @@ internal class PathDictTest {
     @Test
     fun testPathDictDeepCopy() {
         val pathDict: PathDict = generateSystemGeneralPathDict()
-        val originalDict = pathDict.rootDict
-        val copyDict = originalDict.deepCopy()
 
-        assert(copyDict == originalDict)
+        val originalDict = pathDict.rootDict
+        val shallowCopy = originalDict.toMutableMap()
+        val deepCopy = originalDict.deepCopy()
+
+        assert(shallowCopy == originalDict)
+        assert(shallowCopy !== originalDict)
+        assert(shallowCopy["Daily"] === originalDict["Daily"])
+        assert(shallowCopy["Config"] === originalDict["Config"])
+        assert(shallowCopy["Runtime"] === originalDict["Runtime"])
+
+        assert(deepCopy == originalDict)
+        assert(deepCopy !== originalDict)
+        assert(deepCopy["Daily"] !== originalDict["Daily"])
+        assert(deepCopy["Config"] !== originalDict["Config"])
+        assert(deepCopy["Runtime"] !== originalDict["Runtime"])
     }
 }
