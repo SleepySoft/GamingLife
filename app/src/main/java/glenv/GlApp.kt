@@ -1,17 +1,19 @@
-package glcore
+package glenv
 
 import android.app.Application
 import android.content.Context
 
 
-class GlApplication : Application() {
+// Do not reference this class in GlRoot Module
+
+class GlApp : Application() {
 
     init {
         instance = this
     }
 
     companion object {
-        private var instance: GlApplication? = null
+        private var instance: GlApp? = null
 
         fun applicationContext() : Context {
             return instance!!.applicationContext

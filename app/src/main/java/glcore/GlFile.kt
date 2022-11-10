@@ -1,9 +1,6 @@
 package glcore
 
-import android.content.Context
-import android.os.Environment
 import java.io.File
-import kotlin.io.path.Path
 
 
 object GlFile {
@@ -24,11 +21,9 @@ object GlFile {
 
     fun glRoot() : String = glExternalRoot()
 
-    fun glInternalRoot() : String =
-        GlApplication.applicationContext().filesDir.absolutePath
+    fun glInternalRoot() : String = GlRoot.env.internalStorageRoot()
 
-    fun glExternalRoot() : String =
-        File(Environment.getExternalStorageDirectory(), "gaminglife").absolutePath
+    fun glExternalRoot() : String = GlRoot.env.externalStorageRoot()
 
     fun saveFile(fileName: String, fileContent: ByteArray) : Boolean =
         // Use external for debug

@@ -1,16 +1,17 @@
 package glcore
 
+import glenv.GlEnv
 import java.io.File
 import java.util.*
 
 
 object GlRoot {
-    val glContext = GlContext()
+    lateinit var env: GlEnv
     val glDatabase = GlDatabase()
     val glTaskModule = GlTaskModule(glDatabase)
 
-    fun init() {
-        GlAudioRecorder.init()
+    fun init(glEnv: GlEnv) {
+        env = glEnv
         glDatabase.init()
         glTaskModule.init()
     }

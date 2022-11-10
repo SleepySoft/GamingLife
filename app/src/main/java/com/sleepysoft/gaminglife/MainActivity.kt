@@ -7,7 +7,9 @@ import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.view.WindowManager
 import glcore.GlRoot
+import glenv.GlEnv
 import graphengine.GraphView
+
 
 @RequiresApi(Build.VERSION_CODES.N)
 fun testInternalStorage(ctx: Context) {
@@ -46,7 +48,7 @@ class MainActivity : AppCompatActivity() {
         requireLockScreenShow()
         checkRequireExtStoragePermission()
 
-        GlRoot.init()
+        GlRoot.init(GlEnv().apply { init() })
 
         mHandler = Handler(Looper.getMainLooper())
         mRunnable = Runnable {

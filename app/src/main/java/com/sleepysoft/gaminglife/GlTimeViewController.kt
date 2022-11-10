@@ -9,7 +9,6 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import glcore.*
 import graphengine.*
-import java.io.File
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
@@ -376,7 +375,7 @@ class GlTimeViewController(
             mLongLongPressProgress.progress = 0.0f
         }
         if (mRecording) {
-            GlAudioRecorder.stopRecord()
+            GlRoot.env.glAudio.stopRecord()
             mRecording = false
         }
     }
@@ -387,7 +386,7 @@ class GlTimeViewController(
                 GlRoot.saveContentToDailyFolder(result.toByteArray(), ".md")
             }
             "Audio" -> {
-                GlRoot.archiveTemporaryFileToDailyFolder(GlAudioRecorder.WAVPath)
+                GlRoot.archiveTemporaryFileToDailyFolder(GlRoot.env.glAudio.WAVPath)
             }
             else -> {
 

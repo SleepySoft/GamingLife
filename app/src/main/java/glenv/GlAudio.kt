@@ -1,4 +1,4 @@
-package glcore
+package glenv
 
 import android.Manifest
 import android.content.Context
@@ -6,19 +6,19 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import android.os.Build
-import android.os.Environment
-import android.support.annotation.RequiresApi
 import android.support.v4.app.ActivityCompat
+import glcore.FILE_AUDIO_TEMP_PCM
+import glcore.FILE_AUDIO_TEMP_WAV
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
+// Do not reference this class in GlRoot Module
 
 // https://blog.csdn.net/wozuihaole/article/details/104063277
 
-object GlAudioRecorder {
+class GlAudio {
     // 1.设置录音相关参数,音频采集源、采样率、声道、数据格式
     // 2.计算最小录音缓存区大小
     // 3.创建audioRecord对象
@@ -27,10 +27,10 @@ object GlAudioRecorder {
     // 6.录音完毕，关闭录音及释放相关资源
     // 7.将pcm文件转换为WAV文件
 
-    private const val AudioSource = MediaRecorder.AudioSource.MIC
-    private const val SampleRate = 16000
-    private const val Channel = AudioFormat.CHANNEL_IN_MONO
-    private const val EncodingType = AudioFormat.ENCODING_PCM_16BIT
+    private val AudioSource = MediaRecorder.AudioSource.MIC
+    private val SampleRate = 16000
+    private val Channel = AudioFormat.CHANNEL_IN_MONO
+    private val EncodingType = AudioFormat.ENCODING_PCM_16BIT
 
     lateinit var PCMPath: String
     lateinit var WAVPath: String
@@ -41,15 +41,15 @@ object GlAudioRecorder {
     private var isRecording = false
 
     fun init() {
-        val ctx: Context = GlApplication.applicationContext()
-        PCMPath = "${ctx.filesDir.absolutePath}/${FILE_AUDIO_TEMP_PCM}"
-        WAVPath = "${ctx.filesDir.absolutePath}/${FILE_AUDIO_TEMP_WAV}"
+        val ctx: Context = GlApp.applicationContext()
+        PCMPath = "${ctx.filesDir.absolutePath}/$FILE_AUDIO_TEMP_PCM"
+        WAVPath = "${ctx.filesDir.absolutePath}/$FILE_AUDIO_TEMP_WAV"
         bufferSizeInByte = AudioRecord.getMinBufferSize(SampleRate, Channel, EncodingType)
     }
 
     private fun createRecorder() : Boolean {
         return if (ActivityCompat.checkSelfPermission(
-                GlApplication.applicationContext(),
+                GlApp.applicationContext(),
                 Manifest.permission.RECORD_AUDIO
             ) != PackageManager.PERMISSION_GRANTED
         ) {
@@ -79,7 +79,7 @@ object GlAudioRecorder {
             audioRecorder?.startRecording()
 
             isRecording = true
-            toFileTask = AudioRecordToFile().apply {
+            toFileTask = AudioRecordToFile(this).apply {
                 this.start()
             }
             true
@@ -108,16 +108,7 @@ object GlAudioRecorder {
 
     // ----------------------------------------------------------
 
-    private class AudioRecordToFile : Thread() {
-
-        override fun run() {
-            super.run()
-            writeDateTOFile()
-            copyWaveFile()
-        }
-    }
-
-    private fun writeDateTOFile() {
+    private fun writeDateToFile() {
 
         val audioData = ByteArray(bufferSizeInByte)
         val file = File(PCMPath)
@@ -220,5 +211,15 @@ object GlAudioRecorder {
         header[42] = (totalAudioLen shr 16 and 0xff).toByte()
         header[43] = (totalAudioLen shr 24 and 0xff).toByte()
         out.write(header, 0, 44)
+    }
+
+    private class AudioRecordToFile(
+        val outer: GlAudio) : Thread() {
+
+        override fun run() {
+            super.run()
+            outer.writeDateToFile()
+            outer.copyWaveFile()
+        }
     }
 }

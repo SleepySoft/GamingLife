@@ -3,12 +3,11 @@ package com.sleepysoft.gaminglife
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.*
-import android.graphics.drawable.Drawable
 import android.text.InputType
 import android.view.Gravity
 import android.widget.EditText
-import glcore.GlApplication
-import glcore.GlAudioRecorder
+import glcore.GlRoot
+import glenv.GlApp
 import graphengine.*
 
 
@@ -26,7 +25,7 @@ class GlAudioRecordLayerController(
     private lateinit var mIconInput: Bitmap
     private lateinit var mIconTrash: Bitmap
 
-    private val mTextInput = EditText(GlApplication.applicationContext()).apply {
+    private val mTextInput = EditText(GlApp.applicationContext()).apply {
         this.setText("")
         this.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
         this.isSingleLine = false
@@ -153,7 +152,8 @@ class GlAudioRecordLayerController(
     }
 
     override fun onItemDropped(droppedItem: GraphItem) {
-        GlAudioRecorder.stopRecord()
+        GlRoot.env.glAudio.stopRecord()
+
         val intersectingItems: List< GraphItem > =
             mVoiceRecordEffectLayer.itemIntersectRect(droppedItem.boundRect()) {
                 it != droppedItem
@@ -162,7 +162,7 @@ class GlAudioRecordLayerController(
         if (intersectingItems.isEmpty()) {
             // Just release the record button
 
-            GlAudioRecorder.join(1500)
+            GlRoot.env.glAudio.join(1500)
 
             // Copy wav to daily folder and rename
             onAudioRecordOk()
@@ -252,7 +252,7 @@ class GlAudioRecordLayerController(
     }
 
     private fun onAudioRecordOk() {
-        mReturnFunction?.run { this("Audio", GlAudioRecorder.WAVPath) }
+        mReturnFunction?.run { this("Audio", GlRoot.env.glAudio.WAVPath) }
     }
 
     private fun onUserInputCancel() {
