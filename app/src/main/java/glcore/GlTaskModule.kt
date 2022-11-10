@@ -156,6 +156,8 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
     // ---------------------------------------- Daily data ----------------------------------------
 
     fun checkSettleDailyData() {
+        println("Check settle daily data.")
+
         /*******************************************************************************************
          *
          * The algorithm of settling daily data:
@@ -172,14 +174,17 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
             val dailyDataTs: Long = dataTs
             val currentDayTs: Long = GlDateTime.dayStartTimeStamp()
             if (currentDayTs != dailyDataTs) {
+                println("> Do settling.")
                 settleDailyData(dailyDataTs, currentDayTs)
                 resetDayDailyData()
             }
             else {
                 // The daily data is the current day, everything is OK.
+                println("> Not need to settle.")
             }
         }
         else {
+            println("> No daily data.")
             resetDayDailyData()
         }
     }
