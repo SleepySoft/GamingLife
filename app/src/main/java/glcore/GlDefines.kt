@@ -29,8 +29,8 @@ val GL_FILES = listOf< String >(
     GL_FILE_ENVIRONMENT
 )
 
-const val FILE_AUDIO_TEMP_PCM = "temp/RawAudio.pcm"
-const val FILE_AUDIO_TEMP_WAV = "temp/RawAudio.wav"
+const val FILE_NAME_AUDIO_TEMP_PCM = "RawAudio.pcm"
+const val FILE_NAME_AUDIO_TEMP_WAV = "RawAudio.wav"
 
 const val DAILY_FOLDER_TEMPLATE = "GL_DAILY_%s"
 

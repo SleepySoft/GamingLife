@@ -6,6 +6,7 @@ import android.graphics.*
 import android.text.InputType
 import android.view.Gravity
 import android.widget.EditText
+import glcore.GlFile
 import glcore.GlRoot
 import glenv.GlApp
 import graphengine.*
@@ -55,6 +56,8 @@ class GlAudioRecordLayerController(
         mGraphView.pushObserver(this)
         mVoiceRecordEffectLayer.visible = true
         mGraphView.invalidate()
+
+        GlRoot.env.glAudio.startRecord(GlFile.glRoot())
     }
 
     private fun releaseControl() {

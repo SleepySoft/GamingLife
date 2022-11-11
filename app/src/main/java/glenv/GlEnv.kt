@@ -14,8 +14,8 @@ class GlEnv {
 
         println("Internal Storage Root: ${internalStorageRoot()}")
         println("External Storage Root: ${externalStorageRoot()}")
-        println("Audio pcm temporary file: ${glAudio.PCMPath}")
-        println("Audio wav temporary file: ${glAudio.WAVPath}")
+        // println("Audio pcm temporary file: ${glAudio.PCMPath}")
+        // println("Audio wav temporary file: ${glAudio.WAVPath}")
 
         println("----------------------------- Init Environment Done-----------------------------")
     }

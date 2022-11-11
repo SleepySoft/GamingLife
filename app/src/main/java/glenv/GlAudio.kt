@@ -7,8 +7,9 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import android.support.v4.app.ActivityCompat
-import glcore.FILE_AUDIO_TEMP_PCM
-import glcore.FILE_AUDIO_TEMP_WAV
+import glcore.FILE_NAME_AUDIO_TEMP_PCM
+import glcore.FILE_NAME_AUDIO_TEMP_WAV
+import glcore.GlLog
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
@@ -42,8 +43,8 @@ class GlAudio {
 
     fun init() {
         val ctx: Context = GlApp.applicationContext()
-        PCMPath = "${ctx.filesDir.absolutePath}/$FILE_AUDIO_TEMP_PCM"
-        WAVPath = "${ctx.filesDir.absolutePath}/$FILE_AUDIO_TEMP_WAV"
+        PCMPath = "${ctx.filesDir.absolutePath}/$FILE_NAME_AUDIO_TEMP_PCM"
+        WAVPath = "${ctx.filesDir.absolutePath}/$FILE_NAME_AUDIO_TEMP_WAV"
         bufferSizeInByte = AudioRecord.getMinBufferSize(SampleRate, Channel, EncodingType)
     }
 
@@ -71,10 +72,16 @@ class GlAudio {
         }
     }
 
-    fun startRecord(): Boolean {
+    fun startRecord(savePath: String): Boolean {
         return if (isRecording) {
+            GlLog.i("Start record - Recording, ignore.")
             false
         } else {
+            GlLog.i("Start record.")
+
+            PCMPath = "$savePath/$FILE_NAME_AUDIO_TEMP_PCM"
+            WAVPath = "$savePath/$FILE_NAME_AUDIO_TEMP_WAV"
+
             audioRecorder ?: createRecorder()
             audioRecorder?.startRecording()
 
@@ -87,6 +94,7 @@ class GlAudio {
     }
 
     fun stopRecord() {
+        GlLog.i("Stop audio recorder.")
         isRecording = false
         audioRecorder?.stop()
         audioRecorder?.release()
@@ -95,11 +103,13 @@ class GlAudio {
 
     fun join(timeoutMs: Long = 0) {
         try {
+            GlLog.i("Joining audio recorder.")
             toFileTask?.join(timeoutMs)
             toFileTask = null
+            GlLog.i("Joining audio recorder - Exit.")
         }
         catch (_: java.lang.Exception) {
-
+            GlLog.i("Joining audio recorder - Exception.")
         }
         finally {
 
@@ -108,7 +118,7 @@ class GlAudio {
 
     // ----------------------------------------------------------
 
-    private fun writeDateToFile() {
+    private fun writeDataToFile() {
 
         val audioData = ByteArray(bufferSizeInByte)
         val file = File(PCMPath)
@@ -134,7 +144,7 @@ class GlAudio {
             }
         }
         catch (_: Exception) {
-            System.out.println("Audio recording got exception.")
+            GlLog.e("Audio record gets exception.")
         }
         finally {
             out.close()
@@ -217,9 +227,11 @@ class GlAudio {
         val outer: GlAudio) : Thread() {
 
         override fun run() {
+            GlLog.i("Audio record thread starts.")
             super.run()
-            outer.writeDateToFile()
+            outer.writeDataToFile()
             outer.copyWaveFile()
+            GlLog.i("Audio record thread ends.")
         }
     }
 }

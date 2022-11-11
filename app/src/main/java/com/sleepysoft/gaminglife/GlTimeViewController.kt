@@ -386,7 +386,7 @@ class GlTimeViewController(
                 GlRoot.saveContentToDailyFolder(result.toByteArray(), ".md")
             }
             "Audio" -> {
-                GlRoot.archiveRootPathFileToDailyFolder(GlRoot.env.glAudio.WAVPath)
+                GlRoot.archiveRootPathFileToDailyFolder(FILE_NAME_AUDIO_TEMP_WAV)
             }
             else -> {
 
