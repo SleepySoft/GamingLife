@@ -20,13 +20,13 @@ const val LONG_LONG_PRESS_TIMEOUT = 1500       // ms
 const val GL_FILE_RUNTIME_DATA = "RuntimeData.json"
 const val GL_FILE_DAILY_RECORD = "DailyRecord.json"
 const val GL_FILE_SYSTEM_CONFIG = "SystemConfig.json"
-const val GL_FILE_ENVIRONMENT = "Environment.json"
+const val GL_FILE_ENVIRONMENT_CONTEXT = "EnvironmentCtx.json"
 
 val GL_FILES = listOf< String >(
     GL_FILE_RUNTIME_DATA,
     GL_FILE_DAILY_RECORD,
     GL_FILE_SYSTEM_CONFIG,
-    GL_FILE_ENVIRONMENT
+    GL_FILE_ENVIRONMENT_CONTEXT
 )
 
 const val FILE_NAME_AUDIO_TEMP_PCM = "RawAudio.pcm"

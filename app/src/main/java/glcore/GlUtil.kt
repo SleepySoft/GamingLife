@@ -3,6 +3,8 @@ package glcore
 import java.util.*
 import kotlin.collections.HashMap
 
+fun trueOrNull(v: Boolean) : Boolean? = if (v) true else null
+
 
 // https://kotlinlang.org/docs/multiplatform-connect-to-apis.html#generate-a-uuid
 fun randomUUID() = UUID.randomUUID().toString()

@@ -6,18 +6,29 @@ import java.util.Date
 class GlTaskModule(private val mDatabase: GlDatabase) {
 
     fun init() {
-        groupDataFromDatabase()
+
     }
 
     // ---------------------------------------- Task Group -----------------------------------------
 
     // ------------------- Data, Load and Write -------------------
 
-    var mTaskGroupTop: GlStrStructDict = mutableMapOf()         // id: name
-    var mTaskGroupSub: GlStrStructDict = mutableMapOf()         // id: name
-    var mTaskGroupLink = mutableMapOf< String , String >()      // sub id: top id
+    @Suppress("UNCHECKED_CAST")
+    val mTaskGroupTop: GlStrStructDict                      // id: name
+        get() = (mDatabase.systemConfig.getDictAny(PATH_SYSTEM_TASK_GROUP_TOP) ?:
+                    TASK_GROUP_TOP_PRESET.toMutableMap()) as GlStrStructDict
 
-    private fun groupDataFromDatabase() {
+    @Suppress("UNCHECKED_CAST")
+    val mTaskGroupSub: GlStrStructDict                      // id: name
+        get() =  (mDatabase.systemConfig.getDictAny(PATH_SYSTEM_TASK_GROUP_SUB) ?:
+                    mutableMapOf()) as GlStrStructDict
+
+    @Suppress("UNCHECKED_CAST")
+    val mTaskGroupLink: MutableMap< String , String >       // sub id: top id
+        get() = (mDatabase.systemConfig.getDictStr(PATH_SYSTEM_TASK_GROUP_LINK) ?:
+                    mutableMapOf())
+
+/*    private fun groupDataFromDatabase() {
         @Suppress("UNCHECKED_CAST")
         mTaskGroupTop = (mDatabase.systemConfig.getDictAny(PATH_SYSTEM_TASK_GROUP_TOP) ?:
                         TASK_GROUP_TOP_PRESET.toMutableMap()) as GlStrStructDict
@@ -28,14 +39,14 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
 
         @Suppress("UNCHECKED_CAST")
         mTaskGroupLink = (mDatabase.systemConfig.getDictStr(PATH_SYSTEM_TASK_GROUP_LINK) ?:
-                          mutableMapOf())
+                mutableMapOf< String , String >()
     }
 
     private fun groupDataToDatabase() {
         mDatabase.systemConfig.put(PATH_SYSTEM_TASK_GROUP_TOP, mTaskGroupTop, forceWrite = true)
         mDatabase.systemConfig.put(PATH_SYSTEM_TASK_GROUP_SUB, mTaskGroupSub, forceWrite = true)
         mDatabase.systemConfig.put(PATH_SYSTEM_TASK_GROUP_LINK, mTaskGroupLink, forceWrite = true)
-    }
+    }*/
 
     // --------------------------- Gets ---------------------------
 
@@ -92,6 +103,8 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
     // ----------------------- Task Switching -----------------------
 
     fun switchToTask(taskData: GlStrStruct) {
+        checkSettleDailyData()
+
         @Suppress("UNCHECKED_CAST")
         if (!checkStruct(taskData as GlAnyStruct, STRUCT_DEC_TASK_DATA)) {
             return
@@ -130,7 +143,7 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
                     throw java.lang.Exception("No current task data")
                 }
                 else -> {
-                    val taskID = currentTaskData.get("taskID") as String
+                    // val taskID = currentTaskData.get("taskID") as String
                     val groupID = currentTaskData.get("groupID") as String
                     val startTime = currentTaskData.get("startTime") as Long
 
@@ -156,7 +169,7 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
     // ---------------------------------------- Daily data ----------------------------------------
 
     fun checkSettleDailyData() {
-        println("Check settle daily data.")
+        GlLog.i("Check settle daily data.")
 
         /*******************************************************************************************
          *
@@ -174,17 +187,17 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
             val dailyDataTs: Long = dataTs
             val currentDayTs: Long = GlDateTime.dayStartTimeStamp()
             if (currentDayTs != dailyDataTs) {
-                println("> Do settling.")
+                GlLog.i("> Do settling.")
                 settleDailyData(dailyDataTs, currentDayTs)
                 resetDayDailyData()
             }
             else {
                 // The daily data is the current day, everything is OK.
-                println("> Not need to settle.")
+                GlLog.i("> Not need to settle.")
             }
         }
         else {
-            println("> No daily data.")
+            GlLog.i("> No daily data.")
             resetDayDailyData()
         }
     }

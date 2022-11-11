@@ -18,7 +18,7 @@ class GlDatabase {
         this.separator = SEPARATOR
     }
 
-    val environment = PathDict().apply {
+    val environmentContext = PathDict().apply {
         this.separator = SEPARATOR
     }
 
@@ -32,14 +32,14 @@ class GlDatabase {
         return  savePathDict(GL_FILE_RUNTIME_DATA, runtimeData) and
                 savePathDict(GL_FILE_DAILY_RECORD, dailyRecord) and
                 savePathDict(GL_FILE_SYSTEM_CONFIG, systemConfig) and
-                savePathDict(GL_FILE_ENVIRONMENT, environment)
+                savePathDict(GL_FILE_ENVIRONMENT_CONTEXT, environmentContext)
     }
 
     private fun load(): Boolean {
-        return  loadPathDict(GL_FILE_RUNTIME_DATA, runtimeData) and
-                loadPathDict(GL_FILE_DAILY_RECORD, dailyRecord) and
-                loadPathDict(GL_FILE_SYSTEM_CONFIG, systemConfig) and
-                loadPathDict(GL_FILE_ENVIRONMENT, environment)
+        return  (trueOrNull(loadPathDict(GL_FILE_RUNTIME_DATA, runtimeData)) ?: initRuntimeData()) and
+                (trueOrNull(loadPathDict(GL_FILE_DAILY_RECORD, dailyRecord)) ?: initDailyRecord()) and
+                (trueOrNull(loadPathDict(GL_FILE_SYSTEM_CONFIG, systemConfig)) ?: initSystemConfig()) and
+                (trueOrNull(loadPathDict(GL_FILE_ENVIRONMENT_CONTEXT, environmentContext)) ?: initEnvironmentContext())
     }
 
     private fun savePathDict(fileName: String, pathDict: PathDict, force: Boolean = false) : Boolean {
@@ -61,13 +61,37 @@ class GlDatabase {
 
     // ------------------------------------------------------------
 
-/*    private fun toJson(dict: GlAnyStruct) {
-        val json: String = Json.encodeToString< GlAnyStruct >(dict)
+    private fun initRuntimeData() : Boolean {
+        GlLog.i("Init RuntimeData")
+        runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/taskID", GROUP_ID_IDLE)
+        runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/groupID", GROUP_ID_IDLE)
+        runtimeData.set("$PATH_RUNTIME_CURRENT_TASK/startTime", GlDateTime.datetime())
+        // return savePathDict(GL_FILE_RUNTIME_DATA, runtimeData)
+        return true
     }
 
-    private fun persistsJson() {
+    private fun initDailyRecord() : Boolean {
+        GlLog.i("Init Daily Record")
+        dailyRecord.set(PATH_DAILY_START_TS, GlDateTime.dayStartTimeStamp())
+        dailyRecord.set(PATH_DAILY_TASK_HISTORY, GlDateTime.dayStartTimeStamp())
+        // return savePathDict(GL_FILE_DAILY_RECORD, dailyRecord)
+        return true
+    }
 
-    }*/
+    private fun initSystemConfig() : Boolean {
+        GlLog.i("Init System Config")
+        systemConfig.set(PATH_SYSTEM_TASK_GROUP_TOP, TASK_GROUP_TOP_PRESET.toMutableMap())
+        systemConfig.set(PATH_SYSTEM_TASK_GROUP_SUB, mutableMapOf< String, GlAnyStruct >())
+        systemConfig.set(PATH_SYSTEM_TASK_GROUP_LINK, mutableMapOf< String, GlAnyStruct >())
+        // savePathDict(GL_FILE_SYSTEM_CONFIG, systemConfig)
+        return true
+    }
+
+    private fun initEnvironmentContext() : Boolean {
+        GlLog.i("Init Environment Context")
+        // savePathDict(GL_FILE_ENVIRONMENT_CONTEXT, environmentContext)
+        return true
+    }
 }
 
 
