@@ -205,8 +205,23 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
     // ------------------------------------------ Private ------------------------------------------
 
     private fun settleDailyData(dailyDataTs: Long, currentDayTs: Long) {
-        val currentTask = currentTaskToHistory()
-        setCurrentTask(currentTask["id"], currentDayTs)
+        val currentTask = getCurrentTaskInfo()
+        val currentTaskStartTs = currentTask["startTime"] as Long
+        if (currentTaskStartTs < currentDayTs) {
+            // The task starts before today
+
+            if ((currentTaskStartTs >= dailyDataTs) &&
+                (currentTaskStartTs <  dailyDataTs + TIMESTAMP_COUNT_IN_DAY)) {
+                // The task starts from the daily data's day
+                currentTaskToHistory()
+            }
+
+            // Limit the task start time in today
+            setCurrentTask(currentTask["id"], currentDayTs)
+        }
+        else {
+            // The task does not cross day, usually in manually update json scenario.
+        }
         GlRoot.glDatabase.save()
         GlRoot.archiveJsonFilesToDailyFolder(Date(dailyDataTs))
     }
@@ -218,7 +233,7 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
         GlRoot.glDatabase.save()
     }
 
-    private fun currentTaskToHistory() : GlAnyStruct {
+    private fun currentTaskToHistory() {
         val currentTask = getCurrentTaskInfo()
         val currentTaskCopy = currentTask.deepCopy()
         val taskHistory = mDatabase.dailyRecord.get(PATH_DAILY_TASK_HISTORY)
@@ -230,8 +245,6 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
         else {
             mDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf(currentTaskCopy))
         }
-
-        return currentTask
     }
 
     private fun setCurrentTask(taskId: Any?, ts: Long? = null) {

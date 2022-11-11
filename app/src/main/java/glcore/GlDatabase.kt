@@ -56,7 +56,7 @@ class GlDatabase {
         val fileContent: String = GlFile.loadFile(fileName).toString(Charsets.UTF_8)
         pathDict.attach(GlJson.deserializeAnyDict(fileContent))
         pathDict.hasUpdate = false
-        return true
+        return fileContent.isNotEmpty()
     }
 
     // ------------------------------------------------------------
@@ -73,7 +73,7 @@ class GlDatabase {
     private fun initDailyRecord() : Boolean {
         GlLog.i("Init Daily Record")
         dailyRecord.set(PATH_DAILY_START_TS, GlDateTime.dayStartTimeStamp())
-        dailyRecord.set(PATH_DAILY_TASK_HISTORY, GlDateTime.dayStartTimeStamp())
+        dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf< GlAnyDict >())
         // return savePathDict(GL_FILE_DAILY_RECORD, dailyRecord)
         return true
     }
