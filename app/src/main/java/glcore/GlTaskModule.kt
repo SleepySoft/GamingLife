@@ -241,6 +241,7 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
         if (taskHistory is MutableList< * >) {
             @Suppress("UNCHECKED_CAST")
             (taskHistory as GlAnyStructList).add(currentTaskCopy)
+            mDatabase.dailyRecord.hasUpdate = true
         }
         else {
             mDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf(currentTaskCopy))
