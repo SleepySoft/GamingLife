@@ -5,16 +5,16 @@ object GlLog {
 
     // info
     fun i(vararg text: String, ) {
-        text.joinToString(" ")
+        println(text.joinToString(" "))
     }
 
     // error
     fun e(vararg text: String, ) {
-        text.joinToString(" ")
+        println(text.joinToString(" "))
     }
 
     // critical
     fun c(vararg text: String, ) {
-        text.joinToString(" ")
+        println(text.joinToString(" "))
     }
 }
