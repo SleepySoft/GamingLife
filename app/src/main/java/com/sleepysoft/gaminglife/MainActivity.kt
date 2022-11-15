@@ -11,7 +11,6 @@ import android.view.WindowManager
 import glcore.GlLog
 import glcore.GlRoot
 import glenv.GlEnv
-import graphengine.GraphView
 
 
 @RequiresApi(Build.VERSION_CODES.N)
@@ -40,11 +39,7 @@ fun testExternalStorage() {
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var mHandler : Handler
-    private lateinit var mRunnable : Runnable
-    private lateinit var mView: GraphView
-    private lateinit var mController: GlTimeViewController
-
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -53,24 +48,10 @@ class MainActivity : AppCompatActivity() {
 
         GlRoot.init(GlEnv().apply { init() })
 
-        mHandler = Handler(Looper.getMainLooper())
-        mRunnable = Runnable {
-            doPeriod()
-        }
+        startGlService()
+        launchTimeViewActivity()
 
-        mView = GraphView(this)
-        mController = GlTimeViewController(this, mView, GlRoot.glTaskModule).apply {
-            this.init()
-            mView.pushObserver(this)
-        }
-
-        setContentView(mView)
-        mHandler.postDelayed(mRunnable, 1000)
-    }
-
-    private fun doPeriod() {
-        mController.polling()
-        mHandler.postDelayed(mRunnable, 100)
+        finish()
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -103,5 +84,23 @@ class MainActivity : AppCompatActivity() {
     private fun checkRequireExtStoragePermission() {
         val intent = Intent(this, PermissionActivity::class.java)
         startActivity(intent)
+    }
+
+/*    private fun registerScreenStatusListener() {
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_SCREEN_OFF)
+        registerReceiver(screenReceiver, filter)
+    }*/
+
+    private fun startGlService() {
+        val intent = Intent(this, GamingLifeMainService::class.java)
+        startService(intent)
+    }
+
+    private fun launchTimeViewActivity() {
+        val intent = Intent(this, TimeViewActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        startActivity(intent)
+        GlLog.i("Popup Time View on Locked Screen.")
     }
 }
