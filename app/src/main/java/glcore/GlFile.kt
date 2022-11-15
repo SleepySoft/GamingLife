@@ -19,7 +19,7 @@ object GlFile {
         }
     }
 
-    fun glRoot() : String = glExternalRoot()
+    fun glRoot() : String = glInternalRoot()
 
     fun glInternalRoot() : String = GlRoot.env.internalStorageRoot()
 

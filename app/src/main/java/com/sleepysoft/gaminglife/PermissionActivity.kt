@@ -100,17 +100,23 @@ class PermissionActivity : AppCompatActivity() {
     private fun tryWriteFile() : Boolean {
         var ret = false
         val file = File(GlFile.glExternalRoot())
+
         if (file.exists()) {
-            if (file.canRead()) {
+            if (file.canRead() && file.canWrite()) {
                 ret = true
-                toast("External Storage Permission OK")
-                // Toast.makeText(this, "External Storage Permission OK", Toast.LENGTH_SHORT).show()
-            } else {
-                toast("External Storage Permission Fail")
-                // Toast.makeText(this, "External Storage Permission Fail", Toast.LENGTH_SHORT).show()
             }
         }
+
+        if (ret) {
+            toast("External Storage Permission OK")
+            // Toast.makeText(this, "External Storage Permission OK", Toast.LENGTH_SHORT).show()
+        }
+        else {
+            toast("External Storage Permission Fail")
+            // Toast.makeText(this, "External Storage Permission Fail", Toast.LENGTH_SHORT).show()
+        }
         finish()
+
         return ret
     }
 }

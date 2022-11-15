@@ -2,10 +2,13 @@ package com.sleepysoft.gaminglife
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.*
+import android.provider.Settings
 import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.view.WindowManager
+import glcore.GlLog
 import glcore.GlRoot
 import glenv.GlEnv
 import graphengine.GraphView
@@ -70,6 +73,7 @@ class MainActivity : AppCompatActivity() {
         mHandler.postDelayed(mRunnable, 100)
     }
 
+    @RequiresApi(Build.VERSION_CODES.M)
     private fun requireLockScreenShow() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
         {
@@ -80,6 +84,19 @@ class MainActivity : AppCompatActivity() {
             window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
                     WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
                     WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+        }
+
+        val canOverlay: Boolean = Settings.canDrawOverlays(this)
+        if (canOverlay) {
+            GlLog.i("Overlay permission OK.")
+        }
+        else {
+            startActivity(
+                Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+            )
         }
     }
 

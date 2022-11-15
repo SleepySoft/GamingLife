@@ -109,8 +109,8 @@ class GlTimeViewController(
 
     override fun onItemDragging(draggingItem: GraphItem, pos: PointF) {
         if (draggingItem == mCenterItem) {
-            if ((abs(mCenterItem.offsetPixel.x) > mGraphView.unitScale * 0.1) ||
-                (abs(mCenterItem.offsetPixel.y) > mGraphView.unitScale * 0.1)) {
+            if ((abs(mCenterItem.offsetPixel.x) > mGraphView.unitScale * 0.3) ||
+                (abs(mCenterItem.offsetPixel.y) > mGraphView.unitScale * 0.3)) {
                 endLongLongPress()
             }
         }
