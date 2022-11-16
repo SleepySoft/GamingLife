@@ -38,6 +38,19 @@ object GlDateTime {
         return SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.getDefault()).format(dt)
     }
 
+    fun stringToDate(dtStr: String, dateDefault: Date = Date()) : Date {
+        return  SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(dtStr) ?:
+                SimpleDateFormat("yyyyMMdd HHmmss", Locale.getDefault()).parse(dtStr) ?:
+                SimpleDateFormat("yyyyMMdd HHmmss SSS", Locale.getDefault()).parse(dtStr) ?:
+
+                SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).parse(dtStr) ?:
+                SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.getDefault()).parse(dtStr) ?:
+
+                SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dtStr) ?:
+                SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(dtStr) ?:
+                SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS", Locale.getDefault()).parse(dtStr) ?: dateDefault
+    }
+
     // ---------------------------------------------------------------------
 
     fun daysBetween(baseDate: Date, targetDate: Date) : Int {

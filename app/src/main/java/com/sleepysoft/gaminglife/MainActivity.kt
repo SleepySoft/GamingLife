@@ -14,7 +14,7 @@ import glenv.GlEnv
 
 
 class MainActivity : AppCompatActivity() {
-    @RequiresApi(Build.VERSION_CODES.M)
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -23,6 +23,8 @@ class MainActivity : AppCompatActivity() {
 
         startGlService()
         launchTimeViewActivity()
+
+        RuntimeTest.testEntry(this)
 
         finish()
     }

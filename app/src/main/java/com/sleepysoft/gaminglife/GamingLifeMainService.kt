@@ -51,6 +51,6 @@ class GamingLifeMainService : Service() {
     }
 
     private fun servicePolling() {
-        GlLog.i("Service running: ${GlDateTime.datetime()}")
+        // GlLog.i("Service running: ${GlDateTime.datetime()}")
     }
 }

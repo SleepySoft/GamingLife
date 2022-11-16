@@ -54,6 +54,26 @@ object GlFile {
     fun copyFileAbsolute(srcFilePath: String, desFilePath: String, overwrite: Boolean = true) : Boolean =
         doCopyFile(File(srcFilePath), File(desFilePath), overwrite)
 
+    fun listFiles(relativePath: String, fullPath: Boolean) : List< String > {
+        return listFilesAbsolute(joinPaths(glRoot(), relativePath), fullPath)
+    }
+
+    fun listFilesInternal(relativePath: String, fullPath: Boolean) : List< String > {
+        return listFilesAbsolute(joinPaths(glInternalRoot(), relativePath), fullPath)
+    }
+
+    fun listFilesExternal(relativePath: String, fullPath: Boolean) : List< String > {
+        return listFilesAbsolute(joinPaths(glExternalRoot(), relativePath), fullPath)
+    }
+
+    fun listFilesAbsolute(absPath: String, fullPath: Boolean) : List< String > {
+        val fileNames = mutableListOf< String >()
+        File(absPath).walkTopDown().forEach {
+            fileNames.add(if (fullPath) it.absolutePath else it.name)
+        }
+        return fileNames
+    }
+
     // -----------------------------------------------------------------------
 
     private fun doSaveFile(filePath: String, fileContent: ByteArray) : Boolean {

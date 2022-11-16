@@ -59,6 +59,24 @@ typealias GlStrStructDict = MutableMap< String, GlStrStruct >
 
 typealias GlStructDeclare = Map< String, KClass< * > >
 
+
+fun toAnyStruct(data: Any?) : GlAnyDict {
+    if (data == null) {
+        return mutableMapOf()
+    }
+    if (data !is Map< *, * >) {
+        return mutableMapOf()
+    }
+    for (k in data.keys) {
+        if (k !is String) {
+            return mutableMapOf()
+        }
+    }
+    @Suppress("UNCHECKED_CAST")
+    return data as GlAnyDict
+}
+
+
 fun checkStruct(structDict: GlAnyStruct,
                 structDeclare: GlStructDeclare) : Boolean {
     for ((k, v) in structDeclare) {
