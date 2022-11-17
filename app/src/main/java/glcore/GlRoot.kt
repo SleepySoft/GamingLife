@@ -10,10 +10,15 @@ object GlRoot {
     val glDatabase = GlDatabase()
     val glTaskModule = GlTaskModule(glDatabase)
 
+    private var mInited = false
+
     fun init(glEnv: GlEnv) {
-        env = glEnv
-        glDatabase.init()
-        glTaskModule.init()
+        if (!mInited) {
+            env = glEnv
+            glDatabase.init()
+            glTaskModule.init()
+            mInited = true
+        }
     }
 
     fun getFileNameTs(date: Date? = null) : String =

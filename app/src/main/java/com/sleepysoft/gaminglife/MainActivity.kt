@@ -18,6 +18,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        GlRoot.init(GlEnv().apply { init() })
+
         requireLockScreenShow()
         checkRequireExtStoragePermission()
 

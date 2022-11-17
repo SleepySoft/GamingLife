@@ -26,7 +26,6 @@ class GamingLifeMainService : Service() {
 
     override fun onCreate() {
         GlLog.i("GL service onCreate")
-        GlRoot.init(GlEnv().apply { init() })
 
         val intentFilter = IntentFilter(Intent.ACTION_SCREEN_OFF)
         registerReceiver(mReceiver, intentFilter)

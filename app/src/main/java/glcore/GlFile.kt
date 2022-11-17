@@ -26,12 +26,10 @@ object GlFile {
     fun glExternalRoot() : String = GlRoot.env.externalStorageRoot()
 
     fun saveFile(fileName: String, fileContent: ByteArray) : Boolean =
-        // Use external for debug
-        saveFileExternal(fileName, fileContent)
+        saveFileInternal(fileName, fileContent)
 
     fun loadFile(fileName: String) : ByteArray =
-        // Use external for debug
-        loadFileExternal(fileName)
+        loadFileInternal(fileName)
 
     fun saveFileInternal(fileName: String, fileContent: ByteArray) : Boolean =
         doSaveFile(File(glInternalRoot(), fileName).absolutePath, fileContent)

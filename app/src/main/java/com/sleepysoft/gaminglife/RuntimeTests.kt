@@ -6,9 +6,10 @@ import android.os.Environment
 import android.support.annotation.RequiresApi
 
 import glcore.GlDailyStatistics
+import glcore.GlDateTime
 import java.time.LocalDate
 import java.time.Month
-import java.util.Calendar
+import java.util.*
 
 
 @RequiresApi(Build.VERSION_CODES.N)
@@ -39,12 +40,12 @@ fun testExternalStorage() {
 @RequiresApi(Build.VERSION_CODES.O)
 fun testDailyStatistics() {
     val dailyStat = GlDailyStatistics()
-    dailyStat.loadDailyData(LocalDate.of(2022, Month.NOVEMBER, 10))
+    dailyStat.loadDailyData(GlDateTime.stringToDate("20221115", Date()))
 }
 
 
 object RuntimeTest {
-    @RequiresApi(Build.VERSION_CODES.N)
+    @RequiresApi(Build.VERSION_CODES.O)
     fun testEntry(ctx: Context) {
         // testInternalStorage(ctx)
         // testExternalStorage()

@@ -107,6 +107,12 @@ fun checkListOfStruct(structDictList: List< GlAnyStruct >,
 
 // ---------------------------------------- Struct Defines -----------------------------------------
 
+interface IGlDeclare {
+    var dataValid : Boolean
+    fun fromAnyStruct(data: Any?) : Boolean
+    fun toAnyStruct() : GlAnyStruct
+}
+
 val STRUCT_DEC_TASK_DATA : GlStructDeclare = mapOf< String, KClass< * > >(
     "id" to String::class,
     "name" to String::class,
@@ -163,5 +169,4 @@ val TASK_RECORD_TEMPLATE = mapOf(
     "groupID" to GROUP_ID_IDLE,
     "startTime" to System.currentTimeMillis()
 )
-
 

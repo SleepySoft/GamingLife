@@ -1,0 +1,13 @@
+{
+  "TaskData": {
+    "id": "String",
+    "name": "String",
+    "color": "String"
+  },
+
+  "TaskRecord": {
+    "taskID": "String",
+    "groupID": "String",
+    "startTime": "Long"
+  }
+}
