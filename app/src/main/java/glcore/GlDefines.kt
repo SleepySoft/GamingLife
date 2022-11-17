@@ -3,9 +3,10 @@ import kotlin.reflect.KClass
 
 // --------------------------------------------- Path ----------------------------------------------
 
-const val PATH_SYSTEM_TASK_GROUP_TOP = "/Config/Meta/TaskGroup/TopGroups"       // v as STRUCT_DEC_TASK_DATA
-const val PATH_SYSTEM_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"       // v as STRUCT_DEC_TASK_DATA
-const val PATH_SYSTEM_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"     // v as MutableMap< String, String >
+const val PATH_SYSTEM_TASK_GROUP_TOP = "/Config/Meta/TaskGroup/TopGroups"           // v as STRUCT_DEC_TASK_DATA
+const val PATH_SYSTEM_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"           // v as STRUCT_DEC_TASK_DATA
+const val PATH_SYSTEM_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"         // v as MutableMap< String, String >
+const val PATH_SYSTEM_TASK_RECORD_THRESHOLD = "/Config/User/TaskRecordThreshold"    // v as Long, in ms
 
 const val PATH_RUNTIME_CURRENT_TASK = "/Runtime/TimeModule/CurrentTask"         // v as STRUCT_DEC_TASK_RECORD
 
@@ -107,10 +108,10 @@ fun checkListOfStruct(structDictList: List< GlAnyStruct >,
 
 // ---------------------------------------- Struct Defines -----------------------------------------
 
-interface IGlDeclare {
-    var dataValid : Boolean
-    fun fromAnyStruct(data: Any?) : Boolean
-    fun toAnyStruct() : GlAnyStruct
+abstract class IGlDeclare {
+    var dataValid : Boolean = false
+    abstract fun fromAnyStruct(data: Any?) : Boolean
+    abstract fun toAnyStruct() : GlAnyStruct
 }
 
 val STRUCT_DEC_TASK_DATA : GlStructDeclare = mapOf< String, KClass< * > >(

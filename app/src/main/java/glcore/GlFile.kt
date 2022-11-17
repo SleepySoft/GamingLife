@@ -4,7 +4,6 @@ import java.io.File
 
 
 object GlFile {
-
     fun joinPaths(vararg paths: String) : String {
         return when (paths.size) {
             0 -> ""
@@ -52,22 +51,29 @@ object GlFile {
     fun copyFileAbsolute(srcFilePath: String, desFilePath: String, overwrite: Boolean = true) : Boolean =
         doCopyFile(File(srcFilePath), File(desFilePath), overwrite)
 
-    fun listFiles(relativePath: String, fullPath: Boolean) : List< String > {
-        return listFilesAbsolute(joinPaths(glRoot(), relativePath), fullPath)
+    const val LIST_FILE = 1
+    const val LIST_DIRECTORY = 2
+    const val LIST_FULL_PATH = 128
+
+    fun listFiles(relativePath: String, option: Int) : List< String > {
+        return listFilesAbsolute(joinPaths(glRoot(), relativePath), option)
     }
 
-    fun listFilesInternal(relativePath: String, fullPath: Boolean) : List< String > {
-        return listFilesAbsolute(joinPaths(glInternalRoot(), relativePath), fullPath)
+    fun listFilesInternal(relativePath: String, option: Int) : List< String > {
+        return listFilesAbsolute(joinPaths(glInternalRoot(), relativePath), option)
     }
 
-    fun listFilesExternal(relativePath: String, fullPath: Boolean) : List< String > {
-        return listFilesAbsolute(joinPaths(glExternalRoot(), relativePath), fullPath)
+    fun listFilesExternal(relativePath: String, option: Int) : List< String > {
+        return listFilesAbsolute(joinPaths(glExternalRoot(), relativePath), option)
     }
 
-    fun listFilesAbsolute(absPath: String, fullPath: Boolean) : List< String > {
+    fun listFilesAbsolute(absPath: String, option: Int) : List< String > {
         val fileNames = mutableListOf< String >()
         File(absPath).walkTopDown().forEach {
-            fileNames.add(if (fullPath) it.absolutePath else it.name)
+            if ((it.isFile && (option and LIST_FILE) != 0) ||
+                (it.isDirectory && (option and LIST_DIRECTORY != 0))) {
+                fileNames.add(if (option and LIST_FULL_PATH != 0) it.absolutePath else it.name)
+            }
         }
         return fileNames
     }

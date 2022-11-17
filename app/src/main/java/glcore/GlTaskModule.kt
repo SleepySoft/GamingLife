@@ -235,6 +235,16 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
 
     private fun currentTaskToHistory() {
         val currentTask = getCurrentTaskInfo()
+        val currentTaskStartTs = currentTask["startTime"] as Long
+        val taskRecordThreshold: Long? =
+            mDatabase.systemConfig.get(PATH_SYSTEM_TASK_RECORD_THRESHOLD) as? Long
+
+        taskRecordThreshold?.run {
+            if (currentTaskStartTs < taskRecordThreshold) {
+                return
+            }
+        }
+
         val currentTaskCopy = currentTask.deepCopy()
         val taskHistory = mDatabase.dailyRecord.get(PATH_DAILY_TASK_HISTORY)
 

@@ -3,28 +3,50 @@ package glcore
 import java.util.*
 
 
-class GlDailyStatistics() {
+class TaskRecordEx : TaskRecord() {
+    var endTime: Long = 0L
+}
+
+
+class GlDailyStatistics {
     var dailyPath: String = ""
+        private set
+    var dailyFile: String = ""
         private set
     val dailyData: PathDict = PathDict()
 
+    var dailyExtraFiles = listOf< String >()
+
     var dailyTs: Long = 0
-    val taskRecords: MutableList< TaskRecord > = mutableListOf()
+    val taskRecords: MutableList< TaskRecordEx > = mutableListOf()
     val dailyGroupTime: MutableMap< String , Long > = mutableMapOf()
+
+    companion object {
+        fun listDailyData() : List< String > {
+            val dailyFolders = mutableListOf< String >()
+            val rootFolders = GlFile.listFiles("", GlFile.LIST_DIRECTORY)
+            for (folder in rootFolders) {
+                if (folder.startsWith(DAILY_FOLDER_TEMPLATE.removeSuffix("%s"))) {
+                    dailyFolders.add(folder)
+                }
+            }
+            return dailyFolders
+        }
+    }
 
     fun loadDailyData(dateTime: Date) : Boolean {
         val offsetDays = GlDateTime.daysBetween(GlDateTime.datetime(), dateTime)
-        val dayFolderName = GlRoot.getDailyFolderName(offsetDays)
         val dailyFileName: String = GlRoot.getFileNameTs()
+        dailyPath = GlRoot.getDailyFolderName(offsetDays)
 
-        dailyPath = GlFile.joinPaths(dayFolderName, dailyFileName)
+        dailyFile = GlFile.joinPaths(dailyPath, dailyFileName)
 
-        val fileContent: String = GlFile.loadFile(dailyPath).toString(Charsets.UTF_8)
+        val fileContent: String = GlFile.loadFile(dailyFile).toString(Charsets.UTF_8)
 
         return if (fileContent.isNotEmpty()) {
             dailyData.attach(GlJson.deserializeAnyDict(fileContent))
             dailyData.hasUpdate = false
-            val ret = parseDailyData() and collectExtraFiles()
+            val ret = parseDailyData() and collectDailyExtraFiles()
             GlLog.i("GlDailyStatistics - Load daily data $dateTime ${if (ret) "SUCCESS." else "FAIL."}")
             ret
         } else {
@@ -53,16 +75,16 @@ class GlDailyStatistics() {
 
             var prevTime = dailyTs
             for (task in dailyHis) {
-                val taskRecord = TaskRecord().apply { fromAnyStruct(task) }
+                val taskRecord = TaskRecordEx().apply { fromAnyStruct(task) }
                 if (taskRecord.dataValid) {
                     if (taskRecord.startTime >= prevTime ) {
-                        taskRecord.extEndTime = taskRecord.startTime - prevTime
+                        taskRecord.endTime = taskRecord.startTime - prevTime
                         dailyGroupTime[taskRecord.groupID] =
-                            (dailyGroupTime[taskRecord.groupID] ?: 0) + taskRecord.extEndTime
+                            (dailyGroupTime[taskRecord.groupID] ?: 0) + taskRecord.endTime
                         prevTime = taskRecord.startTime
                     }
                     else {
-                        taskRecord.extEndTime = 0
+                        taskRecord.endTime = 0
                     }
                     taskRecords.add(taskRecord)
                 } else {
@@ -76,10 +98,10 @@ class GlDailyStatistics() {
         }
     }
 
-    private fun collectExtraFiles() : Boolean {
-        val extraFiles = GlFile.listFiles(dailyPath, false)
+    private fun collectDailyExtraFiles() : Boolean {
+        dailyExtraFiles = GlFile.listFiles(dailyPath, GlFile.LIST_FILE)
 
-        GlLog.i("Collect daily files: $extraFiles")
+        GlLog.i("Collect daily files: $dailyExtraFiles")
 
         return true
     }

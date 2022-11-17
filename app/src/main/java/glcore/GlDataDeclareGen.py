@@ -29,15 +29,13 @@ import kotlin.reflect.KClass
 GL_DATA_CLASS_TEMPLATE = """
 // -------------------------------------------------------------------------------------------------
 
-class <<class_name>>() : IGlDeclare {
+open class <<class_name>> : IGlDeclare() {
 
     val structDeclare = mapOf< String, KClass< * > >(
 <<struct_dec_area>>
     )
     
 <<member_area>>
-
-    override var dataValid: Boolean = false
 
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = toAnyStruct(data)

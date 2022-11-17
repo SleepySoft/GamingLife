@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 
 // -------------------------------------------------------------------------------------------------
 
-class TaskData() : IGlDeclare {
+open class TaskData : IGlDeclare() {
 
     val structDeclare = mapOf< String, KClass< * > >(
         "id" to String::class, 
@@ -22,8 +22,6 @@ class TaskData() : IGlDeclare {
     var id: String = ""
     var name: String = ""
     var color: String = ""
-
-    override var dataValid: Boolean = false
 
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = toAnyStruct(data)
@@ -50,7 +48,7 @@ class TaskData() : IGlDeclare {
 
 // -------------------------------------------------------------------------------------------------
 
-class TaskRecord() : IGlDeclare {
+open class TaskRecord : IGlDeclare() {
 
     val structDeclare = mapOf< String, KClass< * > >(
         "taskID" to String::class, 
@@ -61,8 +59,6 @@ class TaskRecord() : IGlDeclare {
     var taskID: String = ""
     var groupID: String = ""
     var startTime: Long = 0L
-
-    override var dataValid: Boolean = false
 
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = toAnyStruct(data)
