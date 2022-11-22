@@ -35,12 +35,14 @@ class GlAudioRecordLayerController(
         this.gravity = Gravity.START or Gravity.TOP
     }
 
-    private val mTextDialogBuilder = AlertDialog.Builder(mContext).apply {
+    private var mTextDialogBuilder = AlertDialog.Builder(mContext).apply {
         this.setTitle("文字输入")
         this.setView(mTextInput)
         this.setPositiveButton("OK") { _, _ -> onTextInputOk() }
         this.setNegativeButton("Cancel") { _, _ -> onUserInputCancel() }
     }
+
+    private val mInputDialog = mTextDialogBuilder.create()
 
     fun init() {
         loadResource()
@@ -245,8 +247,7 @@ class GlAudioRecordLayerController(
     // -----------------------------------------------------------------
 
     private fun popupTextEditor() {
-        val inputDlg = mTextDialogBuilder.create()
-        inputDlg.show()
+        mInputDialog.show()
     }
 
     private fun onTextInputOk() {
