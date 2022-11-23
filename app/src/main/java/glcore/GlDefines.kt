@@ -34,6 +34,7 @@ val GL_FILES = listOf< String >(
 const val FILE_NAME_AUDIO_TEMP_PCM = "RawAudio.pcm"
 const val FILE_NAME_AUDIO_TEMP_WAV = "RawAudio.wav"
 
+const val DAILY_FOLDER_PREFIX = "GL_DAILY_"
 const val DAILY_FOLDER_TEMPLATE = "GL_DAILY_%s"
 
 const val GROUP_ID_IDLE  = "5084b76d-4e75-4c44-9786-bdf94075f94d"

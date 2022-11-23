@@ -1,6 +1,7 @@
 package com.sleepysoft.gaminglife
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.*
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.os.Build
@@ -30,6 +31,8 @@ class GlTimeViewController(
     private lateinit var mCenterItem: GraphCircle
     private lateinit var mLongLongPressProgress: GraphCircleProgress
     private var mSurroundItems = mutableListOf< GraphCircle >()
+
+    private lateinit var mMenuDailyStatistics: GraphRectangle
 
     private var mRecording: Boolean = false
     private var mPressSince: Long = 0
@@ -155,6 +158,13 @@ class GlTimeViewController(
         endLongLongPress()
     }
 
+    override fun onItemClicked(clickedItem: GraphItem) {
+        if (clickedItem == mMenuDailyStatistics) {
+            val activityIntent = Intent(mContext, DailyBrowseActivity::class.java)
+            mContext.startActivity(activityIntent)
+        }
+    }
+
 /*    override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
         if (droppedItem == mCenterItem) {
             // Drag center item to surround, closestItem as surroundItem
@@ -259,6 +269,17 @@ class GlTimeViewController(
             layer.addGraphItem(item)
             mSurroundItems.add(item)
         }
+
+        mMenuDailyStatistics = GraphRectangle().apply {
+            this.id = "TimeView.MenuDailyStatistics"
+            this.mainText = "回顾"
+            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#FFFFFF")
+                this.textAlign = Paint.Align.CENTER
+            }
+        }
+
+        layer.addGraphItem(mMenuDailyStatistics)
         layer.addGraphItem(mCenterItem)
         layer.insertGraphItemAfter(mLongLongPressProgress, mCenterItem)
 
@@ -306,6 +327,8 @@ class GlTimeViewController(
                 item.radius = mSurroundRadius
             }
         }
+
+        mMenuDailyStatistics.rect = RectF(0.0f, 0.0f, 200.0f, 100.0f)
     }
 
     private fun layoutLandscape() {

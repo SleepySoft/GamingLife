@@ -1,19 +1,24 @@
 package com.sleepysoft.gaminglife
 
+import android.content.Context
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.Button
+import glcore.DAILY_FOLDER_PREFIX
 import glcore.GlDailyStatistics
 import glcore.GlDateTime
 import java.util.Date
 
 
-class DailyBrowseAdapter : RecyclerView.Adapter< DailyBrowseAdapter.DailyViewHolder >() {
+class DailyBrowseAdapter(val context: Context) :
+    RecyclerView.Adapter< DailyBrowseAdapter.DailyViewHolder >() {
 
     val dailyDataList = GlDailyStatistics.listDailyData()
 
@@ -22,21 +27,29 @@ class DailyBrowseAdapter : RecyclerView.Adapter< DailyBrowseAdapter.DailyViewHol
         var dailyDataDate: Date = Date()
         val dailyDataStat: GlDailyStatistics = GlDailyStatistics()
 
-        val dateText: TextView = view.findViewById< TextView >(R.id.id_text_view_date)
+        val dateButton: Button = view.findViewById(R.id.id_button_item_button)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DailyViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(
-            R.layout.layout_daily_data_item, parent, false)
+            R.layout.layout_recycler_view_item, parent, false)
         return DailyViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: DailyViewHolder, position: Int) {
-        val dateStr = dailyDataList[position]
-        holder.dailyDataDate = GlDateTime.stringToDate(dateStr)
-        holder.dataValid = holder.dailyDataStat.loadDailyData(holder.dailyDataDate)
+        val dateStr = dailyDataList[position].removePrefix(DAILY_FOLDER_PREFIX)
 
-        holder.dateText.text = dateStr
+        holder.dataValid = true
+        holder.dailyDataDate = GlDateTime.stringToDate(dateStr)
+
+        // holder.dataValid = holder.dailyDataStat.loadDailyData(holder.dailyDataDate)
+
+        holder.dateButton.text = dateStr
+        holder.dateButton.setOnClickListener {
+            val intent = Intent(context, DailyStatisticsActivity::class.java)
+            intent.putExtra("dateStr", dateStr)
+            context.startActivity(intent)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -52,7 +65,12 @@ class DailyBrowseActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_daily_browse)
 
-        mDailyDataList = findViewById(R.id.id_recycler_reiw_daily_list)
+        title = "GamingLife - 回顾"
+
+        mDailyDataList = findViewById(R.id.id_recycler_view_daily_list)
         mDailyDataList.layoutManager = LinearLayoutManager(this)
+        mDailyDataList.adapter = DailyBrowseAdapter(this)
+        mDailyDataList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL))
     }
 }
+
