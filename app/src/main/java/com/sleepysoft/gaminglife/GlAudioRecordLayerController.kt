@@ -1,5 +1,6 @@
 package com.sleepysoft.gaminglife
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.graphics.*
@@ -247,7 +248,7 @@ class GlAudioRecordLayerController(
     // -----------------------------------------------------------------
 
     private fun popupTextEditor() {
-        mInputDialog.show()
+        (mContext as Activity).startActivityForResult()
     }
 
     private fun onTextInputOk() {

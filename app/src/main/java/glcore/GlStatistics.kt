@@ -36,15 +36,14 @@ class GlDailyStatistics {
 
     fun loadDailyData(dateTime: Date) : Boolean {
         val offsetDays = GlDateTime.daysBetween(GlDateTime.datetime(), dateTime)
-        val dailyFileName: String = GlRoot.getFileNameTs()
+
         dailyPath = GlRoot.getDailyFolderName(offsetDays)
+        dailyFile = GlFile.joinPaths(dailyPath, GL_FILE_DAILY_RECORD)
 
-        dailyFile = GlFile.joinPaths(dailyPath, dailyFileName)
+        val dailyFileData: String = GlFile.loadFile(dailyFile).toString(Charsets.UTF_8)
 
-        val fileContent: String = GlFile.loadFile(dailyFile).toString(Charsets.UTF_8)
-
-        return if (fileContent.isNotEmpty()) {
-            dailyData.attach(GlJson.deserializeAnyDict(fileContent))
+        return if (dailyFileData.isNotEmpty()) {
+            dailyData.attach(GlJson.deserializeAnyDict(dailyFileData))
             dailyData.hasUpdate = false
             val ret = parseDailyData() and collectDailyExtraFiles()
             GlLog.i("GlDailyStatistics - Load daily data $dateTime ${if (ret) "SUCCESS." else "FAIL."}")
