@@ -2,7 +2,6 @@ package graphengine
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
-import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
@@ -12,11 +11,11 @@ const val DEBUG_TAG = "DefaultDbg"
 
 
 interface GraphViewObserver {
-    fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+    fun onItemLayout()
 
-    }
+    fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int)
 
-    fun onItemPicked(pickedItem: GraphItem) {
+/*    fun onItemPicked(pickedItem: GraphItem) {
 
     }
 
@@ -30,15 +29,33 @@ interface GraphViewObserver {
 
     fun onItemDragging(draggingItem: GraphItem, pos: PointF) {
 
-    }
+    }*/
 
 /*    fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
 
     }*/
+}
 
-    fun onItemLayout() {
 
+interface ActionHandler {
+    enum class ACT {
+        IGNORED,
+        HANDLED
     }
+
+    fun onActionUp(pos: PointF) : ACT
+
+    fun onActionDown(pos: PointF) : ACT
+
+    fun onActionMove(posBefore: PointF, posNow: PointF, distanceX: Float,distanceY: Float) : ACT
+
+    fun onActionFling(posBefore: PointF, posNow: PointF, velocityX: Float, velocityY: Float) : ACT
+
+    fun onActionClick(pos: PointF) : ACT
+
+    fun onActionSelect(pos: PointF) : ACT
+
+    fun onActionLongPress(pos: PointF) : ACT
 }
 
 
@@ -55,7 +72,8 @@ class GraphView(context: Context) :
     var unitScale: Float = 1.0f
         private set
 
-    private var mObserverStack: MutableList< GraphViewObserver > = mutableListOf()
+    val mGraphViewObserver = mutableListOf< GraphViewObserver >()
+
     private var mGestureDetector = GestureDetector(context, this)
 
     // ------------------------------- Window event handler override -------------------------------
@@ -79,11 +97,11 @@ class GraphView(context: Context) :
         paintArea.set(0.0f, 0.0f, w.toFloat(), h.toFloat())
 
         // Update Layer cover area
-        mLayers.map { it.coverArea.set(0.0f, 0.0f, w.toFloat(), h.toFloat()) }
+        mLayers.forEach { it.coverArea.set(0.0f, 0.0f, w.toFloat(), h.toFloat()) }
+
+        mGraphViewObserver.forEach { it.onViewSizeChanged(w, h, oldw, oldh) }
 
         layoutItems()
-
-        topObserver()?.onViewSizeChanged(w, h, oldw, oldh)
     }
 
     // --------------------------------- Action & Gesture Handler ----------------------------------
@@ -112,64 +130,88 @@ class GraphView(context: Context) :
     }
 
     private fun onUp(e: MotionEvent) {
-        // Log.i(DEBUG_TAG, "onUp")
-
-/*        mSelItem?.apply {
-            val itemBound = this.boundRect()
-            val insectItems = itemsFromLayer() {
-                it.boundRect().intersect(itemBound) && it.interactive}
-
-            if (insectItems.size > 0) {
-                topObserver()?.onItemDropIntersecting(this, insectItems)
+        var handleState = ActionHandler.ACT.IGNORED
+        mLayers.forEach { layer ->
+            layer.graphItems.forEach { item ->
+                if (handleState == ActionHandler.ACT.IGNORED) {
+                    handleState = item.graphActionDecorator?.onActionUp(PointF(e.x, e.y)) ?: ActionHandler.ACT.IGNORED
+                }
             }
-
-            // Reset graph item offset and repaint
-            this.offsetPixel = PointF(0.0f, 0.0f)
-        }*/
+        }
 
         // Clear select item and notify observer
-        mSelItem?.run {
+/*        mSelItem?.run {
             topObserver()?.onItemDropped(this)
             this.offsetPixel = PointF(0.0f, 0.0f)
             this@GraphView.invalidate()
         }
 
-        mSelItem = null
+        mSelItem = null*/
     }
 
     override fun onDown(e: MotionEvent): Boolean {
-        // Log.i(DEBUG_TAG, "onDown")
+        var handleState = ActionHandler.ACT.IGNORED
+        mLayers.forEach { layer ->
+            layer.graphItems.forEach { item ->
+                if (handleState == ActionHandler.ACT.IGNORED) {
+                    handleState = item.graphActionDecorator?.onActionDown(PointF(e.x, e.y)) ?: ActionHandler.ACT.IGNORED
+                }
+            }
+        }
         return true
     }
 
     override fun onShowPress(e: MotionEvent) {
-        // Log.i(DEBUG_TAG, "onShowPress")
+        var handleState = ActionHandler.ACT.IGNORED
+        mLayers.forEach { layer ->
+            layer.graphItems.forEach { item ->
+                if (handleState == ActionHandler.ACT.IGNORED) {
+                    handleState = item.graphActionDecorator?.onActionSelect(PointF(e.x, e.y)) ?: ActionHandler.ACT.IGNORED
+                }
+            }
+        }
 
-        val selItem = itemsFromLayer() {
+/*        val selItem = itemsFromLayer() {
             it.boundRect().contains(e.x, e.y) && it.visible && it.interactive}
         if (selItem.isNotEmpty()) {
             mSelItem = selItem[0]
             // Log.i(DEBUG_TAG, "Adapted item: $mSelItem")
             topObserver()?.onItemPicked(selItem[0])
-        }
+        }*/
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        // Log.i(DEBUG_TAG, "onSingleTapUp")
+        var handleState = ActionHandler.ACT.IGNORED
+        mLayers.forEach { layer ->
+            layer.graphItems.forEach { item ->
+                if (handleState == ActionHandler.ACT.IGNORED) {
+                    handleState = item.graphActionDecorator?.onActionClick(PointF(e.x, e.y)) ?: ActionHandler.ACT.IGNORED
+                }
+            }
+        }
 
-        val selItem = itemsFromLayer() {
+/*        val selItem = itemsFromLayer() {
             it.boundRect().contains(e.x, e.y) && it.visible && it.interactive}
         if (selItem.isNotEmpty()) {
             topObserver()?.onItemClicked(selItem[0])
-        }
+        }*/
+
         return true
     }
 
     override fun onScroll(e1: MotionEvent, e2: MotionEvent,
                           distanceX: Float,distanceY: Float): Boolean {
-        // Log.i(DEBUG_TAG, "onScroll - x = $distanceX, y = $distanceY")
+        var handleState = ActionHandler.ACT.IGNORED
+        mLayers.forEach { layer ->
+            layer.graphItems.forEach { item ->
+                if (handleState == ActionHandler.ACT.IGNORED) {
+                    handleState = item.graphActionDecorator?.onActionMove(
+                        PointF(e1.x, e1.y), PointF(e2.x, e2.y), distanceX, distanceY) ?: ActionHandler.ACT.IGNORED
+                }
+            }
+        }
 
-        mSelItem?.run {
+/*        mSelItem?.run {
             this.shiftItem(-distanceX, -distanceY)
             this@GraphView.invalidate()
 
@@ -177,19 +219,37 @@ class GraphView(context: Context) :
                 this.boundRect().centerX(),
                 this.boundRect().centerY())
             topObserver()?.onItemDragging(this, pos)
-        }
+        }*/
+
         return true
     }
 
-    // https://stackoverflow.com/a/56545079
-
     override fun onLongPress(e: MotionEvent) {
+        var handleState = ActionHandler.ACT.IGNORED
+        mLayers.forEach { layer ->
+            layer.graphItems.forEach { item ->
+                if (handleState == ActionHandler.ACT.IGNORED) {
+                    handleState = item.graphActionDecorator?.onActionLongPress(PointF(e.x, e.y))
+                        ?: ActionHandler.ACT.IGNORED
+                }
+            }
+        }
+
+        // https://stackoverflow.com/a/56545079
         mIsLongPressed = true
     }
 
     override fun onFling(e1: MotionEvent, e2: MotionEvent,
                          velocityX: Float, velocityY: Float): Boolean {
-        // // Log.i(DEBUG_TAG, "onFling - x = $velocityX, y = $velocityY")
+        var handleState = ActionHandler.ACT.IGNORED
+        mLayers.forEach { layer ->
+            layer.graphItems.forEach { item ->
+                if (handleState == ActionHandler.ACT.IGNORED) {
+                    handleState = item.graphActionDecorator?.onActionFling(
+                        PointF(e1.x, e1.y), PointF(e2.x, e2.y), velocityX, velocityY) ?: ActionHandler.ACT.IGNORED
+                }
+            }
+        }
         return false
     }
 
@@ -217,7 +277,7 @@ class GraphView(context: Context) :
         }
     }
 
-    fun pushObserver(observer: GraphViewObserver) {
+/*    fun pushObserver(observer: GraphViewObserver) {
         mObserverStack.add(observer)
     }
 
@@ -228,7 +288,7 @@ class GraphView(context: Context) :
             mObserverStack.removeAt(mObserverStack.size - 1)
         }
         return poppedLayer
-    }
+    }*/
 
     fun isPortrait(): Boolean {
         return paintArea.height() >= paintArea.width()
@@ -241,11 +301,7 @@ class GraphView(context: Context) :
     // ------------------------------------- Private functions -------------------------------------
 
     private fun layoutItems() {
-        topObserver()?.onItemLayout()
-    }
-    
-    private fun topObserver() : GraphViewObserver? {
-        return if (mObserverStack.isNotEmpty()) mObserverStack[mObserverStack.size - 1] else null
+        mGraphViewObserver.forEach { it.onItemLayout() }
     }
 
     private fun itemsFromLayer(filter: (input: GraphItem) -> Boolean): MutableList< GraphItem > {
@@ -257,27 +313,5 @@ class GraphView(context: Context) :
         }
         return items
     }
-
-/*    private fun itemFromPoint(pos: PointF) : MutableList< GraphItem > {
-        val items = mutableListOf< GraphItem >()
-        for (item in mGraphItems) {
-            if (item.boundRect().contains(pos.x, pos.y)) {
-                items.add(item)
-            }
-        }
-        return items
-    }
-
-    private fun pickableItemFromPoint(pos: PointF) : GraphItem? {
-        var selItem: GraphItem? = null
-        val selItems = itemFromPoint(pos)
-        for (item in selItems) {
-            if (item.interactive) {
-                selItem = item
-                break
-            }
-        }
-        return selItem
-    }*/
 }
 

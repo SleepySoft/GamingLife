@@ -1,13 +1,6 @@
 package graphengine
-import android.R
 import android.graphics.*
-import android.graphics.drawable.Drawable
-import android.graphics.BitmapFactory
-
 import android.graphics.Bitmap
-
-
-
 
 
 abstract class GraphObject(
@@ -26,52 +19,52 @@ abstract class GraphItem(
     GraphObject(id, visible) {
 
     var itemData: Any? = null
-
-    var subText: String = ""
-        set(value) {
-            field = value
-            needRender = true
-        }
-    var mainText: String = ""
-        set(value) {
-            field = value
-            needRender = true
-        }
-
-    var needRender: Boolean = true
-    var interactive: Boolean = true
-
-    var fontPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    var itemLayer: GraphLayer? = null
     var shapePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    val graphItemDecorator = mutableListOf< GraphItemDecorator >()
+    val graphActionDecorator: GraphActionDecorator? = null
 
     var inflatePct: Float = 0.0f
         set(value) {
             field = value
-            needRender = true
         }
 
     var offsetPixel: PointF = PointF(0.0f, 0.0f)
         set(value) {
             field = value
-            needRender = true
         }
 
     fun shiftItem(cx: Float, cy: Float) {
         offsetPixel.x += cx
         offsetPixel.y += cy
-        needRender = true
     }
 
     fun cancelShift() {
         offsetPixel.x = 0.0f
         offsetPixel.y = 0.0f
-        needRender = true
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    open fun renderWithDecorator(canvas: Canvas) {
+
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    override fun render(canvas: Canvas) {
+        graphItemDecorator.map { it.paintBeforeGraph(canvas) }
+        renderWithDecorator(canvas)
+        graphItemDecorator.map { it.paintAfterGraph(canvas) }
     }
 }
 
 
-class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
-    private var mGraphItems: MutableList< GraphItem > = mutableListOf()
+class GraphLayer(id: String, visible: Boolean,
+    val graphView: GraphView) : GraphObject(id, visible) {
+    var graphItems: MutableList< GraphItem > = mutableListOf()
+        private set
 
     private val mBackGroundPaint: Paint = Paint().apply {
         this.color = 0x00FFFFFF
@@ -95,19 +88,21 @@ class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
     // ---------------- GraphItem Management ----------------
 
     fun addGraphItem(newItem: GraphItem) : Boolean {
+        newItem.itemLayer = this
         return insertGraphItem(newItem, 0)
     }
 
     fun insertGraphItem(newItem: GraphItem, atIndex: Int) : Boolean {
-        if (newItem in mGraphItems) {
+        if (newItem in graphItems) {
             return false
         }
-        mGraphItems.add(atIndex, newItem)
+        newItem.itemLayer = this
+        graphItems.add(atIndex, newItem)
         return true
     }
 
     fun insertGraphItemBefore(newItem: GraphItem, refItem: GraphItem) : Boolean {
-        val refItemPos = mGraphItems.indexOf(refItem)
+        val refItemPos = graphItems.indexOf(refItem)
         if (refItemPos >= 0) {
             return insertGraphItem(newItem, refItemPos)
         }
@@ -115,7 +110,7 @@ class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
     }
 
     fun insertGraphItemAfter(newItem: GraphItem, refItem: GraphItem) : Boolean {
-        val refItemPos = mGraphItems.indexOf(refItem)
+        val refItemPos = graphItems.indexOf(refItem)
         if (refItemPos >= 0) {
             return insertGraphItem(newItem, refItemPos + 1)
         }
@@ -123,42 +118,42 @@ class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
     }
 
     fun bringGraphItemToFront(item: GraphItem) {
-        if (item in mGraphItems) {
-            mGraphItems.remove(item)
-            mGraphItems.add(0, item)
+        if (item in graphItems) {
+            graphItems.remove(item)
+            graphItems.add(0, item)
         }
     }
 
     fun sendGraphItemToBack(item: GraphItem) {
-        if (item in mGraphItems) {
-            mGraphItems.remove(item)
-            mGraphItems.add(item)
+        if (item in graphItems) {
+            graphItems.remove(item)
+            graphItems.add(item)
         }
     }
 
     fun bringGraphItemToFrontOf(operateItem: GraphItem, refItem: GraphItem) : Boolean {
-        if (operateItem in mGraphItems) {
-            mGraphItems.remove(operateItem)
+        if (operateItem in graphItems) {
+            graphItems.remove(operateItem)
             return insertGraphItemBefore(operateItem, refItem)
         }
         return false
     }
 
     fun sendGraphItemToBackOf(operateItem: GraphItem, refItem: GraphItem) : Boolean {
-        if (operateItem in mGraphItems) {
-            mGraphItems.remove(operateItem)
+        if (operateItem in graphItems) {
+            graphItems.remove(operateItem)
             return insertGraphItemAfter(operateItem, refItem)
         }
         return false
     }
 
     fun pickGraphItems(filter: (input: GraphItem) -> Boolean) : List< GraphItem > {
-        return mGraphItems.filter(filter)
+        return graphItems.filter(filter)
     }
 
     fun removeGraphItem(filter: (input: GraphItem) -> Boolean) {
-        val remainingItems = mGraphItems.filter { !filter(it) }
-        mGraphItems = remainingItems.toMutableList()
+        graphItems.filter { filter(it) }.map { it.itemLayer = null }
+        graphItems = graphItems.filter { !filter(it) }.toMutableList()
     }
 
     fun itemFromPoint(pos: PointF) : List< GraphItem > {
@@ -191,7 +186,7 @@ class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
 
     override fun boundRect(): RectF {
         var rect: RectF = RectF()
-        for (item in mGraphItems) {
+        for (item in graphItems) {
             if (item.visible) {
                 if (rect.isEmpty) {
                     rect = item.boundRect()
@@ -206,7 +201,7 @@ class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
 
     override fun render(canvas: Canvas) {
         canvas.drawRect(coverArea, mBackGroundPaint)
-        for (item in mGraphItems.reversed()) {
+        for (item in graphItems.reversed()) {
             if (item.visible) {
                 item.render(canvas)
             }
@@ -221,40 +216,12 @@ class GraphLayer(id: String, visible: Boolean) : GraphObject(id, visible) {
 
 class GraphCircle : GraphItem() {
     var radius: Float = 0.0f
-        set(value) {
-            field = value
-            needRender = true
-        }
-
     var origin: PointF = PointF(0.0f, 0.0f)
-        set(value) {
-            field = value
-            needRender = true
-        }
 
-    private var boundaryOfText: Rect = Rect()
-    private var drawableContainer: Rect = Rect()
-
-    override fun render(canvas: Canvas) {
+    override fun renderWithDecorator(canvas: Canvas) {
         val rCenter = realOrigin()
         val rRadius = realRadius()
-
         canvas.drawCircle(rCenter.x, rCenter.y, rRadius, shapePaint)
-
-        if (needRender) {
-            drawableContainer = boundRect().apply { inflate(0.7f) }.toRect()
-            val fontSize = calculateFontSize(boundaryOfText, drawableContainer, mainText)
-            fontPaint.setTextSize(fontSize)
-            needRender = false
-        }
-
-        val halfTextHeight: Float = boundaryOfText.height() / 2.0f
-        canvas.drawText(
-            mainText,
-            drawableContainer.centerX().toFloat(),
-            (drawableContainer.centerY().toFloat() + halfTextHeight),
-            fontPaint
-        )
     }
 
     override fun boundRect() : RectF {
@@ -293,7 +260,6 @@ class GraphCircleProgress(
 
     override fun render(canvas: Canvas) {
         canvas.drawArc(boundRect(), -90.0f, 360.0f * progress, true, shapePaint)
-        // canvas.drawRect(getBoundRect(), shapePaint)
     }
 
     override fun moveCenter(pos: PointF) {
@@ -304,23 +270,11 @@ class GraphCircleProgress(
 
 class GraphRectangle : GraphItem() {
     var rect: RectF = RectF()
-        set(value) {
-            field = value
-            needRender = true
-        }
-
     var roundRadius: Float = 0.0f
-        set(value) {
-            field = value
-            needRender = true
-        }
-
-    private var boundaryOfText: Rect = Rect()
-    private var drawableContainer: Rect = Rect()
 
     // ---------------------------------------------------------------------
 
-    override fun render(canvas: Canvas) {
+    override fun renderWithDecorator(canvas: Canvas) {
         val rRect = boundRect()
 
         if (roundRadius < 0.001f) {
@@ -329,21 +283,6 @@ class GraphRectangle : GraphItem() {
         else {
             canvas.drawRoundRect(rRect, roundRadius, roundRadius, shapePaint)
         }
-
-        if (needRender) {
-            drawableContainer = boundRect().apply { inflate(0.8f) }.toRect()
-            val fontSize = calculateFontSize(boundaryOfText, drawableContainer, mainText)
-            fontPaint.setTextSize(fontSize)
-            needRender = false
-        }
-
-        val halfTextHeight: Float = boundaryOfText.height() / 2.0f
-        canvas.drawText(
-            mainText,
-            drawableContainer.centerX().toFloat(),
-            (drawableContainer.centerY().toFloat() + halfTextHeight),
-            fontPaint
-        )
     }
 
     override fun boundRect() : RectF =
