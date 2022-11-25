@@ -4,6 +4,8 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.Rect
+import android.os.Handler
+import android.os.Looper
 
 
 open class GraphItemDecorator(
@@ -154,6 +156,22 @@ class LongPressProgressDecorator(decoratedItem: GraphItem) :
         fun onLongPressTriggered(triggerItem: GraphItem)
     }
     val triggerListener: TriggerListener? = null
+
+    private lateinit var mHandler : Handler
+    private lateinit var mRunnable : Runnable
+
+    // ---------------------------------------------------------------------
+
+    fun init() {
+        mHandler = Handler(Looper.getMainLooper())
+        mRunnable = Runnable { doPeriod() }
+    }
+
+    private fun doPeriod() {
+        mHandler.postDelayed(mRunnable, 100)
+    }
+
+    // ---------------------------------------------------------------------
 
     override fun onActionUp(pos: PointF): ActionHandler.ACT {
         // Leak this action to other handler avoiding issues
