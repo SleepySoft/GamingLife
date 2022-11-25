@@ -1,5 +1,6 @@
 package com.sleepysoft.gaminglife
 
+import android.app.Activity
 import android.app.KeyguardManager
 import android.content.Intent
 import android.os.Build
@@ -58,12 +59,16 @@ class TimeViewActivity : AppCompatActivity() {
         val onLockScreen: Boolean = intent.getBooleanExtra("OnLockedScreen", false)
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+
+    }
+
+    fun popupInputActivity() {
+        // startActivityForResult()
+    }
+
     private fun doPeriod() {
         mController.polling()
         mHandler.postDelayed(mRunnable, 100)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        
     }
 }

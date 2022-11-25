@@ -248,7 +248,6 @@ class GlAudioRecordLayerController(
     // -----------------------------------------------------------------
 
     private fun popupTextEditor() {
-        (mContext as Activity).startActivityForResult()
     }
 
     private fun onTextInputOk() {
