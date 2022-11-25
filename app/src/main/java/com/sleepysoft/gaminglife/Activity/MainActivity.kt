@@ -1,6 +1,5 @@
-package com.sleepysoft.gaminglife
+package com.sleepysoft.gaminglife.Activity
 
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.*
@@ -8,6 +7,10 @@ import android.provider.Settings
 import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.view.WindowManager
+import com.sleepysoft.gaminglife.GamingLifeMainService
+import com.sleepysoft.gaminglife.PermissionActivity
+import com.sleepysoft.gaminglife.RuntimeTest
+import com.sleepysoft.gaminglife.TimeViewActivity
 import glcore.GlLog
 import glcore.GlRoot
 import glenv.GlEnv

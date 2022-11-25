@@ -99,6 +99,7 @@ class GlDailyStatistics {
 
     private fun collectDailyExtraFiles() : Boolean {
         dailyExtraFiles = GlFile.listFiles(dailyPath, GlFile.LIST_FILE)
+        dailyExtraFiles.filter { !it.endsWith(".json") }
 
         GlLog.i("Collect daily files: $dailyExtraFiles")
 

@@ -406,7 +406,7 @@ class GlTimeViewController(
     private fun handleInputComplete(inputType: String, result: String) {
         when (inputType) {
             "Text" -> {
-                GlRoot.saveContentToDailyFolder(result.toByteArray(), ".md")
+                GlRoot.saveContentToDailyFolder(result.toByteArray(), "md")
             }
             "Audio" -> {
                 GlRoot.archiveRootPathFileToDailyFolder(FILE_NAME_AUDIO_TEMP_WAV)

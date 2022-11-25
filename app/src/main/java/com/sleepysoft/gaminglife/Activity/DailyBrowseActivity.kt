@@ -58,6 +58,8 @@ class DailyBrowseAdapter(val context: Context) :
 }
 
 
+// -------------------------------------------------------------------------------------------------
+
 class DailyBrowseActivity : AppCompatActivity() {
     lateinit var mDailyDataList: RecyclerView
 

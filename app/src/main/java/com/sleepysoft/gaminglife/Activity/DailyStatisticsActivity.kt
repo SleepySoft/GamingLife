@@ -46,6 +46,8 @@ class DailyExtFileAdapter(private val dailyStatistics: GlDailyStatistics) :
 }
 
 
+// -------------------------------------------------------------------------------------------------
+
 class DailyStatisticsActivity : AppCompatActivity() {
     lateinit var mDailyExtFileList: RecyclerView
     var mDailyStatistics: GlDailyStatistics = GlDailyStatistics()
