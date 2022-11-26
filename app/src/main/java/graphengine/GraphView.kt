@@ -130,13 +130,8 @@ class GraphView(context: Context) :
     }
 
     private fun onUp(e: MotionEvent) {
-        var handleState = ActionHandler.ACT.IGNORED
-        mLayers.forEach { layer ->
-            layer.graphItems.forEach { item ->
-                if (handleState == ActionHandler.ACT.IGNORED) {
-                    handleState = item.graphActionDecorator?.onActionUp(PointF(e.x, e.y)) ?: ActionHandler.ACT.IGNORED
-                }
-            }
+        forEachItemActionHandler {
+            it.onActionUp(PointF(e.x, e.y))
         }
 
         // Clear select item and notify observer
@@ -150,25 +145,15 @@ class GraphView(context: Context) :
     }
 
     override fun onDown(e: MotionEvent): Boolean {
-        var handleState = ActionHandler.ACT.IGNORED
-        mLayers.forEach { layer ->
-            layer.graphItems.forEach { item ->
-                if (handleState == ActionHandler.ACT.IGNORED) {
-                    handleState = item.graphActionDecorator?.onActionDown(PointF(e.x, e.y)) ?: ActionHandler.ACT.IGNORED
-                }
-            }
+        forEachItemActionHandler {
+            it.onActionDown(PointF(e.x, e.y))
         }
         return true
     }
 
     override fun onShowPress(e: MotionEvent) {
-        var handleState = ActionHandler.ACT.IGNORED
-        mLayers.forEach { layer ->
-            layer.graphItems.forEach { item ->
-                if (handleState == ActionHandler.ACT.IGNORED) {
-                    handleState = item.graphActionDecorator?.onActionSelect(PointF(e.x, e.y)) ?: ActionHandler.ACT.IGNORED
-                }
-            }
+        forEachItemActionHandler {
+            it.onActionSelect(PointF(e.x, e.y))
         }
 
 /*        val selItem = itemsFromLayer() {
@@ -181,13 +166,8 @@ class GraphView(context: Context) :
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        var handleState = ActionHandler.ACT.IGNORED
-        mLayers.forEach { layer ->
-            layer.graphItems.forEach { item ->
-                if (handleState == ActionHandler.ACT.IGNORED) {
-                    handleState = item.graphActionDecorator?.onActionClick(PointF(e.x, e.y)) ?: ActionHandler.ACT.IGNORED
-                }
-            }
+        forEachItemActionHandler {
+            it.onActionClick(PointF(e.x, e.y))
         }
 
 /*        val selItem = itemsFromLayer() {
@@ -201,14 +181,9 @@ class GraphView(context: Context) :
 
     override fun onScroll(e1: MotionEvent, e2: MotionEvent,
                           distanceX: Float,distanceY: Float): Boolean {
-        var handleState = ActionHandler.ACT.IGNORED
-        mLayers.forEach { layer ->
-            layer.graphItems.forEach { item ->
-                if (handleState == ActionHandler.ACT.IGNORED) {
-                    handleState = item.graphActionDecorator?.onActionMove(
-                        PointF(e1.x, e1.y), PointF(e2.x, e2.y), distanceX, distanceY) ?: ActionHandler.ACT.IGNORED
-                }
-            }
+        forEachItemActionHandler {
+            it.onActionMove(
+                PointF(e1.x, e1.y), PointF(e2.x, e2.y), distanceX, distanceY)
         }
 
 /*        mSelItem?.run {
@@ -225,30 +200,17 @@ class GraphView(context: Context) :
     }
 
     override fun onLongPress(e: MotionEvent) {
-        var handleState = ActionHandler.ACT.IGNORED
-        mLayers.forEach { layer ->
-            layer.graphItems.forEach { item ->
-                if (handleState == ActionHandler.ACT.IGNORED) {
-                    handleState = item.graphActionDecorator?.onActionLongPress(PointF(e.x, e.y))
-                        ?: ActionHandler.ACT.IGNORED
-                }
-            }
+        forEachItemActionHandler {
+            it.onActionLongPress(PointF(e.x, e.y))
         }
-
         // https://stackoverflow.com/a/56545079
         mIsLongPressed = true
     }
 
     override fun onFling(e1: MotionEvent, e2: MotionEvent,
                          velocityX: Float, velocityY: Float): Boolean {
-        var handleState = ActionHandler.ACT.IGNORED
-        mLayers.forEach { layer ->
-            layer.graphItems.forEach { item ->
-                if (handleState == ActionHandler.ACT.IGNORED) {
-                    handleState = item.graphActionDecorator?.onActionFling(
-                        PointF(e1.x, e1.y), PointF(e2.x, e2.y), velocityX, velocityY) ?: ActionHandler.ACT.IGNORED
-                }
-            }
+        forEachItemActionHandler {
+            it.onActionFling(PointF(e1.x, e1.y), PointF(e2.x, e2.y), velocityX, velocityY)
         }
         return false
     }
@@ -322,11 +284,16 @@ class GraphView(context: Context) :
         return items
     }
 
-    private fun forEachItemActionHandler() {
-        var handleState = ActionHandler.ACT.IGNORED
-        forEachItem {
-            if (handleState == ActionHandler.ACT.IGNORED) {
-                it.graphActionDecorator.forEach {  }
+    private fun forEachItemActionHandler(action: (GraphActionDecorator) -> ActionHandler.ACT) {
+        var skip = false
+        forEachItem { item->
+            if (!skip) {
+                item.graphActionDecorator.forEach {
+                    // Not skip action in an item
+                    if (action(it) == ActionHandler.ACT.HANDLED) {
+                        skip = true
+                    }
+                }
             }
         }
     }

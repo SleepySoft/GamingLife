@@ -28,14 +28,17 @@ class GlTimeViewController(
     private lateinit var mTimeViewBaseLayer: GraphLayer
     private var mCenterRadius = 0.1f
     private var mSurroundRadius = 0.1f
+
     private lateinit var mCenterItem: GraphCircle
-    private lateinit var mLongLongPressProgress: GraphCircleProgress
+    private lateinit var mProgressItem: GraphCircleProgress
+    private lateinit var mCenterItemText: AutoFitTextDecorator
+
     private var mSurroundItems = mutableListOf< GraphCircle >()
+    private var mSurroundItemText = mutableListOf< AutoFitTextDecorator >()
 
     private lateinit var mMenuDailyStatistics: GraphRectangle
 
     private var mRecording: Boolean = false
-    private var mPressSince: Long = 0
     private lateinit var mRecordController: GlAudioRecordLayerController
 
     fun init() {
@@ -67,13 +70,13 @@ class GlTimeViewController(
         val seconds: Long = remainingSec % 60
 
         if (hour != 0L) {
-            mCenterItem.mainText = "%02d:%02d:%02d".format(hour, minutes, seconds)
+            mCenterItemText.mainText = "%02d:%02d:%02d".format(hour, minutes, seconds)
         }
         else {
-            mCenterItem.mainText = "%02d:%02d".format(minutes, seconds)
+            mCenterItemText.mainText = "%02d:%02d".format(minutes, seconds)
         }
 
-        processRecordProgress()
+        // processRecordProgress()
 
         // mCenterItem.mainText = "%02d:%02d:%02d.%03d".format(hour, minutes, seconds, ms)
         mGraphView.invalidate()
@@ -91,7 +94,7 @@ class GlTimeViewController(
         mCenterItem.shapePaint.strokeWidth = strokeWidth
     }
 
-    override fun onItemPicked(pickedItem: GraphItem) {
+/*    override fun onItemPicked(pickedItem: GraphItem) {
         pickedItem.inflatePct = 10.0f
         mTimeViewBaseLayer.bringGraphItemToFront(pickedItem)
 
@@ -163,7 +166,7 @@ class GlTimeViewController(
             val activityIntent = Intent(mContext, DailyBrowseActivity::class.java)
             mContext.startActivity(activityIntent)
         }
-    }
+    }*/
 
 /*    override fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
         if (droppedItem == mCenterItem) {
@@ -214,7 +217,7 @@ class GlTimeViewController(
         val layer = if (layers.isNotEmpty()) {
             layers[0]
         } else {
-            GraphLayer("TimeView.BaseLayer", true).apply {
+            GraphLayer("TimeView.BaseLayer", true, mGraphView).apply {
                 mGraphView.addLayer(this)
             }
         }
@@ -229,59 +232,72 @@ class GlTimeViewController(
         mCenterItem = GraphCircle().apply {
             this.id = "TimeView.CenterItem"
             this.itemData = currentTaskGroupData
-            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#FFFFFF")
-                this.textAlign = Paint.Align.CENTER
-            }
             this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
                 this.color = Color.parseColor(
                     mGlTaskModule.colorOfTask(currentTaskGroupData?.get("id") ?: GROUP_ID_IDLE))
                 this.style = Paint.Style.FILL
             }
+            this.graphItemDecorator.add(mCenterItemText)
         }
 
-        mLongLongPressProgress = GraphCircleProgress(
+        mCenterItemText = AutoFitTextDecorator(mCenterItem).apply {
+            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#FFFFFF")
+                this.textAlign = Paint.Align.CENTER
+            }
+        }
+        mCenterItem.graphItemDecorator.add(mCenterItemText)
+
+        mProgressItem = GraphCircleProgress(
             mCenterItem, 1.3f).apply {
             this.visible = false
-            this.interactive = false
             this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
                 this.color = Color.parseColor("#FFA500")
                 this.style = Paint.Style.FILL
             }
         }
+        mCenterItem.graphActionDecorator.add(
+            LongPressProgressDecorator(mCenterItem, mProgressItem, 30.0f).apply { init() })
 
         val taskGroupTop = mGlTaskModule.getTaskGroupTop()
         for ((k, v) in taskGroupTop) {
             val item = GraphCircle().apply {
                 this.id = "TimeView.$k"
                 this.itemData = v
-                this.mainText = v["name"] ?: ""
-                this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-                    this.color = Color.parseColor("#FFFFFF")
-                    this.textAlign = Paint.Align.CENTER
-                }
                 this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
                     this.color = Color.parseColor(mGlTaskModule.colorOfTask(k))
                     this.style = Paint.Style.FILL
                 }
             }
 
+            val text = AutoFitTextDecorator(item).apply {
+                this.mainText = v["name"] ?: ""
+                this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                    this.color = Color.parseColor("#FFFFFF")
+                    this.textAlign = Paint.Align.CENTER
+                }
+            }
+            item.graphItemDecorator.add(text)
             layer.addGraphItem(item)
+
             mSurroundItems.add(item)
+            mSurroundItemText.add(text)
         }
 
         mMenuDailyStatistics = GraphRectangle().apply {
             this.id = "TimeView.MenuDailyStatistics"
-            this.mainText = "回顾"
-            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#FFFFFF")
-                this.textAlign = Paint.Align.CENTER
-            }
+            this.graphItemDecorator.add(AutoFitTextDecorator(this).apply {
+                this.mainText = "回顾"
+                this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                    this.color = Color.parseColor("#FFFFFF")
+                    this.textAlign = Paint.Align.CENTER
+                }
+            })
         }
 
         layer.addGraphItem(mMenuDailyStatistics)
         layer.addGraphItem(mCenterItem)
-        layer.insertGraphItemAfter(mLongLongPressProgress, mCenterItem)
+        layer.insertGraphItemAfter(mProgressItem, mCenterItem)
 
         mTimeViewBaseLayer = layer
     }
@@ -371,7 +387,7 @@ class GlTimeViewController(
         }
     }
 
-    private fun processRecordProgress() {
+/*    private fun processRecordProgress() {
         if (!mRecording && (mPressSince > 0)) {
             val duration: Int = (System.currentTimeMillis() - mPressSince).toInt()
             if (duration >= LONG_LONG_PRESS_TIMEOUT) {
@@ -401,7 +417,7 @@ class GlTimeViewController(
             GlRoot.env.glAudio.stopRecord()
             mRecording = false
         }
-    }
+    }*/
 
     private fun handleInputComplete(inputType: String, result: String) {
         when (inputType) {
