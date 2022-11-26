@@ -1,4 +1,4 @@
-package com.sleepysoft.gaminglife.Activity
+package com.sleepysoft.gaminglife.activities
 
 import android.content.Intent
 import android.net.Uri
@@ -7,6 +7,7 @@ import android.provider.Settings
 import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.view.WindowManager
+import com.sleepysoft.gaminglife.controllers.GlControllerBuilder
 import com.sleepysoft.gaminglife.GamingLifeMainService
 import com.sleepysoft.gaminglife.PermissionActivity
 import com.sleepysoft.gaminglife.RuntimeTest
@@ -17,6 +18,8 @@ import glenv.GlEnv
 
 
 class MainActivity : AppCompatActivity() {
+    val glControllerBuilder: GlControllerBuilder = GlControllerBuilder()
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

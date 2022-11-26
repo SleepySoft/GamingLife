@@ -1,6 +1,5 @@
 package com.sleepysoft.gaminglife
 
-import android.app.Activity
 import android.app.KeyguardManager
 import android.content.Intent
 import android.os.Build
@@ -9,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.support.v7.app.AppCompatActivity
 import android.view.WindowManager
+import com.sleepysoft.gaminglife.controllers.GlTimeViewController
 import glcore.GlRoot
 import graphengine.GraphView
 

@@ -1,21 +1,15 @@
-package com.sleepysoft.gaminglife
+package com.sleepysoft.gaminglife.controllers
 
-import android.app.Activity
-import android.app.AlertDialog
-import android.content.Context
 import android.graphics.*
-import android.text.InputType
-import android.view.Gravity
-import android.widget.EditText
+import com.sleepysoft.gaminglife.R
 import glcore.GlFile
 import glcore.GlRoot
-import glenv.GlApp
 import graphengine.*
 
 
 class GlAudioRecordLayerController(
-    private val mContext: Context,
-    private val mGraphView: GraphView) : GraphViewObserver, GraphInteractiveListener() {
+    private val mContext: GlControllerContext
+    ) : GraphViewObserver, GraphInteractiveListener() {
 
     private lateinit var mVoiceRecordEffectLayer: GraphLayer
     private lateinit var mAudioCircle: GraphImage
@@ -36,7 +30,7 @@ class GlAudioRecordLayerController(
         this.gravity = Gravity.START or Gravity.TOP
     }
 
-    private var mTextDialogBuilder = AlertDialog.Builder(mContext).apply {
+    private var mTextDialogBuilder = AlertDialog.Builder(mContext.context).apply {
         this.setTitle("文字输入")
         this.setView(mTextInput)
         this.setPositiveButton("OK") { _, _ -> onTextInputOk() }
@@ -55,35 +49,41 @@ class GlAudioRecordLayerController(
         layoutItems()
         mReturnFunction = returnFunction
         mAudioCircle.moveCenter(operatingPos)
-        mGraphView.specifySelItem(mAudioCircle)
-        mGraphView.pushObserver(this)
+        InteractiveDecorator.changeTrackingItem(mAudioCircle)
+/*        mContext.graphView.specifySelItem(mAudioCircle)
+        mContext.graphView.pushObserver(this)*/
         mVoiceRecordEffectLayer.visible = true
-        mGraphView.invalidate()
+        mContext.graphView.bringLayerToFront(mVoiceRecordEffectLayer)
+        mContext.graphView.invalidate()
 
         GlRoot.env.glAudio.startRecord(GlFile.glRoot())
     }
 
     private fun releaseControl() {
         mVoiceRecordEffectLayer.visible = false
-        val poppedLayer = mGraphView.popObserver()
-        assert(poppedLayer == this)
-        mGraphView.invalidate()
+/*        val poppedLayer = mContext.graphView.popObserver()
+        assert(poppedLayer == this)*/
+        mContext.graphView.invalidate()
     }
 
     private fun loadResource() {
-        mIconAudio = BitmapFactory.decodeResource(mContext.resources, R.drawable.icon_audio_recording)
-        mIconInput = BitmapFactory.decodeResource(mContext.resources, R.drawable.icon_text_input)
-        mIconTrash = BitmapFactory.decodeResource(mContext.resources, R.drawable.icon_trush)
+        mIconAudio = BitmapFactory.decodeResource(mContext.context.resources,
+            R.drawable.icon_audio_recording
+        )
+        mIconInput = BitmapFactory.decodeResource(mContext.context.resources,
+            R.drawable.icon_text_input
+        )
+        mIconTrash = BitmapFactory.decodeResource(mContext.context.resources, R.drawable.icon_trush)
     }
 
     private fun checkBuildVoiceRecordEffectLayer() {
-        val layers = mGraphView.pickLayer { it.id == "TimeView.RecordLayer" }
+        val layers = mContext.graphView.pickLayer { it.id == "TimeView.RecordLayer" }
         val layer = if (layers.isNotEmpty()) {
             layers[0]
         } else {
-            GraphLayer("TimeView.RecordLayer", false).apply {
+            GraphLayer("TimeView.RecordLayer", false, mContext.graphView).apply {
                 this.setBackgroundAlpha(128)
-                mGraphView.addLayer(this)
+                mContext.graphView.addLayer(this)
             }
         }
 
@@ -102,6 +102,7 @@ class GlAudioRecordLayerController(
                 this.style = Paint.Style.FILL
             }
         }*/
+
         mAudioCircle = GraphImage(mIconAudio).apply {
             this.id = "TimeView.RecordLayer.Audio"
             this.graphActionDecorator.add(InteractiveDecorator(this).apply {
@@ -157,7 +158,7 @@ class GlAudioRecordLayerController(
     }
 
     override fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        val strokeWidth = mGraphView.unitScale * 1.0f
+        val strokeWidth = mContext.graphView.unitScale * 1.0f
 
         mAudioCircle.shapePaint.strokeWidth = strokeWidth
         mCancelCircle.shapePaint.strokeWidth = strokeWidth
@@ -201,7 +202,7 @@ class GlAudioRecordLayerController(
     // ---------------------------- Private ----------------------------
 
     private fun layoutItems() {
-        if (mGraphView.isPortrait()) {
+        if (mContext.graphView.isPortrait()) {
             layoutPortrait()
         }
         else {
@@ -210,35 +211,35 @@ class GlAudioRecordLayerController(
     }
 
     private fun layoutPortrait() {
-        val area = mGraphView.paintArea
+        val area = mContext.graphView.paintArea
 
 /*        mAudioCircle.origin = PointF(area.width() / 2, 3 * area.height() / 4)
-        mAudioCircle.radius = 20 * mGraphView.unitScale*/
+        mAudioCircle.radius = 20 * mContext.graphView.unitScale*/
 
         mAudioCircle.paintArea.fromCenterSides(
             PointF(area.width() / 2, 3 * area.height() / 4),
-            20 * mGraphView.unitScale, 20 * mGraphView.unitScale
+            20 * mContext.graphView.unitScale, 20 * mContext.graphView.unitScale
         )
 
 /*        mCancelCircle.origin = PointF(area.width() / 2, area.height() / 4)
-        mCancelCircle.radius = 15 * mGraphView.unitScale*/
+        mCancelCircle.radius = 15 * mContext.graphView.unitScale*/
         mCancelCircle.paintArea.fromCenterSides(
             PointF(area.width() / 2, area.height() / 8),
-            20 * mGraphView.unitScale, 20 * mGraphView.unitScale
+            20 * mContext.graphView.unitScale, 20 * mContext.graphView.unitScale
         )
 
-/*        mTextRectangle.rect = RectF(mGraphView.paintArea).apply {
-            this.left += mGraphView.unitScale * 15.0f
-            this.right -= mGraphView.unitScale * 15.0f
-            this.bottom -= mGraphView.unitScale * 15.0f
-            this.top = this.bottom - mGraphView.unitScale * 20.0f
+/*        mTextRectangle.rect = RectF(mContext.graphView.paintArea).apply {
+            this.left += mContext.graphView.unitScale * 15.0f
+            this.right -= mContext.graphView.unitScale * 15.0f
+            this.bottom -= mContext.graphView.unitScale * 15.0f
+            this.top = this.bottom - mContext.graphView.unitScale * 20.0f
         }*/
 
-        mTextRectangle.paintArea = RectF(mGraphView.paintArea).apply {
-            left += mGraphView.unitScale * 5.0f
-            right -= mGraphView.unitScale * 5.0f
-            bottom -= mGraphView.unitScale * 5.0f
-            top = bottom - mGraphView.unitScale * 15.0f
+        mTextRectangle.paintArea = RectF(mContext.graphView.paintArea).apply {
+            left += mContext.graphView.unitScale * 5.0f
+            right -= mContext.graphView.unitScale * 5.0f
+            bottom -= mContext.graphView.unitScale * 5.0f
+            top = bottom - mContext.graphView.unitScale * 15.0f
         }
     }
 

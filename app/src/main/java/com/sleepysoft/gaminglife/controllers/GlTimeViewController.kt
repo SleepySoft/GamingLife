@@ -1,16 +1,9 @@
-package com.sleepysoft.gaminglife
+package com.sleepysoft.gaminglife.controllers
 
-import android.content.Context
-import android.content.Intent
 import android.graphics.*
 import android.graphics.Paint.ANTI_ALIAS_FLAG
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import glcore.*
 import graphengine.*
-import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -19,11 +12,10 @@ const val DEBUG_TAG = "DefaultDbg"
 
 
 class GlTimeViewController(
-    private val mContext: Context,
-    private val mGraphView: GraphView,
+    private val mContext: GlControllerContext,
     private val mGlTaskModule: GlTaskModule) : GraphViewObserver {
 
-    private lateinit var mVibrator: Vibrator
+    // private lateinit var mVibrator: Vibrator
 
     private lateinit var mTimeViewBaseLayer: GraphLayer
     private var mCenterRadius = 0.1f
@@ -42,16 +34,16 @@ class GlTimeViewController(
     private lateinit var mRecordController: GlAudioRecordLayerController
 
     fun init() {
-        mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+/*        mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager =
-                mGraphView.context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+                mContext.graphView.context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
             vibratorManager.defaultVibrator
         } else {
             @Suppress("DEPRECATION")
-            mGraphView.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
+            mContext.graphView.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }*/
 
-        mRecordController = GlAudioRecordLayerController(mContext, mGraphView).apply { init() }
+        // mRecordController = GlAudioRecordLayerController(mContext, mContext.graphView).apply { init() }
 
         checkBuildTimeViewLayer()
     }
@@ -79,13 +71,13 @@ class GlTimeViewController(
         // processRecordProgress()
 
         // mCenterItem.mainText = "%02d:%02d:%02d.%03d".format(hour, minutes, seconds, ms)
-        mGraphView.invalidate()
+        mContext.graphView.invalidate()
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
 
     override fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        val strokeWidth = mGraphView.unitScale * 1.0f
+        val strokeWidth = mContext.graphView.unitScale * 1.0f
 
         for (item in mSurroundItems) {
             item.shapePaint.strokeWidth = strokeWidth
@@ -110,13 +102,13 @@ class GlTimeViewController(
             mPressSince = System.currentTimeMillis()
         }
 
-        mGraphView.invalidate()
+        mContext.graphView.invalidate()
     }
 
     override fun onItemDragging(draggingItem: GraphItem, pos: PointF) {
         if (draggingItem == mCenterItem) {
-            if ((abs(mCenterItem.offsetPixel.x) > mGraphView.unitScale * 0.3) ||
-                (abs(mCenterItem.offsetPixel.y) > mGraphView.unitScale * 0.3)) {
+            if ((abs(mCenterItem.offsetPixel.x) > mContext.graphView.unitScale * 0.3) ||
+                (abs(mCenterItem.offsetPixel.y) > mContext.graphView.unitScale * 0.3)) {
                 endLongLongPress()
             }
         }
@@ -202,7 +194,7 @@ class GlTimeViewController(
     }*/
 
     override fun onItemLayout() {
-        if (mGraphView.isPortrait()) {
+        if (mContext.graphView.isPortrait()) {
             layoutPortrait()
         }
         else {
@@ -213,12 +205,12 @@ class GlTimeViewController(
     // ------------------------------------- Private Functions -------------------------------------
 
     private fun checkBuildTimeViewLayer() {
-        val layers = mGraphView.pickLayer { it.id == "TimeView.BaseLayer" }
+        val layers = mContext.graphView.pickLayer { it.id == "TimeView.BaseLayer" }
         val layer = if (layers.isNotEmpty()) {
             layers[0]
         } else {
-            GraphLayer("TimeView.BaseLayer", true, mGraphView).apply {
-                mGraphView.addLayer(this)
+            GraphLayer("TimeView.BaseLayer", true, mContext.graphView).apply {
+                mContext.graphView.addLayer(this)
             }
         }
 
@@ -237,7 +229,6 @@ class GlTimeViewController(
                     mGlTaskModule.colorOfTask(currentTaskGroupData?.get("id") ?: GROUP_ID_IDLE))
                 this.style = Paint.Style.FILL
             }
-            this.graphItemDecorator.add(mCenterItemText)
         }
 
         mCenterItemText = AutoFitTextDecorator(mCenterItem).apply {
@@ -303,15 +294,15 @@ class GlTimeViewController(
     }
 
     private fun layoutPortrait() {
-        val layoutArea = RectF(mGraphView.paintArea)
+        val layoutArea = RectF(mContext.graphView.paintArea)
         layoutArea.top = layoutArea.bottom - layoutArea.height()
         layoutArea.apply {
-            this.top += 10.0f * mGraphView.unitScale
-            this.bottom += 10.0f * mGraphView.unitScale
+            this.top += 10.0f * mContext.graphView.unitScale
+            this.bottom += 10.0f * mContext.graphView.unitScale
         }
 
-        mCenterRadius = 8.0f * mGraphView.unitScale
-        mSurroundRadius = 6.5f * mGraphView.unitScale
+        mCenterRadius = 8.0f * mContext.graphView.unitScale
+        mSurroundRadius = 6.5f * mContext.graphView.unitScale
 
         val center = PointF(layoutArea.centerX(), layoutArea.centerY())
         val radius = layoutArea.width() / 2
@@ -403,7 +394,7 @@ class GlTimeViewController(
                     duration.toFloat() / LONG_LONG_PRESS_TIMEOUT.toFloat()
                 mLongLongPressProgress.visible = true
             }
-            mGraphView.invalidate()
+            mContext.graphView.invalidate()
         }
     }
 
