@@ -105,12 +105,18 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
 
     companion object {
         var trackingItem: GraphItem? = null
+            private set
+
+        fun changeTrackingItem(item: GraphItem) {
+            trackingItem = item
+        }
     }
 
-    val interactiveListener: GraphInteractiveListener? = null
+    var interactiveListener: GraphInteractiveListener? = null
 
     override fun onActionUp(pos: PointF): ActionHandler.ACT {
         if (trackingItem == decoratedItem) {
+            interactiveListener?.onItemDropped(decoratedItem, intersectItems())
             trackingItem = null
         }
         // Leak this action to other handler avoiding issues
@@ -121,7 +127,7 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
                               distanceX: Float,distanceY: Float): ActionHandler.ACT {
         return if (decoratedItem == trackingItem) {
             decoratedItem.shiftItem(-distanceX, -distanceY)
-
+            interactiveListener?.onItemDropped(decoratedItem, intersectItems())
             ActionHandler.ACT.HANDLED
         }
         else {
@@ -146,6 +152,12 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
             ActionHandler.ACT.IGNORED
         }
     }
+
+    // --------------------------------------------------------------
+
+    private fun intersectItems() : List< GraphItem > =
+        decoratedItem.itemLayer?.itemIntersectRect(
+            decoratedItem.boundRect()) { it.visible } ?: listOf()
 }
 
 

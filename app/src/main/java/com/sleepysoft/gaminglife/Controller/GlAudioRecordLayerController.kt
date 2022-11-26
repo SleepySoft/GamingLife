@@ -15,7 +15,7 @@ import graphengine.*
 
 class GlAudioRecordLayerController(
     private val mContext: Context,
-    private val mGraphView: GraphView) : GraphViewObserver {
+    private val mGraphView: GraphView) : GraphViewObserver, GraphInteractiveListener() {
 
     private lateinit var mVoiceRecordEffectLayer: GraphLayer
     private lateinit var mAudioCircle: GraphImage
@@ -27,7 +27,7 @@ class GlAudioRecordLayerController(
     private lateinit var mIconInput: Bitmap
     private lateinit var mIconTrash: Bitmap
 
-    private val mTextInput = EditText(GlApp.applicationContext()).apply {
+ /*   private val mTextInput = EditText(GlApp.applicationContext()).apply {
         this.setText("")
         this.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
         this.isSingleLine = false
@@ -41,9 +41,9 @@ class GlAudioRecordLayerController(
         this.setView(mTextInput)
         this.setPositiveButton("OK") { _, _ -> onTextInputOk() }
         this.setNegativeButton("Cancel") { _, _ -> onUserInputCancel() }
-    }
+    }*/
 
-    private val mInputDialog = mTextDialogBuilder.create()
+    // private val mInputDialog = mTextDialogBuilder.create()
 
     fun init() {
         loadResource()
@@ -104,6 +104,9 @@ class GlAudioRecordLayerController(
         }*/
         mAudioCircle = GraphImage(mIconAudio).apply {
             this.id = "TimeView.RecordLayer.Audio"
+            this.graphActionDecorator.add(InteractiveDecorator(this).apply {
+                this.interactiveListener = this@GlAudioRecordLayerController
+            })
         }
 
 /*        mCancelCircle = GraphCircle().apply {
@@ -149,6 +152,10 @@ class GlAudioRecordLayerController(
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
 
+    override fun onItemLayout() {
+        layoutItems()
+    }
+
     override fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         val strokeWidth = mGraphView.unitScale * 1.0f
 
@@ -157,15 +164,13 @@ class GlAudioRecordLayerController(
         mTextRectangle.shapePaint.strokeWidth = strokeWidth
     }
 
-    override fun onItemDropped(droppedItem: GraphItem) {
+    // -------------------------------------------------------------------------------
+
+    override fun onItemDropped(item: GraphItem, intersectItems: List< GraphItem >) {
+
         GlRoot.env.glAudio.stopRecord()
 
-        val intersectingItems: List< GraphItem > =
-            mVoiceRecordEffectLayer.itemIntersectRect(droppedItem.boundRect()) {
-                it != droppedItem
-            }
-
-        if (intersectingItems.isEmpty()) {
+        if (intersectItems.isEmpty()) {
             // Just release the record button
 
             GlRoot.env.glAudio.join(1500)
@@ -175,7 +180,7 @@ class GlAudioRecordLayerController(
         }
         else {
             // Drag the record button to give up or text
-            when (intersectingItems[0].id) {
+            when (intersectItems[0].id) {
                 "TimeView.RecordLayer.Text" -> {
                     // Open text editor
                     popupTextEditor()
@@ -191,10 +196,6 @@ class GlAudioRecordLayerController(
             }
         }
         releaseControl()
-    }
-
-    override fun onItemLayout() {
-        layoutItems()
     }
 
     // ---------------------------- Private ----------------------------
@@ -251,8 +252,8 @@ class GlAudioRecordLayerController(
     }
 
     private fun onTextInputOk() {
-        println(mTextInput.text)
-        mReturnFunction?.run { this("Text", mTextInput.text.toString()) }
+        // println(mTextInput.text)
+        // mReturnFunction?.run { this("Text", mTextInput.text.toString()) }
     }
 
     private fun onAudioRecordOk() {

@@ -46,7 +46,7 @@ class TimeViewActivity : AppCompatActivity() {
         mView = GraphView(this)
         mController = GlTimeViewController(this, mView, GlRoot.glTaskModule).apply {
             this.init()
-            mView.pushObserver(this)
+            // mView.pushObserver(this)
         }
 
         setContentView(mView)

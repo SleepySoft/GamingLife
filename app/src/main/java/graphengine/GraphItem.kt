@@ -71,6 +71,7 @@ class GraphLayer(id: String, visible: Boolean,
     }
 
     var coverArea: RectF = RectF()
+    val layerActionDecorator = mutableListOf< GraphActionDecorator >()
 
     // -------------------------- Public --------------------------
 

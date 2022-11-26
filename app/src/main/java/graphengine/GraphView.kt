@@ -130,7 +130,7 @@ class GraphView(context: Context) :
     }
 
     private fun onUp(e: MotionEvent) {
-        forEachItemActionHandler {
+        forTopLayerItemActionHandler {
             it.onActionUp(PointF(e.x, e.y))
         }
 
@@ -145,14 +145,14 @@ class GraphView(context: Context) :
     }
 
     override fun onDown(e: MotionEvent): Boolean {
-        forEachItemActionHandler {
+        forTopLayerItemActionHandler {
             it.onActionDown(PointF(e.x, e.y))
         }
         return true
     }
 
     override fun onShowPress(e: MotionEvent) {
-        forEachItemActionHandler {
+        forTopLayerItemActionHandler {
             it.onActionSelect(PointF(e.x, e.y))
         }
 
@@ -166,7 +166,7 @@ class GraphView(context: Context) :
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        forEachItemActionHandler {
+        forTopLayerItemActionHandler {
             it.onActionClick(PointF(e.x, e.y))
         }
 
@@ -181,7 +181,7 @@ class GraphView(context: Context) :
 
     override fun onScroll(e1: MotionEvent, e2: MotionEvent,
                           distanceX: Float,distanceY: Float): Boolean {
-        forEachItemActionHandler {
+        forTopLayerItemActionHandler {
             it.onActionMove(
                 PointF(e1.x, e1.y), PointF(e2.x, e2.y), distanceX, distanceY)
         }
@@ -200,7 +200,7 @@ class GraphView(context: Context) :
     }
 
     override fun onLongPress(e: MotionEvent) {
-        forEachItemActionHandler {
+        forTopLayerItemActionHandler {
             it.onActionLongPress(PointF(e.x, e.y))
         }
         // https://stackoverflow.com/a/56545079
@@ -209,7 +209,7 @@ class GraphView(context: Context) :
 
     override fun onFling(e1: MotionEvent, e2: MotionEvent,
                          velocityX: Float, velocityY: Float): Boolean {
-        forEachItemActionHandler {
+        forTopLayerItemActionHandler {
             it.onActionFling(PointF(e1.x, e1.y), PointF(e2.x, e2.y), velocityX, velocityY)
         }
         return false
@@ -268,6 +268,15 @@ class GraphView(context: Context) :
         }
     }
 
+    fun forTopLayerItem(action: (GraphItem) -> Unit) {
+        for (layer in mLayers) {
+            layer.graphItems.forEach {item ->
+                action(item)
+            }
+            break
+        }
+    }
+
     // ------------------------------------- Private functions -------------------------------------
 
     private fun layoutItems() {
@@ -284,12 +293,12 @@ class GraphView(context: Context) :
         return items
     }
 
-    private fun forEachItemActionHandler(action: (GraphActionDecorator) -> ActionHandler.ACT) {
+    private fun forTopLayerItemActionHandler(action: (GraphActionDecorator) -> ActionHandler.ACT) {
         var skip = false
-        forEachItem { item->
+        forTopLayerItem { item->
             if (!skip) {
                 item.graphActionDecorator.forEach {
-                    // Not skip action in an item
+                    // Not skip actions in the same item
                     if (action(it) == ActionHandler.ACT.HANDLED) {
                         skip = true
                     }
