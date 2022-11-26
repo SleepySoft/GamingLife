@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
+import com.sleepysoft.gaminglife.activities.MainActivity
 import glcore.GlLog
 import glenv.GlApp
 
@@ -20,7 +21,7 @@ class ScreenBroadcastReceiver : BroadcastReceiver() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 Settings.canDrawOverlays(context)) {
 
-                val activityIntent = Intent(context, TimeViewActivity::class.java).apply {
+                val activityIntent = Intent(context, MainActivity::class.java).apply {
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)

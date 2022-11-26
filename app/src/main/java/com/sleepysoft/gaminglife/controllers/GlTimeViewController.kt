@@ -76,6 +76,15 @@ class GlTimeViewController(
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
 
+    override fun onItemLayout() {
+        if (mContext.graphView.isPortrait()) {
+            layoutPortrait()
+        }
+        else {
+            layoutLandscape()
+        }
+    }
+
     override fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         val strokeWidth = mContext.graphView.unitScale * 1.0f
 
@@ -192,15 +201,6 @@ class GlTimeViewController(
 
         endLongLongPress()
     }*/
-
-    override fun onItemLayout() {
-        if (mContext.graphView.isPortrait()) {
-            layoutPortrait()
-        }
-        else {
-            layoutLandscape()
-        }
-    }
 
     // ------------------------------------- Private Functions -------------------------------------
 
