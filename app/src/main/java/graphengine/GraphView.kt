@@ -298,6 +298,14 @@ class GraphView(context: Context) :
         mSelItem = item
     }
 
+    fun forEachItem(action: (GraphItem) -> Unit) {
+        mLayers.forEach { layer ->
+            layer.graphItems.forEach {item ->
+                action(item)
+            }
+        }
+    }
+
     // ------------------------------------- Private functions -------------------------------------
 
     private fun layoutItems() {
@@ -312,6 +320,15 @@ class GraphView(context: Context) :
             }
         }
         return items
+    }
+
+    private fun forEachItemActionHandler() {
+        var handleState = ActionHandler.ACT.IGNORED
+        forEachItem {
+            if (handleState == ActionHandler.ACT.IGNORED) {
+                it.graphActionDecorator.forEach {  }
+            }
+        }
     }
 }
 

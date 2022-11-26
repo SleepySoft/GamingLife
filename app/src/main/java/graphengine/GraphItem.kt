@@ -23,7 +23,7 @@ abstract class GraphItem(
     var shapePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     val graphItemDecorator = mutableListOf< GraphItemDecorator >()
-    val graphActionDecorator: GraphActionDecorator? = null
+    val graphActionDecorator = mutableListOf< GraphActionDecorator >()
 
     var inflatePct: Float = 0.0f
         set(value) {
@@ -248,22 +248,28 @@ class GraphCircle : GraphItem() {
 }
 
 
-class GraphCircleProgress(
-    private val mWrapCircle: GraphCircle,
-    private val mAroundInflatePct: Float) : GraphItem() {
+open class GraphProgress(
+    protected val mWrapItem: GraphItem,
+    protected val mAroundInflatePct: Float) : GraphItem() {
 
     var progress: Float = 0.0f
 
     override fun boundRect(): RectF {
-        return mWrapCircle.boundRect().apply { inflate(mAroundInflatePct) }
-    }
-
-    override fun render(canvas: Canvas) {
-        canvas.drawArc(boundRect(), -90.0f, 360.0f * progress, true, shapePaint)
+        return mWrapItem.boundRect().apply { inflate(mAroundInflatePct) }
     }
 
     override fun moveCenter(pos: PointF) {
 
+    }
+}
+
+
+class GraphCircleProgress(
+    wrapItem: GraphCircle, aroundInflatePct: Float) :
+    GraphProgress(wrapItem, aroundInflatePct) {
+
+    override fun render(canvas: Canvas) {
+        canvas.drawArc(boundRect(), -90.0f, 360.0f * progress, true, shapePaint)
     }
 }
 

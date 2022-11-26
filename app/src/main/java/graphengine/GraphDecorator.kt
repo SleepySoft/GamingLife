@@ -6,6 +6,8 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
+import glcore.LONG_LONG_PRESS_TIMEOUT
+import kotlin.math.abs
 
 
 open class GraphItemDecorator(
@@ -105,10 +107,7 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
         var trackingItem: GraphItem? = null
     }
 
-    interface ClickListener {
-        fun onItemClicked(clickedItem: GraphItem)
-    }
-    val clickListener: ClickListener? = null
+    val interactiveListener: GraphInteractiveListener? = null
 
     override fun onActionUp(pos: PointF): ActionHandler.ACT {
         if (trackingItem == decoratedItem) {
@@ -131,7 +130,7 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
     }
 
     override fun onActionClick(pos: PointF) : ActionHandler.ACT {
-        clickListener?.onItemClicked(decoratedItem)
+        interactiveListener?.onItemClicked(decoratedItem)
         return ActionHandler.ACT.HANDLED
     }
 
@@ -139,6 +138,7 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
         return if (decoratedItem.visible &&
                    decoratedItem.boundRect().contains(pos.x, pos.y)) {
             trackingItem = decoratedItem
+            interactiveListener?.onItemSelected(decoratedItem)
 
             ActionHandler.ACT.HANDLED
         }
@@ -149,14 +149,14 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
 }
 
 
-class LongPressProgressDecorator(decoratedItem: GraphItem) :
-    GraphActionDecorator(decoratedItem) {
+class LongPressProgressDecorator(decoratedItem: GraphItem,
+    val progressItem: GraphProgress,
+    val abandonOffset: Float) : GraphActionDecorator(decoratedItem) {
 
-    interface TriggerListener {
-        fun onLongPressTriggered(triggerItem: GraphItem)
-    }
-    val triggerListener: TriggerListener? = null
+    var triggerListener: GraphInteractiveListener? = null
+    var longLongPressTimeout = LONG_LONG_PRESS_TIMEOUT
 
+    private var mPressSince: Long = 0
     private lateinit var mHandler : Handler
     private lateinit var mRunnable : Runnable
 
@@ -168,43 +168,47 @@ class LongPressProgressDecorator(decoratedItem: GraphItem) :
     }
 
     private fun doPeriod() {
+        val duration: Int = (System.currentTimeMillis() - mPressSince).toInt()
+        if (duration >= longLongPressTimeout) {
+            progressItem.visible = true
+            triggerListener?.onItemTriggered(decoratedItem)
+        }
+        else {
+            progressItem.progress = duration.toFloat() / longLongPressTimeout.toFloat()
+        }
         mHandler.postDelayed(mRunnable, 100)
+    }
+
+    private fun endLongLongPress() {
+        mPressSince = 0
+        progressItem.visible = false
+        progressItem.progress = 0.0f
     }
 
     // ---------------------------------------------------------------------
 
     override fun onActionUp(pos: PointF): ActionHandler.ACT {
+        endLongLongPress()
         // Leak this action to other handler avoiding issues
         return ActionHandler.ACT.IGNORED
     }
 
     override fun onActionMove(posBefore: PointF, posNow: PointF,
                               distanceX: Float,distanceY: Float): ActionHandler.ACT {
-        return if (decoratedItem == trackingItem) {
-            decoratedItem.shiftItem(-distanceX, -distanceY)
 
-            ActionHandler.ACT.HANDLED
+        if ((abs(decoratedItem.offsetPixel.x) > abandonOffset) ||
+            (abs(decoratedItem.offsetPixel.y) > abandonOffset)) {
+            endLongLongPress()
         }
-        else {
-            ActionHandler.ACT.IGNORED
-        }
-    }
-
-    override fun onActionClick(pos: PointF) : ActionHandler.ACT {
-        clickListener?.onItemClicked(decoratedItem)
-        return ActionHandler.ACT.HANDLED
+        // Leak this action for ?
+        return ActionHandler.ACT.IGNORED
     }
 
     override fun onActionSelect(pos: PointF): ActionHandler.ACT {
-        return if (decoratedItem.visible &&
-            decoratedItem.boundRect().contains(pos.x, pos.y)) {
-            trackingItem = decoratedItem
+        decoratedItem.visible = true
+        mPressSince = System.currentTimeMillis()
 
-            ActionHandler.ACT.HANDLED
-        }
-        else {
-            ActionHandler.ACT.IGNORED
-        }
+        return ActionHandler.ACT.HANDLED
     }
 }
 
