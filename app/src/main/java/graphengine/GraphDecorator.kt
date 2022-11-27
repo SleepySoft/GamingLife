@@ -116,6 +116,7 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
 
     override fun onActionUp(pos: PointF): ActionHandler.ACT {
         if (trackingItem == decoratedItem) {
+            decoratedItem.inflatePct = 0.0f
             interactiveListener?.onItemDropped(decoratedItem, intersectItems())
             trackingItem = null
         }
@@ -144,6 +145,8 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
         return if (decoratedItem.visible &&
                    decoratedItem.boundRect().contains(pos.x, pos.y)) {
             trackingItem = decoratedItem
+            decoratedItem.inflatePct = 10.0f
+            decoratedItem.itemLayer?.bringGraphItemToFront(decoratedItem)
             interactiveListener?.onItemSelected(decoratedItem)
 
             ActionHandler.ACT.HANDLED

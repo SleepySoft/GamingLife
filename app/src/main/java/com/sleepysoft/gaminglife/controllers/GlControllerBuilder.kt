@@ -1,12 +1,15 @@
 package com.sleepysoft.gaminglife.controllers
 
 import android.content.Context
+import android.os.Handler
+import android.os.Looper
 import glcore.GlRoot
 import graphengine.GraphView
 
 
 class GlControllerContext {
     var valid: Boolean = false
+
     lateinit var context: Context
     lateinit var graphView: GraphView
     lateinit var timeViewController: GlTimeViewController
@@ -27,6 +30,10 @@ class GlControllerBuilder {
         createAudioRecordController()
 
         mControllerContext.valid = true
+    }
+
+    fun pollingEntry() {
+        mControllerContext.timeViewController.polling()
     }
 
     private fun createTimeViewController() {

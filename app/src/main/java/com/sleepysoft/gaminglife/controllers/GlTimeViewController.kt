@@ -13,7 +13,8 @@ const val DEBUG_TAG = "DefaultDbg"
 
 class GlTimeViewController(
     private val mContext: GlControllerContext,
-    private val mGlTaskModule: GlTaskModule) : GraphViewObserver {
+    private val mGlTaskModule: GlTaskModule)
+    : GraphInteractiveListener(), GraphViewObserver {
 
     // private lateinit var mVibrator: Vibrator
 
@@ -46,6 +47,10 @@ class GlTimeViewController(
         // mRecordController = GlAudioRecordLayerController(mContext, mContext.graphView).apply { init() }
 
         checkBuildTimeViewLayer()
+        mContext.graphView.mGraphViewObserver.add(this)
+
+/*        adaptViewArea()
+        doLayout()*/
     }
 
     fun polling() {
@@ -77,22 +82,45 @@ class GlTimeViewController(
     // -------------------------- Implements GraphViewObserver interface ---------------------------
 
     override fun onItemLayout() {
-        if (mContext.graphView.isPortrait()) {
-            layoutPortrait()
-        }
-        else {
-            layoutLandscape()
-        }
+        doLayout()
     }
 
     override fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        val strokeWidth = mContext.graphView.unitScale * 1.0f
+        adaptViewArea()
+    }
 
-        for (item in mSurroundItems) {
-            item.shapePaint.strokeWidth = strokeWidth
+    // ------------------------ Implements GraphInteractiveListener interface -------------------------
+
+    override fun onItemDropped(item: GraphItem, intersectItems: List< GraphItem >) {
+
+        if (item == mCenterItem) {
+            // Drag center item to surround, closestItem as surroundItem
+
+            val closestItem : GraphItem? = closestGraphItem(
+                item.boundRect().centerPoint(),
+                intersectItems.intersect(mSurroundItems.toSet()).toList())
+
+            closestItem?.run {
+                mCenterItem.itemData = closestItem.itemData
+                mCenterItem.shapePaint.color = closestItem.shapePaint.color
+
+                @Suppress("UNCHECKED_CAST")
+                handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
+                    closestItem.itemData as GlStrStruct?)
+            }
         }
+        else if (intersectItems.contains(mCenterItem)) {
+            // Drag surround item to center
 
-        mCenterItem.shapePaint.strokeWidth = strokeWidth
+            if (item in mSurroundItems) {
+                mCenterItem.itemData = item.itemData
+                mCenterItem.shapePaint.color = item.shapePaint.color
+
+                @Suppress("UNCHECKED_CAST")
+                handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
+                    item.itemData as GlStrStruct?)
+            }
+        }
     }
 
 /*    override fun onItemPicked(pickedItem: GraphItem) {
@@ -291,6 +319,25 @@ class GlTimeViewController(
         layer.insertGraphItemAfter(mProgressItem, mCenterItem)
 
         mTimeViewBaseLayer = layer
+    }
+
+    private fun doLayout() {
+        if (mContext.graphView.isPortrait()) {
+            layoutPortrait()
+        }
+        else {
+            layoutLandscape()
+        }
+    }
+
+    private fun adaptViewArea() {
+        val strokeWidth = mContext.graphView.unitScale * 1.0f
+
+        for (item in mSurroundItems) {
+            item.shapePaint.strokeWidth = strokeWidth
+        }
+
+        mCenterItem.shapePaint.strokeWidth = strokeWidth
     }
 
     private fun layoutPortrait() {

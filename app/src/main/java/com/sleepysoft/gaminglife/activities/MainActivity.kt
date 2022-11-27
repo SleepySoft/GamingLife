@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mHandler : Handler
     private lateinit var mRunnable : Runnable
 
-    private val glControllerBuilder: GlControllerBuilder = GlControllerBuilder()
+    private val glControllerBuilder = GlControllerBuilder()
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -109,7 +109,7 @@ class MainActivity : AppCompatActivity() {
     }*/
 
     private fun doPeriod() {
-        // mController.polling()
+        glControllerBuilder.pollingEntry()
         mHandler.postDelayed(mRunnable, 100)
     }
 }
