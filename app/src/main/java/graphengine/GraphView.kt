@@ -14,26 +14,6 @@ interface GraphViewObserver {
     fun onItemLayout()
 
     fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int)
-
-/*    fun onItemPicked(pickedItem: GraphItem) {
-
-    }
-
-    fun onItemDropped(droppedItem: GraphItem) {
-
-    }
-
-    fun onItemClicked(clickedItem: GraphItem) {
-
-    }
-
-    fun onItemDragging(draggingItem: GraphItem, pos: PointF) {
-
-    }*/
-
-/*    fun onItemDropIntersecting(droppedItem: GraphItem, intersectingItems: List< GraphItem >) {
-
-    }*/
 }
 
 

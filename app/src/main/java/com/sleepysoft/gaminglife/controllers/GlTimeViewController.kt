@@ -16,7 +16,6 @@ class GlTimeViewController(
     private val mGlTaskModule: GlTaskModule)
     : GraphInteractiveListener(), GraphViewObserver {
 
-    // private lateinit var mVibrator: Vibrator
 
     private lateinit var mTimeViewBaseLayer: GraphLayer
     private var mCenterRadius = 0.1f
@@ -35,17 +34,6 @@ class GlTimeViewController(
     private lateinit var mRecordController: GlAudioRecordLayerController
 
     fun init() {
-/*        mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager =
-                mContext.graphView.context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            vibratorManager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            mContext.graphView.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }*/
-
-        // mRecordController = GlAudioRecordLayerController(mContext, mContext.graphView).apply { init() }
-
         checkBuildTimeViewLayer()
         mContext.graphView.mGraphViewObserver.add(this)
 
@@ -121,6 +109,8 @@ class GlTimeViewController(
                     item.itemData as GlStrStruct?)
             }
         }
+        item.offsetPixel.x = 0.0f
+        item.offsetPixel.y = 0.0f
     }
 
 /*    override fun onItemPicked(pickedItem: GraphItem) {
@@ -275,8 +265,9 @@ class GlTimeViewController(
                 this.style = Paint.Style.FILL
             }
         }
-        mCenterItem.graphActionDecorator.add(
-            LongPressProgressDecorator(mCenterItem, mProgressItem, 30.0f).apply { init() })
+        mCenterItem.graphActionDecorator.add(InteractiveDecorator(mCenterItem, this))
+        mCenterItem.graphActionDecorator.add(LongPressProgressDecorator(
+            mCenterItem, mProgressItem, 30.0f, this).apply { init() })
 
         val taskGroupTop = mGlTaskModule.getTaskGroupTop()
         for ((k, v) in taskGroupTop) {
@@ -297,6 +288,7 @@ class GlTimeViewController(
                 }
             }
             item.graphItemDecorator.add(text)
+            item.graphActionDecorator.add(InteractiveDecorator(item, this))
             layer.addGraphItem(item)
 
             mSurroundItems.add(item)

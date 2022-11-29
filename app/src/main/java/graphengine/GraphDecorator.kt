@@ -6,6 +6,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.os.Handler
 import android.os.Looper
+import glcore.GlLog
 import glcore.LONG_LONG_PRESS_TIMEOUT
 import kotlin.math.abs
 
@@ -100,8 +101,10 @@ class AutoFitTextDecorator(decoratedItem: GraphItem) : GraphItemDecorator(decora
 
 // ---------------------------------------------------------------------------------------------
 
-class InteractiveDecorator(decoratedItem: GraphItem) :
-    GraphActionDecorator(decoratedItem) {
+class InteractiveDecorator(
+    decoratedItem: GraphItem,
+    var interactiveListener: GraphInteractiveListener? = null)
+    : GraphActionDecorator(decoratedItem) {
 
     companion object {
         var trackingItem: GraphItem? = null
@@ -112,10 +115,11 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
         }
     }
 
-    var interactiveListener: GraphInteractiveListener? = null
 
     override fun onActionUp(pos: PointF): ActionHandler.ACT {
         if (trackingItem == decoratedItem) {
+            GlLog.i("InteractiveDecorator.onActionUp [$decoratedItem]")
+
             decoratedItem.inflatePct = 0.0f
             interactiveListener?.onItemDropped(decoratedItem, intersectItems())
             trackingItem = null
@@ -127,6 +131,8 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
     override fun onActionMove(posBefore: PointF, posNow: PointF,
                               distanceX: Float,distanceY: Float): ActionHandler.ACT {
         return if (decoratedItem == trackingItem) {
+            GlLog.i("InteractiveDecorator.onActionMove [$decoratedItem]")
+
             decoratedItem.shiftItem(-distanceX, -distanceY)
             interactiveListener?.onItemDropped(decoratedItem, intersectItems())
             ActionHandler.ACT.HANDLED
@@ -137,6 +143,8 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
     }
 
     override fun onActionClick(pos: PointF) : ActionHandler.ACT {
+        GlLog.i("InteractiveDecorator.onActionClick [$decoratedItem]")
+
         interactiveListener?.onItemClicked(decoratedItem)
         return ActionHandler.ACT.HANDLED
     }
@@ -144,6 +152,8 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
     override fun onActionSelect(pos: PointF): ActionHandler.ACT {
         return if (decoratedItem.visible &&
                    decoratedItem.boundRect().contains(pos.x, pos.y)) {
+
+            GlLog.i("InteractiveDecorator.onActionSelect [$decoratedItem]")
             trackingItem = decoratedItem
             decoratedItem.inflatePct = 10.0f
             decoratedItem.itemLayer?.bringGraphItemToFront(decoratedItem)
@@ -166,9 +176,10 @@ class InteractiveDecorator(decoratedItem: GraphItem) :
 
 class LongPressProgressDecorator(decoratedItem: GraphItem,
     val progressItem: GraphProgress,
-    val abandonOffset: Float) : GraphActionDecorator(decoratedItem) {
+    val abandonOffset: Float,
+    var triggerListener: GraphInteractiveListener? = null)
+    : GraphActionDecorator(decoratedItem) {
 
-    var triggerListener: GraphInteractiveListener? = null
     var longLongPressTimeout = LONG_LONG_PRESS_TIMEOUT
 
     private var mPressSince: Long = 0

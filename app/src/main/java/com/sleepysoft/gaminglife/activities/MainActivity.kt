@@ -1,5 +1,6 @@
 package com.sleepysoft.gaminglife.activities
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.*
@@ -11,6 +12,7 @@ import com.sleepysoft.gaminglife.controllers.GlControllerBuilder
 import com.sleepysoft.gaminglife.GamingLifeMainService
 import com.sleepysoft.gaminglife.PermissionActivity
 import com.sleepysoft.gaminglife.RuntimeTest
+import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import glcore.GlLog
 import glcore.GlRoot
 import glenv.GlEnv
@@ -20,8 +22,7 @@ import java.lang.ref.WeakReference
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mView: GraphView
-
-    private val glControllerBuilder = GlControllerBuilder()
+    private lateinit var mVibrator: Vibrator
 
     companion object {
         private var mHandler = Handler(Looper.getMainLooper())
@@ -47,11 +48,13 @@ class MainActivity : AppCompatActivity() {
         mView = GraphView(this)
         setContentView(mView)
 
-        GlRoot.init(GlEnv().apply { init() })
-        glControllerBuilder.init(this, mView)
-
+        createVibrator()
         requireLockScreenShow()
         checkRequireExtStoragePermission()
+        initControllerContext()
+
+        GlRoot.init(GlEnv().apply { init() })
+        GlControllerBuilder.checkBuildController()
 
         startGlService()
 
@@ -64,6 +67,18 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
 
         val onLockScreen: Boolean = intent.getBooleanExtra("OnLockedScreen", false)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private fun createVibrator() {
+        mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
@@ -98,11 +113,11 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-/*    private fun registerScreenStatusListener() {
-        val filter = IntentFilter()
-        filter.addAction(Intent.ACTION_SCREEN_OFF)
-        registerReceiver(screenReceiver, filter)
-    }*/
+    private fun initControllerContext() {
+        GlControllerContext.view = WeakReference(mView)
+        GlControllerContext.context = WeakReference(this)
+        GlControllerContext.vibrator = WeakReference(mVibrator)
+    }
 
     private fun startGlService() {
         val intent = Intent(this, GamingLifeMainService::class.java)
@@ -113,14 +128,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+/*    private fun registerScreenStatusListener() {
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_SCREEN_OFF)
+        registerReceiver(screenReceiver, filter)
+    }*/
+
 /*    private fun launchTimeViewActivity() {
         val intent = Intent(this, TimeViewActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
         startActivity(intent)
         GlLog.i("Popup Time View on Locked Screen.")
-    }*/
+    }
 
     private fun doPeriod() {
         glControllerBuilder.pollingEntry()
-    }
+    }*/
 }

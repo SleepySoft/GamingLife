@@ -1,48 +1,30 @@
 package com.sleepysoft.gaminglife.controllers
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import glcore.GlRoot
 import graphengine.GraphView
+import java.lang.ref.WeakReference
 
 
-class GlControllerContext {
-    var valid: Boolean = false
+object GlControllerBuilder {
+    var built = false
+    val timeViewController = WeakReference< GlTimeViewController >(null)
+    val audioRecordController = WeakReference< GlAudioRecordLayerController >(null)
 
-    lateinit var context: Context
-    lateinit var graphView: GraphView
-    lateinit var timeViewController: GlTimeViewController
-    lateinit var audioRecordController: GlAudioRecordLayerController
-}
-
-
-class GlControllerBuilder {
-
-    var mControllerContext = GlControllerContext()
-
-    fun init(context: Context, graphView: GraphView) {
-        mControllerContext.context = context
-        mControllerContext.graphView = graphView
-
+    fun checkBuildController() {
         // Do not access other controller in controller's init() function
-        createTimeViewController()
-        createAudioRecordController()
-
-        mControllerContext.valid = true
-    }
-
-    fun pollingEntry() {
-        mControllerContext.timeViewController.polling()
+        if (!built) {
+            built = true
+            createTimeViewController()
+            createAudioRecordController()
+        }
     }
 
     private fun createTimeViewController() {
-        mControllerContext.timeViewController =
-            GlTimeViewController(mControllerContext, GlRoot.glTaskModule).apply { init() }
+        timeViewController = GlTimeViewController(GlRoot.glTaskModule).apply { init() }
     }
 
     private fun createAudioRecordController() {
-        mControllerContext.audioRecordController =
-            GlAudioRecordLayerController(mControllerContext).apply { init() }
+        audioRecordController = GlAudioRecordLayerController().apply { init() }
     }
 }
