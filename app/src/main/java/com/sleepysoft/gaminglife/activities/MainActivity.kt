@@ -15,14 +15,30 @@ import glcore.GlLog
 import glcore.GlRoot
 import glenv.GlEnv
 import graphengine.GraphView
+import java.lang.ref.WeakReference
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mView: GraphView
-    private lateinit var mHandler : Handler
-    private lateinit var mRunnable : Runnable
 
     private val glControllerBuilder = GlControllerBuilder()
+
+    companion object {
+        private var mHandler = Handler(Looper.getMainLooper())
+    }
+
+    private class PrivateRunnable(acitvity: MainActivity,
+                                  private val handlerRef: Handler) : Runnable {
+        private val activityRef = WeakReference(acitvity)
+
+        override fun run() {
+            activityRef.get()?.run {
+                doPeriod()
+                handlerRef.postDelayed(this@PrivateRunnable, 100)
+            }
+        }
+    }
+    private val runnable = PrivateRunnable(this, mHandler)
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,11 +57,7 @@ class MainActivity : AppCompatActivity() {
 
         RuntimeTest.testEntry(this)
 
-        mHandler = Handler(Looper.getMainLooper())
-        mRunnable = Runnable {
-            doPeriod()
-        }
-        mHandler.postDelayed(mRunnable, 1000)
+        mHandler.postDelayed(runnable, 100)
     }
 
     override fun onStart() {
@@ -110,6 +122,5 @@ class MainActivity : AppCompatActivity() {
 
     private fun doPeriod() {
         glControllerBuilder.pollingEntry()
-        mHandler.postDelayed(mRunnable, 100)
     }
 }

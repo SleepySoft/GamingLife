@@ -63,7 +63,6 @@ class GraphView(context: Context) :
     View(context), GestureDetector.OnGestureListener {
 
     private var mIsLongPressed = false
-    private var mSelItem: GraphItem? = null;
     private var mLayers: MutableList< GraphLayer > = mutableListOf()
 
     var paintArea: RectF = RectF()
@@ -130,9 +129,13 @@ class GraphView(context: Context) :
     }
 
     private fun onUp(e: MotionEvent) {
-        forTopLayerItemActionHandler {
+        invokeActionHandler(visibleItems()) {
             it.onActionUp(PointF(e.x, e.y))
         }
+
+/*        forTopLayerItem {
+            it.onActionUp(PointF(e.x, e.y))
+        }*/
 
         // Clear select item and notify observer
 /*        mSelItem?.run {
@@ -145,16 +148,22 @@ class GraphView(context: Context) :
     }
 
     override fun onDown(e: MotionEvent): Boolean {
-        forTopLayerItemActionHandler {
+        invokeActionHandler(visibleItemFromPoint(e.x, e.y)) {
             it.onActionDown(PointF(e.x, e.y))
         }
+/*        forTopLayerItemActionHandler {
+            it.onActionDown(PointF(e.x, e.y))
+        }*/
         return true
     }
 
     override fun onShowPress(e: MotionEvent) {
-        forTopLayerItemActionHandler {
+        invokeActionHandler(visibleItemFromPoint(e.x, e.y)) {
             it.onActionSelect(PointF(e.x, e.y))
         }
+/*        forTopLayerItemActionHandler {
+            it.onActionSelect(PointF(e.x, e.y))
+        }*/
 
 /*        val selItem = itemsFromLayer() {
             it.boundRect().contains(e.x, e.y) && it.visible && it.interactive}
@@ -166,9 +175,12 @@ class GraphView(context: Context) :
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        forTopLayerItemActionHandler {
+        invokeActionHandler(visibleItems()) {
             it.onActionClick(PointF(e.x, e.y))
         }
+/*        forTopLayerItemActionHandler {
+            it.onActionClick(PointF(e.x, e.y))
+        }*/
 
 /*        val selItem = itemsFromLayer() {
             it.boundRect().contains(e.x, e.y) && it.visible && it.interactive}
@@ -181,10 +193,15 @@ class GraphView(context: Context) :
 
     override fun onScroll(e1: MotionEvent, e2: MotionEvent,
                           distanceX: Float,distanceY: Float): Boolean {
-        forTopLayerItemActionHandler {
+        invokeActionHandler(visibleItems()) {
             it.onActionMove(
                 PointF(e1.x, e1.y), PointF(e2.x, e2.y), distanceX, distanceY)
         }
+
+/*        forTopLayerItemActionHandler {
+            it.onActionMove(
+                PointF(e1.x, e1.y), PointF(e2.x, e2.y), distanceX, distanceY)
+        }*/
 
 /*        mSelItem?.run {
             this.shiftItem(-distanceX, -distanceY)
@@ -200,18 +217,24 @@ class GraphView(context: Context) :
     }
 
     override fun onLongPress(e: MotionEvent) {
-        forTopLayerItemActionHandler {
+        invokeActionHandler(visibleItemFromPoint(e.x, e.y)) {
             it.onActionLongPress(PointF(e.x, e.y))
         }
+/*        forTopLayerItemActionHandler {
+            it.onActionLongPress(PointF(e.x, e.y))
+        }*/
         // https://stackoverflow.com/a/56545079
         mIsLongPressed = true
     }
 
     override fun onFling(e1: MotionEvent, e2: MotionEvent,
                          velocityX: Float, velocityY: Float): Boolean {
-        forTopLayerItemActionHandler {
+        invokeActionHandler(visibleItems()) {
             it.onActionFling(PointF(e1.x, e1.y), PointF(e2.x, e2.y), velocityX, velocityY)
         }
+/*        forTopLayerItemActionHandler {
+            it.onActionFling(PointF(e1.x, e1.y), PointF(e2.x, e2.y), velocityX, velocityY)
+        }*/
         return false
     }
 
@@ -256,9 +279,9 @@ class GraphView(context: Context) :
         return paintArea.height() >= paintArea.width()
     }
 
-    fun specifySelItem(item: GraphItem) {
+/*    fun specifySelItem(item: GraphItem) {
         mSelItem = item
-    }
+    }*/
 
     fun forEachItem(action: (GraphItem) -> Unit) {
         mLayers.forEach { layer ->
@@ -268,14 +291,20 @@ class GraphView(context: Context) :
         }
     }
 
-    fun forTopLayerItem(action: (GraphItem) -> Unit) {
+    fun visibleItems() = itemsFromVisibleLayers {it.visible }
+
+    fun visibleItemFromPoint(x: Float, y: Float) =
+        itemsFromVisibleLayers {it.visible && it.boundRect().contains(x, y) }
+
+
+/*    fun forTopLayerItem(action: (GraphItem) -> Unit) {
         for (layer in mLayers) {
             layer.graphItems.forEach {item ->
                 action(item)
             }
             break
         }
-    }
+    }*/
 
     // ------------------------------------- Private functions -------------------------------------
 
@@ -283,7 +312,8 @@ class GraphView(context: Context) :
         mGraphViewObserver.forEach { it.onItemLayout() }
     }
 
-    private fun itemsFromLayer(filter: (input: GraphItem) -> Boolean): MutableList< GraphItem > {
+    private fun itemsFromVisibleLayers(
+        filter: (input: GraphItem) -> Boolean): MutableList< GraphItem > {
         val items = mutableListOf< GraphItem >()
         for (layer in mLayers) {
             if (layer.visible) {
@@ -293,7 +323,42 @@ class GraphView(context: Context) :
         return items
     }
 
-    private fun forTopLayerItemActionHandler(action: (GraphActionDecorator) -> ActionHandler.ACT) {
+/*    fun forAllItemActionHandler(
+        action: (GraphActionDecorator) -> ActionHandler.ACT) {
+
+        val adaptItems = itemsFromVisibleLayers {
+            it.visible
+        }
+        invokeActionHandler(adaptItems, action)
+    }
+
+    fun forPointAdaptItemActionHandler(
+        pos: PointF, action: (GraphActionDecorator) -> ActionHandler.ACT) {
+
+        val adaptItems = itemsFromVisibleLayers {
+            it.visible && it.boundRect().contains(pos.x, pos.y)
+        }
+        invokeActionHandler(adaptItems, action)
+    }*/
+
+    private fun invokeActionHandler(
+        items: List< GraphItem >,
+        action: (GraphActionDecorator) -> ActionHandler.ACT) {
+
+        var skip = false
+        items.forEach { item->
+            if (!skip) {
+                item.graphActionDecorator.forEach {
+                    // Not skip actions in the same item
+                    if (action(it) == ActionHandler.ACT.HANDLED) {
+                        skip = true
+                    }
+                }
+            }
+        }
+    }
+
+/*    private fun forTopLayerItemActionHandler(action: (GraphActionDecorator) -> ActionHandler.ACT) {
         var skip = false
         forTopLayerItem { item->
             if (!skip) {
@@ -305,6 +370,6 @@ class GraphView(context: Context) :
                 }
             }
         }
-    }
+    }*/
 }
 

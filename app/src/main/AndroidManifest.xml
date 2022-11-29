@@ -27,6 +27,7 @@
         android:theme="@style/Theme.GamingLife">
         <activity
             android:name=".CommonTextInputActivity"
+            android:launchMode="singleInstance"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"
