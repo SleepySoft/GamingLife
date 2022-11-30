@@ -4,8 +4,12 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.Rect
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.support.annotation.RequiresApi
+import com.sleepysoft.gaminglife.controllers.GlControllerBuilder
+import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import glcore.GlLog
 import glcore.LONG_LONG_PRESS_TIMEOUT
 import kotlin.math.abs
@@ -123,6 +127,7 @@ class InteractiveDecorator(
             decoratedItem.inflatePct = 0.0f
             interactiveListener?.onItemDropped(decoratedItem, intersectItems())
             trackingItem = null
+            GlControllerBuilder.graphShadowView.invalidate()
         }
         // Leak this action to other handler avoiding issues
         return ActionHandler.ACT.IGNORED
@@ -134,7 +139,9 @@ class InteractiveDecorator(
             GlLog.i("InteractiveDecorator.onActionMove [$decoratedItem]")
 
             decoratedItem.shiftItem(-distanceX, -distanceY)
-            interactiveListener?.onItemDropped(decoratedItem, intersectItems())
+            interactiveListener?.onItemDragging(decoratedItem, intersectItems())
+            GlControllerBuilder.graphShadowView.invalidate()
+
             ActionHandler.ACT.HANDLED
         }
         else {
@@ -146,18 +153,24 @@ class InteractiveDecorator(
         GlLog.i("InteractiveDecorator.onActionClick [$decoratedItem]")
 
         interactiveListener?.onItemClicked(decoratedItem)
+        GlControllerBuilder.graphShadowView.invalidate()
         return ActionHandler.ACT.HANDLED
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onActionSelect(pos: PointF): ActionHandler.ACT {
         return if (decoratedItem.visible &&
                    decoratedItem.boundRect().contains(pos.x, pos.y)) {
 
             GlLog.i("InteractiveDecorator.onActionSelect [$decoratedItem]")
+
             trackingItem = decoratedItem
             decoratedItem.inflatePct = 10.0f
             decoratedItem.itemLayer?.bringGraphItemToFront(decoratedItem)
             interactiveListener?.onItemSelected(decoratedItem)
+
+            GlControllerContext.vibrate(100)
+            GlControllerContext.refresh()
 
             ActionHandler.ACT.HANDLED
         }
@@ -194,15 +207,17 @@ class LongPressProgressDecorator(decoratedItem: GraphItem,
     }
 
     private fun doPeriod() {
-        val duration: Int = (System.currentTimeMillis() - mPressSince).toInt()
-        if (duration >= longLongPressTimeout) {
-            progressItem.visible = true
-            triggerListener?.onItemTriggered(decoratedItem)
+        if (decoratedItem.visible) {
+            val duration: Int = (System.currentTimeMillis() - mPressSince).toInt()
+            if (duration >= longLongPressTimeout) {
+                decoratedItem.visible = false
+                triggerListener?.onItemTriggered(decoratedItem)
+            }
+            else {
+                progressItem.progress = duration.toFloat() / longLongPressTimeout.toFloat()
+            }
+            mHandler.postDelayed(mRunnable, 100)
         }
-        else {
-            progressItem.progress = duration.toFloat() / longLongPressTimeout.toFloat()
-        }
-        mHandler.postDelayed(mRunnable, 100)
     }
 
     private fun endLongLongPress() {
@@ -233,6 +248,7 @@ class LongPressProgressDecorator(decoratedItem: GraphItem,
     override fun onActionSelect(pos: PointF): ActionHandler.ACT {
         decoratedItem.visible = true
         mPressSince = System.currentTimeMillis()
+        mHandler.postDelayed(mRunnable, 100)
 
         return ActionHandler.ACT.HANDLED
     }

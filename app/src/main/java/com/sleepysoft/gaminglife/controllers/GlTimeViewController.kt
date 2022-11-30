@@ -29,8 +29,8 @@ class GlTimeViewController(
 
     private lateinit var mMenuDailyStatistics: GraphRectangle
 
-    private var mRecording: Boolean = false
-    private lateinit var mRecordController: GlAudioRecordLayerController
+/*    private var mRecording: Boolean = false
+    private lateinit var mRecordController: GlAudioRecordLayerController*/
 
     fun init() {
         checkBuildTimeViewLayer()
@@ -223,11 +223,8 @@ class GlTimeViewController(
 
     private fun checkBuildTimeViewLayer() {
         val layer = GraphLayer("TimeView.BaseLayer", true, 
-                                GlControllerBuilder.graphShadowView).apply {
-            GlControllerBuilder.graphShadowView.addLayer(this)
-        }
-
-        layer.removeGraphItem() { true }
+                                GlControllerBuilder.graphShadowView)
+        GlControllerBuilder.graphShadowView.addLayer(layer)
 
         val currentTaskInfo = mGlTaskModule.getCurrentTaskInfo()
         val currentTaskGroupData =

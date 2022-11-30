@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import glcore.GlLog
 
 
 class GlView(context: Context)
@@ -18,6 +19,7 @@ class GlView(context: Context)
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        GlLog.i("Draw")
         GlControllerBuilder.graphShadowView.onDraw(canvas)
     }
 
@@ -79,6 +81,7 @@ class GlView(context: Context)
     }
 
     override fun onLongPress(e: MotionEvent) {
+        mIsLongPressed = true
         GlControllerBuilder.graphShadowView.onLongPress(e)
     }
 

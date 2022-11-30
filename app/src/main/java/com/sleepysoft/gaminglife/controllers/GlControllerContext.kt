@@ -2,7 +2,10 @@ package com.sleepysoft.gaminglife.controllers
 
 import android.view.View
 import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
 import android.os.Vibrator
+import android.support.annotation.RequiresApi
 import java.lang.ref.WeakReference
 
 //
@@ -18,4 +21,10 @@ object GlControllerContext {
     var view = WeakReference< View >(null)
     var context = WeakReference< Context >(null)
     var vibrator = WeakReference< Vibrator >(null)
+
+    fun refresh() = view.get()?.invalidate()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun vibrate(milliseconds: Long) = vibrator.get()?.vibrate(
+        VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
 }

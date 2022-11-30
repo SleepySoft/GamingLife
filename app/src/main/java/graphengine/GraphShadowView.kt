@@ -2,6 +2,7 @@ package graphengine
 import android.annotation.SuppressLint
 import android.graphics.*
 import android.view.MotionEvent
+import com.sleepysoft.gaminglife.controllers.GlControllerContext
 
 
 const val DEBUG_TAG = "DefaultDbg"
@@ -52,7 +53,7 @@ class GraphShadowView() {
     // ------------------------------------------------------------------------------------
 
     fun invalidate() {
-
+        GlControllerContext.view.get()?.invalidate()
     }
 
     // ------------------------------- Window event handler -------------------------------

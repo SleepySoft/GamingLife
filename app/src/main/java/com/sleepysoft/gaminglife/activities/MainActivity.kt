@@ -13,6 +13,7 @@ import com.sleepysoft.gaminglife.GamingLifeMainService
 import com.sleepysoft.gaminglife.PermissionActivity
 import com.sleepysoft.gaminglife.RuntimeTest
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
+import com.sleepysoft.gaminglife.controllers.GlView
 import glcore.GlLog
 import glcore.GlRoot
 import glenv.GlEnv
@@ -21,10 +22,10 @@ import java.lang.ref.WeakReference
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var mView: GraphShadowView
+    private lateinit var mView: GlView
     private lateinit var mVibrator: Vibrator
 
-    companion object {
+/*    companion object {
         private var mHandler = Handler(Looper.getMainLooper())
     }
 
@@ -39,20 +40,20 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private val runnable = PrivateRunnable(this, mHandler)
+    private val runnable = PrivateRunnable(this, mHandler)*/
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mView = GraphShadowView(this)
+        mView = GlView(this)
         setContentView(mView)
 
         createVibrator()
         requireLockScreenShow()
         checkRequireExtStoragePermission()
-        initControllerContext()
 
+        initControllerContext()
         GlRoot.init(GlEnv().apply { init() })
         GlControllerBuilder.checkBuildController()
 
@@ -60,7 +61,7 @@ class MainActivity : AppCompatActivity() {
 
         RuntimeTest.testEntry(this)
 
-        mHandler.postDelayed(runnable, 100)
+        // mHandler.postDelayed(runnable, 100)
     }
 
     override fun onStart() {
