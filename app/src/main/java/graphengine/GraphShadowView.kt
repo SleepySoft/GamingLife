@@ -1,10 +1,7 @@
 package graphengine
 import android.annotation.SuppressLint
-import android.content.Context
 import android.graphics.*
-import android.view.GestureDetector
 import android.view.MotionEvent
-import android.view.View
 
 
 const val DEBUG_TAG = "DefaultDbg"
@@ -39,8 +36,7 @@ interface ActionHandler {
 }
 
 
-class GraphView(context: Context) :
-    View(context), GestureDetector.OnGestureListener {
+class GraphShadowView() {
 
     private var mIsLongPressed = false
     private var mLayers: MutableList< GraphLayer > = mutableListOf()
@@ -53,13 +49,15 @@ class GraphView(context: Context) :
 
     val mGraphViewObserver = mutableListOf< GraphViewObserver >()
 
-    private var mGestureDetector = GestureDetector(context, this)
+    // ------------------------------------------------------------------------------------
 
-    // ------------------------------- Window event handler override -------------------------------
+    fun invalidate() {
 
-    override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
+    }
 
+    // ------------------------------- Window event handler -------------------------------
+
+    fun onDraw(canvas: Canvas?) {
         canvas?.run {
             for (item in mLayers.reversed()) {
                 if (item.visible) {
@@ -69,9 +67,7 @@ class GraphView(context: Context) :
         }
     }
 
-    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        super.onSizeChanged(w, h, oldw, oldh)
-
+    fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         unitScale = w * 0.01f
         paintArea.set(0.0f, 0.0f, w.toFloat(), h.toFloat())
 
@@ -85,10 +81,7 @@ class GraphView(context: Context) :
 
     // --------------------------------- Action & Gesture Handler ----------------------------------
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        event ?: return super.onTouchEvent(event)
-
+/*    fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event.actionMasked) {
             MotionEvent.ACTION_UP -> onUp(event)
         }
@@ -106,9 +99,9 @@ class GraphView(context: Context) :
             }
         }
         return super.onTouchEvent(event)
-    }
+    }*/
 
-    private fun onUp(e: MotionEvent) {
+    fun onUp(e: MotionEvent) {
         invokeActionHandler(visibleItems()) {
             it.onActionUp(PointF(e.x, e.y))
         }
@@ -127,7 +120,7 @@ class GraphView(context: Context) :
         mSelItem = null*/
     }
 
-    override fun onDown(e: MotionEvent): Boolean {
+    fun onDown(e: MotionEvent): Boolean {
         invokeActionHandler(visibleItemFromPoint(e.x, e.y)) {
             it.onActionDown(PointF(e.x, e.y))
         }
@@ -137,7 +130,7 @@ class GraphView(context: Context) :
         return true
     }
 
-    override fun onShowPress(e: MotionEvent) {
+    fun onShowPress(e: MotionEvent) {
         invokeActionHandler(visibleItemFromPoint(e.x, e.y)) {
             it.onActionSelect(PointF(e.x, e.y))
         }
@@ -154,7 +147,7 @@ class GraphView(context: Context) :
         }*/
     }
 
-    override fun onSingleTapUp(e: MotionEvent): Boolean {
+    fun onSingleTapUp(e: MotionEvent): Boolean {
         invokeActionHandler(visibleItems()) {
             it.onActionClick(PointF(e.x, e.y))
         }
@@ -171,7 +164,7 @@ class GraphView(context: Context) :
         return true
     }
 
-    override fun onScroll(e1: MotionEvent, e2: MotionEvent,
+    fun onScroll(e1: MotionEvent, e2: MotionEvent,
                           distanceX: Float,distanceY: Float): Boolean {
         invokeActionHandler(visibleItems()) {
             it.onActionMove(
@@ -196,7 +189,7 @@ class GraphView(context: Context) :
         return true
     }
 
-    override fun onLongPress(e: MotionEvent) {
+    fun onLongPress(e: MotionEvent) {
         invokeActionHandler(visibleItemFromPoint(e.x, e.y)) {
             it.onActionLongPress(PointF(e.x, e.y))
         }
@@ -207,7 +200,7 @@ class GraphView(context: Context) :
         mIsLongPressed = true
     }
 
-    override fun onFling(e1: MotionEvent, e2: MotionEvent,
+    fun onFling(e1: MotionEvent, e2: MotionEvent,
                          velocityX: Float, velocityY: Float): Boolean {
         invokeActionHandler(visibleItems()) {
             it.onActionFling(PointF(e1.x, e1.y), PointF(e2.x, e2.y), velocityX, velocityY)

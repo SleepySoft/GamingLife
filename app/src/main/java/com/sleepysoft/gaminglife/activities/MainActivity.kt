@@ -16,12 +16,12 @@ import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import glcore.GlLog
 import glcore.GlRoot
 import glenv.GlEnv
-import graphengine.GraphView
+import graphengine.GraphShadowView
 import java.lang.ref.WeakReference
 
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var mView: GraphView
+    private lateinit var mView: GraphShadowView
     private lateinit var mVibrator: Vibrator
 
     companion object {
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        mView = GraphView(this)
+        mView = GraphShadowView(this)
         setContentView(mView)
 
         createVibrator()

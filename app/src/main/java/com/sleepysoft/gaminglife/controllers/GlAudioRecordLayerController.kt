@@ -7,9 +7,8 @@ import glcore.GlRoot
 import graphengine.*
 
 
-class GlAudioRecordLayerController(
-    private val mContext: GlControllerContext
-    ) : GraphViewObserver, GraphInteractiveListener() {
+class GlAudioRecordLayerController()
+    : GraphViewObserver, GraphInteractiveListener() {
 
     private lateinit var mVoiceRecordEffectLayer: GraphLayer
     private lateinit var mAudioCircle: GraphImage

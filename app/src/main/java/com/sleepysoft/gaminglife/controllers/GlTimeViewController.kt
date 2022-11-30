@@ -12,7 +12,6 @@ const val DEBUG_TAG = "DefaultDbg"
 
 
 class GlTimeViewController(
-    private val mContext: GlControllerContext,
     private val mGlTaskModule: GlTaskModule)
     : GraphInteractiveListener(), GraphViewObserver {
 
@@ -35,7 +34,7 @@ class GlTimeViewController(
 
     fun init() {
         checkBuildTimeViewLayer()
-        mContext.graphView.mGraphViewObserver.add(this)
+        GlControllerBuilder.graphShadowView.mGraphViewObserver.add(this)
 
 /*        adaptViewArea()
         doLayout()*/
@@ -64,7 +63,7 @@ class GlTimeViewController(
         // processRecordProgress()
 
         // mCenterItem.mainText = "%02d:%02d:%02d.%03d".format(hour, minutes, seconds, ms)
-        mContext.graphView.invalidate()
+        GlControllerBuilder.graphShadowView.invalidate()
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
@@ -129,13 +128,13 @@ class GlTimeViewController(
             mPressSince = System.currentTimeMillis()
         }
 
-        mContext.graphView.invalidate()
+        GlControllerBuilder.graphShadowView.invalidate()
     }
 
     override fun onItemDragging(draggingItem: GraphItem, pos: PointF) {
         if (draggingItem == mCenterItem) {
-            if ((abs(mCenterItem.offsetPixel.x) > mContext.graphView.unitScale * 0.3) ||
-                (abs(mCenterItem.offsetPixel.y) > mContext.graphView.unitScale * 0.3)) {
+            if ((abs(mCenterItem.offsetPixel.x) > GlControllerBuilder.graphShadowView.unitScale * 0.3) ||
+                (abs(mCenterItem.offsetPixel.y) > GlControllerBuilder.graphShadowView.unitScale * 0.3)) {
                 endLongLongPress()
             }
         }
@@ -223,13 +222,9 @@ class GlTimeViewController(
     // ------------------------------------- Private Functions -------------------------------------
 
     private fun checkBuildTimeViewLayer() {
-        val layers = mContext.graphView.pickLayer { it.id == "TimeView.BaseLayer" }
-        val layer = if (layers.isNotEmpty()) {
-            layers[0]
-        } else {
-            GraphLayer("TimeView.BaseLayer", true, mContext.graphView).apply {
-                mContext.graphView.addLayer(this)
-            }
+        val layer = GraphLayer("TimeView.BaseLayer", true, 
+                                GlControllerBuilder.graphShadowView).apply {
+            GlControllerBuilder.graphShadowView.addLayer(this)
         }
 
         layer.removeGraphItem() { true }
@@ -314,7 +309,7 @@ class GlTimeViewController(
     }
 
     private fun doLayout() {
-        if (mContext.graphView.isPortrait()) {
+        if (GlControllerBuilder.graphShadowView.isPortrait()) {
             layoutPortrait()
         }
         else {
@@ -323,7 +318,7 @@ class GlTimeViewController(
     }
 
     private fun adaptViewArea() {
-        val strokeWidth = mContext.graphView.unitScale * 1.0f
+        val strokeWidth = GlControllerBuilder.graphShadowView.unitScale * 1.0f
 
         for (item in mSurroundItems) {
             item.shapePaint.strokeWidth = strokeWidth
@@ -333,15 +328,15 @@ class GlTimeViewController(
     }
 
     private fun layoutPortrait() {
-        val layoutArea = RectF(mContext.graphView.paintArea)
+        val layoutArea = RectF(GlControllerBuilder.graphShadowView.paintArea)
         layoutArea.top = layoutArea.bottom - layoutArea.height()
         layoutArea.apply {
-            this.top += 10.0f * mContext.graphView.unitScale
-            this.bottom += 10.0f * mContext.graphView.unitScale
+            this.top += 10.0f * GlControllerBuilder.graphShadowView.unitScale
+            this.bottom += 10.0f * GlControllerBuilder.graphShadowView.unitScale
         }
 
-        mCenterRadius = 8.0f * mContext.graphView.unitScale
-        mSurroundRadius = 6.5f * mContext.graphView.unitScale
+        mCenterRadius = 8.0f * GlControllerBuilder.graphShadowView.unitScale
+        mSurroundRadius = 6.5f * GlControllerBuilder.graphShadowView.unitScale
 
         val center = PointF(layoutArea.centerX(), layoutArea.centerY())
         val radius = layoutArea.width() / 2
@@ -433,7 +428,7 @@ class GlTimeViewController(
                     duration.toFloat() / LONG_LONG_PRESS_TIMEOUT.toFloat()
                 mLongLongPressProgress.visible = true
             }
-            mContext.graphView.invalidate()
+            GlControllerBuilder.graphShadowView.invalidate()
         }
     }
 
