@@ -4,6 +4,7 @@ import android.graphics.*
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.os.Handler
 import android.os.Looper
+import com.sleepysoft.gaminglife.DailyBrowseActivity
 import glcore.*
 import graphengine.*
 import kotlin.math.cos
@@ -87,6 +88,12 @@ class GlTimeViewController(
 
     // ------------------------ Implements GraphInteractiveListener interface -------------------------
 
+    override fun onItemClicked(item: GraphItem) {
+        if (item == mMenuDailyStatistics) {
+            GlControllerContext.launchActivity(DailyBrowseActivity::class.java)
+        }
+    }
+
     override fun onItemDropped(item: GraphItem, intersectItems: List< GraphItem >) {
 
         if (item == mCenterItem) {
@@ -119,6 +126,16 @@ class GlTimeViewController(
         }
         item.offsetPixel.x = 0.0f
         item.offsetPixel.y = 0.0f
+    }
+
+    override fun onItemTriggered(item: GraphItem) {
+        if (item == mCenterItem) {
+            GlControllerBuilder.audioRecordController.popupInput(
+                mCenterItem.boundRect().centerPoint()) {
+                    inputType: String, result: Any? ->
+                handleInputComplete(inputType, (result as String?) ?: "")
+            }
+        }
     }
 
 /*    override fun onItemPicked(pickedItem: GraphItem) {

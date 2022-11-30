@@ -46,6 +46,7 @@ class GlAudioRecordLayerController()
     fun popupInput(operatingPos: PointF,
                    returnFunction: (inputType: String, result: Any?) -> Unit) {
         layoutItems()
+
         mReturnFunction = returnFunction
         mAudioCircle.moveCenter(operatingPos)
         InteractiveDecorator.changeTrackingItem(mAudioCircle)
@@ -54,9 +55,8 @@ class GlAudioRecordLayerController()
         GlControllerBuilder.graphShadowView.pushObserver(this)*/
 
         mVoiceRecordEffectLayer.visible = true
-        InteractiveDecorator.changeTrackingItem(mAudioCircle)
         GlControllerBuilder.graphShadowView.bringLayerToFront(mVoiceRecordEffectLayer)
-        GlControllerBuilder.graphShadowView.invalidate()
+        GlControllerContext.refresh()
 
         GlRoot.env.glAudio.startRecord(GlFile.glRoot())
     }

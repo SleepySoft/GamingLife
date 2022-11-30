@@ -2,10 +2,12 @@ package com.sleepysoft.gaminglife.controllers
 
 import android.view.View
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.support.annotation.RequiresApi
+import graphengine.InteractiveDecorator
 import java.lang.ref.WeakReference
 
 //
@@ -27,4 +29,15 @@ object GlControllerContext {
     @RequiresApi(Build.VERSION_CODES.O)
     fun vibrate(milliseconds: Long) = vibrator.get()?.vibrate(
         VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
+
+    fun launchActivity(cls: Class< * >) = launchActivity(cls) { }
+
+    fun launchActivity(cls: Class< * >, intentDecorator: (intent: Intent) -> Unit) {
+        val contextRef = context.get()
+        contextRef?.run {
+            val activityIntent = Intent(contextRef, cls)
+            intentDecorator(activityIntent)
+            contextRef.startActivity(activityIntent)
+        }
+    }
 }
