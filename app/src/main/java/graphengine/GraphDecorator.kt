@@ -207,15 +207,16 @@ class LongPressProgressDecorator(decoratedItem: GraphItem,
     }
 
     private fun doPeriod() {
-        if (decoratedItem.visible) {
+        if (progressItem.visible) {
             val duration: Int = (System.currentTimeMillis() - mPressSince).toInt()
             if (duration >= longLongPressTimeout) {
-                decoratedItem.visible = false
+                progressItem.visible = false
                 triggerListener?.onItemTriggered(decoratedItem)
             }
             else {
                 progressItem.progress = duration.toFloat() / longLongPressTimeout.toFloat()
             }
+            GlControllerContext.refresh()
             mHandler.postDelayed(mRunnable, 100)
         }
     }
@@ -246,7 +247,7 @@ class LongPressProgressDecorator(decoratedItem: GraphItem,
     }
 
     override fun onActionSelect(pos: PointF): ActionHandler.ACT {
-        decoratedItem.visible = true
+        progressItem.visible = true
         mPressSince = System.currentTimeMillis()
         mHandler.postDelayed(mRunnable, 100)
 
