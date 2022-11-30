@@ -14,8 +14,8 @@ object GlControllerBuilder {
     lateinit var timeViewController: GlTimeViewController
     lateinit var  audioRecordController: GlAudioRecordLayerController
 
-    private var mHandler = Handler(Looper.getMainLooper())
-    private val mRunnable = Runnable { polling() }
+/*    private var mHandler = Handler(Looper.getMainLooper())
+    private val mRunnable = Runnable { polling() }*/
 
     fun checkBuildController() {
         // Do not access other controller in controller's init() function
@@ -24,7 +24,7 @@ object GlControllerBuilder {
             createTimeViewController()
             createAudioRecordController()
         }
-        mHandler.postDelayed(mRunnable, 100)
+        // mHandler.postDelayed(mRunnable, 100)
     }
 
     private fun createTimeViewController() {
@@ -35,7 +35,7 @@ object GlControllerBuilder {
         audioRecordController = GlAudioRecordLayerController().apply { init() }
     }
 
-    private fun polling() {
+/*    private fun polling() {
         mHandler.postDelayed(mRunnable, 100)
-    }
+    }*/
 }

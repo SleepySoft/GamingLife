@@ -2,6 +2,8 @@ package com.sleepysoft.gaminglife.controllers
 
 import android.graphics.*
 import android.graphics.Paint.ANTI_ALIAS_FLAG
+import android.os.Handler
+import android.os.Looper
 import glcore.*
 import graphengine.*
 import kotlin.math.cos
@@ -29,6 +31,9 @@ class GlTimeViewController(
 
     private lateinit var mMenuDailyStatistics: GraphRectangle
 
+    private var mHandler = Handler(Looper.getMainLooper())
+    private val mRunnable = Runnable { polling() }
+
 /*    private var mRecording: Boolean = false
     private lateinit var mRecordController: GlAudioRecordLayerController*/
 
@@ -38,6 +43,8 @@ class GlTimeViewController(
 
 /*        adaptViewArea()
         doLayout()*/
+
+        mHandler.postDelayed(mRunnable, 100)
     }
 
     fun polling() {
@@ -63,7 +70,9 @@ class GlTimeViewController(
         // processRecordProgress()
 
         // mCenterItem.mainText = "%02d:%02d:%02d.%03d".format(hour, minutes, seconds, ms)
-        GlControllerBuilder.graphShadowView.invalidate()
+
+        GlControllerContext.refresh()
+        mHandler.postDelayed(mRunnable, 100)
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------

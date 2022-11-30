@@ -19,7 +19,6 @@ class GlView(context: Context)
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        GlLog.i("Draw")
         GlControllerBuilder.graphShadowView.onDraw(canvas)
     }
 
