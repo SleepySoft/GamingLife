@@ -149,7 +149,7 @@ class GraphShadowView() {
     }
 
     fun onSingleTapUp(e: MotionEvent): Boolean {
-        invokeActionHandler(visibleItems()) {
+        invokeActionHandler(visibleItemFromPoint(e.x, e.y)) {
             it.onActionClick(PointF(e.x, e.y))
         }
 /*        forTopLayerItemActionHandler {

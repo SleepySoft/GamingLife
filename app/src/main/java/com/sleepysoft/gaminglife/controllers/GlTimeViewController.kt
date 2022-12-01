@@ -323,6 +323,7 @@ class GlTimeViewController(
                 }
             })
         }
+        mMenuDailyStatistics.graphActionDecorator.add(ClickDecorator(mMenuDailyStatistics, this))
 
         layer.addGraphItem(mMenuDailyStatistics)
         layer.addGraphItem(mCenterItem)

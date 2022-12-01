@@ -105,6 +105,21 @@ class AutoFitTextDecorator(decoratedItem: GraphItem) : GraphItemDecorator(decora
 
 // ---------------------------------------------------------------------------------------------
 
+class ClickDecorator(
+    decoratedItem: GraphItem,
+    var interactiveListener: GraphInteractiveListener? = null)
+    : GraphActionDecorator(decoratedItem) {
+
+    override fun onActionClick(pos: PointF): ActionHandler.ACT {
+        GlLog.i("ClickDecorator.onActionClick [$decoratedItem]")
+
+        interactiveListener?.onItemClicked(decoratedItem)
+        GlControllerBuilder.graphShadowView.invalidate()
+        return ActionHandler.ACT.HANDLED
+    }
+}
+
+
 class InteractiveDecorator(
     decoratedItem: GraphItem,
     var interactiveListener: GraphInteractiveListener? = null)
@@ -151,13 +166,13 @@ class InteractiveDecorator(
         }
     }
 
-    override fun onActionClick(pos: PointF) : ActionHandler.ACT {
+/*    override fun onActionClick(pos: PointF) : ActionHandler.ACT {
         GlLog.i("InteractiveDecorator.onActionClick [$decoratedItem]")
 
         interactiveListener?.onItemClicked(decoratedItem)
         GlControllerBuilder.graphShadowView.invalidate()
         return ActionHandler.ACT.HANDLED
-    }
+    }*/
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onActionSelect(pos: PointF): ActionHandler.ACT {
