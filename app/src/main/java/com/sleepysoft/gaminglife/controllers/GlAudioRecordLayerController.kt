@@ -1,6 +1,7 @@
 package com.sleepysoft.gaminglife.controllers
 
 import android.graphics.*
+import com.sleepysoft.gaminglife.CommonTextInputActivity
 import com.sleepysoft.gaminglife.R
 import glcore.GlFile
 import glcore.GlRoot
@@ -171,6 +172,9 @@ class GlAudioRecordLayerController()
 
         GlRoot.env.glAudio.stopRecord()
 
+        item.offsetPixel.x = 0.0f
+        item.offsetPixel.y = 0.0f
+
         if (intersectItems.isEmpty()) {
             // Just release the record button
 
@@ -250,6 +254,7 @@ class GlAudioRecordLayerController()
     // -----------------------------------------------------------------
 
     private fun popupTextEditor() {
+        GlControllerContext.launchActivity(CommonTextInputActivity::class.java)
     }
 
     private fun onTextInputOk() {

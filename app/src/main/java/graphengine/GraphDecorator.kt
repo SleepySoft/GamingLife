@@ -125,7 +125,8 @@ class InteractiveDecorator(
             GlLog.i("InteractiveDecorator.onActionUp [$decoratedItem]")
 
             decoratedItem.inflatePct = 0.0f
-            interactiveListener?.onItemDropped(decoratedItem, intersectItems())
+            interactiveListener?.onItemDropped(
+                decoratedItem, intersectItems(decoratedItem))
             trackingItem = null
             GlControllerBuilder.graphShadowView.invalidate()
         }
@@ -139,7 +140,8 @@ class InteractiveDecorator(
             GlLog.i("InteractiveDecorator.onActionMove [$decoratedItem]")
 
             decoratedItem.shiftItem(-distanceX, -distanceY)
-            interactiveListener?.onItemDragging(decoratedItem, intersectItems())
+            interactiveListener?.onItemDragging(
+                decoratedItem, intersectItems(decoratedItem))
             GlControllerBuilder.graphShadowView.invalidate()
 
             ActionHandler.ACT.HANDLED
@@ -181,9 +183,9 @@ class InteractiveDecorator(
 
     // --------------------------------------------------------------
 
-    private fun intersectItems() : List< GraphItem > =
+    private fun intersectItems(exceptItem: GraphItem?) : List< GraphItem > =
         decoratedItem.itemLayer?.itemIntersectRect(
-            decoratedItem.boundRect()) { it.visible } ?: listOf()
+            decoratedItem.boundRect()) { it.visible && it != exceptItem } ?: listOf()
 }
 
 
