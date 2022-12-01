@@ -1,4 +1,4 @@
-package com.sleepysoft.gaminglife
+package com.sleepysoft.gaminglife.test
 
 import android.content.Context
 import android.os.Build

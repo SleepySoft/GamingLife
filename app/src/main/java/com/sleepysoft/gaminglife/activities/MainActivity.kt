@@ -11,9 +11,9 @@ import android.view.WindowManager
 import com.sleepysoft.gaminglife.controllers.GlControllerBuilder
 import com.sleepysoft.gaminglife.GamingLifeMainService
 import com.sleepysoft.gaminglife.PermissionActivity
-import com.sleepysoft.gaminglife.RuntimeTest
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import com.sleepysoft.gaminglife.controllers.GlView
+import com.sleepysoft.gaminglife.test.RuntimeTest
 import glcore.GlLog
 import glcore.GlRoot
 import glenv.GlEnv
@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
 
         startGlService()
 
-        RuntimeTest.testEntry(this)
+        // RuntimeTest.testEntry(this)
 
         // mHandler.postDelayed(runnable, 100)
     }
@@ -68,6 +68,11 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
 
         val onLockScreen: Boolean = intent.getBooleanExtra("OnLockedScreen", false)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        GlControllerContext.dispatchAsyncResult(requestCode, resultCode, data)
     }
 
     // ---------------------------------------------------------------------------------------------

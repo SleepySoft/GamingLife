@@ -1,5 +1,6 @@
 package com.sleepysoft.gaminglife.controllers
 
+import android.content.Intent
 import android.graphics.*
 import com.sleepysoft.gaminglife.CommonTextInputActivity
 import com.sleepysoft.gaminglife.R
@@ -42,6 +43,21 @@ class GlAudioRecordLayerController()
     fun init() {
         loadResource()
         checkBuildVoiceRecordEffectLayer()
+
+        GlControllerContext.asyncResultHandler.add {
+                requestCode: Int, resultCode: Int, data: Intent? ->
+            if (requestCode == GlControllerContext.REQUEST_AUDIO_RECORD_CONTROLLER) {
+                when (resultCode) {
+                    GlControllerContext.RESULT_COMMON_INPUT_CANCELLED -> {
+                        onUserInputCancel()
+                    }
+                    GlControllerContext.RESULT_COMMON_INPUT_TEXT_COMPLETE -> {
+                        val inputText = data?.getStringExtra("text") ?: ""
+                        onTextInputOk(inputText)
+                    }
+                }
+            }
+        }
     }
 
     fun popupInput(operatingPos: PointF,
@@ -254,12 +270,13 @@ class GlAudioRecordLayerController()
     // -----------------------------------------------------------------
 
     private fun popupTextEditor() {
-        GlControllerContext.launchActivity(CommonTextInputActivity::class.java)
+        GlControllerContext.launchActivity(
+            CommonTextInputActivity::class.java,
+            GlControllerContext.REQUEST_AUDIO_RECORD_CONTROLLER)
     }
 
-    private fun onTextInputOk() {
-        // println(mTextInput.text)
-        // mReturnFunction?.run { this("Text", mTextInput.text.toString()) }
+    private fun onTextInputOk(inputText: String) {
+        mReturnFunction?.run { this("Text", inputText) }
     }
 
     private fun onAudioRecordOk() {
