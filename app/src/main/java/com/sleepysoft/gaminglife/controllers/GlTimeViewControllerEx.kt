@@ -31,21 +31,24 @@ class GlTimeViewControllerEx(
 /*        adaptViewArea()
         doLayout()*/
 
-        mHandler.postDelayed(mRunnable, 100)
+        mHandler.postDelayed(mRunnable, 1000)
     }
 
     fun polling() {
-
+        if (dailySubBars.isNotEmpty()) {
+            dailySubBars.last().rect.right = timeStampToBarBaseX(GlDateTime.datetime().time)
+            GlControllerContext.refresh()
+        }
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
 
     override fun onItemLayout() {
-        TODO("Not yet implemented")
+        doLayout()
     }
 
     override fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        TODO("Not yet implemented")
+
     }
 
     // ----------------------- Implements GraphInteractiveListener interface -----------------------
@@ -109,6 +112,10 @@ class GlTimeViewControllerEx(
                 this.style = Paint.Style.FILL
             }
         }
+
+        layer.addGraphItem(recordBubble)
+        layer.addGraphItem(suggestionBubble)
+        layer.addGraphItem(dailyBarBase)
     }
 
     private fun buildTaskGroupGraph(layer: GraphLayer) {
@@ -140,6 +147,9 @@ class GlTimeViewControllerEx(
     }
 
     private fun rebuildDailyBar(layer: GraphLayer) {
+        dailySubBars.clear()
+        layer.removeGraphItem { it.id == "TimeView.SubTaskBar" }
+
         val dailyStat = GlDailyStatistics().apply {
             loadDailyData(0)
         }
@@ -153,16 +163,29 @@ class GlTimeViewControllerEx(
             dailyStat.taskRecords.add(currentTaskRecord)
         }
 
-        dailySubBars.clear()
+        // If the first task does not start from beginning
+        // Insert an idle task at the head of task record
+
+        val dayStartTs = GlDateTime.dayStartTimeStamp()
+        if (dailyStat.taskRecords.isEmpty() ||
+            dailyStat.taskRecords[0].startTime > dayStartTs) {
+            dailyStat.taskRecords.add(0, TaskRecordEx().apply {
+                this.groupID = GROUP_ID_IDLE
+                this.startTime = dayStartTs
+            })
+        }
+
         for (taskRecord in dailyStat.taskRecords) {
-            dailySubBars.add(GraphRectangle().apply {
+            val subBar = GraphRectangle().apply {
                 this.id = "TimeView.SubTaskBar"
                 this.itemData = taskRecord
                 this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     this.color = Color.parseColor(mGlTaskModule.colorOfTask(taskRecord.groupID))
                     this.style = Paint.Style.FILL
                 }
-            })
+            }
+            dailySubBars.add(subBar)
+            layer.addGraphItem(subBar)
         }
     }
 
@@ -176,10 +199,53 @@ class GlTimeViewControllerEx(
     }
 
     private fun layoutPortrait() {
+        val layoutArea = RectF(GlControllerBuilder.graphShadowView.paintArea)
+
+        // Layout daily bar
+
+        dailyBarBase.rect.set(
+            layoutArea.left,
+            layoutArea.centerY(),
+            layoutArea.right,
+            layoutArea.centerY() + 90.0f
+        )
+
+        val barBaseRect = dailyBarBase.boundRect()
+        for (i in 0 until dailySubBars.size) {
+            val subBar = dailySubBars[i]
+            val taskRec = subBar.itemData as TaskRecordEx
+            taskRec.endTime = if (i == dailySubBars.size - 1) {
+                GlDateTime.datetime().time
+            } else {
+                (dailySubBars[i + 1].itemData as TaskRecordEx).startTime
+            }
+
+            subBar.rect.set(
+                timeStampToBarBaseX(taskRec.startTime),
+                barBaseRect.top,
+                timeStampToBarBaseX(taskRec.endTime),
+                barBaseRect.bottom
+            )
+        }
+
+        // Layout task bubble
+
 
     }
 
     private fun layoutLandscape() {
 
+    }
+
+    private fun timeStampToBarBaseX(ts: Long) : Float {
+        val dayStartTs = GlDateTime.dayStartTimeStamp()
+        val barBaseRect = dailyBarBase.boundRect()
+        if (ts <= dayStartTs) {
+            return 0.0f
+        } else if (ts >= dayStartTs + TIMESTAMP_COUNT_IN_DAY) {
+            return barBaseRect.right
+        } else {
+            return barBaseRect.left + barBaseRect.width() * (ts - dayStartTs).toFloat() / TIMESTAMP_COUNT_IN_DAY
+        }
     }
 }

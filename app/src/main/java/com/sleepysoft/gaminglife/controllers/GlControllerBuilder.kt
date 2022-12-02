@@ -12,6 +12,7 @@ object GlControllerBuilder {
     var built = false
     val graphShadowView = GraphShadowView()
     lateinit var timeViewController: GlTimeViewController
+    lateinit var timeViewControllerEx: GlTimeViewControllerEx
     lateinit var  audioRecordController: GlAudioRecordLayerController
 
 /*    private var mHandler = Handler(Looper.getMainLooper())
@@ -28,7 +29,8 @@ object GlControllerBuilder {
     }
 
     private fun createTimeViewController() {
-        timeViewController = GlTimeViewController(GlRoot.glTaskModule).apply { init() }
+        // timeViewController = GlTimeViewController(GlRoot.glTaskModule).apply { init() }
+        timeViewControllerEx = GlTimeViewControllerEx(GlRoot.glTaskModule).apply { init() }
     }
 
     private fun createAudioRecordController() {

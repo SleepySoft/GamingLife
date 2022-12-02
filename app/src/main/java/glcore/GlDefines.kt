@@ -49,7 +49,7 @@ const val GROUP_ID_CREATE = "fa94a546-beeb-4570-b266-c066a4a31233"
 
 
 const val COLOR_RECORD = "#B2FF59"              // Light Green A200
-const val COLOR_SUGGESTION = "##EEFF41"         // Lime A200
+const val COLOR_SUGGESTION = "#EEFF41"          // Lime A200
 const val COLOR_DAILY_BAR_BASE = "#BDBDBD"      // Gray 400
 
 // ---------------------------------------- Struct Support -----------------------------------------
