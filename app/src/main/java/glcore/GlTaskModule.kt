@@ -229,7 +229,7 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
     private fun resetDayDailyData() {
         GlRoot.glDatabase.dailyRecord.clear()
         GlRoot.glDatabase.dailyRecord.set(PATH_DAILY_START_TS, GlDateTime.dayStartTimeStamp())
-        GlRoot.glDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf< GlAnyDict >())
+        GlRoot.glDatabase.dailyRecord.set(PATH_DAILY_TASK_RECORD, mutableListOf< GlAnyDict >())
         GlRoot.glDatabase.save()
     }
 
@@ -246,7 +246,7 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
         }
 
         val currentTaskCopy = currentTask.deepCopy()
-        val taskHistory = mDatabase.dailyRecord.get(PATH_DAILY_TASK_HISTORY)
+        val taskHistory = mDatabase.dailyRecord.get(PATH_DAILY_TASK_RECORD)
 
         if (taskHistory is MutableList< * >) {
             @Suppress("UNCHECKED_CAST")
@@ -254,7 +254,7 @@ class GlTaskModule(private val mDatabase: GlDatabase) {
             mDatabase.dailyRecord.hasUpdate = true
         }
         else {
-            mDatabase.dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf(currentTaskCopy))
+            mDatabase.dailyRecord.set(PATH_DAILY_TASK_RECORD, mutableListOf(currentTaskCopy))
         }
     }
 

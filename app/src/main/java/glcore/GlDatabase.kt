@@ -73,7 +73,7 @@ class GlDatabase {
     private fun initDailyRecord() : Boolean {
         GlLog.i("Init Daily Record")
         dailyRecord.set(PATH_DAILY_START_TS, GlDateTime.dayStartTimeStamp())
-        dailyRecord.set(PATH_DAILY_TASK_HISTORY, mutableListOf< GlAnyDict >())
+        dailyRecord.set(PATH_DAILY_TASK_RECORD, mutableListOf< GlAnyDict >())
         // return savePathDict(GL_FILE_DAILY_RECORD, dailyRecord)
         return true
     }

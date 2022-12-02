@@ -86,7 +86,7 @@ class GlTimeViewController(
         adaptViewArea()
     }
 
-    // ------------------------ Implements GraphInteractiveListener interface -------------------------
+    // ----------------------- Implements GraphInteractiveListener interface -----------------------
 
     override fun onItemClicked(item: GraphItem) {
         if (item == mMenuDailyStatistics) {

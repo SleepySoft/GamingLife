@@ -8,10 +8,10 @@ const val PATH_SYSTEM_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"       
 const val PATH_SYSTEM_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"         // v as MutableMap< String, String >
 const val PATH_SYSTEM_TASK_RECORD_THRESHOLD = "/Config/User/TaskRecordThreshold"    // v as Long, in ms
 
-const val PATH_RUNTIME_CURRENT_TASK = "/Runtime/TimeModule/CurrentTask"         // v as STRUCT_DEC_TASK_RECORD
+const val PATH_RUNTIME_CURRENT_TASK = "/Runtime/TimeModule/CurrentTask"             // v as STRUCT_DEC_TASK_RECORD
 
-const val PATH_DAILY_START_TS = "/Daily/StartTimestamp"                         // The start seconds of the day since January 1, 1970, 00:00:00 GMT
-const val PATH_DAILY_TASK_HISTORY = "/Daily/TimeModule/TaskHistory"             // v as list of STRUCT_DEC_TASK_RECORD
+const val PATH_DAILY_START_TS = "/Daily/StartTimestamp"                             // The start seconds of the day since January 1, 1970, 00:00:00 GMT
+const val PATH_DAILY_TASK_RECORD = "/Daily/TimeModule/TaskHistory"                  // v as list of STRUCT_DEC_TASK_RECORD
 
 
 // --------------------------------------------- Value ---------------------------------------------
@@ -44,6 +44,13 @@ const val GROUP_ID_WORK   = "11000041-0376-4876-9efa-8a6a7028140d"
 const val GROUP_ID_PROMOTE  = "1841978a-3adc-413a-a9ae-a34e019205f8"
 const val GROUP_ID_CREATE = "fa94a546-beeb-4570-b266-c066a4a31233"
 
+
+// --------------------------------------------- Color ---------------------------------------------
+
+
+const val COLOR_RECORD = "#B2FF59"              // Light Green A200
+const val COLOR_SUGGESTION = "##EEFF41"         // Lime A200
+const val COLOR_DAILY_BAR_BASE = "#BDBDBD"      // Gray 400
 
 // ---------------------------------------- Struct Support -----------------------------------------
 

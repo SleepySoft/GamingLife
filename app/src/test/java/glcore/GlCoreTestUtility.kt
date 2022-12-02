@@ -30,7 +30,7 @@ fun generateSystemGeneralPathDict() : PathDict {
         this.set(PATH_SYSTEM_TASK_GROUP_TOP, TASK_GROUP_TOP_PRESET)
         this.set(PATH_RUNTIME_CURRENT_TASK, TASK_RECORD_TEMPLATE)
         this.set(
-            PATH_DAILY_TASK_HISTORY, listOf(
+            PATH_DAILY_TASK_RECORD, listOf(
                 TASK_RECORD_TEMPLATE,
                 TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_ENJOY },
                 TASK_RECORD_TEMPLATE.toMutableMap().apply { this["groupID"] = GROUP_ID_LIFE },

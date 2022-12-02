@@ -302,7 +302,7 @@ class GraphRectangle : GraphItem() {
 
 
 class GraphImage(
-    private val mBitmapImage: Bitmap) : GraphItem() {
+    var mBitmapImage: Bitmap? = null) : GraphItem() {
 
     enum class PAINT_MODE {
         SCALE, ORIGIN, STRETCH
@@ -311,7 +311,7 @@ class GraphImage(
     var blitArea: RectF = RectF()
         private set
 
-    var imageBounds: Rect = Rect(0, 0, mBitmapImage.width, mBitmapImage.height)
+    var imageBounds: Rect = Rect(0, 0, mBitmapImage?.width ?: 0, mBitmapImage?.height ?: 0)
         private set
 
     var paintMode: PAINT_MODE = PAINT_MODE.SCALE
@@ -361,7 +361,9 @@ class GraphImage(
         if (blitArea.isEmpty) {
             updateBlitArea()
         }
-        canvas.drawBitmap(mBitmapImage, imageBounds, boundRect(), shapePaint)
+        mBitmapImage?.run {
+            canvas.drawBitmap(this, imageBounds, boundRect(), shapePaint)
+        }
     }
 
     override fun moveCenter(pos: PointF) {

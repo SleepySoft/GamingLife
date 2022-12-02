@@ -35,19 +35,16 @@ class GlDailyStatistics {
     }
 
     fun loadDailyData(dateTime: Date) : Boolean {
-        val offsetDays = GlDateTime.daysBetween(GlDateTime.datetime(), dateTime)
+        dailyFile = if (GlDateTime.zeroDateHMS(dateTime).time == GlDateTime.dayStartTimeStamp()) {
+            GL_FILE_DAILY_RECORD
+        } else {
+            dailyPath = GlRoot.getDailyFolderName(dateTime)
+            GlFile.joinPaths(dailyPath, GL_FILE_DAILY_RECORD)
+        }
 
-        dailyPath = GlRoot.getDailyFolderName(offsetDays)
-        dailyFile = GlFile.joinPaths(dailyPath, GL_FILE_DAILY_RECORD)
-
-        val dailyFileData: String = GlFile.loadFile(dailyFile).toString(Charsets.UTF_8)
-
-        return if (dailyFileData.isNotEmpty()) {
-            dailyData.attach(GlJson.deserializeAnyDict(dailyFileData))
-            dailyData.hasUpdate = false
-            val ret = parseDailyData() and collectDailyExtraFiles()
-            GlLog.i("GlDailyStatistics - Load daily data $dateTime ${if (ret) "SUCCESS." else "FAIL."}")
-            ret
+        return if (parseDailyFile(dailyFile) and collectDailyExtraFiles()) {
+            GlLog.i("GlDailyStatistics - Load daily data $dateTime SUCCESS.")
+            true
         } else {
             GlLog.i("GlDailyStatistics - Load daily data $dateTime FAIL.")
             false
@@ -58,13 +55,27 @@ class GlDailyStatistics {
         return loadDailyData(GlDateTime.datetime(dayOffset))
     }
 
+    // ---------------------------------------------------------------------------------------------
+
+    private fun parseDailyFile(dailyJsonPath: String) : Boolean {
+        val dailyFileData: String = GlFile.loadFile(dailyFile).toString(Charsets.UTF_8)
+
+        return if (dailyFileData.isNotEmpty()) {
+            dailyData.attach(GlJson.deserializeAnyDict(dailyFileData))
+            dailyData.hasUpdate = false
+            parseDailyData()
+        } else {
+            false
+        }
+    }
+
     private fun parseDailyData() : Boolean {
         return try {
             taskRecords.clear()
             dailyGroupTime.clear()
 
             dailyTs = (dailyData.get(PATH_DAILY_START_TS) as? Long) ?: 0
-            val dailyHis = dailyData.get(PATH_DAILY_TASK_HISTORY) as? List< * >
+            val dailyHis = dailyData.get(PATH_DAILY_TASK_RECORD) as? List< * >
 
             if ((dailyTs == 0L) || (dailyHis == null)) {
                 return false
