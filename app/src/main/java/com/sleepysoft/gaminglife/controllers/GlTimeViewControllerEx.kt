@@ -230,7 +230,24 @@ class GlTimeViewControllerEx(
 
         // Layout task bubble
 
+        for (i in 0 until mSurroundItems.size) {
+            val item = mSurroundItems[i]
+            item.origin.x = layoutArea.left + layoutArea.width() * (i + 1) / (mSurroundItems.size + 2).toFloat()
+            item.origin.y = layoutArea.centerY() + 160.0f
+            item.radius = 60.0f
+        }
 
+        // Layout 2 bubbles
+
+        suggestionBubble.radius = 30.0f
+        suggestionBubble.moveCenter(PointF(
+            layoutArea.centerX() - 60.0f,
+            layoutArea.centerY() + 220.0f ))
+
+        recordBubble.paintArea = suggestionBubble.boundRect()
+        recordBubble.moveCenter(PointF(
+            layoutArea.centerX() + 60.0f,
+            layoutArea.centerY() + 220.0f ))
     }
 
     private fun layoutLandscape() {

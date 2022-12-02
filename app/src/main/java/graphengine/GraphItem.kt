@@ -311,8 +311,9 @@ class GraphImage(
     var blitArea: RectF = RectF()
         private set
 
-    var imageBounds: Rect = Rect(0, 0, mBitmapImage?.width ?: 0, mBitmapImage?.height ?: 0)
+    var imageBounds: Rect = Rect()
         private set
+        get() = Rect(0, 0, mBitmapImage?.width ?: 0, mBitmapImage?.height ?: 0)
 
     var paintMode: PAINT_MODE = PAINT_MODE.SCALE
         set(value) {
