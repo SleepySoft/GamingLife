@@ -1,9 +1,6 @@
 package graphengine
 
-import android.graphics.Canvas
-import android.graphics.Paint
-import android.graphics.PointF
-import android.graphics.Rect
+import android.graphics.*
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -99,6 +96,50 @@ class AutoFitTextDecorator(decoratedItem: GraphItem) : GraphItemDecorator(decora
             (textArea.centerY().toFloat() + halfTextHeight),
             fontPaint
         )
+    }
+}
+
+
+// ---------------------------------------------------------------------------------------------
+
+class MultipleProgressDecorator(decoratedItem: GraphItem) : GraphItemDecorator(decoratedItem) {
+
+    // The progress pct records
+    data class ProgressData(
+        var progressPct: Float,
+        var progressPaint: Paint
+    )
+
+    var progressEnd: Float = 0.0f
+    var progressData = mutableListOf< ProgressData >()
+
+    /*
+    The ProgressData records the start of this progress
+    The bar before progressData[0].progressPct and after progressEnd will not be filled.
+
+          progressData[0].progressPct       progressData[1].progressPct                         100%
+    |     |###################|*************|=======================================|           |
+                               progressData[1].progressPct                          progressEnd
+    */
+
+    override fun paintAfterGraph(canvas: Canvas) {
+        val wholeRect = decoratedItem.boundRect()
+        val subRect = RectF(wholeRect).apply { right = left }
+
+        for (i in 0 until progressData.size) {
+            subRect.left = pctToX(progressData[i].progressPct)
+            subRect.right = pctToX(if (i == progressData.size - 1) {
+                progressEnd
+            } else {
+                progressData[i + 1].progressPct
+            })
+            canvas.drawRect(subRect, progressData[i].progressPaint)
+        }
+    }
+
+    private fun pctToX(pct: Float): Float {
+        val wholeRect = decoratedItem.boundRect()
+        return wholeRect.left + pct * wholeRect.width()
     }
 }
 
