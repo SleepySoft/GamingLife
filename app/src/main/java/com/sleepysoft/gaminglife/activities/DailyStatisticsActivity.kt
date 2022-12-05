@@ -9,13 +9,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import glcore.DAILY_FOLDER_PREFIX
 import glcore.GlDailyStatistics
 import glcore.GlDateTime
+import glcore.GlFile
+import java.io.File
 
 
-class DailyExtFileAdapter(private val dailyStatistics: GlDailyStatistics) :
-    RecyclerView.Adapter< DailyExtFileAdapter.DailyStatisticsHolder >() {
+class DailyExtFileAdapter(
+    private val dailyStatistics: GlDailyStatistics,
+    private val dailyStatisticsActivity: DailyStatisticsActivity)
+    : RecyclerView.Adapter< DailyExtFileAdapter.DailyStatisticsHolder >() {
 
     class DailyStatisticsHolder(view: View) : RecyclerView.ViewHolder(view) {
         var dataValid: Boolean = false
@@ -31,17 +36,27 @@ class DailyExtFileAdapter(private val dailyStatistics: GlDailyStatistics) :
     }
 
     override fun onBindViewHolder(holder: DailyStatisticsHolder, position: Int) {
-        val fileName = dailyStatistics.dailyExtraFiles[position].removePrefix(DAILY_FOLDER_PREFIX)
-        holder.dataValid = true
-        holder.extFileName = fileName
-        holder.fileActionButton.text = fileName
-        holder.fileActionButton.setOnClickListener {
-
+        if (position == 0) {
+            holder.dataValid = true
+            holder.extFileName = ""
+            holder.fileActionButton.text = "统计信息"
+            holder.fileActionButton.setOnClickListener {
+                dailyStatisticsActivity.onShowStatistics()
+            }
+        }
+        else {
+            val fileName = dailyStatistics.dailyExtraFiles[position - 1].removePrefix(DAILY_FOLDER_PREFIX)
+            holder.dataValid = true
+            holder.extFileName = fileName
+            holder.fileActionButton.text = fileName
+            holder.fileActionButton.setOnClickListener {
+                dailyStatisticsActivity.onShowExtFile(fileName)
+            }
         }
     }
 
     override fun getItemCount(): Int {
-        return dailyStatistics.dailyExtraFiles.size
+        return dailyStatistics.dailyExtraFiles.size + 1
     }
 }
 
@@ -49,6 +64,7 @@ class DailyExtFileAdapter(private val dailyStatistics: GlDailyStatistics) :
 // -------------------------------------------------------------------------------------------------
 
 class DailyStatisticsActivity : AppCompatActivity() {
+    lateinit var mMdViewer: TextView
     lateinit var mDailyExtFileList: RecyclerView
     var mDailyStatistics: GlDailyStatistics = GlDailyStatistics()
 
@@ -61,9 +77,30 @@ class DailyStatisticsActivity : AppCompatActivity() {
 
         title = "GamingLife - 回顾 ($dateStr)"
 
+        mMdViewer = findViewById(R.id.id_text_view_md)
+
         mDailyExtFileList = findViewById(R.id.id_recycler_view_ext_files)
         mDailyExtFileList.layoutManager = LinearLayoutManager(this)
-        mDailyExtFileList.adapter = DailyExtFileAdapter(mDailyStatistics)
+        mDailyExtFileList.adapter = DailyExtFileAdapter(mDailyStatistics, this)
         mDailyExtFileList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL))
+    }
+
+    fun onShowStatistics() {
+
+    }
+
+    fun onShowExtFile(fileName: String) {
+        if (fileName.lowercase().endsWith(".md")) {
+            val filePath= GlFile.joinPaths(mDailyStatistics.dailyPath, fileName)
+            val fileData = GlFile.loadFile(filePath)
+            val fileText = fileData.decodeToString()
+            mMdViewer.text = fileText
+        } else if (fileName.lowercase().endsWith(".wav")) {
+            // TODO: Play wav
+            mMdViewer.text = "音频文件，还未支持"
+        } else {
+            // No support yet.
+            mMdViewer.text = "不支持的文件类型"
+        }
     }
 }

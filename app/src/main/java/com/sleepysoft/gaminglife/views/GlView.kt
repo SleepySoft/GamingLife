@@ -1,12 +1,11 @@
-package com.sleepysoft.gaminglife.controllers
+package com.sleepysoft.gaminglife.views
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
-import glcore.GlLog
+import com.sleepysoft.gaminglife.controllers.GlControllerBuilder
 
 
 class GlView(context: Context)

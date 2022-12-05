@@ -29,8 +29,8 @@ object GlControllerBuilder {
     }
 
     private fun createTimeViewController() {
-        // timeViewController = GlTimeViewController(GlRoot.glTaskModule).apply { init() }
-        timeViewControllerEx = GlTimeViewControllerEx(GlRoot.glTaskModule).apply { init() }
+        timeViewController = GlTimeViewController(GlRoot.glTaskModule).apply { init() }
+        // timeViewControllerEx = GlTimeViewControllerEx(GlRoot.glTaskModule).apply { init() }
     }
 
     private fun createAudioRecordController() {

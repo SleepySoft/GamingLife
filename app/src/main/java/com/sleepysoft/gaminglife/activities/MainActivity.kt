@@ -12,12 +12,10 @@ import com.sleepysoft.gaminglife.controllers.GlControllerBuilder
 import com.sleepysoft.gaminglife.GamingLifeMainService
 import com.sleepysoft.gaminglife.PermissionActivity
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
-import com.sleepysoft.gaminglife.controllers.GlView
-import com.sleepysoft.gaminglife.test.RuntimeTest
+import com.sleepysoft.gaminglife.views.GlView
 import glcore.GlLog
 import glcore.GlRoot
 import glenv.GlEnv
-import graphengine.GraphShadowView
 import java.lang.ref.WeakReference
 
 

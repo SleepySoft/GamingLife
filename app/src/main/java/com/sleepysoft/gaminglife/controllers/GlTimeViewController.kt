@@ -11,9 +11,6 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 
-const val DEBUG_TAG = "DefaultDbg"
-
-
 class GlTimeViewController(
     private val mGlTaskModule: GlTaskModule)
     : GraphInteractiveListener(), GraphViewObserver {
