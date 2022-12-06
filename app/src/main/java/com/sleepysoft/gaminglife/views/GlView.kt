@@ -9,14 +9,9 @@ import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import graphengine.GraphView
 
 
-class GlView(
-    private val mGraphView: GraphView, context: Context)
-    : View(context), GestureDetector.OnGestureListener {
+class GlView(context: Context) : View(context), GestureDetector.OnGestureListener {
 
-    constructor(context: Context) : this(GraphView(GlControllerContext()), context) {
-        // Should no use this constructor
-        assert(false)
-    }
+    var graphView: GraphView? = null
 
     private var mIsLongPressed = false
     private val mGestureDetector = GestureDetector(context, this)
@@ -25,12 +20,12 @@ class GlView(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        mGraphView.onDraw(canvas)
+        graphView?.onDraw(canvas)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        mGraphView.onSizeChanged(w, h, oldw, oldh)
+        graphView?.onSizeChanged(w, h, oldw, oldh)
     }
 
     // --------------------------------- Action & Gesture Handler ----------------------------------
@@ -58,11 +53,11 @@ class GlView(
     }
 
     private fun onUp(e: MotionEvent) {
-        mGraphView.onUp(e)
+        graphView?.onUp(e)
     }
 
     override fun onDown(e: MotionEvent): Boolean {
-        return mGraphView.onDown(e)
+        return graphView?.onDown(e) ?: true
     }
 
     override fun performClick(): Boolean {
@@ -73,25 +68,25 @@ class GlView(
     }
 
     override fun onShowPress(e: MotionEvent) {
-        mGraphView.onShowPress(e)
+        graphView?.onShowPress(e)
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        return mGraphView.onSingleTapUp(e)
+        return graphView?.onSingleTapUp(e) ?: true
     }
 
     override fun onScroll(e1: MotionEvent, e2: MotionEvent,
                           distanceX: Float, distanceY: Float): Boolean {
-        return mGraphView.onScroll(e1, e2, distanceX, distanceY)
+        return graphView?.onScroll(e1, e2, distanceX, distanceY) ?: true
     }
 
     override fun onLongPress(e: MotionEvent) {
         mIsLongPressed = true
-        mGraphView.onLongPress(e)
+        graphView?.onLongPress(e)
     }
 
     override fun onFling(e1: MotionEvent, e2: MotionEvent,
                          velocityX: Float, velocityY: Float): Boolean {
-        return mGraphView.onFling(e1, e2, velocityX, velocityY)
+        return graphView?.onFling(e1, e2, velocityX, velocityY) ?: true
     }
 }

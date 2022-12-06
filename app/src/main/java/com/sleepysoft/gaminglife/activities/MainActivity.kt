@@ -60,6 +60,8 @@ class MainActivity : AppCompatActivity() {
         GlRoot.init(GlEnv().apply { init() })
         buildGraphControllers()
 
+        mView.graphView = mCtrlContext.graphView
+
         startGlService()
 
         // RuntimeTest.testEntry(this)
