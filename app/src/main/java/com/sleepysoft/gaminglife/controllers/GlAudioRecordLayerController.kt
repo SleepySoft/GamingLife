@@ -9,7 +9,8 @@ import glcore.GlRoot
 import graphengine.*
 
 
-class GlAudioRecordLayerController()
+class GlAudioRecordLayerController(
+    private val mCtrlContext: GlControllerContext)
     : GraphViewObserver, GraphInteractiveListener() {
 
     private lateinit var mVoiceRecordEffectLayer: GraphLayer
@@ -44,7 +45,7 @@ class GlAudioRecordLayerController()
         loadResource()
         checkBuildVoiceRecordEffectLayer()
 
-        GlControllerContext.asyncResultHandler.add {
+        mCtrlContext.asyncResultHandler.add {
                 requestCode: Int, resultCode: Int, data: Intent? ->
             if (requestCode == GlControllerContext.REQUEST_AUDIO_RECORD_CONTROLLER) {
                 when (resultCode) {
@@ -68,25 +69,25 @@ class GlAudioRecordLayerController()
         mAudioCircle.moveCenter(operatingPos)
         InteractiveDecorator.changeTrackingItem(mAudioCircle)
 
-/*        GlControllerBuilder.graphShadowView.specifySelItem(mAudioCircle)
-        GlControllerBuilder.graphShadowView.pushObserver(this)*/
+/*        GlControllerBuilder.graphView.specifySelItem(mAudioCircle)
+        GlControllerBuilder.graphView.pushObserver(this)*/
 
         mVoiceRecordEffectLayer.visible = true
-        GlControllerBuilder.graphShadowView.bringLayerToFront(mVoiceRecordEffectLayer)
-        GlControllerContext.refresh()
+        mCtrlContext.graphView?.bringLayerToFront(mVoiceRecordEffectLayer)
+        mCtrlContext.refresh()
 
         GlRoot.env.glAudio.startRecord(GlFile.glRoot())
     }
 
     private fun releaseControl() {
         mVoiceRecordEffectLayer.visible = false
-/*        val poppedLayer = GlControllerBuilder.graphShadowView.popObserver()
+/*        val poppedLayer = GlControllerBuilder.graphView.popObserver()
         assert(poppedLayer == this)*/
-        GlControllerBuilder.graphShadowView.invalidate()
+        mCtrlContext.refresh()
     }
 
     private fun loadResource() {
-        val context = GlControllerContext.context.get()
+        val context = mCtrlContext.context.get()
         if (context != null)
         {
             mIconAudio = BitmapFactory.decodeResource(context.resources, R.drawable.icon_audio_recording)
@@ -99,12 +100,12 @@ class GlAudioRecordLayerController()
     }
 
     private fun checkBuildVoiceRecordEffectLayer() {
-        // val layers = GlControllerBuilder.graphShadowView.pickLayer { it.id == "TimeView.RecordLayer" }
-        val layer =  GraphLayer("TimeView.RecordLayer", false,
-            GlControllerBuilder.graphShadowView).apply {
+        mCtrlContext.graphView?.also { graphView ->
+            val layer =  GraphLayer("TimeView.RecordLayer", false,
+                graphView).apply {
                 this.setBackgroundAlpha(128)
             }
-        GlControllerBuilder.graphShadowView.addLayer(layer)
+            graphView.addLayer(layer)
 
 /*        mAudioCircle = GraphCircle().apply {
             this.id = "TimeView.RecordLayer.Audio"
@@ -120,12 +121,12 @@ class GlAudioRecordLayerController()
             }
         }*/
 
-        mAudioCircle = GraphImage(mIconAudio).apply {
-            this.id = "TimeView.RecordLayer.Audio"
-            this.graphActionDecorator.add(InteractiveDecorator(this).apply {
-                this.interactiveListener = this@GlAudioRecordLayerController
-            })
-        }
+            mAudioCircle = GraphImage(mIconAudio).apply {
+                this.id = "TimeView.RecordLayer.Audio"
+                this.graphActionDecorator.add(InteractiveDecorator(mCtrlContext, this).apply {
+                    this.interactiveListener = this@GlAudioRecordLayerController
+                })
+            }
 
 /*        mCancelCircle = GraphCircle().apply {
             this.id = "TimeView.RecordLayer.Cancel"
@@ -140,9 +141,9 @@ class GlAudioRecordLayerController()
                 this.style = Paint.Style.FILL
             }
         }*/
-        mCancelCircle = GraphImage(mIconTrash).apply {
-            this.id = "TimeView.RecordLayer.Cancel"
-        }
+            mCancelCircle = GraphImage(mIconTrash).apply {
+                this.id = "TimeView.RecordLayer.Cancel"
+            }
 
 /*        mTextRectangle = GraphRectangle().apply {
             this.id = "TimeView.RecordLayer.Text"
@@ -157,15 +158,16 @@ class GlAudioRecordLayerController()
                 this.style = Paint.Style.FILL
             }
         }*/
-        mTextRectangle = GraphImage(mIconInput).apply {
-            this.id = "TimeView.RecordLayer.Text"
+            mTextRectangle = GraphImage(mIconInput).apply {
+                this.id = "TimeView.RecordLayer.Text"
+            }
+
+            layer.addGraphItem(mTextRectangle)
+            layer.addGraphItem(mCancelCircle)
+            layer.addGraphItem(mAudioCircle)
+
+            mVoiceRecordEffectLayer = layer
         }
-
-        layer.addGraphItem(mTextRectangle)
-        layer.addGraphItem(mCancelCircle)
-        layer.addGraphItem(mAudioCircle)
-
-        mVoiceRecordEffectLayer = layer
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
@@ -175,11 +177,13 @@ class GlAudioRecordLayerController()
     }
 
     override fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        val strokeWidth = GlControllerBuilder.graphShadowView.unitScale * 1.0f
+        mCtrlContext.graphView?.also { graphView ->
+            val strokeWidth = graphView.unitScale * 1.0f
 
-        mAudioCircle.shapePaint.strokeWidth = strokeWidth
-        mCancelCircle.shapePaint.strokeWidth = strokeWidth
-        mTextRectangle.shapePaint.strokeWidth = strokeWidth
+            mAudioCircle.shapePaint.strokeWidth = strokeWidth
+            mCancelCircle.shapePaint.strokeWidth = strokeWidth
+            mTextRectangle.shapePaint.strokeWidth = strokeWidth
+        }
     }
 
     // -------------------------------------------------------------------------------
@@ -222,55 +226,57 @@ class GlAudioRecordLayerController()
     // ---------------------------- Private ----------------------------
 
     private fun layoutItems() {
-        if (GlControllerBuilder.graphShadowView.isPortrait()) {
-            layoutPortrait()
-        }
-        else {
-            layoutLandscape()
+        mCtrlContext.graphView?.also { graphView ->
+            if (graphView.isPortrait()) {
+                layoutPortrait(graphView)
+            }
+            else {
+                layoutLandscape(graphView)
+            }
         }
     }
 
-    private fun layoutPortrait() {
-        val area = GlControllerBuilder.graphShadowView.paintArea
+    private fun layoutPortrait(graphView: GraphView) {
+        val area = graphView.paintArea
 
 /*        mAudioCircle.origin = PointF(area.width() / 2, 3 * area.height() / 4)
-        mAudioCircle.radius = 20 * GlControllerBuilder.graphShadowView.unitScale*/
+        mAudioCircle.radius = 20 * GlControllerBuilder.graphView.unitScale*/
 
         mAudioCircle.paintArea.fromCenterSides(
             PointF(area.width() / 2, 3 * area.height() / 4),
-            20 * GlControllerBuilder.graphShadowView.unitScale, 20 * GlControllerBuilder.graphShadowView.unitScale
+            20 * graphView.unitScale, 20 * graphView.unitScale
         )
 
 /*        mCancelCircle.origin = PointF(area.width() / 2, area.height() / 4)
-        mCancelCircle.radius = 15 * GlControllerBuilder.graphShadowView.unitScale*/
+        mCancelCircle.radius = 15 * GlControllerBuilder.graphView.unitScale*/
         mCancelCircle.paintArea.fromCenterSides(
             PointF(area.width() / 2, area.height() / 8),
-            20 * GlControllerBuilder.graphShadowView.unitScale, 20 * GlControllerBuilder.graphShadowView.unitScale
+            20 * graphView.unitScale, 20 * graphView.unitScale
         )
 
-/*        mTextRectangle.rect = RectF(GlControllerBuilder.graphShadowView.paintArea).apply {
-            this.left += GlControllerBuilder.graphShadowView.unitScale * 15.0f
-            this.right -= GlControllerBuilder.graphShadowView.unitScale * 15.0f
-            this.bottom -= GlControllerBuilder.graphShadowView.unitScale * 15.0f
-            this.top = this.bottom - GlControllerBuilder.graphShadowView.unitScale * 20.0f
+/*        mTextRectangle.rect = RectF(GlControllerBuilder.graphView.paintArea).apply {
+            this.left += GlControllerBuilder.graphView.unitScale * 15.0f
+            this.right -= GlControllerBuilder.graphView.unitScale * 15.0f
+            this.bottom -= GlControllerBuilder.graphView.unitScale * 15.0f
+            this.top = this.bottom - GlControllerBuilder.graphView.unitScale * 20.0f
         }*/
 
-        mTextRectangle.paintArea = RectF(GlControllerBuilder.graphShadowView.paintArea).apply {
-            left += GlControllerBuilder.graphShadowView.unitScale * 5.0f
-            right -= GlControllerBuilder.graphShadowView.unitScale * 5.0f
-            bottom -= GlControllerBuilder.graphShadowView.unitScale * 5.0f
-            top = bottom - GlControllerBuilder.graphShadowView.unitScale * 15.0f
+        mTextRectangle.paintArea = RectF(graphView.paintArea).apply {
+            left += graphView.unitScale * 5.0f
+            right -= graphView.unitScale * 5.0f
+            bottom -= graphView.unitScale * 5.0f
+            top = bottom - graphView.unitScale * 15.0f
         }
     }
 
-    private fun layoutLandscape() {
+    private fun layoutLandscape(graphView: GraphView) {
 
     }
 
     // -----------------------------------------------------------------
 
     private fun popupTextEditor() {
-        GlControllerContext.launchActivity(
+        mCtrlContext.launchActivity(
             CommonTextInputActivity::class.java,
             GlControllerContext.REQUEST_AUDIO_RECORD_CONTROLLER)
     }

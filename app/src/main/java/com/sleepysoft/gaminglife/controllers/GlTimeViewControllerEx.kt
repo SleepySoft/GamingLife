@@ -9,6 +9,7 @@ import graphengine.*
 
 
 class GlTimeViewControllerEx(
+    private val mCtrlContext: GlControllerContext,
     private val mGlTaskModule: GlTaskModule)
     : GraphInteractiveListener(), GraphViewObserver {
 
@@ -26,7 +27,7 @@ class GlTimeViewControllerEx(
 
     fun init() {
         buildTimeViewLayer()
-        GlControllerBuilder.graphShadowView.mGraphViewObserver.add(this)
+        mCtrlContext.graphView?.mGraphViewObserver?.add(this)
 
 /*        adaptViewArea()
         doLayout()*/
@@ -37,7 +38,7 @@ class GlTimeViewControllerEx(
     fun polling() {
         if (dailySubBars.isNotEmpty()) {
             dailySubBars.last().rect.right = timeStampToBarBaseX(GlDateTime.datetime().time)
-            GlControllerContext.refresh()
+            mCtrlContext.refresh()
         }
     }
 
@@ -68,17 +69,18 @@ class GlTimeViewControllerEx(
     // ------------------------------------- Private Functions -------------------------------------
 
     private fun buildTimeViewLayer() {
-        val layer = GraphLayer("TimeView.BaseLayer", true,
-            GlControllerBuilder.graphShadowView)
-        GlControllerBuilder.graphShadowView.addLayer(layer)
+        mCtrlContext.graphView?.also { graphView ->
+            val layer = GraphLayer("TimeView.BaseLayer", true, graphView)
+            graphView.addLayer(layer)
 
-        buildMainGraph(layer)
-        buildTaskGroupGraph(layer)
-        rebuildDailyBar(layer)
+            buildMainGraph(layer)
+            buildTaskGroupGraph(layer)
+            rebuildDailyBar(layer)
+        }
     }
 
     private fun buildMainGraph(layer: GraphLayer) {
-        val context = GlControllerContext.context.get()
+        val context = mCtrlContext.context.get()
         if (context != null) {
             with(recordBubble) {
                 this.id = "TimeView.Record"
@@ -96,7 +98,7 @@ class GlTimeViewControllerEx(
                 this.color = Color.parseColor(COLOR_SUGGESTION)
                 this.style = Paint.Style.FILL
             }
-            this.graphItemDecorator.add(AutoFitTextDecorator(this).apply {
+            this.graphItemDecorator.add(AutoFitTextDecorator(mCtrlContext, this).apply {
                 this.mainText = "?"
                 this.fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     this.color = Color.parseColor("#FFFFFF")
@@ -130,7 +132,7 @@ class GlTimeViewControllerEx(
                 }
             }
 
-            val text = AutoFitTextDecorator(item).apply {
+            val text = AutoFitTextDecorator(mCtrlContext, item).apply {
                 this.mainText = v["name"] ?: ""
                 this.fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     this.color = Color.parseColor("#FFFFFF")
@@ -138,7 +140,8 @@ class GlTimeViewControllerEx(
                 }
             }
             item.graphItemDecorator.add(text)
-            item.graphActionDecorator.add(InteractiveDecorator(item, this))
+            item.graphActionDecorator.add(
+                InteractiveDecorator(mCtrlContext, item, this))
             layer.addGraphItem(item)
 
             mSurroundItems.add(item)
@@ -190,16 +193,18 @@ class GlTimeViewControllerEx(
     }
 
     private fun doLayout() {
-        if (GlControllerBuilder.graphShadowView.isPortrait()) {
-            layoutPortrait()
-        }
-        else {
-            layoutLandscape()
+        mCtrlContext.graphView?.also { graphView ->
+            if (graphView.isPortrait()) {
+                layoutPortrait(graphView)
+            }
+            else {
+                layoutLandscape(graphView)
+            }
         }
     }
 
-    private fun layoutPortrait() {
-        val layoutArea = RectF(GlControllerBuilder.graphShadowView.paintArea)
+    private fun layoutPortrait(graphView: GraphView) {
+        val layoutArea = RectF(graphView.paintArea)
 
         // Layout daily bar
 
@@ -250,7 +255,7 @@ class GlTimeViewControllerEx(
             layoutArea.centerY() + 220.0f ))
     }
 
-    private fun layoutLandscape() {
+    private fun layoutLandscape(graphView: GraphView) {
 
     }
 

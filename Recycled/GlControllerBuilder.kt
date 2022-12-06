@@ -1,16 +1,12 @@
 package com.sleepysoft.gaminglife.controllers
 
-import android.os.Handler
-import android.os.Looper
-import com.sleepysoft.gaminglife.activities.MainActivity
 import glcore.GlRoot
-import graphengine.GraphShadowView
-import java.lang.ref.WeakReference
+import graphengine.GraphView
 
 
-object GlControllerBuilder {
+class GlControllerMainBuilder() {
     var built = false
-    val graphShadowView = GraphShadowView()
+    lateinit var graphView: GraphView
     lateinit var timeViewController: GlTimeViewController
     lateinit var timeViewControllerEx: GlTimeViewControllerEx
     lateinit var  audioRecordController: GlAudioRecordLayerController

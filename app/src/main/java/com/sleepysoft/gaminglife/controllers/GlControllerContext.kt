@@ -8,6 +8,8 @@ import android.os.Handler
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.support.annotation.RequiresApi
+import graphengine.GraphContext
+import graphengine.GraphView
 import java.lang.ref.WeakReference
 
 //
@@ -23,23 +25,34 @@ import java.lang.ref.WeakReference
 typealias AsyncResultHandler =  (requestCode: Int, resultCode: Int, data: Intent?) -> Unit
 
 
-object GlControllerContext {
-    const val REQUEST_AUDIO_RECORD_CONTROLLER = 0x1001
+class GlControllerContext : GraphContext {
+    companion object {
+        const val REQUEST_AUDIO_RECORD_CONTROLLER = 0x1001
 
-    const val RESULT_COMMON_INPUT_CANCELLED = 0x2001
-    const val RESULT_COMMON_INPUT_TEXT_COMPLETE = 0x2002
-    const val RESULT_COMMON_INPUT_AUDIO_COMPLETE = 0x2003
+        const val RESULT_COMMON_INPUT_CANCELLED = 0x2001
+        const val RESULT_COMMON_INPUT_TEXT_COMPLETE = 0x2002
+    }
+
+    var graphView: GraphView? = null
 
     var view = WeakReference< View >(null)
     var context = WeakReference<Activity>(null)
     var vibrator = WeakReference< Vibrator >(null)
     val asyncResultHandler = mutableListOf< AsyncResultHandler >()
 
-    fun refresh() = view.get()?.invalidate()
+    // ---------------------------------- Implement GraphContext  ----------------------------------
+
+    override fun refresh() {
+        view.get()?.invalidate()
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun vibrate(milliseconds: Long) = vibrator.get()?.vibrate(
-        VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
+    override fun vibrate(milliseconds: Long) {
+        vibrator.get()?.vibrate(
+            VibrationEffect.createOneShot(milliseconds, VibrationEffect.DEFAULT_AMPLITUDE))
+    }
+
+    // ---------------------------------------------------------------------------------------------
 
     fun launchActivity(cls: Class< * >, requestCode: Int? = null) = launchActivity(cls, requestCode) { }
 

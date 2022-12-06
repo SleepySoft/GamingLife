@@ -1,11 +1,6 @@
 package graphengine
-import android.annotation.SuppressLint
 import android.graphics.*
 import android.view.MotionEvent
-import com.sleepysoft.gaminglife.controllers.GlControllerContext
-
-
-const val DEBUG_TAG = "DefaultDbg"
 
 
 interface GraphViewObserver {
@@ -37,7 +32,8 @@ interface ActionHandler {
 }
 
 
-class GraphShadowView() {
+class GraphView(
+    private val context: GraphContext) {
 
     private var mIsLongPressed = false
     private var mLayers: MutableList< GraphLayer > = mutableListOf()
@@ -52,9 +48,9 @@ class GraphShadowView() {
 
     // ------------------------------------------------------------------------------------
 
-    fun invalidate() {
-        GlControllerContext.view.get()?.invalidate()
-    }
+/*    fun refresh() = context.refresh()
+
+    fun vibrate(milliseconds: Long) = context.vibrate(milliseconds)*/
 
     // ------------------------------- Window event handler -------------------------------
 

@@ -5,11 +5,18 @@ import android.graphics.Canvas
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
-import com.sleepysoft.gaminglife.controllers.GlControllerBuilder
+import com.sleepysoft.gaminglife.controllers.GlControllerContext
+import graphengine.GraphView
 
 
-class GlView(context: Context)
+class GlView(
+    private val mGraphView: GraphView, context: Context)
     : View(context), GestureDetector.OnGestureListener {
+
+    constructor(context: Context) : this(GraphView(GlControllerContext()), context) {
+        // Should no use this constructor
+        assert(false)
+    }
 
     private var mIsLongPressed = false
     private val mGestureDetector = GestureDetector(context, this)
@@ -18,12 +25,12 @@ class GlView(context: Context)
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        GlControllerBuilder.graphShadowView.onDraw(canvas)
+        mGraphView.onDraw(canvas)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        GlControllerBuilder.graphShadowView.onSizeChanged(w, h, oldw, oldh)
+        mGraphView.onSizeChanged(w, h, oldw, oldh)
     }
 
     // --------------------------------- Action & Gesture Handler ----------------------------------
@@ -51,11 +58,11 @@ class GlView(context: Context)
     }
 
     private fun onUp(e: MotionEvent) {
-        GlControllerBuilder.graphShadowView.onUp(e)
+        mGraphView.onUp(e)
     }
 
     override fun onDown(e: MotionEvent): Boolean {
-        return GlControllerBuilder.graphShadowView.onDown(e)
+        return mGraphView.onDown(e)
     }
 
     override fun performClick(): Boolean {
@@ -66,25 +73,25 @@ class GlView(context: Context)
     }
 
     override fun onShowPress(e: MotionEvent) {
-        GlControllerBuilder.graphShadowView.onShowPress(e)
+        mGraphView.onShowPress(e)
     }
 
     override fun onSingleTapUp(e: MotionEvent): Boolean {
-        return GlControllerBuilder.graphShadowView.onSingleTapUp(e)
+        return mGraphView.onSingleTapUp(e)
     }
 
     override fun onScroll(e1: MotionEvent, e2: MotionEvent,
                           distanceX: Float, distanceY: Float): Boolean {
-        return GlControllerBuilder.graphShadowView.onScroll(e1, e2, distanceX, distanceY)
+        return mGraphView.onScroll(e1, e2, distanceX, distanceY)
     }
 
     override fun onLongPress(e: MotionEvent) {
         mIsLongPressed = true
-        GlControllerBuilder.graphShadowView.onLongPress(e)
+        mGraphView.onLongPress(e)
     }
 
     override fun onFling(e1: MotionEvent, e2: MotionEvent,
                          velocityX: Float, velocityY: Float): Boolean {
-        return GlControllerBuilder.graphShadowView.onFling(e1, e2, velocityX, velocityY)
+        return mGraphView.onFling(e1, e2, velocityX, velocityY)
     }
 }

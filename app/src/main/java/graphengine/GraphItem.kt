@@ -62,7 +62,7 @@ abstract class GraphItem(
 
 
 class GraphLayer(id: String, visible: Boolean,
-    val graphView: GraphShadowView) : GraphObject(id, visible) {
+    val graphView: GraphView) : GraphObject(id, visible) {
     var graphItems: MutableList< GraphItem > = mutableListOf()
         private set
 

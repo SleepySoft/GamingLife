@@ -12,7 +12,9 @@ import kotlin.math.sin
 
 
 class GlTimeViewController(
-    private val mGlTaskModule: GlTaskModule)
+    private val mCtrlContext: GlControllerContext,
+    private val mGlTaskModule: GlTaskModule,
+    private val audioRecordController: GlAudioRecordLayerController)
     : GraphInteractiveListener(), GraphViewObserver {
 
 
@@ -37,7 +39,7 @@ class GlTimeViewController(
 
     fun init() {
         checkBuildTimeViewLayer()
-        GlControllerBuilder.graphShadowView.mGraphViewObserver.add(this)
+        mCtrlContext.graphView?.mGraphViewObserver?.add(this)
 
 /*        adaptViewArea()
         doLayout()*/
@@ -69,7 +71,7 @@ class GlTimeViewController(
 
         // mCenterItem.mainText = "%02d:%02d:%02d.%03d".format(hour, minutes, seconds, ms)
 
-        GlControllerContext.refresh()
+        mCtrlContext.refresh()
         mHandler.postDelayed(mRunnable, 100)
     }
 
@@ -87,7 +89,7 @@ class GlTimeViewController(
 
     override fun onItemClicked(item: GraphItem) {
         if (item == mMenuDailyStatistics) {
-            GlControllerContext.launchActivity(DailyBrowseActivity::class.java)
+            mCtrlContext.launchActivity(DailyBrowseActivity::class.java)
         }
     }
 
@@ -127,7 +129,7 @@ class GlTimeViewController(
 
     override fun onItemTriggered(item: GraphItem) {
         if (item == mCenterItem) {
-            GlControllerBuilder.audioRecordController.popupInput(
+            audioRecordController.popupInput(
                 mCenterItem.boundRect().centerPoint()) {
                     inputType: String, result: Any? ->
                 handleInputComplete(inputType, (result as String?) ?: "")
@@ -151,13 +153,13 @@ class GlTimeViewController(
             mPressSince = System.currentTimeMillis()
         }
 
-        GlControllerBuilder.graphShadowView.invalidate()
+        GlControllerBuilder.graphView.invalidate()
     }
 
     override fun onItemDragging(draggingItem: GraphItem, pos: PointF) {
         if (draggingItem == mCenterItem) {
-            if ((abs(mCenterItem.offsetPixel.x) > GlControllerBuilder.graphShadowView.unitScale * 0.3) ||
-                (abs(mCenterItem.offsetPixel.y) > GlControllerBuilder.graphShadowView.unitScale * 0.3)) {
+            if ((abs(mCenterItem.offsetPixel.x) > GlControllerBuilder.graphView.unitScale * 0.3) ||
+                (abs(mCenterItem.offsetPixel.y) > GlControllerBuilder.graphView.unitScale * 0.3)) {
                 endLongLongPress()
             }
         }
@@ -245,119 +247,126 @@ class GlTimeViewController(
     // ------------------------------------- Private Functions -------------------------------------
 
     private fun checkBuildTimeViewLayer() {
-        val layer = GraphLayer("TimeView.BaseLayer", true, 
-                                GlControllerBuilder.graphShadowView)
-        GlControllerBuilder.graphShadowView.addLayer(layer)
+        mCtrlContext.graphView?.also { graphView ->
 
-        val currentTaskInfo = mGlTaskModule.getCurrentTaskInfo()
-        val currentTaskGroupData =
-            mGlTaskModule.getTaskData(currentTaskInfo["groupID"].toString() ?: "") ?:
-            mGlTaskModule.getTaskData(GROUP_ID_IDLE)
+            val layer = GraphLayer("TimeView.BaseLayer", true, graphView)
+            graphView.addLayer(layer)
 
-        mCenterItem = GraphCircle().apply {
-            this.id = "TimeView.CenterItem"
-            this.itemData = currentTaskGroupData
-            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor(
-                    mGlTaskModule.colorOfTask(currentTaskGroupData?.get("id") ?: GROUP_ID_IDLE))
-                this.style = Paint.Style.FILL
-            }
-        }
+            val currentTaskInfo = mGlTaskModule.getCurrentTaskInfo()
+            val currentTaskGroupData =
+                mGlTaskModule.getTaskData(currentTaskInfo["groupID"].toString() ?: "") ?:
+                mGlTaskModule.getTaskData(GROUP_ID_IDLE)
 
-        mCenterItemText = AutoFitTextDecorator(mCenterItem).apply {
-            this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#FFFFFF")
-                this.textAlign = Paint.Align.CENTER
-            }
-        }
-        mCenterItem.graphItemDecorator.add(mCenterItemText)
-
-        mProgressItem = GraphCircleProgress(
-            mCenterItem, 1.3f).apply {
-            this.visible = false
-            this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor("#FFA500")
-                this.style = Paint.Style.FILL
-            }
-        }
-        mCenterItem.graphActionDecorator.add(InteractiveDecorator(mCenterItem, this))
-        mCenterItem.graphActionDecorator.add(LongPressProgressDecorator(
-            mCenterItem, mProgressItem, 30.0f, this).apply { init() })
-
-        val taskGroupTop = mGlTaskModule.getTaskGroupTop()
-        for ((k, v) in taskGroupTop) {
-            val item = GraphCircle().apply {
-                this.id = "TimeView.$k"
-                this.itemData = v
+            mCenterItem = GraphCircle().apply {
+                this.id = "TimeView.CenterItem"
+                this.itemData = currentTaskGroupData
                 this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                    this.color = Color.parseColor(mGlTaskModule.colorOfTask(k))
+                    this.color = Color.parseColor(
+                        mGlTaskModule.colorOfTask(currentTaskGroupData?.get("id") ?: GROUP_ID_IDLE))
                     this.style = Paint.Style.FILL
                 }
             }
 
-            val text = AutoFitTextDecorator(item).apply {
-                this.mainText = v["name"] ?: ""
+            mCenterItemText = AutoFitTextDecorator(mCtrlContext, mCenterItem).apply {
                 this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
                     this.color = Color.parseColor("#FFFFFF")
                     this.textAlign = Paint.Align.CENTER
                 }
             }
-            item.graphItemDecorator.add(text)
-            item.graphActionDecorator.add(InteractiveDecorator(item, this))
-            layer.addGraphItem(item)
+            mCenterItem.graphItemDecorator.add(mCenterItemText)
 
-            mSurroundItems.add(item)
-            mSurroundItemText.add(text)
-        }
-
-        mMenuDailyStatistics = GraphRectangle().apply {
-            this.id = "TimeView.MenuDailyStatistics"
-            this.graphItemDecorator.add(AutoFitTextDecorator(this).apply {
-                this.mainText = "回顾"
-                this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
-                    this.color = Color.parseColor("#FFFFFF")
-                    this.textAlign = Paint.Align.CENTER
+            mProgressItem = GraphCircleProgress(
+                mCenterItem, 1.3f).apply {
+                this.visible = false
+                this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+                    this.color = Color.parseColor("#FFA500")
+                    this.style = Paint.Style.FILL
                 }
-            })
+            }
+            mCenterItem.graphActionDecorator.add(InteractiveDecorator(mCtrlContext, mCenterItem, this))
+            mCenterItem.graphActionDecorator.add(LongPressProgressDecorator(
+                mCtrlContext, mCenterItem, mProgressItem, 30.0f, this).apply { init() })
+
+            val taskGroupTop = mGlTaskModule.getTaskGroupTop()
+            for ((k, v) in taskGroupTop) {
+                val item = GraphCircle().apply {
+                    this.id = "TimeView.$k"
+                    this.itemData = v
+                    this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
+                        this.color = Color.parseColor(mGlTaskModule.colorOfTask(k))
+                        this.style = Paint.Style.FILL
+                    }
+                }
+
+                val text = AutoFitTextDecorator(mCtrlContext, item).apply {
+                    this.mainText = v["name"] ?: ""
+                    this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                        this.color = Color.parseColor("#FFFFFF")
+                        this.textAlign = Paint.Align.CENTER
+                    }
+                }
+                item.graphItemDecorator.add(text)
+                item.graphActionDecorator.add(InteractiveDecorator(mCtrlContext, item, this))
+                layer.addGraphItem(item)
+
+                mSurroundItems.add(item)
+                mSurroundItemText.add(text)
+            }
+
+            mMenuDailyStatistics = GraphRectangle().apply {
+                this.id = "TimeView.MenuDailyStatistics"
+                this.graphItemDecorator.add(
+                    AutoFitTextDecorator(mCtrlContext, this).apply {
+                        this.mainText = "回顾"
+                        this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                            this.color = Color.parseColor("#FFFFFF")
+                            this.textAlign = Paint.Align.CENTER
+                        }
+                    }
+                )
+            }
+            mMenuDailyStatistics.graphActionDecorator.add(
+                ClickDecorator(mCtrlContext, mMenuDailyStatistics, this))
+
+            layer.addGraphItem(mMenuDailyStatistics)
+            layer.addGraphItem(mCenterItem)
+            layer.insertGraphItemAfter(mProgressItem, mCenterItem)
+
+            mTimeViewBaseLayer = layer
         }
-        mMenuDailyStatistics.graphActionDecorator.add(ClickDecorator(mMenuDailyStatistics, this))
-
-        layer.addGraphItem(mMenuDailyStatistics)
-        layer.addGraphItem(mCenterItem)
-        layer.insertGraphItemAfter(mProgressItem, mCenterItem)
-
-        mTimeViewBaseLayer = layer
     }
 
     private fun doLayout() {
-        if (GlControllerBuilder.graphShadowView.isPortrait()) {
-            layoutPortrait()
-        }
-        else {
-            layoutLandscape()
+        mCtrlContext.graphView?.also { graphView ->
+            if (graphView.isPortrait()) {
+                layoutPortrait(graphView)
+            }
+            else {
+                layoutLandscape(graphView)
+            }
         }
     }
 
     private fun adaptViewArea() {
-        val strokeWidth = GlControllerBuilder.graphShadowView.unitScale * 1.0f
-
-        for (item in mSurroundItems) {
-            item.shapePaint.strokeWidth = strokeWidth
+        mCtrlContext.graphView?.also { graphView ->
+            val strokeWidth = graphView.unitScale * 1.0f
+            for (item in mSurroundItems) {
+                item.shapePaint.strokeWidth = strokeWidth
+            }
+            mCenterItem.shapePaint.strokeWidth = strokeWidth
         }
-
-        mCenterItem.shapePaint.strokeWidth = strokeWidth
     }
 
-    private fun layoutPortrait() {
-        val layoutArea = RectF(GlControllerBuilder.graphShadowView.paintArea)
+    private fun layoutPortrait(graphView: GraphView) {
+        val layoutArea = RectF(graphView.paintArea)
         layoutArea.top = layoutArea.bottom - layoutArea.height()
         layoutArea.apply {
-            this.top += 10.0f * GlControllerBuilder.graphShadowView.unitScale
-            this.bottom += 10.0f * GlControllerBuilder.graphShadowView.unitScale
+            this.top += 10.0f * graphView.unitScale
+            this.bottom += 10.0f * graphView.unitScale
         }
 
-        mCenterRadius = 8.0f * GlControllerBuilder.graphShadowView.unitScale
-        mSurroundRadius = 6.5f * GlControllerBuilder.graphShadowView.unitScale
+        mCenterRadius = 8.0f * graphView.unitScale
+        mSurroundRadius = 6.5f * graphView.unitScale
 
         val center = PointF(layoutArea.centerX(), layoutArea.centerY())
         val radius = layoutArea.width() / 2
@@ -389,11 +398,10 @@ class GlTimeViewController(
                 item.radius = mSurroundRadius
             }
         }
-
         mMenuDailyStatistics.rect = RectF(0.0f, 0.0f, 200.0f, 100.0f)
     }
 
-    private fun layoutLandscape() {
+    private fun layoutLandscape(graphView: GraphView) {
 
     }
 
@@ -449,7 +457,7 @@ class GlTimeViewController(
                     duration.toFloat() / LONG_LONG_PRESS_TIMEOUT.toFloat()
                 mLongLongPressProgress.visible = true
             }
-            GlControllerBuilder.graphShadowView.invalidate()
+            GlControllerBuilder.graphView.invalidate()
         }
     }
 

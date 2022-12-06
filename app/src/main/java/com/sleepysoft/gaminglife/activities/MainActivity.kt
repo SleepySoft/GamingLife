@@ -8,20 +8,25 @@ import android.provider.Settings
 import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.view.WindowManager
-import com.sleepysoft.gaminglife.controllers.GlControllerBuilder
 import com.sleepysoft.gaminglife.GamingLifeMainService
 import com.sleepysoft.gaminglife.PermissionActivity
-import com.sleepysoft.gaminglife.controllers.GlControllerContext
+import com.sleepysoft.gaminglife.controllers.*
 import com.sleepysoft.gaminglife.views.GlView
 import glcore.GlLog
 import glcore.GlRoot
 import glenv.GlEnv
+import graphengine.GraphView
 import java.lang.ref.WeakReference
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var mView: GlView
     private lateinit var mVibrator: Vibrator
+    private val mCtrlContext = GlControllerContext()
+
+    private lateinit var timeViewController: GlTimeViewController
+    // private lateinit var timeViewControllerEx: GlTimeViewControllerEx
+    private lateinit var audioRecordController: GlAudioRecordLayerController
 
 /*    companion object {
         private var mHandler = Handler(Looper.getMainLooper())
@@ -53,7 +58,7 @@ class MainActivity : AppCompatActivity() {
 
         initControllerContext()
         GlRoot.init(GlEnv().apply { init() })
-        GlControllerBuilder.checkBuildController()
+        buildGraphControllers()
 
         startGlService()
 
@@ -70,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        GlControllerContext.dispatchAsyncResult(requestCode, resultCode, data)
+        mCtrlContext.dispatchAsyncResult(requestCode, resultCode, data)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -118,9 +123,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initControllerContext() {
-        GlControllerContext.view = WeakReference(mView)
-        GlControllerContext.context = WeakReference(this)
-        GlControllerContext.vibrator = WeakReference(mVibrator)
+        mCtrlContext.view = WeakReference(mView)
+        mCtrlContext.context = WeakReference(this)
+        mCtrlContext.vibrator = WeakReference(mVibrator)
+    }
+
+    private fun buildGraphControllers() {
+        mCtrlContext.graphView = GraphView(mCtrlContext)
+        audioRecordController = GlAudioRecordLayerController(mCtrlContext).apply { init() }
+        timeViewController = GlTimeViewController(
+            mCtrlContext, GlRoot.glTaskModule, audioRecordController).apply { init() }
+        // timeViewControllerEx = GlTimeViewControllerEx(mCtrlContext, GlRoot.glTaskModule).apply { init() }
     }
 
     private fun startGlService() {

@@ -5,14 +5,13 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.support.annotation.RequiresApi
-import com.sleepysoft.gaminglife.controllers.GlControllerBuilder
-import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import glcore.GlLog
 import glcore.LONG_LONG_PRESS_TIMEOUT
 import kotlin.math.abs
 
 
 open class GraphItemDecorator(
+    val context: GraphContext,
     val decoratedItem: GraphItem) {
 
     open fun paintBeforeGraph(canvas: Canvas) {
@@ -24,8 +23,8 @@ open class GraphItemDecorator(
 }
 
 
-open class GraphActionDecorator(decoratedItem: GraphItem) :
-    GraphItemDecorator(decoratedItem), ActionHandler {
+open class GraphActionDecorator(context: GraphContext, decoratedItem: GraphItem)
+    : GraphItemDecorator(context, decoratedItem), ActionHandler {
 
     override fun onActionUp(pos: PointF): ActionHandler.ACT {
         return ActionHandler.ACT.IGNORED
@@ -70,7 +69,8 @@ open class GraphActionDecorator(decoratedItem: GraphItem) :
 
 // ---------------------------------------------------------------------------------------------
 
-class AutoFitTextDecorator(decoratedItem: GraphItem) : GraphItemDecorator(decoratedItem) {
+class AutoFitTextDecorator(context: GraphContext, decoratedItem: GraphItem)
+    : GraphItemDecorator(context, decoratedItem) {
 
     var mainText: String = ""
         set(value) {
@@ -102,7 +102,8 @@ class AutoFitTextDecorator(decoratedItem: GraphItem) : GraphItemDecorator(decora
 
 // ---------------------------------------------------------------------------------------------
 
-class MultipleProgressDecorator(decoratedItem: GraphItem) : GraphItemDecorator(decoratedItem) {
+class MultipleProgressDecorator(context: GraphContext, decoratedItem: GraphItem)
+    : GraphItemDecorator(context, decoratedItem) {
 
     // The progress pct records
     data class ProgressData(
@@ -147,24 +148,26 @@ class MultipleProgressDecorator(decoratedItem: GraphItem) : GraphItemDecorator(d
 // ---------------------------------------------------------------------------------------------
 
 class ClickDecorator(
+    context: GraphContext,
     decoratedItem: GraphItem,
     var interactiveListener: GraphInteractiveListener? = null)
-    : GraphActionDecorator(decoratedItem) {
+    : GraphActionDecorator(context, decoratedItem) {
 
     override fun onActionClick(pos: PointF): ActionHandler.ACT {
         GlLog.i("ClickDecorator.onActionClick [$decoratedItem]")
 
         interactiveListener?.onItemClicked(decoratedItem)
-        GlControllerBuilder.graphShadowView.invalidate()
+        context.refresh()
         return ActionHandler.ACT.HANDLED
     }
 }
 
 
 class InteractiveDecorator(
+    context: GraphContext,
     decoratedItem: GraphItem,
     var interactiveListener: GraphInteractiveListener? = null)
-    : GraphActionDecorator(decoratedItem) {
+    : GraphActionDecorator(context, decoratedItem) {
 
     companion object {
         var trackingItem: GraphItem? = null
@@ -184,7 +187,7 @@ class InteractiveDecorator(
             interactiveListener?.onItemDropped(
                 decoratedItem, intersectItems(decoratedItem))
             trackingItem = null
-            GlControllerBuilder.graphShadowView.invalidate()
+            context.refresh()
         }
         // Leak this action to other handler avoiding issues
         return ActionHandler.ACT.IGNORED
@@ -198,7 +201,7 @@ class InteractiveDecorator(
             decoratedItem.shiftItem(-distanceX, -distanceY)
             interactiveListener?.onItemDragging(
                 decoratedItem, intersectItems(decoratedItem))
-            GlControllerBuilder.graphShadowView.invalidate()
+            context.refresh()
 
             ActionHandler.ACT.HANDLED
         }
@@ -211,7 +214,7 @@ class InteractiveDecorator(
         GlLog.i("InteractiveDecorator.onActionClick [$decoratedItem]")
 
         interactiveListener?.onItemClicked(decoratedItem)
-        GlControllerBuilder.graphShadowView.invalidate()
+        context.invalidate()
         return ActionHandler.ACT.HANDLED
     }*/
 
@@ -227,8 +230,8 @@ class InteractiveDecorator(
             decoratedItem.itemLayer?.bringGraphItemToFront(decoratedItem)
             interactiveListener?.onItemSelected(decoratedItem)
 
-            GlControllerContext.vibrate(100)
-            GlControllerContext.refresh()
+            context.vibrate(100)
+            context.refresh()
 
             ActionHandler.ACT.HANDLED
         }
@@ -245,11 +248,12 @@ class InteractiveDecorator(
 }
 
 
-class LongPressProgressDecorator(decoratedItem: GraphItem,
+class LongPressProgressDecorator(
+    context: GraphContext, decoratedItem: GraphItem,
     val progressItem: GraphProgress,
     val abandonOffset: Float,
     var triggerListener: GraphInteractiveListener? = null)
-    : GraphActionDecorator(decoratedItem) {
+    : GraphActionDecorator(context, decoratedItem) {
 
     var longLongPressTimeout = LONG_LONG_PRESS_TIMEOUT
 
@@ -274,7 +278,7 @@ class LongPressProgressDecorator(decoratedItem: GraphItem,
             else {
                 progressItem.progress = duration.toFloat() / longLongPressTimeout.toFloat()
             }
-            GlControllerContext.refresh()
+            context.refresh()
             mHandler.postDelayed(mRunnable, 100)
         }
     }
