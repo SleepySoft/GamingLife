@@ -150,7 +150,7 @@ class GlTimeViewControllerEx(
     }
 
     private fun rebuildDailyBar(layer: GraphLayer) {
-        dailySubBars.clear()
+/*        dailySubBars.clear()
         layer.removeGraphItem { it.id == "TimeView.SubTaskBar" }
 
         val dailyStat = GlDaily().apply {
@@ -189,7 +189,7 @@ class GlTimeViewControllerEx(
             }
             dailySubBars.add(subBar)
             layer.addGraphItem(subBar)
-        }
+        }*/
     }
 
     private fun doLayout() {
@@ -215,7 +215,7 @@ class GlTimeViewControllerEx(
             layoutArea.centerY() + 90.0f
         )
 
-        val barBaseRect = dailyBarBase.boundRect()
+/*        val barBaseRect = dailyBarBase.boundRect()
         for (i in 0 until dailySubBars.size) {
             val subBar = dailySubBars[i]
             val taskRec = subBar.itemData as TaskRecordEx
@@ -231,7 +231,7 @@ class GlTimeViewControllerEx(
                 timeStampToBarBaseX(taskRec.endTime),
                 barBaseRect.bottom
             )
-        }
+        }*/
 
         // Layout task bubble
 

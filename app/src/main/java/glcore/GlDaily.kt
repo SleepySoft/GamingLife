@@ -1,11 +1,13 @@
 package glcore
 
+import java.lang.Long.max
 import java.util.*
+import kotlin.math.min
 
 
-class TaskRecordEx : TaskRecord() {
+/*class TaskRecordEx : TaskRecord() {
     var endTime: Long = 0L
-}
+}*/
 
 
 class GlDaily {
@@ -18,7 +20,7 @@ class GlDaily {
     var dailyExtraFiles = listOf< String >()
 
     var dailyTs: Long = 0
-    val taskRecords: MutableList< TaskRecordEx > = mutableListOf()
+    val taskRecords: MutableList< TaskRecord > = mutableListOf()
     val dailyGroupTime: MutableMap< String , Long > = mutableMapOf()
 
     companion object {
@@ -32,6 +34,17 @@ class GlDaily {
             }
             return dailyFolders
         }
+    }
+
+    fun addTask(task: TaskRecord) {
+        task.startTime = max(task.startTime, dailyTs)
+        task.startTime = min(task.startTime, dailyTs + TIMESTAMP_COUNT_IN_DAY - 1)
+        taskRecords.add(task)
+        taskRecords.sortBy { it.startTime }
+    }
+
+    fun lastTask(): TaskRecord? {
+        return if (taskRecords.isNotEmpty())  taskRecords.last() else null
     }
 
     fun loadDailyData(dateTime: Date) : Boolean {
@@ -53,10 +66,6 @@ class GlDaily {
 
     fun loadDailyData(dayOffset: Int) : Boolean {
         return loadDailyData(GlDateTime.datetime(dayOffset))
-    }
-
-    fun appendTask(task: TaskRecord) {
-
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -87,11 +96,11 @@ class GlDaily {
 
             GlLog.i("Parsing daily data ${Date(dailyTs)} ...")
 
-            var prevTime = dailyTs
+            // var prevTime = dailyTs
             for (task in dailyHis) {
-                val taskRecord = TaskRecordEx().apply { fromAnyStruct(task) }
+                val taskRecord = TaskRecord().apply { fromAnyStruct(task) }
                 if (taskRecord.dataValid) {
-                    if (taskRecord.startTime >= prevTime ) {
+/*                    if (taskRecord.startTime >= prevTime ) {
                         taskRecord.endTime = taskRecord.startTime - prevTime
                         dailyGroupTime[taskRecord.groupID] =
                             (dailyGroupTime[taskRecord.groupID] ?: 0) + taskRecord.endTime
@@ -99,12 +108,13 @@ class GlDaily {
                     }
                     else {
                         taskRecord.endTime = 0
-                    }
+                    }*/
                     taskRecords.add(taskRecord)
                 } else {
                     return false
                 }
             }
+            taskRecords.sortBy { it.startTime }
             true
         } catch (e: Exception) {
             GlLog.i("Parse daily data fail - $e")
