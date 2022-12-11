@@ -116,7 +116,11 @@ fun checkListOfStruct(structDictList: List< GlAnyStruct >,
 
 // ---------------------------------------- Struct Defines -----------------------------------------
 
-abstract class IGlDeclare {
+interface IGlObject {
+    val uuid: String
+}
+
+abstract class IGlDeclare : IGlObject {
     var dataValid : Boolean = false
     abstract fun fromAnyStruct(data: Any?) : Boolean
     abstract fun toAnyStruct() : GlAnyStruct

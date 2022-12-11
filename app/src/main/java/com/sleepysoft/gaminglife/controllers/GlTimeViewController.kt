@@ -13,7 +13,7 @@ import kotlin.math.sin
 
 class GlTimeViewController(
     private val mCtrlContext: GlControllerContext,
-    private val mGlTaskModule: GlTaskModule,
+    private val mGlTask: GlTask,
     private val audioRecordController: GlAudioRecordLayerController)
     : GraphInteractiveListener(), GraphViewObserver {
 
@@ -48,7 +48,7 @@ class GlTimeViewController(
     }
 
     fun polling() {
-        val currentTaskData = mGlTaskModule.getCurrentTaskInfo()
+        val currentTaskData = mGlTask.getCurrentTaskInfo()
         val currentTaskStartTimeMs = currentTaskData["startTime"] as Long
 
         val deltaTimeMs: Long = System.currentTimeMillis() - currentTaskStartTimeMs
@@ -252,17 +252,17 @@ class GlTimeViewController(
             val layer = GraphLayer("TimeView.BaseLayer", true, graphView)
             graphView.addLayer(layer)
 
-            val currentTaskInfo = mGlTaskModule.getCurrentTaskInfo()
+            val currentTaskInfo = mGlTask.getCurrentTaskInfo()
             val currentTaskGroupData =
-                mGlTaskModule.getTaskData(currentTaskInfo["groupID"].toString() ?: "") ?:
-                mGlTaskModule.getTaskData(GROUP_ID_IDLE)
+                mGlTask.getTaskData(currentTaskInfo["groupID"].toString() ?: "") ?:
+                mGlTask.getTaskData(GROUP_ID_IDLE)
 
             mCenterItem = GraphCircle().apply {
                 this.id = "TimeView.CenterItem"
                 this.itemData = currentTaskGroupData
                 this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
                     this.color = Color.parseColor(
-                        mGlTaskModule.colorOfTask(currentTaskGroupData?.get("id") ?: GROUP_ID_IDLE))
+                        mGlTask.colorOfTask(currentTaskGroupData?.get("id") ?: GROUP_ID_IDLE))
                     this.style = Paint.Style.FILL
                 }
             }
@@ -287,13 +287,13 @@ class GlTimeViewController(
             mCenterItem.graphActionDecorator.add(LongPressProgressDecorator(
                 mCtrlContext, mCenterItem, mProgressItem, 30.0f, this).apply { init() })
 
-            val taskGroupTop = mGlTaskModule.getTaskGroupTop()
+            val taskGroupTop = mGlTask.getTaskGroupTop()
             for ((k, v) in taskGroupTop) {
                 val item = GraphCircle().apply {
                     this.id = "TimeView.$k"
                     this.itemData = v
                     this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                        this.color = Color.parseColor(mGlTaskModule.colorOfTask(k))
+                        this.color = Color.parseColor(mGlTask.colorOfTask(k))
                         this.style = Paint.Style.FILL
                     }
                 }
@@ -437,7 +437,7 @@ class GlTimeViewController(
 
         }
         toTask?.run {
-            mGlTaskModule.switchToTask(toTask)
+            mGlTask.switchToTask(toTask)
         }
     }
 

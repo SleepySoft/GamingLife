@@ -233,6 +233,10 @@ class GraphCircle : GraphItem() {
             rCenter.x + radius, rCenter.y + radius)
     }
 
+    override fun moveCenter(pos: PointF) {
+        origin = pos
+    }
+
     // ---------------------------------------------------------------------
 
     private fun realOrigin() : PointF {
@@ -241,10 +245,6 @@ class GraphCircle : GraphItem() {
 
     private fun realRadius() : Float {
         return radius * (1.0f + inflatePct / 100)
-    }
-
-    override fun moveCenter(pos: PointF) {
-        origin = pos
     }
 }
 

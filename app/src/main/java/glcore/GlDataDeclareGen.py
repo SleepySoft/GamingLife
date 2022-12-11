@@ -30,7 +30,8 @@ GL_DATA_CLASS_TEMPLATE = """
 // -------------------------------------------------------------------------------------------------
 
 open class <<class_name>> : IGlDeclare() {
-
+    override var uuid: String = randomUUID()
+    
     val structDeclare = mapOf< String, KClass< * > >(
 <<struct_dec_area>>
     )
@@ -40,6 +41,8 @@ open class <<class_name>> : IGlDeclare() {
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = toAnyStruct(data)
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
+            uuid = (anyStruct.get("uuid") as? String) ?: uuid
+            
 <<from_any_struct_area>>
             true
         }
@@ -51,6 +54,8 @@ open class <<class_name>> : IGlDeclare() {
 
     override fun toAnyStruct(): GlAnyStruct {
         return mutableMapOf(
+            "uuid" to uuid,
+            
 <<to_any_struct_area>>
         )
     }

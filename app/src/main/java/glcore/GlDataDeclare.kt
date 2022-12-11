@@ -12,7 +12,8 @@ import kotlin.reflect.KClass
 // -------------------------------------------------------------------------------------------------
 
 open class TaskData : IGlDeclare() {
-
+    override var uuid: String = randomUUID()
+    
     val structDeclare = mapOf< String, KClass< * > >(
         "id" to String::class, 
         "name" to String::class, 
@@ -26,6 +27,8 @@ open class TaskData : IGlDeclare() {
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = toAnyStruct(data)
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
+            uuid = (anyStruct.get("uuid") as? String) ?: uuid
+            
             id = anyStruct.get("id") as String
             name = anyStruct.get("name") as String
             color = anyStruct.get("color") as String
@@ -39,6 +42,8 @@ open class TaskData : IGlDeclare() {
 
     override fun toAnyStruct(): GlAnyStruct {
         return mutableMapOf(
+            "uuid" to uuid,
+            
             "id" to id, 
             "name" to name, 
             "color" to color
@@ -49,7 +54,8 @@ open class TaskData : IGlDeclare() {
 // -------------------------------------------------------------------------------------------------
 
 open class TaskRecord : IGlDeclare() {
-
+    override var uuid: String = randomUUID()
+    
     val structDeclare = mapOf< String, KClass< * > >(
         "taskID" to String::class, 
         "groupID" to String::class, 
@@ -63,6 +69,8 @@ open class TaskRecord : IGlDeclare() {
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = toAnyStruct(data)
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
+            uuid = (anyStruct.get("uuid") as? String) ?: uuid
+            
             taskID = anyStruct.get("taskID") as String
             groupID = anyStruct.get("groupID") as String
             startTime = anyStruct.get("startTime") as Long
@@ -76,6 +84,8 @@ open class TaskRecord : IGlDeclare() {
 
     override fun toAnyStruct(): GlAnyStruct {
         return mutableMapOf(
+            "uuid" to uuid,
+            
             "taskID" to taskID, 
             "groupID" to groupID, 
             "startTime" to startTime

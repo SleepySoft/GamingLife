@@ -12,7 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import glcore.DAILY_FOLDER_PREFIX
-import glcore.GlDailyStatistics
+import glcore.GlDaily
 import glcore.GlDateTime
 import java.util.Date
 
@@ -20,12 +20,12 @@ import java.util.Date
 class DailyBrowseAdapter(val context: Context) :
     RecyclerView.Adapter< DailyBrowseAdapter.DailyViewHolder >() {
 
-    val dailyDataList = GlDailyStatistics.listDailyData()
+    val dailyDataList = GlDaily.listDailyData()
 
     class DailyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         var dataValid: Boolean = false
         var dailyDataDate: Date = Date()
-        val dailyDataStat: GlDailyStatistics = GlDailyStatistics()
+        val dailyDataStat: GlDaily = GlDaily()
 
         val dateButton: Button = view.findViewById(R.id.id_button_item_button)
     }

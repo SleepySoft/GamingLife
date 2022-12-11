@@ -3,10 +3,10 @@ package com.sleepysoft.gaminglife
 import glcore.GlRoot
 import org.junit.Test
 
-internal class GlTaskModuleTest {
+internal class GlTaskTest {
 
     @Test
     fun testDailyDataSettle() {
-        GlRoot.glTaskModule.checkSettleDailyData()
+        GlRoot.glTask.checkSettleDailyData()
     }
 }

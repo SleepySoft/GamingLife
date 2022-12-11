@@ -8,7 +8,7 @@ class TaskRecordEx : TaskRecord() {
 }
 
 
-class GlDailyStatistics {
+class GlDaily {
     var dailyPath: String = ""
         private set
     var dailyFile: String = ""
@@ -53,6 +53,10 @@ class GlDailyStatistics {
 
     fun loadDailyData(dayOffset: Int) : Boolean {
         return loadDailyData(GlDateTime.datetime(dayOffset))
+    }
+
+    fun appendTask(task: TaskRecord) {
+
     }
 
     // ---------------------------------------------------------------------------------------------

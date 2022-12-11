@@ -10,7 +10,7 @@ import graphengine.*
 
 class GlTimeViewControllerEx(
     private val mCtrlContext: GlControllerContext,
-    private val mGlTaskModule: GlTaskModule)
+    private val mGlTask: GlTask)
     : GraphInteractiveListener(), GraphViewObserver {
 
     private var mHandler = Handler(Looper.getMainLooper())
@@ -121,13 +121,13 @@ class GlTimeViewControllerEx(
     }
 
     private fun buildTaskGroupGraph(layer: GraphLayer) {
-        val taskGroupTop = mGlTaskModule.getTaskGroupTop()
+        val taskGroupTop = mGlTask.getTaskGroupTop()
         for ((k, v) in taskGroupTop) {
             val item = GraphCircle().apply {
                 this.id = "TimeView.$k"
                 this.itemData = v
                 this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    this.color = Color.parseColor(mGlTaskModule.colorOfTask(k))
+                    this.color = Color.parseColor(mGlTask.colorOfTask(k))
                     this.style = Paint.Style.FILL
                 }
             }
@@ -153,7 +153,7 @@ class GlTimeViewControllerEx(
         dailySubBars.clear()
         layer.removeGraphItem { it.id == "TimeView.SubTaskBar" }
 
-        val dailyStat = GlDailyStatistics().apply {
+        val dailyStat = GlDaily().apply {
             loadDailyData(0)
         }
 
@@ -183,7 +183,7 @@ class GlTimeViewControllerEx(
                 this.id = "TimeView.SubTaskBar"
                 this.itemData = taskRecord
                 this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    this.color = Color.parseColor(mGlTaskModule.colorOfTask(taskRecord.groupID))
+                    this.color = Color.parseColor(mGlTask.colorOfTask(taskRecord.groupID))
                     this.style = Paint.Style.FILL
                 }
             }

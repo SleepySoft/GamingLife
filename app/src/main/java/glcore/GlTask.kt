@@ -3,7 +3,7 @@ package glcore
 import java.util.Date
 
 
-class GlTaskModule(private val mDatabase: GlDatabase) {
+class GlTask(private val mDatabase: GlDatabase) {
 
     fun init() {
 

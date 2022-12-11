@@ -8,7 +8,7 @@ import java.util.*
 object GlRoot {
     lateinit var env: GlEnv
     val glDatabase = GlDatabase()
-    val glTaskModule = GlTaskModule(glDatabase)
+    val glTask = GlTask(glDatabase)
 
     private var mInited = false
 
@@ -16,7 +16,7 @@ object GlRoot {
         if (!mInited) {
             env = glEnv
             glDatabase.init()
-            glTaskModule.init()
+            glTask.init()
             mInited = true
         }
     }

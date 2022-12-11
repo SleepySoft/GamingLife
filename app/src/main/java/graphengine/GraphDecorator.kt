@@ -79,7 +79,10 @@ class AutoFitTextDecorator(context: GraphContext, decoratedItem: GraphItem)
     var fontPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     var textArea: Rect = Rect()
+        private set
+
     var textBound: Rect = Rect()
+        private set
 
     override fun paintAfterGraph(canvas: Canvas) {
         val newTextArea = decoratedItem.boundRect().apply { inflate(0.7f) }.toRect()
@@ -145,6 +148,8 @@ class MultipleProgressDecorator(context: GraphContext, decoratedItem: GraphItem)
 }
 
 
+// ---------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------
 
 class ClickDecorator(

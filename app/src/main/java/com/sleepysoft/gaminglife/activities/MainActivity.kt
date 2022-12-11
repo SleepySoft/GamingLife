@@ -134,7 +134,7 @@ class MainActivity : AppCompatActivity() {
         mCtrlContext.graphView = GraphView(mCtrlContext)
         audioRecordController = GlAudioRecordLayerController(mCtrlContext).apply { init() }
         timeViewController = GlTimeViewController(
-            mCtrlContext, GlRoot.glTaskModule, audioRecordController).apply { init() }
+            mCtrlContext, GlRoot.glTask, audioRecordController).apply { init() }
         // timeViewControllerEx = GlTimeViewControllerEx(mCtrlContext, GlRoot.glTaskModule).apply { init() }
     }
 
