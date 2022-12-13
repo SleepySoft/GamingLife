@@ -13,7 +13,7 @@ import kotlin.math.sin
 
 class GlTimeViewController(
     private val mCtrlContext: GlControllerContext,
-    private val mGlTask: GlTask,
+    private val mGlTask: GlSystemConfig,
     private val audioRecordController: GlAudioRecordLayerController)
     : GraphInteractiveListener(), GraphViewObserver {
 

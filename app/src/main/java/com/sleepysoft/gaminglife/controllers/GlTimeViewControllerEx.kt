@@ -10,7 +10,7 @@ import graphengine.*
 
 class GlTimeViewControllerEx(
     private val mCtrlContext: GlControllerContext,
-    private val mGlTask: GlTask)
+    private val mGlTask: GlSystemConfig)
     : GraphInteractiveListener(), GraphViewObserver {
 
     private var mHandler = Handler(Looper.getMainLooper())

@@ -192,6 +192,25 @@ class PathDict(attachMap: MutableMap<String, Any>? = null) {
 }
 
 
+fun savePathDict(fileName: String, pathDict: PathDict, force: Boolean = false) : Boolean {
+    var ret = false
+    if (pathDict.hasUpdate || force) {
+        val fileContent: String = GlJson.serializeAnyDict(pathDict.rootDict)
+        ret = GlFile.saveFile(fileName, fileContent.toByteArray(Charsets.UTF_8))
+        pathDict.hasUpdate = !ret
+    }
+    return ret
+}
+
+
+fun loadPathDict(fileName: String, pathDict: PathDict) : Boolean {
+    val fileContent: String = GlFile.loadFile(fileName).toString(Charsets.UTF_8)
+    pathDict.attach(GlJson.deserializeAnyDict(fileContent))
+    pathDict.hasUpdate = false
+    return fileContent.isNotEmpty()
+}
+
+
 /*
 
 

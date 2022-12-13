@@ -3,17 +3,20 @@ package glcore
 import java.util.Date
 
 
-class GlTask(private val mDatabase: GlDatabase) {
+class GlSystemConfig(private val mDatabase: GlDatabase) {
+    var mTaskGroupTop: MutableList< TaskData > = mutableListOf()
+    val mTaskGroupSub: MutableList< TaskData > = mutableListOf()
+    val mTaskGroupLink: MutableMap< String , String > = mutableMapOf()      // sub id: top id
 
-    fun init() {
+/*    fun init() {
 
-    }
+    }*/
 
     // ---------------------------------------- Task Group -----------------------------------------
 
     // ------------------- Data, Load and Write -------------------
 
-    @Suppress("UNCHECKED_CAST")
+/*    @Suppress("UNCHECKED_CAST")
     val mTaskGroupTop: GlStrStructDict                      // id: name
         get() = (mDatabase.systemConfig.getDictAny(PATH_SYSTEM_TASK_GROUP_TOP) ?:
                     TASK_GROUP_TOP_PRESET.toMutableMap()) as GlStrStructDict
@@ -26,7 +29,7 @@ class GlTask(private val mDatabase: GlDatabase) {
     @Suppress("UNCHECKED_CAST")
     val mTaskGroupLink: MutableMap< String , String >       // sub id: top id
         get() = (mDatabase.systemConfig.getDictStr(PATH_SYSTEM_TASK_GROUP_LINK) ?:
-                    mutableMapOf())
+                    mutableMapOf())*/
 
 /*    private fun groupDataFromDatabase() {
         @Suppress("UNCHECKED_CAST")

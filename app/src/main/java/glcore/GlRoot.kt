@@ -8,7 +8,7 @@ import java.util.*
 object GlRoot {
     lateinit var env: GlEnv
     val glDatabase = GlDatabase()
-    val glTask = GlTask(glDatabase)
+    val glTask = GlSystemConfig(glDatabase)
 
     private var mInited = false
 

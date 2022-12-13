@@ -11,13 +11,13 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
 import glcore.DAILY_FOLDER_PREFIX
-import glcore.GlDaily
+import glcore.GlDailyRecord
 import glcore.GlDateTime
 import glcore.GlFile
 
 
 class DailyExtFileAdapter(
-    private val dailyStatistics: GlDaily,
+    private val dailyStatistics: GlDailyRecord,
     private val dailyStatisticsActivity: DailyStatisticsActivity)
     : RecyclerView.Adapter< DailyExtFileAdapter.DailyStatisticsHolder >() {
 
@@ -65,7 +65,7 @@ class DailyExtFileAdapter(
 class DailyStatisticsActivity : AppCompatActivity() {
     lateinit var mMdViewer: TextView
     lateinit var mDailyExtFileList: RecyclerView
-    var mDailyStatistics: GlDaily = GlDaily()
+    var mDailyStatistics: GlDailyRecord = GlDailyRecord()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

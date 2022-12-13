@@ -1,0 +1,4 @@
+package glcore
+
+class GlService {
+}

@@ -5,21 +5,10 @@ import java.util.*
 import kotlin.math.min
 
 
-class GlDaily {
-    var dailyPath: String = ""
-        private set
-    var dailyFile: String = ""
-        private set
-    val dailyData: PathDict = PathDict()
-
-    var dailyExtraFiles = listOf< String >()
-
-    var dailyTs: Long = 0
-    var taskRecords: MutableList< TaskRecord > = mutableListOf()
-    // val dailyGroupTime: MutableMap< String , Long > = mutableMapOf()
+class GlDailyRecord {
 
     companion object {
-        fun listDailyData() : List< String > {
+        fun listArchivedDailyData() : List< String > {
             val dailyFolders = mutableListOf< String >()
             val rootFolders = GlFile.listFiles("", GlFile.LIST_DIRECTORY)
             for (folder in rootFolders) {
@@ -31,18 +20,46 @@ class GlDaily {
         }
     }
 
-    fun addTask(task: TaskRecord) {
-        task.startTime = max(task.startTime, dailyTs)
-        task.startTime = min(task.startTime, dailyTs + TIMESTAMP_COUNT_IN_DAY - 1)
-        taskRecords.add(task)
-        taskRecords.sortBy { it.startTime }
+    var dailyPath: String = ""
+        private set
+    var dailyFile: String = ""
+        private set
+    val dailyRecord: PathDict = PathDict()
+
+    var dailyExtraFiles = listOf< String >()
+
+    var dailyTs: Long = 0
+    var taskRecords: MutableList< TaskRecord > = mutableListOf()
+    // val dailyGroupTime: MutableMap< String , Long > = mutableMapOf()
+
+    // --------------------------------------- New Save Load ---------------------------------------
+
+    fun newDailyRecord() {
+        GlLog.i("New Daily Record")
+        dailyPath = GlRoot.getDailyFolderName(GlDateTime.datetime())
+        dailyFile = GL_FILE_DAILY_RECORD
+
+        // Init data
+        dailyRecord.set(PATH_DAILY_START_TS, GlDateTime.dayStartTimeStamp())
+        dailyRecord.set(PATH_DAILY_TASK_RECORD, mutableListOf< GlAnyDict >())
+
+        dailyExtraFiles = listOf()
+        dailyTs = GlDateTime.dayStartTimeStamp()
+        taskRecords = mutableListOf()
     }
 
-    fun lastTask(): TaskRecord? {
-        return if (taskRecords.isNotEmpty())  taskRecords.last() else null
+    fun initDailyRecord() {
+        dailyPath = ""
+        dailyFile = ""
+        dailyRecord.clear()
+        dailyExtraFiles = listOf()
+        dailyTs = 0
+        taskRecords = mutableListOf()
     }
 
     fun loadDailyData(dateTime: Date) : Boolean {
+        initDailyRecord()
+
         dailyFile = if (GlDateTime.zeroDateHMS(dateTime).time == GlDateTime.dayStartTimeStamp()) {
             GL_FILE_DAILY_RECORD
         } else {
@@ -65,20 +82,36 @@ class GlDaily {
 
     fun saveDailyData() {
         val pathDict = IGlDeclare.toAnyStructList(taskRecords)
-        dailyData.set(PATH_DAILY_TASK_RECORD, pathDict)
+        dailyRecord.set(PATH_DAILY_TASK_RECORD, pathDict)
+        savePathDict(GlFile.joinPaths(dailyPath, GL_FILE_DAILY_RECORD), dailyRecord)
 
-        if (dailyTs == GlDateTime.dayStartTimeStamp()) {
+/*        if (dailyTs == GlDateTime.dayStartTimeStamp()) {
             GlRoot.glDatabase.dailyRecord.set(PATH_DAILY_TASK_RECORD, pathDict)
             GlRoot.glDatabase.save()
         } else {
             // TODO: Save to archived file
-        }
+        }*/
+    }
+
+    // ---------------------------------------- Task Record ----------------------------------------
+
+    fun addTask(task: TaskRecord) {
+        task.startTime = max(task.startTime, dailyTs)
+        task.startTime = min(task.startTime, dailyTs + TIMESTAMP_COUNT_IN_DAY - 1)
+        taskRecords.add(task)
+        taskRecords.sortBy { it.startTime }
+    }
+
+    fun lastTask(): TaskRecord? {
+        return if (taskRecords.isNotEmpty())  taskRecords.last() else null
     }
 
     // ---------------------------------------------------------------------------------------------
 
     private fun parseDailyFile(dailyJsonPath: String) : Boolean {
-        val dailyFileData: String = GlFile.loadFile(dailyFile).toString(Charsets.UTF_8)
+        return loadPathDict(dailyJsonPath, dailyRecord) && parseDailyData()
+
+/*        val dailyFileData: String = GlFile.loadFile(dailyFile).toString(Charsets.UTF_8)
 
         return if (dailyFileData.isNotEmpty()) {
             dailyData.attach(GlJson.deserializeAnyDict(dailyFileData))
@@ -86,13 +119,13 @@ class GlDaily {
             parseDailyData()
         } else {
             false
-        }
+        }*/
     }
 
     private fun parseDailyData() : Boolean {
         return try {
-            dailyTs = (dailyData.get(PATH_DAILY_START_TS) as? Long) ?: 0
-            val dailyRecord = dailyData.get(PATH_DAILY_TASK_RECORD) as? List< * >
+            dailyTs = (dailyRecord.get(PATH_DAILY_START_TS) as? Long) ?: 0
+            val dailyRecord = dailyRecord.get(PATH_DAILY_TASK_RECORD) as? List< * >
 
             if ((dailyTs == 0L) || (dailyRecord == null)) {
                 return false
