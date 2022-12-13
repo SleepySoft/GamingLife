@@ -9,8 +9,10 @@ object GlRoot {
     private var mInited = false
 
     lateinit var env: GlEnv
-    var dailyRecord = GlDailyRecord()
-    var systemConfig = GlSystemConfig()
+
+    val glService = GlService()
+    val dailyRecord = GlDailyRecord()
+    val systemConfig = GlSystemConfig()
 
     fun init(glEnv: GlEnv) {
         if (!mInited) {

@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
 open class TaskData : IGlDeclare() {
     var id: String = ""
     var name: String = ""
-    var color: String = ""
+    var color: String = GROUP_ID_IDLE
     
     override var uuid: String = randomUUID()
     

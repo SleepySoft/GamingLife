@@ -13,7 +13,6 @@ import kotlin.math.sin
 
 class GlTimeViewController(
     private val mCtrlContext: GlControllerContext,
-    private val mGlTask: GlSystemConfig,
     private val audioRecordController: GlAudioRecordLayerController)
     : GraphInteractiveListener(), GraphViewObserver {
 
@@ -48,8 +47,8 @@ class GlTimeViewController(
     }
 
     fun polling() {
-        val currentTaskData = mGlTask.getCurrentTaskInfo()
-        val currentTaskStartTimeMs = currentTaskData["startTime"] as Long
+        val currentTaskData = GlRoot.glService.getCurrentTaskInfo()
+        val currentTaskStartTimeMs = currentTaskData.startTime
 
         val deltaTimeMs: Long = System.currentTimeMillis() - currentTaskStartTimeMs
         val deltaTimeS: Long = deltaTimeMs / 1000
@@ -107,8 +106,8 @@ class GlTimeViewController(
                 mCenterItem.shapePaint.color = closestItem.shapePaint.color
 
                 @Suppress("UNCHECKED_CAST")
-                handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
-                    closestItem.itemData as GlStrStruct?)
+                handleTaskSwitching(
+                    mCenterItem.itemData as TaskData?, closestItem.itemData as TaskData?)
             }
         }
         else if (intersectItems.contains(mCenterItem)) {
@@ -119,8 +118,8 @@ class GlTimeViewController(
                 mCenterItem.shapePaint.color = item.shapePaint.color
 
                 @Suppress("UNCHECKED_CAST")
-                handleTaskSwitching(mCenterItem.itemData as GlStrStruct?,
-                    item.itemData as GlStrStruct?)
+                handleTaskSwitching(
+                    mCenterItem.itemData as TaskData?, item.itemData as TaskData?)
             }
         }
         item.offsetPixel.x = 0.0f
@@ -252,17 +251,16 @@ class GlTimeViewController(
             val layer = GraphLayer("TimeView.BaseLayer", true, graphView)
             graphView.addLayer(layer)
 
-            val currentTaskInfo = mGlTask.getCurrentTaskInfo()
-            val currentTaskGroupData =
-                mGlTask.getTaskData(currentTaskInfo["groupID"].toString() ?: "") ?:
-                mGlTask.getTaskData(GROUP_ID_IDLE)
+            val currentTaskInfo = GlRoot.glService.getCurrentTaskInfo()
+            val currentTaskGroupData: TaskData =
+                GlRoot.systemConfig.getTopTaskData(currentTaskInfo.groupID) ?:
+                GlRoot.systemConfig.getTopTaskData(GROUP_ID_IDLE) ?: TaskData()
 
             mCenterItem = GraphCircle().apply {
                 this.id = "TimeView.CenterItem"
                 this.itemData = currentTaskGroupData
                 this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                    this.color = Color.parseColor(
-                        mGlTask.colorOfTask(currentTaskGroupData?.get("id") ?: GROUP_ID_IDLE))
+                    this.color = Color.parseColor(currentTaskGroupData.color)
                     this.style = Paint.Style.FILL
                 }
             }
@@ -287,19 +285,19 @@ class GlTimeViewController(
             mCenterItem.graphActionDecorator.add(LongPressProgressDecorator(
                 mCtrlContext, mCenterItem, mProgressItem, 30.0f, this).apply { init() })
 
-            val taskGroupTop = mGlTask.getTaskGroupTop()
-            for ((k, v) in taskGroupTop) {
+            val taskGroupTop = GlRoot.systemConfig.getTopTasks()
+            for (taskData in taskGroupTop) {
                 val item = GraphCircle().apply {
-                    this.id = "TimeView.$k"
-                    this.itemData = v
+                    this.id = "TimeView.${taskData.id}"
+                    this.itemData = taskData
                     this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                        this.color = Color.parseColor(mGlTask.colorOfTask(k))
+                        this.color = Color.parseColor(taskData.color)
                         this.style = Paint.Style.FILL
                     }
                 }
 
                 val text = AutoFitTextDecorator(mCtrlContext, item).apply {
-                    this.mainText = v["name"] ?: ""
+                    this.mainText = taskData.name
                     this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
                         this.color = Color.parseColor("#FFFFFF")
                         this.textAlign = Paint.Align.CENTER
@@ -429,7 +427,7 @@ class GlTimeViewController(
         )
     }
 
-    private fun handleTaskSwitching(fromTask: GlStrStruct?, toTask: GlStrStruct?) {
+    private fun handleTaskSwitching(fromTask: TaskData?, toTask: TaskData?) {
         if (toTask == null) {
             println("The toTask should not be null")
         }
@@ -437,7 +435,7 @@ class GlTimeViewController(
 
         }
         toTask?.run {
-            mGlTask.switchToTask(toTask)
+            GlRoot.glService.switchToTask(toTask)
         }
     }
 

@@ -121,19 +121,19 @@ class GlTimeViewControllerEx(
     }
 
     private fun buildTaskGroupGraph(layer: GraphLayer) {
-        val taskGroupTop = mGlTask.getTaskGroupTop()
-        for ((k, v) in taskGroupTop) {
+        val taskGroupTop = GlRoot.systemConfig.getTopTasks()
+        for (taskData in taskGroupTop) {
             val item = GraphCircle().apply {
-                this.id = "TimeView.$k"
-                this.itemData = v
+                this.id = "TimeView.${taskData.id}"
+                this.itemData = taskData
                 this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    this.color = Color.parseColor(mGlTask.colorOfTask(k))
+                    this.color = Color.parseColor(taskData.color)
                     this.style = Paint.Style.FILL
                 }
             }
 
             val text = AutoFitTextDecorator(mCtrlContext, item).apply {
-                this.mainText = v["name"] ?: ""
+                this.mainText = taskData.name
                 this.fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     this.color = Color.parseColor("#FFFFFF")
                     this.textAlign = Paint.Align.CENTER

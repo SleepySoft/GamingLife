@@ -152,6 +152,14 @@ val STRUCT_DEC_TASK_RECORD : GlStructDeclare = mapOf< String, KClass< * > >(
 
 // -------------------------------------------- Preset ---------------------------------------------
 
+const val COLOR_TASK_IDLE       = "#00BCD4"           // Cyan 500
+const val COLOR_TASK_ENJOY      = "#7E57C2"           // Deep Purple 400
+const val COLOR_TASK_LIFE       = "#34A853"           // Green
+const val COLOR_TASK_WORK       = "#EA4335"           // Red
+const val COLOR_TASK_PROMOTE    = "#FBBC05"           // Yellow
+const val COLOR_TASK_CREATE     = "#4485F4"           // Blue
+
+
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors
 
 val TASK_GROUP_TOP_PRESET = mapOf(
@@ -159,32 +167,32 @@ val TASK_GROUP_TOP_PRESET = mapOf(
     GROUP_ID_IDLE to mapOf(
         "id" to GROUP_ID_IDLE,
         "name" to "放松",
-        "color" to "#00BCD4"),      // Cyan 500
+        "color" to COLOR_TASK_IDLE),
 
     GROUP_ID_ENJOY to mapOf(
         "id" to GROUP_ID_ENJOY,
         "name" to "玩乐",
-        "color" to "#7E57C2"),      // Deep Purple 400
+        "color" to COLOR_TASK_ENJOY),
 
     GROUP_ID_LIFE to mapOf(
         "id" to GROUP_ID_LIFE,
         "name" to "生活",
-        "color" to "#34A853"),      // Green
+        "color" to COLOR_TASK_LIFE),
 
     GROUP_ID_WORK to mapOf(
         "id" to GROUP_ID_WORK,
         "name" to "工作",
-        "color" to "#EA4335"),      // Red
+        "color" to COLOR_TASK_WORK),
 
     GROUP_ID_PROMOTE to mapOf(
         "id" to GROUP_ID_PROMOTE,
         "name" to "提升",
-        "color" to "#FBBC05"),      // Yellow
+        "color" to COLOR_TASK_PROMOTE),
 
     GROUP_ID_CREATE to mapOf(
         "id" to GROUP_ID_CREATE,
         "name" to "创作",
-        "color" to "#4485F4"),      // Blue
+        "color" to COLOR_TASK_CREATE),
 )
 
 
