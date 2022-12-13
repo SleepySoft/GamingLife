@@ -30,7 +30,13 @@ GL_DATA_CLASS_TEMPLATE = """
 // -------------------------------------------------------------------------------------------------
 
 open class <<class_name>> : IGlDeclare() {
+<<member_area>>
+    
     override var uuid: String = randomUUID()
+    
+    val structDeclare = mapOf< String, KClass< * > >(
+<<struct_dec_area>>
+    )
     
     companion object {
         fun fromAnyStructList(anyStructList: List< * >): List< <<class_name>> > {
@@ -44,12 +50,6 @@ open class <<class_name>> : IGlDeclare() {
             }
         }
     }
-    
-    val structDeclare = mapOf< String, KClass< * > >(
-<<struct_dec_area>>
-    )
-    
-<<member_area>>
 
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = toAnyStruct(data)

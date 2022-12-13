@@ -6,17 +6,15 @@ import java.util.*
 
 
 object GlRoot {
-    lateinit var env: GlEnv
-    val glDatabase = GlDatabase()
-    val glTask = GlSystemConfig(glDatabase)
-
     private var mInited = false
+
+    lateinit var env: GlEnv
+    var dailyRecord = GlDailyRecord()
+    var systemConfig = GlSystemConfig()
 
     fun init(glEnv: GlEnv) {
         if (!mInited) {
             env = glEnv
-            glDatabase.init()
-            glTask.init()
             mInited = true
         }
     }

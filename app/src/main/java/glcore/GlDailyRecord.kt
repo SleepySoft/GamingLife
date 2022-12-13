@@ -1,5 +1,7 @@
 package glcore
 
+import android.os.Build
+import android.support.annotation.RequiresApi
 import java.lang.Long.max
 import java.util.*
 import kotlin.math.min
@@ -31,6 +33,8 @@ class GlDailyRecord {
     var dailyTs: Long = 0
     var taskRecords: MutableList< TaskRecord > = mutableListOf()
     // val dailyGroupTime: MutableMap< String , Long > = mutableMapOf()
+
+    var taskIntervalThreshold: Long = 5 * 60 * 1000             // ms
 
     // --------------------------------------- New Save Load ---------------------------------------
 
@@ -99,7 +103,12 @@ class GlDailyRecord {
         task.startTime = max(task.startTime, dailyTs)
         task.startTime = min(task.startTime, dailyTs + TIMESTAMP_COUNT_IN_DAY - 1)
         taskRecords.add(task)
-        taskRecords.sortBy { it.startTime }
+        reshapeTaskRecords()
+    }
+    
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun removeTask(uuid: String) {
+        taskRecords.removeIf { it.uuid == uuid }
     }
 
     fun lastTask(): TaskRecord? {
@@ -134,7 +143,7 @@ class GlDailyRecord {
             GlLog.i("Parsing daily data ${Date(dailyTs)} ...")
 
             taskRecords = TaskRecord.fromAnyStructList(dailyRecord).toMutableList()
-            taskRecords.sortBy { it.startTime }
+            reshapeTaskRecords()
             true
         } catch (e: Exception) {
             GlLog.i("Parse daily data fail - $e")
@@ -149,5 +158,18 @@ class GlDailyRecord {
         // GlLog.i("Collect daily files: $dailyExtraFiles")
 
         return true
+    }
+
+    private fun reshapeTaskRecords() {
+        taskRecords.sortBy { it.startTime }
+
+        var i = 0
+        while (i < taskRecords.size - 1) {
+            if (taskRecords[i + 1].startTime - taskRecords[i].startTime < taskIntervalThreshold) {
+                taskRecords.removeAt(i)
+            } else {
+                i += 1
+            }
+        }
     }
 }

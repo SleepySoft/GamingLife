@@ -12,7 +12,17 @@ import kotlin.reflect.KClass
 // -------------------------------------------------------------------------------------------------
 
 open class TaskData : IGlDeclare() {
+    var id: String = ""
+    var name: String = ""
+    var color: String = ""
+    
     override var uuid: String = randomUUID()
+    
+    val structDeclare = mapOf< String, KClass< * > >(
+        "id" to String::class, 
+        "name" to String::class, 
+        "color" to String::class
+    )
     
     companion object {
         fun fromAnyStructList(anyStructList: List< * >): List< TaskData > {
@@ -26,16 +36,6 @@ open class TaskData : IGlDeclare() {
             }
         }
     }
-    
-    val structDeclare = mapOf< String, KClass< * > >(
-        "id" to String::class, 
-        "name" to String::class, 
-        "color" to String::class
-    )
-    
-    var id: String = ""
-    var name: String = ""
-    var color: String = ""
 
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = toAnyStruct(data)
@@ -67,7 +67,17 @@ open class TaskData : IGlDeclare() {
 // -------------------------------------------------------------------------------------------------
 
 open class TaskRecord : IGlDeclare() {
+    var taskID: String = ""
+    var groupID: String = ""
+    var startTime: Long = 0L
+    
     override var uuid: String = randomUUID()
+    
+    val structDeclare = mapOf< String, KClass< * > >(
+        "taskID" to String::class, 
+        "groupID" to String::class, 
+        "startTime" to Long::class
+    )
     
     companion object {
         fun fromAnyStructList(anyStructList: List< * >): List< TaskRecord > {
@@ -81,16 +91,6 @@ open class TaskRecord : IGlDeclare() {
             }
         }
     }
-    
-    val structDeclare = mapOf< String, KClass< * > >(
-        "taskID" to String::class, 
-        "groupID" to String::class, 
-        "startTime" to Long::class
-    )
-    
-    var taskID: String = ""
-    var groupID: String = ""
-    var startTime: Long = 0L
 
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = toAnyStruct(data)
