@@ -5,11 +5,6 @@ import java.util.*
 import kotlin.math.min
 
 
-/*class TaskRecordEx : TaskRecord() {
-    var endTime: Long = 0L
-}*/
-
-
 class GlDaily {
     var dailyPath: String = ""
         private set
@@ -20,8 +15,8 @@ class GlDaily {
     var dailyExtraFiles = listOf< String >()
 
     var dailyTs: Long = 0
-    val taskRecords: MutableList< TaskRecord > = mutableListOf()
-    val dailyGroupTime: MutableMap< String , Long > = mutableMapOf()
+    var taskRecords: MutableList< TaskRecord > = mutableListOf()
+    // val dailyGroupTime: MutableMap< String , Long > = mutableMapOf()
 
     companion object {
         fun listDailyData() : List< String > {
@@ -68,6 +63,18 @@ class GlDaily {
         return loadDailyData(GlDateTime.datetime(dayOffset))
     }
 
+    fun saveDailyData() {
+        val pathDict = IGlDeclare.toAnyStructList(taskRecords)
+        dailyData.set(PATH_DAILY_TASK_RECORD, pathDict)
+
+        if (dailyTs == GlDateTime.dayStartTimeStamp()) {
+            GlRoot.glDatabase.dailyRecord.set(PATH_DAILY_TASK_RECORD, pathDict)
+            GlRoot.glDatabase.save()
+        } else {
+            // TODO: Save to archived file
+        }
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     private fun parseDailyFile(dailyJsonPath: String) : Boolean {
@@ -84,36 +91,16 @@ class GlDaily {
 
     private fun parseDailyData() : Boolean {
         return try {
-            taskRecords.clear()
-            dailyGroupTime.clear()
-
             dailyTs = (dailyData.get(PATH_DAILY_START_TS) as? Long) ?: 0
-            val dailyHis = dailyData.get(PATH_DAILY_TASK_RECORD) as? List< * >
+            val dailyRecord = dailyData.get(PATH_DAILY_TASK_RECORD) as? List< * >
 
-            if ((dailyTs == 0L) || (dailyHis == null)) {
+            if ((dailyTs == 0L) || (dailyRecord == null)) {
                 return false
             }
 
             GlLog.i("Parsing daily data ${Date(dailyTs)} ...")
 
-            // var prevTime = dailyTs
-            for (task in dailyHis) {
-                val taskRecord = TaskRecord().apply { fromAnyStruct(task) }
-                if (taskRecord.dataValid) {
-/*                    if (taskRecord.startTime >= prevTime ) {
-                        taskRecord.endTime = taskRecord.startTime - prevTime
-                        dailyGroupTime[taskRecord.groupID] =
-                            (dailyGroupTime[taskRecord.groupID] ?: 0) + taskRecord.endTime
-                        prevTime = taskRecord.startTime
-                    }
-                    else {
-                        taskRecord.endTime = 0
-                    }*/
-                    taskRecords.add(taskRecord)
-                } else {
-                    return false
-                }
-            }
+            taskRecords = TaskRecord.fromAnyStructList(dailyRecord).toMutableList()
             taskRecords.sortBy { it.startTime }
             true
         } catch (e: Exception) {

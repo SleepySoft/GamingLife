@@ -32,6 +32,19 @@ GL_DATA_CLASS_TEMPLATE = """
 open class <<class_name>> : IGlDeclare() {
     override var uuid: String = randomUUID()
     
+    companion object {
+        fun fromAnyStructList(anyStructList: List< * >): List< <<class_name>> > {
+            return mutableListOf< <<class_name>> >().apply {
+                for (anyStruct in anyStructList) {
+                    val data = <<class_name>>().apply { fromAnyStruct(anyStruct) }
+                    if (data.dataValid) {
+                        this.add(data)
+                    }
+                }
+            }
+        }
+    }
+    
     val structDeclare = mapOf< String, KClass< * > >(
 <<struct_dec_area>>
     )

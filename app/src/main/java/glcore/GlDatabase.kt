@@ -42,7 +42,7 @@ class GlDatabase {
                 (trueOrNull(loadPathDict(GL_FILE_ENVIRONMENT_CONTEXT, environmentContext)) ?: initEnvironmentContext())
     }
 
-    private fun savePathDict(fileName: String, pathDict: PathDict, force: Boolean = false) : Boolean {
+    fun savePathDict(fileName: String, pathDict: PathDict, force: Boolean = false) : Boolean {
         var ret = false
         if (pathDict.hasUpdate || force) {
             val fileContent: String = GlJson.serializeAnyDict(pathDict.rootDict)
@@ -52,7 +52,7 @@ class GlDatabase {
         return ret
     }
 
-    private fun loadPathDict(fileName: String, pathDict: PathDict) : Boolean {
+    fun loadPathDict(fileName: String, pathDict: PathDict) : Boolean {
         val fileContent: String = GlFile.loadFile(fileName).toString(Charsets.UTF_8)
         pathDict.attach(GlJson.deserializeAnyDict(fileContent))
         pathDict.hasUpdate = false

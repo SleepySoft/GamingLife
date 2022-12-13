@@ -122,6 +122,17 @@ interface IGlObject {
 
 abstract class IGlDeclare : IGlObject {
     var dataValid : Boolean = false
+
+    companion object {
+        fun toAnyStructList(dataList: List< IGlDeclare >): List< GlAnyStruct > {
+            return mutableListOf< GlAnyStruct >().apply {
+                for (data in dataList) {
+                    this.add(data.toAnyStruct())
+                }
+            }
+        }
+    }
+
     abstract fun fromAnyStruct(data: Any?) : Boolean
     abstract fun toAnyStruct() : GlAnyStruct
 }

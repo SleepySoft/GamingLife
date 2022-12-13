@@ -14,6 +14,19 @@ import kotlin.reflect.KClass
 open class TaskData : IGlDeclare() {
     override var uuid: String = randomUUID()
     
+    companion object {
+        fun fromAnyStructList(anyStructList: List< * >): List< TaskData > {
+            return mutableListOf< TaskData >().apply {
+                for (anyStruct in anyStructList) {
+                    val data = TaskData().apply { fromAnyStruct(anyStruct) }
+                    if (data.dataValid) {
+                        this.add(data)
+                    }
+                }
+            }
+        }
+    }
+    
     val structDeclare = mapOf< String, KClass< * > >(
         "id" to String::class, 
         "name" to String::class, 
@@ -55,6 +68,19 @@ open class TaskData : IGlDeclare() {
 
 open class TaskRecord : IGlDeclare() {
     override var uuid: String = randomUUID()
+    
+    companion object {
+        fun fromAnyStructList(anyStructList: List< * >): List< TaskRecord > {
+            return mutableListOf< TaskRecord >().apply {
+                for (anyStruct in anyStructList) {
+                    val data = TaskRecord().apply { fromAnyStruct(anyStruct) }
+                    if (data.dataValid) {
+                        this.add(data)
+                    }
+                }
+            }
+        }
+    }
     
     val structDeclare = mapOf< String, KClass< * > >(
         "taskID" to String::class, 
