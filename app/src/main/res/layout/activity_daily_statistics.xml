@@ -18,6 +18,13 @@
         android:id="@+id/id_text_view_md"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:visibility="invisible" />
+
+    <View
+        android:id="@+id/id_view_statistics"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1" />
 
     <android.support.v7.widget.RecyclerView

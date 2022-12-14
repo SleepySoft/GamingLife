@@ -64,6 +64,7 @@ class DailyExtFileAdapter(
 
 class DailyStatisticsActivity : AppCompatActivity() {
     lateinit var mMdViewer: TextView
+    lateinit var mStatisticsView: View
     lateinit var mDailyExtFileList: RecyclerView
     var mDailyStatistics: GlDailyRecord = GlDailyRecord()
 
@@ -77,6 +78,7 @@ class DailyStatisticsActivity : AppCompatActivity() {
         title = "GamingLife - 回顾 ($dateStr)"
 
         mMdViewer = findViewById(R.id.id_text_view_md)
+        mStatisticsView = findViewById(R.id.id_view_statistics)
 
         mDailyExtFileList = findViewById(R.id.id_recycler_view_ext_files)
         mDailyExtFileList.layoutManager = LinearLayoutManager(this)

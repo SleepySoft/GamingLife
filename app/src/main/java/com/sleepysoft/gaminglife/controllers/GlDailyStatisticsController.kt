@@ -1,32 +1,104 @@
 package com.sleepysoft.gaminglife.controllers
 
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.PointF
 import android.graphics.RectF
-import graphengine.GraphLayer
-import graphengine.GraphRectangle
-import graphengine.MultipleProgressDecorator
+import glcore.*
+import graphengine.*
+import kotlin.math.min
 
 class GlDailyStatisticsController(
-    private val mCtrlContext: GlControllerContext) {
+    private val mCtrlContext: GlControllerContext,
+    private val mDailyRecord: GlDailyRecord) : GraphViewObserver {
 
     private lateinit var statisticsBar: GraphRectangle
     private lateinit var progressDecorator: MultipleProgressDecorator
 
     fun init() {
-
+        buildStatisticsLayer()
+        updateProgress()
     }
 
-    private fun checkBuildStatisticsLayer() {
+    // -------------------------- Implements GraphViewObserver interface ---------------------------
+
+    override fun onItemLayout() {
+        doLayout()
+    }
+
+    override fun onViewSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        adaptViewArea()
+    }
+
+    // ------------------------------------- Private Functions -------------------------------------
+
+    private fun buildStatisticsLayer() {
         mCtrlContext.graphView?.let { graphView ->
             val layer = GraphLayer("Statistics.BaseLayer", true, graphView)
             graphView.addLayer(layer)
 
-            val barArea = RectF(graphView.paintArea).apply {
-                val centerY = centerY()
-                top = centerY - graphView.unitScale
-                bottom = centerY + graphView.unitScale
+            statisticsBar = GraphRectangle().apply {
+                this.id = "Statistics.BaseBar"
+                this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    this.color = Color.parseColor(COLOR_DAILY_BAR_BASE)
+                    this.style = Paint.Style.FILL
+                }
             }
 
+            progressDecorator = MultipleProgressDecorator(mCtrlContext, statisticsBar)
+            statisticsBar.graphItemDecorator.add(progressDecorator)
 
+            layer.addGraphItem(statisticsBar)
         }
     }
+
+    private fun doLayout() {
+        mCtrlContext.graphView?.also { graphView ->
+            if (graphView.isPortrait()) {
+                layoutPortrait(graphView)
+            }
+            else {
+                layoutLandscape(graphView)
+            }
+        }
+    }
+
+    private fun adaptViewArea() {
+        mCtrlContext.graphView?.also { graphView ->
+            val strokeWidth = graphView.unitScale * 1.0f
+            statisticsBar.shapePaint.strokeWidth = strokeWidth
+        }
+    }
+
+    private fun layoutPortrait(graphView: GraphView) {
+        statisticsBar.rect  = RectF(graphView.paintArea).apply {
+            val centerY = centerY()
+            top = centerY - graphView.unitScale
+            bottom = centerY + graphView.unitScale
+        }
+    }
+
+    private fun layoutLandscape(graphView: GraphView) {
+
+    }
+
+    private fun updateProgress() {
+        val dayTsBase = mDailyRecord.dailyTs
+        val dayTsLimit = min(dayTsBase + TIMESTAMP_COUNT_IN_DAY - 1, GlDateTime.datetime().time)
+
+        for (task in mDailyRecord.taskRecords) {
+            progressDecorator.progressData.add(
+                MultipleProgressDecorator.ProgressData(
+                    (task.startTime - dayTsBase).toFloat() / TIMESTAMP_COUNT_IN_DAY,
+                    buildPaintForTask(task)))
+        }
+        progressDecorator.progressEnd = (dayTsLimit - dayTsBase).toFloat() / TIMESTAMP_COUNT_IN_DAY
+    }
+
+    private fun buildPaintForTask(task: TaskRecord) =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor(
+                GlRoot.systemConfig.getTaskData(task.groupID)?.color ?: COLOR_DAILY_BAR_BASE)
+            this.style = Paint.Style.FILL
+        }
 }

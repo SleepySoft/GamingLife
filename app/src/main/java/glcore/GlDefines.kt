@@ -48,10 +48,19 @@ const val GROUP_ID_CREATE = "fa94a546-beeb-4570-b266-c066a4a31233"
 
 // --------------------------------------------- Color ---------------------------------------------
 
+// https://material.io/design/color/the-color-system.html#tools-for-picking-colors
 
-const val COLOR_RECORD = "#B2FF59"              // Light Green A200
-const val COLOR_SUGGESTION = "#EEFF41"          // Lime A200
-const val COLOR_DAILY_BAR_BASE = "#BDBDBD"      // Gray 400
+const val COLOR_TASK_IDLE       = "#00BCD4"             // Cyan 500
+const val COLOR_TASK_ENJOY      = "#7E57C2"             // Deep Purple 400
+const val COLOR_TASK_LIFE       = "#34A853"             // Green
+const val COLOR_TASK_WORK       = "#EA4335"             // Red
+const val COLOR_TASK_PROMOTE    = "#FBBC05"             // Yellow
+const val COLOR_TASK_CREATE     = "#4485F4"             // Blue
+
+const val COLOR_RECORD          = "#B2FF59"             // Light Green A200
+const val COLOR_SUGGESTION      = "#EEFF41"             // Lime A200
+const val COLOR_DAILY_BAR_BASE  = "#BDBDBD"             // Gray 400
+
 
 // ---------------------------------------- Struct Support -----------------------------------------
 
@@ -169,16 +178,6 @@ val STRUCT_DEC_TASK_RECORD : GlStructDeclare = mapOf< String, KClass< * > >(
 
 
 // -------------------------------------------- Preset ---------------------------------------------
-
-const val COLOR_TASK_IDLE       = "#00BCD4"           // Cyan 500
-const val COLOR_TASK_ENJOY      = "#7E57C2"           // Deep Purple 400
-const val COLOR_TASK_LIFE       = "#34A853"           // Green
-const val COLOR_TASK_WORK       = "#EA4335"           // Red
-const val COLOR_TASK_PROMOTE    = "#FBBC05"           // Yellow
-const val COLOR_TASK_CREATE     = "#4485F4"           // Blue
-
-
-// https://material.io/design/color/the-color-system.html#tools-for-picking-colors
 
 val TASK_GROUP_TOP_PRESET = listOf(
 
