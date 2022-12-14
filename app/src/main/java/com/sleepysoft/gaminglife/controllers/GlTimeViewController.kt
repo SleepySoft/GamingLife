@@ -246,7 +246,7 @@ class GlTimeViewController(
     // ------------------------------------- Private Functions -------------------------------------
 
     private fun checkBuildTimeViewLayer() {
-        mCtrlContext.graphView?.also { graphView ->
+        mCtrlContext.graphView?.let { graphView ->
 
             val layer = GraphLayer("TimeView.BaseLayer", true, graphView)
             graphView.addLayer(layer)
