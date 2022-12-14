@@ -34,8 +34,6 @@ class GlDailyRecord {
     var taskRecords: MutableList< TaskRecord > = mutableListOf()
     // val dailyGroupTime: MutableMap< String , Long > = mutableMapOf()
 
-    var taskIntervalThreshold: Long = 5 * 60 * 1000             // ms
-
     // --------------------------------------- New Save Load ---------------------------------------
 
     fun newDailyRecord() : Boolean {
@@ -169,6 +167,8 @@ class GlDailyRecord {
         taskRecords.sortBy { it.startTime }
 
         var i = 0
+        val taskIntervalThreshold = GlRoot.systemConfig.taskRecordThreshold
+
         while (i < taskRecords.size - 1) {
             if (taskRecords[i + 1].startTime - taskRecords[i].startTime < taskIntervalThreshold) {
                 taskRecords.removeAt(i)

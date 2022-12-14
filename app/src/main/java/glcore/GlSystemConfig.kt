@@ -24,6 +24,7 @@ class GlSystemConfig() {
         systemConfig.set(PATH_SYSTEM_TASK_GROUP_TOP, TASK_GROUP_TOP_PRESET.toMutableList())
         systemConfig.set(PATH_SYSTEM_TASK_GROUP_SUB, mutableListOf< TaskData >())
         systemConfig.set(PATH_SYSTEM_TASK_GROUP_LINK, mutableMapOf< String, String >())
+        systemConfig.set(PATH_SYSTEM_TASK_RECORD_THRESHOLD, TIME_DEFAULT_TASK_RECORD_THRESHOLD)
         return saveSystemConfig()
     }
 
@@ -49,7 +50,16 @@ class GlSystemConfig() {
         }
     }
 
-    // ------------------------------------------- Gets --------------------------------------------
+    // -------------------------------------- Simple Property --------------------------------------
+
+    var taskRecordThreshold: Long
+        set(value) = systemConfig.set(PATH_SYSTEM_TASK_RECORD_THRESHOLD, value).let {}
+        get() = (systemConfig.get(PATH_SYSTEM_TASK_RECORD_THRESHOLD) as? Long) ?: TIME_DEFAULT_TASK_RECORD_THRESHOLD.toLong()
+
+
+    // ------------------------------------------- Task --------------------------------------------
+
+    // ========================== Gets ==========================
 
     fun getTopTasks(): List< TaskData > = taskTop
 
@@ -84,7 +94,7 @@ class GlSystemConfig() {
         return taskData
     }
 
-    // ------------------------------------------- Sets --------------------------------------------
+    // ========================== Sets ==========================
 
     @RequiresApi(Build.VERSION_CODES.N)
     fun removeSubTask(glId: String) {
