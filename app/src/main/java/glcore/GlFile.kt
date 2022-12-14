@@ -4,6 +4,13 @@ import java.io.File
 
 
 object GlFile {
+    enum class STORAGE_PLACE {
+        STORAGE_INTERNAL,
+        STORAGE_EXTERNAL
+    }
+
+    var defaultStorage: STORAGE_PLACE = STORAGE_PLACE.STORAGE_EXTERNAL
+
     fun joinPaths(vararg paths: String) : String {
         return when (paths.size) {
             0 -> ""
@@ -18,17 +25,22 @@ object GlFile {
         }
     }
 
-    fun glRoot() : String = glInternalRoot()
+    fun absPath(vararg paths: String) = joinPaths(glRoot(), *paths)
+
+    fun glRoot() : String =
+        if (defaultStorage == STORAGE_PLACE.STORAGE_EXTERNAL) glExternalRoot() else glInternalRoot()
 
     fun glInternalRoot() : String = GlRoot.env.internalStorageRoot()
 
     fun glExternalRoot() : String = GlRoot.env.externalStorageRoot()
 
     fun saveFile(fileName: String, fileContent: ByteArray) : Boolean =
-        saveFileInternal(fileName, fileContent)
+        if (defaultStorage == STORAGE_PLACE.STORAGE_EXTERNAL)
+            saveFileExternal(fileName, fileContent) else saveFileInternal(fileName, fileContent)
 
     fun loadFile(fileName: String) : ByteArray =
-        loadFileInternal(fileName)
+        if (defaultStorage == STORAGE_PLACE.STORAGE_EXTERNAL)
+            loadFileExternal(fileName) else loadFileInternal(fileName)
 
     fun saveFileInternal(fileName: String, fileContent: ByteArray) : Boolean =
         doSaveFile(File(glInternalRoot(), fileName).absolutePath, fileContent)
@@ -42,11 +54,11 @@ object GlFile {
     fun loadFileExternal(fileName: String) : ByteArray =
         doLoadFile(File(glExternalRoot(), fileName).absolutePath)
 
-    fun copyFileInternal(srcFileName: String, desFileName: String, overwrite: Boolean = true) : Boolean =
+/*    fun copyFileInternal(srcFileName: String, desFileName: String, overwrite: Boolean = true) : Boolean =
         doCopyFile(File(glInternalRoot(), srcFileName), File(glInternalRoot(), desFileName), overwrite)
 
     fun copyFileExternal(srcFileName: String, desFileName: String, overwrite: Boolean = true) : Boolean =
-        doCopyFile(File(glExternalRoot(), srcFileName), File(glExternalRoot(), desFileName), overwrite)
+        doCopyFile(File(glExternalRoot(), srcFileName), File(glExternalRoot(), desFileName), overwrite)*/
 
     fun copyFileAbsolute(srcFilePath: String, desFilePath: String, overwrite: Boolean = true) : Boolean =
         doCopyFile(File(srcFilePath), File(desFilePath), overwrite)

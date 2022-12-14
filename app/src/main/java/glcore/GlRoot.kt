@@ -68,8 +68,9 @@ object GlRoot {
      */
     fun archiveJsonFilesToDailyFolder(archiveDate: Date) {
         for (fileName in GL_FILES) {
-            GlFile.copyFileInternal(fileName,
-                GlFile.joinPaths(getDailyFolderName(archiveDate), fileName))
+            GlFile.copyFileAbsolute(
+                GlFile.absPath(fileName),
+                GlFile.absPath(getDailyFolderName(archiveDate), fileName))
         }
     }
 
