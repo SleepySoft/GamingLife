@@ -38,18 +38,22 @@ class GlDailyRecord {
 
     // --------------------------------------- New Save Load ---------------------------------------
 
-    fun newDailyRecord() {
-        GlLog.i("New Daily Record")
-        dailyPath = GlRoot.getDailyFolderName(GlDateTime.datetime())
+    fun newDailyRecord() : Boolean {
+        GlLog.i("New daily data.")
+
+        dailyPath = GlRoot.getDailyFolderName(0)
         dailyFile = GL_FILE_DAILY_RECORD
 
         // Init data
+        dailyRecord.clear()
         dailyRecord.set(PATH_DAILY_START_TS, GlDateTime.dayStartTimeStamp())
         dailyRecord.set(PATH_DAILY_TASK_RECORD, mutableListOf< GlAnyDict >())
 
         dailyExtraFiles = listOf()
         dailyTs = GlDateTime.dayStartTimeStamp()
         taskRecords = mutableListOf()
+
+        return saveDailyRecord()
     }
 
     fun initDailyRecord() {
@@ -61,7 +65,7 @@ class GlDailyRecord {
         taskRecords = mutableListOf()
     }
 
-    fun loadDailyData(dateTime: Date) : Boolean {
+    fun loadDailyRecord(dateTime: Date) : Boolean {
         initDailyRecord()
 
         dailyFile = if (GlDateTime.zeroDateHMS(dateTime).time == GlDateTime.dayStartTimeStamp()) {
@@ -80,14 +84,14 @@ class GlDailyRecord {
         }
     }
 
-    fun loadDailyData(dayOffset: Int) : Boolean {
-        return loadDailyData(GlDateTime.datetime(dayOffset))
+    fun loadDailyRecord(dayOffset: Int) : Boolean {
+        return loadDailyRecord(GlDateTime.datetime(dayOffset))
     }
 
-    fun saveDailyData() {
+    fun saveDailyRecord() : Boolean {
         val pathDict = IGlDeclare.toAnyStructList(taskRecords)
         dailyRecord.set(PATH_DAILY_TASK_RECORD, pathDict)
-        savePathDict(GlFile.joinPaths(dailyPath, GL_FILE_DAILY_RECORD), dailyRecord)
+        return savePathDict(dailyFile, dailyRecord)
 
 /*        if (dailyTs == GlDateTime.dayStartTimeStamp()) {
             GlRoot.glDatabase.dailyRecord.set(PATH_DAILY_TASK_RECORD, pathDict)
@@ -146,7 +150,8 @@ class GlDailyRecord {
             reshapeTaskRecords()
             true
         } catch (e: Exception) {
-            GlLog.i("Parse daily data fail - $e")
+            GlLog.i("Parse Daily Data FAIL.")
+            GlLog.e(e.stackTraceToString())
             false
         }
     }

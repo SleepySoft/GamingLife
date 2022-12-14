@@ -72,7 +72,7 @@ class DailyStatisticsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_daily_statistics)
 
         val dateStr: String = intent.getStringExtra("dateStr") ?: "日期错误"
-        mDailyStatistics.loadDailyData(GlDateTime.stringToDate(dateStr))
+        mDailyStatistics.loadDailyRecord(GlDateTime.stringToDate(dateStr))
 
         title = "GamingLife - 回顾 ($dateStr)"
 

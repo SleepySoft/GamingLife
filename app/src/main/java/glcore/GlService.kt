@@ -4,6 +4,9 @@ import java.util.*
 
 
 class GlService {
+
+    // ----------------------- Task Switching -----------------------
+
     fun switchToTask(taskData: TaskData) {
         checkSettleDailyData()
         GlRoot.dailyRecord.addTask(TaskRecord().apply {
@@ -11,11 +14,11 @@ class GlService {
             groupID = GlRoot.systemConfig.getTopGroupOfTask(taskData.id)
             startTime = GlDateTime.datetime().time
         })
-        GlRoot.dailyRecord.saveDailyData()
+        GlRoot.dailyRecord.saveDailyRecord()
     }
 
     fun getCurrentTaskInfo() : TaskRecord {
-        checkSettleDailyData()
+        // checkSettleDailyData()
         return GlRoot.dailyRecord.lastTask() ?: TaskRecord().apply {
             var taskID: String = ""
             var groupID: String = GROUP_ID_IDLE
@@ -45,7 +48,7 @@ class GlService {
         if (currentDayTs != dailyDataTs) {
             GlLog.i("> Do settling.")
 
-            GlRoot.dailyRecord.saveDailyData()
+            GlRoot.dailyRecord.saveDailyRecord()
             GlRoot.archiveJsonFilesToDailyFolder(Date(dailyDataTs))
 
             // Yesterday's last task will be today's first task
@@ -63,7 +66,7 @@ class GlService {
                 GlRoot.dailyRecord.addTask(lastingTask)
             }
 
-            GlRoot.dailyRecord.saveDailyData()
+            GlRoot.dailyRecord.saveDailyRecord()
         }
         else {
             // The daily data is the current day, everything is OK.

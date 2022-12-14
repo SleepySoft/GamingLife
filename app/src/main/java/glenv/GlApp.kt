@@ -38,8 +38,12 @@ class GlExceptionHandler : Thread.UncaughtExceptionHandler {
         val logFileName = "$timestamp.log"
 
         try {
-            File(logFileName).apply {
-            }.writeText(stacktrace)
+            context?.openFileOutput(logFileName, Context.MODE_PRIVATE).use { output ->
+                output?.write(stacktrace.toByteArray())
+            }
+/*            File(logFileName).apply {
+                println("Writing log file to: " + this.absolutePath)
+            }.writeText(stacktrace)*/
         } catch (e: Exception) {
             println("Save log file fail: $logFileName - $e")
         } finally {

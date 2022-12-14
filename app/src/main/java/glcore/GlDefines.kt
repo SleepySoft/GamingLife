@@ -86,6 +86,23 @@ fun toAnyStruct(data: Any?) : GlAnyDict {
 }
 
 
+fun toStrStruct(data: Any?) : GlStrStruct {
+    if (data == null) {
+        return mutableMapOf()
+    }
+    if (data !is Map< *, * >) {
+        return mutableMapOf()
+    }
+    for ((k, v) in data) {
+        if ((k !is String) || (v !is String)) {
+            return mutableMapOf()
+        }
+    }
+    @Suppress("UNCHECKED_CAST")
+    return data as GlStrStruct
+}
+
+
 fun checkStruct(structDict: GlAnyStruct,
                 structDeclare: GlStructDeclare) : Boolean {
     for ((k, v) in structDeclare) {
@@ -162,34 +179,34 @@ const val COLOR_TASK_CREATE     = "#4485F4"           // Blue
 
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors
 
-val TASK_GROUP_TOP_PRESET = mapOf(
+val TASK_GROUP_TOP_PRESET = listOf(
 
-    GROUP_ID_IDLE to mapOf(
+    mapOf(
         "id" to GROUP_ID_IDLE,
         "name" to "放松",
         "color" to COLOR_TASK_IDLE),
 
-    GROUP_ID_ENJOY to mapOf(
+    mapOf(
         "id" to GROUP_ID_ENJOY,
         "name" to "玩乐",
         "color" to COLOR_TASK_ENJOY),
 
-    GROUP_ID_LIFE to mapOf(
+    mapOf(
         "id" to GROUP_ID_LIFE,
         "name" to "生活",
         "color" to COLOR_TASK_LIFE),
 
-    GROUP_ID_WORK to mapOf(
+    mapOf(
         "id" to GROUP_ID_WORK,
         "name" to "工作",
         "color" to COLOR_TASK_WORK),
 
-    GROUP_ID_PROMOTE to mapOf(
+    mapOf(
         "id" to GROUP_ID_PROMOTE,
         "name" to "提升",
         "color" to COLOR_TASK_PROMOTE),
 
-    GROUP_ID_CREATE to mapOf(
+    mapOf(
         "id" to GROUP_ID_CREATE,
         "name" to "创作",
         "color" to COLOR_TASK_CREATE),

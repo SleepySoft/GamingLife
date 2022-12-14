@@ -17,6 +17,14 @@ object GlRoot {
     fun init(glEnv: GlEnv) {
         if (!mInited) {
             env = glEnv
+            val success: Boolean =
+                (systemConfig.loadSystemConfig() || systemConfig.rebuildSystemConfig()) and
+                (dailyRecord.loadDailyRecord(0) || dailyRecord.newDailyRecord())
+            if (success) {
+                GlLog.e("System init successful.")
+            } else {
+                GlLog.e("System init fail.")
+            }
             mInited = true
         }
     }

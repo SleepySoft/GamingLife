@@ -383,9 +383,9 @@ class GlTimeViewController(
         for (item in mSurroundItems) {
             item.itemData?.run {
                 @Suppress("UNCHECKED_CAST")
-                val groupData = item.itemData as GlStrStruct
+                val groupData = item.itemData as TaskData
 
-                if (groupData["id"] == GROUP_ID_IDLE) {
+                if (groupData.id == GROUP_ID_IDLE) {
                     // The relax item, special process
                     item.origin = relaxItemPos
                 }

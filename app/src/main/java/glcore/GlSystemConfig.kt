@@ -2,13 +2,52 @@ package glcore
 
 import android.os.Build
 import android.support.annotation.RequiresApi
-import java.util.Date
 
 
 class GlSystemConfig() {
-    val taskTop: MutableList< TaskData > = mutableListOf()
-    val taskSub: MutableList< TaskData > = mutableListOf()
-    val taskGroupLink: MutableMap< String , String > = mutableMapOf()      // sub id: top id
+    private val systemConfig: PathDict = PathDict()
+
+    private var taskTop: MutableList< TaskData > = mutableListOf()
+    private var taskSub: MutableList< TaskData > = mutableListOf()
+    private var taskLink: MutableMap< String , String > = mutableMapOf()        // sub id: top id
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun loadSystemConfig() : Boolean =
+        loadPathDict(GL_FILE_SYSTEM_CONFIG, systemConfig) && parseSystemConfig()
+
+    fun saveSystemConfig() : Boolean = savePathDict(GL_FILE_SYSTEM_CONFIG, systemConfig)
+
+    fun rebuildSystemConfig() : Boolean {
+        GlLog.i("Rebuild System Config")
+        systemConfig.clear()
+        systemConfig.set(PATH_SYSTEM_TASK_GROUP_TOP, TASK_GROUP_TOP_PRESET.toMutableList())
+        systemConfig.set(PATH_SYSTEM_TASK_GROUP_SUB, mutableListOf< TaskData >())
+        systemConfig.set(PATH_SYSTEM_TASK_GROUP_LINK, mutableMapOf< String, String >())
+        return saveSystemConfig()
+    }
+
+    private fun parseSystemConfig(): Boolean {
+        return try {
+            val taskTopList = systemConfig.get(PATH_SYSTEM_TASK_GROUP_TOP) as List< * >
+            taskTop = TaskData.fromAnyStructList(taskTopList).toMutableList()
+
+            val taskSubList = systemConfig.get(PATH_SYSTEM_TASK_GROUP_SUB) as List< * >
+            taskSub = TaskData.fromAnyStructList(taskSubList).toMutableList()
+
+            val taskLinkDict = systemConfig.get(PATH_SYSTEM_TASK_GROUP_LINK) as MutableMap< *, * >
+            taskLink = toStrStruct(taskLinkDict)
+
+            true
+
+        } catch (e: Exception) {
+            GlLog.e("Parse System Config FAIL.")
+            GlLog.e(e.stackTraceToString())
+            false
+        } finally {
+
+        }
+    }
 
     // ------------------------------------------- Gets --------------------------------------------
 
@@ -29,12 +68,12 @@ class GlSystemConfig() {
     }
 
     fun getTopGroupOfTask(glId: String): String =
-        getTopTaskData(glId)?.id ?: taskGroupLink[glId] ?: GROUP_ID_IDLE
+        getTopTaskData(glId)?.id ?: taskLink[glId] ?: GROUP_ID_IDLE
 
     fun getTaskInTopGroup(topTaskId: String): List< TaskData > {
         val taskData = mutableListOf< TaskData >()
         if (getTopTaskData(topTaskId) != null) {
-            for ((k, v) in taskGroupLink) {
+            for ((k, v) in taskLink) {
                 if (v == topTaskId) {
                     getSubTaskData(k)?.run {
                         taskData.add(this)
@@ -67,10 +106,7 @@ class GlSystemConfig() {
     fun setTaskSubGroup(glId: String, groupId: String) {
         if ((getSubTaskData(glId) != null) &&
             (getTopTaskData(groupId) != null)) {
-            taskGroupLink[glId] = groupId
+            taskLink[glId] = groupId
         }
     }
-
-    // ----------------------- Task Switching -----------------------
-
 }

@@ -38,7 +38,7 @@ fun testExternalStorage() {
 @RequiresApi(Build.VERSION_CODES.O)
 fun testDailyStatistics() {
     val dailyStat = GlDailyRecord()
-    dailyStat.loadDailyData(GlDateTime.stringToDate("20221115", Date()))
+    dailyStat.loadDailyRecord(GlDateTime.stringToDate("20221115", Date()))
 }
 
 
