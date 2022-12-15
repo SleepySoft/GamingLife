@@ -1,15 +1,17 @@
 package com.sleepysoft.gaminglife.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
+import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
-import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import graphengine.GraphView
 
 
-class GlView(context: Context) : View(context), GestureDetector.OnGestureListener {
+class GlView(context: Context, attributes: AttributeSet? = null)
+    : View(context, attributes), GestureDetector.OnGestureListener {
 
     var graphView: GraphView? = null
 
@@ -30,6 +32,7 @@ class GlView(context: Context) : View(context), GestureDetector.OnGestureListene
 
     // --------------------------------- Action & Gesture Handler ----------------------------------
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         event?.run {
             if (this.actionMasked == MotionEvent.ACTION_UP) {

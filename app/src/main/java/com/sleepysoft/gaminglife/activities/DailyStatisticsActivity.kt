@@ -10,10 +10,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import com.sleepysoft.gaminglife.controllers.GlAudioRecordLayerController
+import com.sleepysoft.gaminglife.controllers.GlControllerContext
+import com.sleepysoft.gaminglife.controllers.GlDailyStatisticsController
+import com.sleepysoft.gaminglife.controllers.GlTimeViewController
+import com.sleepysoft.gaminglife.views.GlView
 import glcore.DAILY_FOLDER_PREFIX
 import glcore.GlDailyRecord
 import glcore.GlDateTime
 import glcore.GlFile
+import graphengine.GraphView
+import java.lang.ref.WeakReference
 
 
 class DailyExtFileAdapter(
@@ -63,17 +70,21 @@ class DailyExtFileAdapter(
 // -------------------------------------------------------------------------------------------------
 
 class DailyStatisticsActivity : AppCompatActivity() {
+    val mDailyRecord = GlDailyRecord()
+
     lateinit var mMdViewer: TextView
-    lateinit var mStatisticsView: View
+    lateinit var mStatisticsView: GlView
     lateinit var mDailyExtFileList: RecyclerView
-    var mDailyStatistics: GlDailyRecord = GlDailyRecord()
+
+    private val mCtrlContext = GlControllerContext()
+    lateinit var mDailyStatisticsController: GlDailyStatisticsController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_daily_statistics)
 
         val dateStr: String = intent.getStringExtra("dateStr") ?: "日期错误"
-        mDailyStatistics.loadDailyRecord(GlDateTime.stringToDate(dateStr))
+        mDailyRecord.loadDailyRecord(GlDateTime.stringToDate(dateStr))
 
         title = "GamingLife - 回顾 ($dateStr)"
 
@@ -82,17 +93,27 @@ class DailyStatisticsActivity : AppCompatActivity() {
 
         mDailyExtFileList = findViewById(R.id.id_recycler_view_ext_files)
         mDailyExtFileList.layoutManager = LinearLayoutManager(this)
-        mDailyExtFileList.adapter = DailyExtFileAdapter(mDailyStatistics, this)
+        mDailyExtFileList.adapter = DailyExtFileAdapter(mDailyRecord, this)
         mDailyExtFileList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL))
+
+        buildContextAndController()
+
+        mStatisticsView.graphView = mCtrlContext.graphView
+
+        onShowStatistics()
     }
 
     fun onShowStatistics() {
-
+        mMdViewer.visibility = View.GONE
+        mStatisticsView.visibility = View.VISIBLE
     }
 
     fun onShowExtFile(fileName: String) {
+        mMdViewer.visibility = View.VISIBLE
+        mStatisticsView.visibility = View.GONE
+
         if (fileName.lowercase().endsWith(".md")) {
-            val filePath= GlFile.joinPaths(mDailyStatistics.dailyPath, fileName)
+            val filePath= GlFile.joinPaths(mDailyRecord.dailyPath, fileName)
             val fileData = GlFile.loadFile(filePath)
             val fileText = fileData.decodeToString()
             mMdViewer.text = fileText
@@ -103,5 +124,12 @@ class DailyStatisticsActivity : AppCompatActivity() {
             // No support yet.
             mMdViewer.text = "不支持的文件类型"
         }
+    }
+
+    private fun buildContextAndController() {
+        mCtrlContext.view = WeakReference(mStatisticsView)
+        mCtrlContext.context = WeakReference(this)
+        mCtrlContext.graphView = GraphView(mCtrlContext)
+        mDailyStatisticsController = GlDailyStatisticsController(mCtrlContext, mDailyRecord).apply { init() }
     }
 }

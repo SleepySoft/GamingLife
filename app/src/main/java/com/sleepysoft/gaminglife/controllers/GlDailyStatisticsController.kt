@@ -17,6 +17,7 @@ class GlDailyStatisticsController(
 
     fun init() {
         buildStatisticsLayer()
+        mCtrlContext.graphView?.mGraphViewObserver?.add(this)
         updateProgress()
     }
 
@@ -70,16 +71,20 @@ class GlDailyStatisticsController(
         }
     }
 
-    private fun layoutPortrait(graphView: GraphView) {
+    private fun layoutCommon(graphView: GraphView) {
         statisticsBar.rect  = RectF(graphView.paintArea).apply {
             val centerY = centerY()
-            top = centerY - graphView.unitScale
-            bottom = centerY + graphView.unitScale
+            top = centerY - graphView.unitScale * 5
+            bottom = centerY + graphView.unitScale * 5
         }
     }
 
-    private fun layoutLandscape(graphView: GraphView) {
+    private fun layoutPortrait(graphView: GraphView) {
+        layoutCommon(graphView)
+    }
 
+    private fun layoutLandscape(graphView: GraphView) {
+        layoutCommon(graphView)
     }
 
     private fun updateProgress() {
