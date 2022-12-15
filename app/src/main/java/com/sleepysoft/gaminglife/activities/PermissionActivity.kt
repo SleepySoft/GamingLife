@@ -17,6 +17,24 @@ import java.io.File
 
 
 class PermissionActivity : AppCompatActivity() {
+
+    companion object {
+        const val DENIED = 1024
+        const val PERMITTED = 2048
+        private const val REQUEST_CODE = 4096
+
+        fun verifyPermission() : Boolean {
+            var ret = false
+            val file = File(Environment.getExternalStorageDirectory(), "gaminglife")
+            if (file.exists()) {
+                if (file.canRead() && file.canWrite()) {
+                    ret = true
+                }
+            }
+            return ret
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestPermission()
@@ -24,26 +42,16 @@ class PermissionActivity : AppCompatActivity() {
 
     private fun requestPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // 先判断有没有权限
             if (Environment.isExternalStorageManager()) {
-                tryWriteFile()
+                finishEnsurePermission()
             } else {
                 val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
                 intent.data = Uri.parse("package:$packageName")
                 startActivityForResult(intent, REQUEST_CODE)
             }
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // 先判断有没有权限
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                tryWriteFile()
+            if (checkPermission() && verifyPermission()) {
+                finishWithPermitted()
             } else {
                 ActivityCompat.requestPermissions(
                     this,
@@ -55,68 +63,55 @@ class PermissionActivity : AppCompatActivity() {
                 )
             }
         } else {
-            tryWriteFile()
+            finishEnsurePermission()
         }
     }
 
     override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray) {
-
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
         if (requestCode == REQUEST_CODE) {
-            if (ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                ) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                tryWriteFile()
-            } else {
-                Toast.makeText(this, "存储权限获取失败", Toast.LENGTH_LONG).show();
-            }
+            finishEnsurePermission()
+        } else {
+            finishWithDenied()
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         if (requestCode == REQUEST_CODE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (Environment.isExternalStorageManager()) {
-                tryWriteFile()
+                finishEnsurePermission()
             } else {
-                Toast.makeText(this, "存储权限获取失败", Toast.LENGTH_LONG).show();
+                finishWithDenied()
             }
         }
     }
 
-    companion object {
-        private const val REQUEST_CODE = 4096
-    }
+    private fun checkPermission() : Boolean = (
+            (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) &&
+            (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED))
 
-    private fun tryWriteFile() : Boolean {
-        var ret = false
-        val file = File(GlFile.glExternalRoot())
-
-        if (file.exists()) {
-            if (file.canRead() && file.canWrite()) {
-                ret = true
-            }
-        }
-
-        if (ret) {
-            toast("External Storage Permission OK")
-            // Toast.makeText(this, "External Storage Permission OK", Toast.LENGTH_SHORT).show()
+    private fun finishEnsurePermission() {
+        if (checkPermission() && verifyPermission()) {
+            finishWithPermitted()
         }
         else {
-            toast("External Storage Permission Fail")
-            // Toast.makeText(this, "External Storage Permission Fail", Toast.LENGTH_SHORT).show()
+            finishWithDenied()
         }
-        finish()
+    }
 
-        return ret
+    private fun finishWithPermitted() {
+        toast("External Storage Permission OK")
+        setResult(PERMITTED)
+        finish()
+    }
+
+    private fun finishWithDenied() {
+        toast("External Storage Permission Fail")
+        setResult(DENIED)
+        finish()
     }
 }

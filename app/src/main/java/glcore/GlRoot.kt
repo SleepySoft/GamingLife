@@ -1,11 +1,20 @@
 package glcore
 
+import android.os.Environment
 import glenv.GlEnv
 import java.io.File
 import java.util.*
 
 
 object GlRoot {
+    const val ERROR_NONE = 0
+    const val ERROR_INITED = 1
+    const val ERROR_INVALID_ENV = 2
+
+    const val ERROR_FILE_PERMISSION = 16
+    const val ERROR_SYSTEM_CONFIG = 32
+    const val ERROR_DAILY_RECORD = 64
+
     private var mInited = false
 
     lateinit var env: GlEnv
@@ -14,9 +23,17 @@ object GlRoot {
     val dailyRecord = GlDailyRecord()
     val systemConfig = GlSystemConfig()
 
-    fun init(glEnv: GlEnv) {
+    fun init(glEnv: GlEnv) : int {
+        if (mInited) {
+            return ERROR_INITED
+        }
+        if (!glEnv.valid) {
+            return ERROR_INVALID_ENV
+        }
+
+        env = glEnv             // GlFile can be used after here.
+
         if (!mInited) {
-            env = glEnv
             val success: Boolean =
                 (systemConfig.loadSystemConfig() || systemConfig.rebuildSystemConfig()) and
                 (dailyRecord.loadDailyRecord(0) || dailyRecord.newDailyRecord())
@@ -103,6 +120,16 @@ object GlRoot {
      */
     fun archiveRootPathFileToDailyFolder(fileName: String, offsetDays: Int = 0) =
         archiveRootPathFileToDailyFolder(fileName, GlDateTime.datetime(offsetDays = offsetDays))
+
+    private fun ensureStorage() : Boolean {
+        val file = File(GlFile.glRoot())
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
+                return false
+            }
+        }
+        return file.isDirectory && file.canRead() && file.canWrite()
+    }
 }
 
 

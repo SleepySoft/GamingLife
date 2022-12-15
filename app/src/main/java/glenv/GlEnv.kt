@@ -5,6 +5,7 @@ import android.os.Environment
 
 
 class GlEnv {
+    var valid: Boolean = false
     val glAudio: GlAudio = GlAudio()
 
     fun init() {
@@ -18,6 +19,8 @@ class GlEnv {
         // println("Audio wav temporary file: ${glAudio.WAVPath}")
 
         println("----------------------------- Init Environment Done-----------------------------")
+
+        valid = true
     }
 
     fun internalStorageRoot() : String =

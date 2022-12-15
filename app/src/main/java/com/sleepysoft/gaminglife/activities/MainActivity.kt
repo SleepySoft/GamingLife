@@ -20,6 +20,10 @@ import java.lang.ref.WeakReference
 
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        private const val REQUEST_CODE_STORAGE_PERMISSION = 1024
+    }
+
     private lateinit var mView: GlView
     private lateinit var mVibrator: Vibrator
     private val mCtrlContext = GlControllerContext()
@@ -54,18 +58,14 @@ class MainActivity : AppCompatActivity() {
 
         createVibrator()
         requireLockScreenShow()
-        checkRequireExtStoragePermission()
 
-        initControllerContext()
-        GlRoot.init(GlEnv().apply { init() })
-        buildGraphControllers()
-
-        mView.graphView = mCtrlContext.graphView
-
-        startGlService()
+        if (PermissionActivity.verifyPermission()) {
+            glStart()
+        } else {
+            requireExtStoragePermission()
+        }
 
         // RuntimeTest.testEntry(this)
-
         // mHandler.postDelayed(runnable, 100)
     }
 
@@ -77,10 +77,26 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        mCtrlContext.dispatchAsyncResult(requestCode, resultCode, data)
+
+        when (requestCode) {
+            REQUEST_CODE_STORAGE_PERMISSION -> when (resultCode) {
+                PermissionActivity.PERMITTED -> glStart()
+                PermissionActivity.DENIED -> finish()
+                else -> finish()
+            }
+            else -> mCtrlContext.dispatchAsyncResult(requestCode, resultCode, data)
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    private fun glStart() {
+        initControllerContext()
+        GlRoot.init(GlEnv().apply { init() })
+        buildGraphControllers()
+        mView.graphView = mCtrlContext.graphView
+        startGlService()
+    }
 
     private fun createVibrator() {
         mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -119,9 +135,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkRequireExtStoragePermission() {
+    private fun requireExtStoragePermission() {
         val intent = Intent(this, PermissionActivity::class.java)
-        startActivity(intent)
+        startActivityForResult(intent, REQUEST_CODE_STORAGE_PERMISSION)
     }
 
     private fun initControllerContext() {
