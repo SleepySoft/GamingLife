@@ -96,6 +96,7 @@ class MainActivity : AppCompatActivity() {
 
         when (val errorCode = GlRoot.init(GlEnv().apply { init() })) {
             GlRoot.ERROR_NONE -> glStart()
+            GlRoot.ERROR_INITED -> glStart()
             GlRoot.ERROR_FILE_PERMISSION -> when (mInitRound) {
                 0 -> {
                     requireExtStoragePermission()
@@ -115,11 +116,13 @@ class MainActivity : AppCompatActivity() {
                     glInit()
                 }
                 else -> {
+                    GlLog.e("File Permission Error. GamingLife cannot proceed.")
                     toast("File Permission Error. GamingLife cannot proceed.")
                     finish()
                 }
             }
             else -> {
+                GlLog.e("Gaming life init fail. Error code: $errorCode")
                 toast("Gaming life init fail. Error code: $errorCode")
                 finish()
             }
