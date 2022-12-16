@@ -84,9 +84,12 @@ class AutoFitTextDecorator(context: GraphContext, decoratedItem: GraphItem)
     var textBound: Rect = Rect()
         private set
 
+    private var textPrev: String = ""
+
     override fun paintAfterGraph(canvas: Canvas) {
         val newTextArea = decoratedItem.boundRect().apply { inflate(0.7f) }.toRect()
-        if (textArea != newTextArea) {
+        if ((textArea != newTextArea) || (textPrev.length != mainText.length)) {
+            textPrev = mainText
             textArea = newTextArea
             textBound = decoratedItem.boundRect().apply { inflate(0.7f) }.toRect()
             val fontSize = calculateFontSize(textBound, textArea, mainText)

@@ -23,7 +23,7 @@ object GlRoot {
     val dailyRecord = GlDailyRecord()
     val systemConfig = GlSystemConfig()
 
-    fun init(glEnv: GlEnv) : int {
+    fun init(glEnv: GlEnv) : Int {
         if (mInited) {
             return ERROR_INITED
         }
@@ -31,19 +31,30 @@ object GlRoot {
             return ERROR_INVALID_ENV
         }
 
-        env = glEnv             // GlFile can be used after here.
+        env = glEnv                     // GlFile can be used after here.
 
-        if (!mInited) {
-            val success: Boolean =
-                (systemConfig.loadSystemConfig() || systemConfig.rebuildSystemConfig()) and
-                (dailyRecord.loadDailyRecord(0) || dailyRecord.newDailyRecord())
-            if (success) {
-                GlLog.e("System init successful.")
-            } else {
-                GlLog.e("System init fail.")
-            }
-            mInited = true
+        if (!ensureStorage()) {
+            return ERROR_FILE_PERMISSION
         }
+
+        var errorCode = ERROR_NONE
+
+        if (!(systemConfig.loadSystemConfig() || systemConfig.rebuildSystemConfig())) {
+            errorCode = errorCode and ERROR_SYSTEM_CONFIG
+        }
+
+        if (!(dailyRecord.loadDailyRecord(0) || dailyRecord.newDailyRecord())) {
+            errorCode = errorCode and ERROR_DAILY_RECORD
+        }
+
+        if (errorCode == ERROR_NONE) {
+            GlLog.e("System init successful.")
+            mInited = true
+        } else {
+            GlLog.e("System init fail.")
+        }
+
+        return errorCode
     }
 
     /**

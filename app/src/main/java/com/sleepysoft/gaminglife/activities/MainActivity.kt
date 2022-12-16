@@ -1,5 +1,7 @@
 package com.sleepysoft.gaminglife.activities
 
+import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -8,10 +10,13 @@ import android.provider.Settings
 import android.support.annotation.RequiresApi
 import android.support.v7.app.AppCompatActivity
 import android.view.WindowManager
+import android.widget.TextView
 import com.sleepysoft.gaminglife.GamingLifeMainService
 import com.sleepysoft.gaminglife.PermissionActivity
 import com.sleepysoft.gaminglife.controllers.*
+import com.sleepysoft.gaminglife.toast
 import com.sleepysoft.gaminglife.views.GlView
+import glcore.GlFile
 import glcore.GlLog
 import glcore.GlRoot
 import glenv.GlEnv
@@ -23,6 +28,8 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val REQUEST_CODE_STORAGE_PERMISSION = 1024
     }
+
+    private var mInitRound: Int = 0
 
     private lateinit var mView: GlView
     private lateinit var mVibrator: Vibrator
@@ -58,12 +65,9 @@ class MainActivity : AppCompatActivity() {
 
         createVibrator()
         requireLockScreenShow()
+        initControllerContext()
 
-        if (PermissionActivity.verifyPermission()) {
-            glStart()
-        } else {
-            requireExtStoragePermission()
-        }
+        glInit()
 
         // RuntimeTest.testEntry(this)
         // mHandler.postDelayed(runnable, 100)
@@ -79,20 +83,50 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         when (requestCode) {
-            REQUEST_CODE_STORAGE_PERMISSION -> when (resultCode) {
-                PermissionActivity.PERMITTED -> glStart()
-                PermissionActivity.DENIED -> finish()
-                else -> finish()
-            }
+            REQUEST_CODE_STORAGE_PERMISSION -> glInit()
             else -> mCtrlContext.dispatchAsyncResult(requestCode, resultCode, data)
         }
     }
 
     // ---------------------------------------------------------------------------------------------
 
+    @SuppressLint("SetTextI18n")
+    private fun glInit() {
+        GlLog.i("GlInit, round = $mInitRound")
+
+        when (val errorCode = GlRoot.init(GlEnv().apply { init() })) {
+            GlRoot.ERROR_NONE -> glStart()
+            GlRoot.ERROR_FILE_PERMISSION -> when (mInitRound) {
+                0 -> {
+                    requireExtStoragePermission()
+                    mInitRound = 1
+                }
+                1 -> {
+                    GlFile.defaultStorage = GlFile.STORAGE_PLACE.STORAGE_INTERNAL
+
+                    AlertDialog.Builder(this).apply {
+                        this.setTitle("提示")
+                        this.setCancelable(true)
+                        this.setView(TextView(this@MainActivity).apply {
+                            text = "无法获取外部存储权限，尝试使用内部存储。\n\n软件卸载后数据将会被系统删除。"
+                        })
+                    }.create().show()
+                    mInitRound = 2
+                    glInit()
+                }
+                else -> {
+                    toast("File Permission Error. GamingLife cannot proceed.")
+                    finish()
+                }
+            }
+            else -> {
+                toast("Gaming life init fail. Error code: $errorCode")
+                finish()
+            }
+        }
+    }
+
     private fun glStart() {
-        initControllerContext()
-        GlRoot.init(GlEnv().apply { init() })
         buildGraphControllers()
         mView.graphView = mCtrlContext.graphView
         startGlService()
