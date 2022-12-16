@@ -68,6 +68,7 @@ class GraphLayer(id: String, visible: Boolean,
 
     private val mBackGroundPaint: Paint = Paint().apply {
         this.color = 0x00FFFFFF
+        this.style = Paint.Style.FILL
     }
 
     var coverArea: RectF = RectF()
@@ -186,7 +187,7 @@ class GraphLayer(id: String, visible: Boolean,
     // -------------------------- Override --------------------------
 
     override fun boundRect(): RectF {
-        var rect: RectF = RectF()
+        var rect = RectF()
         for (item in graphItems) {
             if (item.visible) {
                 if (rect.isEmpty) {

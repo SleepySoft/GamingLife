@@ -36,6 +36,8 @@ class GlDailyStatisticsController(
     private fun buildStatisticsLayer() {
         mCtrlContext.graphView?.let { graphView ->
             val layer = GraphLayer("Statistics.BaseLayer", true, graphView)
+            layer.setBackgroundColor(COLOR_INDIGO_100)
+            layer.setBackgroundAlpha(0xFF)
             graphView.addLayer(layer)
 
             statisticsBar = GraphRectangle().apply {

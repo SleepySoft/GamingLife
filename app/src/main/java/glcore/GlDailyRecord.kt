@@ -66,10 +66,10 @@ class GlDailyRecord {
     fun loadDailyRecord(dateTime: Date) : Boolean {
         initDailyRecord()
 
+        dailyPath = GlRoot.getDailyFolderName(dateTime)
         dailyFile = if (GlDateTime.zeroDateHMS(dateTime).time == GlDateTime.dayStartTimeStamp()) {
             GL_FILE_DAILY_RECORD
         } else {
-            dailyPath = GlRoot.getDailyFolderName(dateTime)
             GlFile.joinPaths(dailyPath, GL_FILE_DAILY_RECORD)
         }
 
