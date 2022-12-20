@@ -1,9 +1,6 @@
 package com.sleepysoft.gaminglife
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
@@ -15,13 +12,21 @@ import android.support.annotation.RequiresApi
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
 import com.sleepysoft.gaminglife.activities.MainActivity
+import glcore.GlDateTime
 import glcore.GlLog
+import glcore.GlRoot
 
 
 class GamingLifeMainService : Service() {
     private val mRunner: Runnable = Runnable { serviceLooper() }
     private val mHandler : Handler = Handler(Looper.getMainLooper())
     private val mReceiver: BroadcastReceiver = ScreenBroadcastReceiver()
+    private var mNotification: NotificationCompat.Builder? = null
+
+    companion object {
+        const val NOTIFICATION_ID_DEFAULT_INT = 299792458
+        const val NOTIFICATION_ID_DEFAULT_STR = "GamingLife.Notification.Default"
+    }
 
     override fun onBind(intent: Intent): IBinder {
         TODO("Return the communication channel to the service.")
@@ -60,6 +65,7 @@ class GamingLifeMainService : Service() {
 
     private fun servicePolling() {
         // GlLog.i("Service running: ${GlDateTime.datetime()}")
+        updateNotification()
     }
 
     private fun createNotificationChannel(
@@ -84,19 +90,33 @@ class GamingLifeMainService : Service() {
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
 
         val channelId = createNotificationChannel(
-            "GamingLife.Notification.Default",
+            NOTIFICATION_ID_DEFAULT_STR,
             "GamingLife Notification Channel",
             NotificationManager.IMPORTANCE_HIGH
         )
-        val notification = NotificationCompat.Builder(this, channelId).apply {
+        mNotification = NotificationCompat.Builder(this, channelId).apply {
             setShowWhen(false)
             setContentTitle("Task")
             setContentText("00:00")
             setContentIntent(pendingIntent)
             setSmallIcon(R.mipmap.ic_launcher)
-            setPriority(NotificationCompat.PRIORITY_HIGH)
             setAutoCancel(true)
+            setOnlyAlertOnce(true)
+            priority = NotificationCompat.PRIORITY_HIGH
+            notification.flags = Notification.FLAG_ONGOING_EVENT
         }
-        startForeground(100, notification.build())
+        mNotification?.run {
+            this@GamingLifeMainService.startForeground(NOTIFICATION_ID_DEFAULT_INT, this.build())
+        }
+    }
+
+    private fun updateNotification() {
+        mNotification?.run {
+            this.setContentTitle(GlRoot.glService.getCurrentTaskName())
+            this.setContentText(GlRoot.glService.getCurrentTaskLastTimeFormatted())
+
+            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            manager.notify(NOTIFICATION_ID_DEFAULT_INT, this.build())
+        }
     }
 }

@@ -26,6 +26,36 @@ class GlService {
         }
     }
 
+    fun getCurrentTaskName() : String {
+        val taskRecord = getCurrentTaskInfo()
+        val taskData = GlRoot.systemConfig.getTaskData(taskRecord.groupID)
+        return taskData?.name ?: ""
+    }
+
+    fun getCurrentTaskLastTimeMs() : Long {
+        val currentTaskData = getCurrentTaskInfo()
+        val currentTaskStartTimeMs = currentTaskData.startTime
+        return System.currentTimeMillis() - currentTaskStartTimeMs
+    }
+
+    fun getCurrentTaskLastTimeFormatted() : String {
+        val deltaTimeMs = getCurrentTaskLastTimeMs()
+        val deltaTimeS: Long = deltaTimeMs / 1000
+
+        val ms: Long = deltaTimeMs % 1000
+        val hour: Long = deltaTimeS / 3600
+        val remainingSec: Long = deltaTimeS % 3600
+        val minutes: Long = remainingSec / 60
+        val seconds: Long = remainingSec % 60
+
+        return if (hour != 0L) {
+            "%02d:%02d:%02d".format(hour, minutes, seconds)
+        }
+        else {
+            "%02d:%02d".format(minutes, seconds)
+        }
+    }
+
     // ---------------------------------------- Daily data ----------------------------------------
 
     fun checkSettleDailyData() {

@@ -47,29 +47,7 @@ class GlTimeViewController(
     }
 
     fun polling() {
-        val currentTaskData = GlRoot.glService.getCurrentTaskInfo()
-        val currentTaskStartTimeMs = currentTaskData.startTime
-
-        val deltaTimeMs: Long = System.currentTimeMillis() - currentTaskStartTimeMs
-        val deltaTimeS: Long = deltaTimeMs / 1000
-
-        val ms: Long = deltaTimeMs % 1000
-        val hour: Long = deltaTimeS / 3600
-        val remainingSec: Long = deltaTimeS % 3600
-        val minutes: Long = remainingSec / 60
-        val seconds: Long = remainingSec % 60
-
-        if (hour != 0L) {
-            mCenterItemText.mainText = "%02d:%02d:%02d".format(hour, minutes, seconds)
-        }
-        else {
-            mCenterItemText.mainText = "%02d:%02d".format(minutes, seconds)
-        }
-
-        // processRecordProgress()
-
-        // mCenterItem.mainText = "%02d:%02d:%02d.%03d".format(hour, minutes, seconds, ms)
-
+        mCenterItemText.mainText = GlRoot.glService.getCurrentTaskLastTimeFormatted()
         mCtrlContext.refresh()
         mHandler.postDelayed(mRunnable, 100)
     }
