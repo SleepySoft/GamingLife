@@ -54,15 +54,6 @@
             android:exported="false" />
 
         <activity
-            android:name=".TimeViewActivity"
-            android:exported="true"
-            android:launchMode="singleInstance"
-            android:screenOrientation="portrait">
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
-        </activity>
-        <activity
             android:name=".PermissionActivity"
             android:exported="false">
             <meta-data

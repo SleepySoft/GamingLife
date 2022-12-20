@@ -38,8 +38,8 @@ class GamingLifeMainService : Service() {
     override fun onCreate() {
         GlLog.i("GL service onCreate")
 
-        val intentFilter = IntentFilter(Intent.ACTION_SCREEN_OFF)
-        registerReceiver(mReceiver, intentFilter)
+        // val intentFilter = IntentFilter(Intent.ACTION_SCREEN_OFF)
+        // registerReceiver(mReceiver, intentFilter)
 
         createNotification()
 
@@ -54,7 +54,7 @@ class GamingLifeMainService : Service() {
     override fun onDestroy() {
         GlLog.i("GL service onDestroy")
         super.onDestroy()
-        unregisterReceiver(mReceiver)
+        // unregisterReceiver(mReceiver)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -65,7 +65,6 @@ class GamingLifeMainService : Service() {
     }
 
     private fun servicePolling() {
-        // GlLog.i("Service running: ${GlDateTime.datetime()}")
         updateNotification()
     }
 

@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(mView)
 
         createVibrator()
-        requireLockScreenShow()
+        // requireLockScreenShow()
         initControllerContext()
 
         glInit()
