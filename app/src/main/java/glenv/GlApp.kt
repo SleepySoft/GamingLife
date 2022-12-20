@@ -27,12 +27,19 @@ class GlExceptionHandler : Thread.UncaughtExceptionHandler {
     }
 
     override fun uncaughtException(t: Thread, e: Throwable) {
+        println("#################################################################################")
+        println(e.message)
+        println("#################################################################################")
+
         val writer: Writer = StringWriter()
         val printWriter = PrintWriter(writer).apply {
             e.printStackTrace(this)
         }
         val stacktrace: String = writer.toString()
         printWriter.close()
+
+        println(stacktrace)
+        println("#################################################################################")
 
         val timestamp = Date().time
         val logFileName = "$timestamp.log"
@@ -41,9 +48,6 @@ class GlExceptionHandler : Thread.UncaughtExceptionHandler {
             context?.openFileOutput(logFileName, Context.MODE_PRIVATE).use { output ->
                 output?.write(stacktrace.toByteArray())
             }
-/*            File(logFileName).apply {
-                println("Writing log file to: " + this.absolutePath)
-            }.writeText(stacktrace)*/
         } catch (e: Exception) {
             println("Save log file fail: $logFileName - $e")
         } finally {
