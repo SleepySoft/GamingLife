@@ -2,11 +2,11 @@ package com.sleepysoft.gaminglife
 
 import android.content.Context
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -70,9 +70,15 @@ class DailyBrowseActivity : AppCompatActivity() {
         title = "GamingLife - 回顾"
 
         mDailyDataList = findViewById(R.id.id_recycler_view_daily_list)
-        mDailyDataList.layoutManager = LinearLayoutManager(this)
+        mDailyDataList.layoutManager =
+            LinearLayoutManager(this)
         mDailyDataList.adapter = DailyBrowseAdapter(this)
-        mDailyDataList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL))
+        mDailyDataList.addItemDecoration(
+            DividerItemDecoration(
+                this,
+                DividerItemDecoration.HORIZONTAL
+            )
+        )
     }
 }
 

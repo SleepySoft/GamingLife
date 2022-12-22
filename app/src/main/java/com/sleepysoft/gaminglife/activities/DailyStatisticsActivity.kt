@@ -1,10 +1,10 @@
 package com.sleepysoft.gaminglife
 
-import android.support.v7.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.widget.DividerItemDecoration
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -92,9 +92,15 @@ class DailyStatisticsActivity : AppCompatActivity() {
         mStatisticsView = findViewById(R.id.id_view_statistics)
 
         mDailyExtFileList = findViewById(R.id.id_recycler_view_ext_files)
-        mDailyExtFileList.layoutManager = LinearLayoutManager(this)
+        mDailyExtFileList.layoutManager =
+            LinearLayoutManager(this)
         mDailyExtFileList.adapter = DailyExtFileAdapter(mDailyRecord, this)
-        mDailyExtFileList.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL))
+        mDailyExtFileList.addItemDecoration(
+            DividerItemDecoration(
+                this,
+                DividerItemDecoration.HORIZONTAL
+            )
+        )
 
         buildContextAndController()
 

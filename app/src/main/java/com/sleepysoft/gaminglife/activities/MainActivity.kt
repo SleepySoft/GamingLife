@@ -7,8 +7,8 @@ import android.content.Intent
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
-import android.support.annotation.RequiresApi
-import android.support.v7.app.AppCompatActivity
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AppCompatActivity
 import android.view.WindowManager
 import android.widget.TextView
 import com.sleepysoft.gaminglife.GamingLifeMainService

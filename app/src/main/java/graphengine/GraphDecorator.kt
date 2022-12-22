@@ -4,7 +4,7 @@ import android.graphics.*
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import glcore.GlLog
 import glcore.LONG_LONG_PRESS_TIMEOUT
 import kotlin.math.abs

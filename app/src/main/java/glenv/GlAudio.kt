@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
-import android.support.v4.app.ActivityCompat
+import androidx.core.app.ActivityCompat
 import glcore.FILE_NAME_AUDIO_TEMP_PCM
 import glcore.FILE_NAME_AUDIO_TEMP_WAV
 import glcore.GlLog

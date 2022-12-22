@@ -7,7 +7,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 import graphengine.GraphContext
 import graphengine.GraphView
 import java.lang.ref.WeakReference

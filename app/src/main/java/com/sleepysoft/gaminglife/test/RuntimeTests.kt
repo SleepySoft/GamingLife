@@ -3,7 +3,7 @@ package com.sleepysoft.gaminglife.test
 import android.content.Context
 import android.os.Build
 import android.os.Environment
-import android.support.annotation.RequiresApi
+import androidx.annotation.RequiresApi
 
 import glcore.GlDailyRecord
 import glcore.GlDateTime
