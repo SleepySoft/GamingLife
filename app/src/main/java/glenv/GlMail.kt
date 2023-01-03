@@ -17,7 +17,7 @@ class GlMail {
     var mailSmtpAuth: Boolean = true
     var mailSmtpTimeout: Int = 3000
 
-    private fun mailProperties() : Properties =00b
+    private fun mailProperties() : Properties =
         Properties().apply {
             this.setProperty("mail.transport.protocol", mailProtocol)
             this.setProperty("mail.smtp.host", mailSmtpHost)
