@@ -87,7 +87,8 @@ class GamingLifeMainService : Service() {
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
             putExtra("OnNotification", true)
         }
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, 0)
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
         val channelId = createNotificationChannel(
             NOTIFICATION_ID_DEFAULT_STR,
