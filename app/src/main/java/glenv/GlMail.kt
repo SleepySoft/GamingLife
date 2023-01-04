@@ -18,7 +18,7 @@ class GlMail(
     private val carbonCopies: List< String >) {
 
     var mailProtocol: String = "SMTP"
-    var mailSmtpHost: String = "smtp.qiye.163.com"
+    var mailSmtpHost: String = "smtp.163.com"
     var mailSmtpPort: Int = 25
     var mailSmtpAuth: Boolean = true
     var mailSmtpTimeout: Int = 3000
@@ -35,6 +35,39 @@ class GlMail(
         } finally {
 
         }
+    }
+
+    companion object {
+        data class SmtpData(
+            val name: String,
+            val mailSmtpHost: String,
+            val mailSmtpPort: Int)
+
+        val SMTP_PRESET = mapOf(
+            "qq.com"        to SmtpData("qq邮箱", "smtp.qq.com", 25),
+            "163.com"       to SmtpData("163邮箱", "smtp.163.com", 25),
+            "126.com"       to SmtpData("126邮箱", "smtp.126.com", 25),
+            "163.net"       to SmtpData("163收费邮箱", "smtp.163vip.net", 25),
+            "netease.com"   to SmtpData("网易邮箱", "smtp.netease.com", 25),
+            "yeah.net"      to SmtpData("邮箱", "smtp.yeah.net", 25),
+            "sohu.com"      to SmtpData("搜狐邮箱", "smtp.sohu.com", 25),
+            "sina.com.cn"   to SmtpData("新浪邮箱", "smtp.sina.com.cn", 25),
+            "yahoo.com.cn"  to SmtpData("雅虎邮箱", "smtp.mail.yahoo.com.cn", 25),
+            "139.com"       to SmtpData("移动139邮箱", "smtp.139.com", 25),
+            "zzidc.com"     to SmtpData("景安网络邮箱", "smtp.zzidc.com", 25),
+            "foxmail.com"   to SmtpData("Foxmail邮箱", "smtp.foxmail.com", 25),
+            "hotmail.com"   to SmtpData("HotMail邮箱", "smtp.live.com", 587),
+            "gmail.com"     to SmtpData("Google邮箱", "smtp.gmail.com", 587)
+        )
+    }
+
+    fun selectPresetMailService(host: String) : Boolean {
+        SMTP_PRESET[host]?.let {
+            mailProtocol = "SMTP"
+            mailSmtpHost = it.mailSmtpHost
+            mailSmtpPort = it.mailSmtpPort
+        }
+        return SMTP_PRESET.containsKey(host)
     }
 
     // ---------------------------------------------------------------------------------------------
