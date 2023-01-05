@@ -10,6 +10,11 @@ fun trueOrNull(v: Boolean) : Boolean? = if (v) true else null
 fun randomUUID() = UUID.randomUUID().toString()
 
 
+// https://stackoverflow.com/a/52225984
+fun ByteArray.toHexString() =
+    asUByteArray().joinToString("") { it.toString(16).padStart(2, '0') }
+
+
 // https://stackoverflow.com/a/60910036
 fun Map< String, Any >.deepCopy() : MutableMap< String, Any > {
     return HashMap< String, Any >(this).mapValues {

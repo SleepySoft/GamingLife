@@ -2,6 +2,8 @@ package glenv
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import java.io.ByteArrayOutputStream
+import java.security.Key
 import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -21,15 +23,19 @@ class GlEncryption {
         const val DECRYPT_SIZE_MAX = 256
     }
 
-    private var publicKey: PublicKey? = null
-    private var privateKey: PrivateKey? = null
+    var publicKey: PublicKey? = null
+        private set
+    var privateKey: PrivateKey? = null
+        private set
+
+    var transformation: String = "RSA"
 
     var publicKeyString: String = ""
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
             field = value
-            val keyFactory = KeyFactory.getInstance("RSA")
-            privateKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(Base64.getDecoder().decode(value)))
+            val keyFactory = KeyFactory.getInstance(transformation)
+            publicKey = keyFactory.generatePublic(X509EncodedKeySpec(Base64.getDecoder().decode(value)))
         }
         @RequiresApi(Build.VERSION_CODES.O)
         get() = Base64.getEncoder().encodeToString(publicKey?.encoded ?: ByteArray(0))
@@ -38,45 +44,64 @@ class GlEncryption {
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
             field = value
-            val keyFactory = KeyFactory.getInstance("RSA")
-            publicKey = keyFactory.generatePublic(X509EncodedKeySpec(Base64.getDecoder().decode(value)))
+            val keyFactory = KeyFactory.getInstance(transformation)
+            privateKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(Base64.getDecoder().decode(value)))
         }
         @RequiresApi(Build.VERSION_CODES.O)
         get() = Base64.getEncoder().encodeToString(privateKey?.encoded ?: ByteArray(0))
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateKeyPair() {
-        val generator = KeyPairGenerator.getInstance("RSA")
+        val generator = KeyPairGenerator.getInstance(transformation)
         val keyPair = generator.genKeyPair()
         privateKey = keyPair.private
         publicKey = keyPair.public
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun publicKeyEncrypt(input: ByteArray) : String {
-        return publicKey?.run {
-            if (input.size <= ENCRYPT_SIZE_MAX) {
-                val cipher = Cipher.getInstance("RSA")
-                cipher.init(Cipher.ENCRYPT_MODE, this)
-                val encrypt = cipher.doFinal(input)
-                String(Base64.getEncoder().encode(encrypt))
-            } else {
-                ""
-            }
-        } ?: ""
-    }
+    fun publicKeyEncrypt(data: ByteArray) : ByteArray = publicKey?.run {
+            keyEncrypt(this, data)
+        } ?: byteArrayOf()
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun privateKeyEncrypt(input: ByteArray) : String {
-        return privateKey?.run {
-            if (input.size <= ENCRYPT_SIZE_MAX) {
-                val cipher = Cipher.getInstance("RSA")
-                cipher.init(Cipher.ENCRYPT_MODE, this)
-                val encrypt = cipher.doFinal(input)
-                String(Base64.getEncoder().encode(encrypt))
-            } else {
-                ""
-            }
-        } ?: ""
+    fun privateKeyEncrypt(data: ByteArray) : ByteArray = privateKey?.run {
+            keyEncrypt(this, data)
+        } ?: byteArrayOf()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun publicKeyDecrypt(data: ByteArray) : ByteArray = publicKey?.run {
+        keyDecrypt(this, data)
+    } ?: byteArrayOf()
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun privateKeyDecrypt(data: ByteArray) : ByteArray = privateKey?.run {
+        keyDecrypt(this, data)
+    } ?: byteArrayOf()
+
+    // ---------------------------------------------------------------------------------------------
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun keyEncrypt(key: Key, data: ByteArray) : ByteArray =
+        keyCipher(key, data, Cipher.ENCRYPT_MODE, ENCRYPT_SIZE_MAX)
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun keyDecrypt(key: Key, data: ByteArray) : ByteArray =
+        keyCipher(key, data, Cipher.DECRYPT_MODE, DECRYPT_SIZE_MAX)
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun keyCipher(key: Key, data: ByteArray, mode: Int, limit: Int) : ByteArray {
+        var offset = 0
+        val outputStream = ByteArrayOutputStream()
+        val cipher = Cipher.getInstance(transformation).apply { init(mode, key) }
+        while (offset < data.size) {
+            val remainingLen = data.size - offset
+            val processLen = if (remainingLen > limit) limit else remainingLen
+            val encryptedData = cipher.doFinal(data, offset, processLen)
+            outputStream.write(encryptedData)
+            offset += processLen
+        }
+        outputStream.close()
+        return outputStream.toByteArray()
+        // return Base64.getEncoder().encode(outputStream.toByteArray()).toString()
     }
 }
