@@ -48,7 +48,11 @@ class GlDailyStatisticsController(
                 }
             }
 
-            progressDecorator = MultipleProgressDecorator(mCtrlContext, statisticsBar)
+            progressDecorator = MultipleProgressDecorator(mCtrlContext, statisticsBar).apply {
+                progressScale.add(MultipleProgressDecorator.ProgressScale(0.25f, "06:00"))
+                progressScale.add(MultipleProgressDecorator.ProgressScale(0.50f, "12:00"))
+                progressScale.add(MultipleProgressDecorator.ProgressScale(0.75f, "18:00"))
+            }
             statisticsBar.graphItemDecorator.add(progressDecorator)
 
             layer.addGraphItem(statisticsBar)

@@ -8,7 +8,6 @@ import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.example.data_persistent.R
 import java.io.IOException
 import java.math.BigInteger
 import java.security.*
@@ -119,7 +118,7 @@ class PasswordStorageHelper(context: Context) {
         @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
         override fun init(context: Context?): Boolean {
             preferences = context?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-            alias = context?.getString(R.string.app_package);
+            alias = "A"  // context?.getString(R.string.app_package);
 
             val ks: KeyStore?
 
@@ -227,7 +226,7 @@ class PasswordStorageHelper(context: Context) {
                     return;
                 }
 
-                val value: String = encrypt(publicKey, data);
+                val value: String = "" // encrypt(publicKey, data);
 
                 val editor: SharedPreferences.Editor? = preferences?.edit();
                 editor?.putString(key, value);
@@ -255,7 +254,7 @@ class PasswordStorageHelper(context: Context) {
                 ks = KeyStore.getInstance(KEYSTORE_PROVIDER_ANDROID_KEYSTORE);
                 ks.load(null);
                 val privateKey: Key = ks.getKey(alias, null);
-                return decrypt(privateKey, preferences?.getString(key, null));
+                return ByteArray(0)   // decrypt(privateKey, preferences?.getString(key, null));
             } catch (e: Exception) {
                 //KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException
                 // | UnrecoverableEntryException | InvalidKeyException | NoSuchPaddingException
@@ -275,4 +274,5 @@ class PasswordStorageHelper(context: Context) {
             editor?.remove(key);
             editor?.apply();
         }
+    }
 }

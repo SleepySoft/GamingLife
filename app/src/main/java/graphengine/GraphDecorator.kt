@@ -117,8 +117,19 @@ class MultipleProgressDecorator(context: GraphContext, decoratedItem: GraphItem)
         var progressPaint: Paint
     )
 
+    data class ProgressScale(
+        var progressPct: Float,
+        var scaleText: String
+    )
+
+    // TODO: Relative text size
+    var fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        textSize = 35.0f
+    }
+
     var progressEnd: Float = 0.0f
     var progressData = mutableListOf< ProgressData >()
+    var progressScale = mutableListOf< ProgressScale >()
 
     /*
     The ProgressData records the start of this progress
@@ -141,6 +152,38 @@ class MultipleProgressDecorator(context: GraphContext, decoratedItem: GraphItem)
                 progressData[i + 1].progressPct
             })
             canvas.drawRect(subRect, progressData[i].progressPaint)
+        }
+
+        for (scale in progressScale) {
+            val rectTextBounds = Rect()
+            fontPaint.getTextBounds(scale.scaleText, 0, scale.scaleText.length, rectTextBounds)
+
+            val scaleTextCenter = PointF(
+                pctToX(scale.progressPct),
+                wholeRect.top - 10 - rectTextBounds.height()
+            )
+
+            val rectTextPaint = rectTextBounds.toRectF()
+            rectTextPaint.moveCenter(scaleTextCenter)
+
+            canvas.drawLine(
+                scaleTextCenter.x,
+                wholeRect.top,
+
+                scaleTextCenter.x,
+                wholeRect.top - 10.0f,
+
+                Paint().apply {
+                    strokeWidth = 2.0f
+                }
+            )
+
+            canvas.drawText(
+                scale.scaleText,
+                rectTextPaint.left,
+                rectTextPaint.centerY(),
+                fontPaint
+            )
         }
     }
 
