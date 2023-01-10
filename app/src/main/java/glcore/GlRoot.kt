@@ -1,6 +1,5 @@
 package glcore
 
-import android.os.Environment
 import glenv.GlEnv
 import java.io.File
 import java.util.*
@@ -64,7 +63,7 @@ object GlRoot {
      * @return The timestamp style filename which is format to second. Not includes the full path and suffix.
      */
     fun getFileNameTs(date: Date? = null) : String =
-        GlDateTime.formatToMSec(date ?: GlDateTime.datetime())
+        GlDateTime.formatDateToMSec(date ?: GlDateTime.datetime())
 
     /**
      * Get the daily folder name by the date. Only name, not the full path.
@@ -73,7 +72,7 @@ object GlRoot {
      * @return The daily folder's name.
      */
     fun getDailyFolderName(date: Date) : String =
-        DAILY_FOLDER_TEMPLATE.format(GlDateTime.formatToDay(date))
+        DAILY_FOLDER_TEMPLATE.format(GlDateTime.formatDateToDay(date))
 
     /**
      * Get the daily folder name by the day offset of today. Only name, not the full path.

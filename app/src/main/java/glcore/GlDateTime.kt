@@ -26,15 +26,29 @@ object GlDateTime {
         }.time
     }
 
-    fun formatToDay(dt: Date) : String {
+    fun smartFormatSec(sec: Long) : String {
+        val day: Long = sec / 3600 / 24
+        val hour: Long = sec / 3600
+        val remainingSec: Long = sec % 3600
+        val minutes: Long = remainingSec / 60
+        val seconds: Long = remainingSec % 60
+
+        return when {
+            day > 0L -> "%d %02d:%02d:%02d".format(day, hour, minutes, seconds)
+            hour > 0L -> "%02d:%02d:%02d".format(hour, minutes, seconds)
+            else -> "%02d:%02d".format(minutes, seconds)
+        }
+    }
+
+    fun formatDateToDay(dt: Date) : String {
         return SimpleDateFormat("yyyyMMdd", Locale.getDefault()).format(dt)
     }
 
-    fun formatToSec(dt: Date) : String {
+    fun formatDateToSec(dt: Date) : String {
         return SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(dt)
     }
 
-    fun formatToMSec(dt: Date) : String {
+    fun formatDateToMSec(dt: Date) : String {
         return SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.getDefault()).format(dt)
     }
 

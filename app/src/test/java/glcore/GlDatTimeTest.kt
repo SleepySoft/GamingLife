@@ -7,9 +7,9 @@ internal class GlDatTimeTest {
 
     private fun printDateTime(ts: Date) {
         println(ts)
-        println(GlDateTime.formatToDay(ts))
-        println(GlDateTime.formatToSec(ts))
-        println(GlDateTime.formatToMSec(ts))
+        println(GlDateTime.formatDateToDay(ts))
+        println(GlDateTime.formatDateToSec(ts))
+        println(GlDateTime.formatDateToMSec(ts))
     }
 
     private fun verifyDaysOffsetAndDaysBetween(offsetDays: Int) {
