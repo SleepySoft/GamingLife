@@ -19,6 +19,7 @@ const val PATH_DAILY_TASK_RECORD = "/Daily/TimeModule/TaskHistory"              
 const val LONG_LONG_PRESS_TIMEOUT = 1500                    // ms
 const val TIMESTAMP_COUNT_IN_DAY = 24 * 60 * 60 * 1000      // Gl ts unit is ms
 const val TIME_DEFAULT_TASK_RECORD_THRESHOLD = 10 * 1000    // ms
+const val TIME_ONE_HOUR = 60 * 60 * 1000
 
 const val GL_FILE_RUNTIME_DATA = "RuntimeData.json"
 const val GL_FILE_DAILY_RECORD = "DailyRecord.json"

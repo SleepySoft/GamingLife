@@ -2,7 +2,6 @@ package com.sleepysoft.gaminglife.controllers
 
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.PointF
 import android.graphics.RectF
 import glcore.*
 import graphengine.*
@@ -13,7 +12,10 @@ class GlDailyStatisticsController(
     private val mDailyRecord: GlDailyRecord) : GraphViewObserver {
 
     private lateinit var statisticsBar: GraphRectangle
-    private lateinit var progressDecorator: MultipleProgressDecorator
+    private lateinit var progressDecorator: MultipleSectionProgressDecorator
+
+    private lateinit var multipleStatisticsBar: GraphRectangle
+    private lateinit var multipleStatisticsDecorator: MultipleHorizonStatisticsBarDecorator
 
     fun init() {
         buildStatisticsLayer()
@@ -48,14 +50,54 @@ class GlDailyStatisticsController(
                 }
             }
 
-            progressDecorator = MultipleProgressDecorator(mCtrlContext, statisticsBar).apply {
-                progressScale.add(MultipleProgressDecorator.ProgressScale(0.25f, "06:00"))
-                progressScale.add(MultipleProgressDecorator.ProgressScale(0.50f, "12:00"))
-                progressScale.add(MultipleProgressDecorator.ProgressScale(0.75f, "18:00"))
+            progressDecorator = MultipleSectionProgressDecorator(mCtrlContext, statisticsBar).apply {
+                progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.25f, "06:00"))
+                progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.50f, "12:00"))
+                progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.75f, "18:00"))
             }
             statisticsBar.graphItemDecorator.add(progressDecorator)
 
             layer.addGraphItem(statisticsBar)
+
+            // -------------------------------------------------------------------------------------
+
+            multipleStatisticsBar = GraphRectangle().apply {
+                this.id = "Statistics.StatisticsBar"
+                this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    this.color = Color.parseColor(COLOR_DAILY_BAR_BASE)
+                    this.style = Paint.Style.FILL
+                }
+            }
+
+            multipleStatisticsDecorator = MultipleHorizonStatisticsBarDecorator(mCtrlContext, multipleStatisticsBar).apply {
+                emptyAreaPaint = Paint().apply {
+                    this.style = Paint.Style.STROKE
+                    this.strokeWidth = 2.0f
+                }
+                defaultMaxValue = (8 * TIME_ONE_HOUR).toFloat()
+
+                val taskDatas = GlRoot.systemConfig.getTopTasks()
+                val groupStatistics = mDailyRecord.groupStatistics()
+
+                for (taskData in taskDatas) {
+                    barDatas.add(MultipleHorizonStatisticsBarDecorator.BarData(
+                        text=taskData.name,
+                        value=(groupStatistics[taskData.id] ?: 0).toFloat(),
+                        barPaint=Paint().apply {
+                            this.color = Color.parseColor(taskData.color)
+                            this.style = Paint.Style.FILL
+                        },
+                        textPaint=Paint().apply {
+                            this.color = Color.parseColor("#000000")
+                            this.textSize = 30.0f
+                            this.textAlign = Paint.Align.CENTER
+                        }
+                    ))
+                }
+            }
+            multipleStatisticsBar.graphItemDecorator.add(multipleStatisticsDecorator)
+
+            layer.addGraphItem(multipleStatisticsBar)
         }
     }
 
@@ -78,10 +120,14 @@ class GlDailyStatisticsController(
     }
 
     private fun layoutCommon(graphView: GraphView) {
-        statisticsBar.rect  = RectF(graphView.paintArea).apply {
-            val centerY = centerY()
-            top = centerY - graphView.unitScale * 5
-            bottom = centerY + graphView.unitScale * 5
+        statisticsBar.rect = RectF(graphView.paintArea).apply {
+            top = graphView.paintArea.top + graphView.unitScale * 10
+            bottom = graphView.paintArea.top + graphView.unitScale * 20
+        }
+
+        multipleStatisticsBar.rect = RectF(graphView.paintArea).apply {
+            top = graphView.paintArea.top + graphView.unitScale * 25
+            bottom = graphView.paintArea.top + graphView.unitScale * 60
         }
     }
 
@@ -99,7 +145,7 @@ class GlDailyStatisticsController(
 
         for (task in mDailyRecord.taskRecords) {
             progressDecorator.progressData.add(
-                MultipleProgressDecorator.ProgressData(
+                MultipleSectionProgressDecorator.ProgressData(
                     (task.startTime - dayTsBase).toFloat() / TIMESTAMP_COUNT_IN_DAY,
                     buildPaintForTask(task)))
         }

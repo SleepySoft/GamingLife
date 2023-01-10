@@ -117,6 +117,25 @@ class GlDailyRecord {
         return if (taskRecords.isNotEmpty())  taskRecords.last() else null
     }
 
+    fun groupStatistics() : Map< String , Long > {
+        return mutableMapOf< String , Long >().apply {
+            var prevTask: TaskRecord? = null
+            for (taskRecord in taskRecords) {
+                prevTask?.let {
+                    this[it.groupID] = (this[it.groupID] ?: 0) + (taskRecord.startTime - it.startTime)
+                }
+                prevTask = taskRecord
+            }
+            prevTask?.let {
+                var  dayLimit = GlDateTime.datetime().time - dailyTs
+                if ((dayLimit > TIMESTAMP_COUNT_IN_DAY) || (dayLimit < 0)) {
+                     dayLimit = TIMESTAMP_COUNT_IN_DAY.toLong()
+                }
+                this[it.groupID] = (this[it.groupID] ?: 0) + (dailyTs + dayLimit - it.startTime)
+            }
+        }
+    }
+
     // ---------------------------------------------------------------------------------------------
 
     private fun parseDailyFile(dailyJsonPath: String) : Boolean {

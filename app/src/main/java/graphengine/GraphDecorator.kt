@@ -108,7 +108,7 @@ class AutoFitTextDecorator(context: GraphContext, decoratedItem: GraphItem)
 
 // ---------------------------------------------------------------------------------------------
 
-class MultipleProgressDecorator(context: GraphContext, decoratedItem: GraphItem)
+class MultipleSectionProgressDecorator(context: GraphContext, decoratedItem: GraphItem)
     : GraphItemDecorator(context, decoratedItem) {
 
     // The progress pct records
@@ -190,6 +190,56 @@ class MultipleProgressDecorator(context: GraphContext, decoratedItem: GraphItem)
     private fun pctToX(pct: Float): Float {
         val wholeRect = decoratedItem.boundRect()
         return wholeRect.left + pct * wholeRect.width()
+    }
+}
+
+
+class MultipleHorizonStatisticsBarDecorator(context: GraphContext, decoratedItem: GraphItem)
+    : GraphItemDecorator(context, decoratedItem) {
+
+    /*
+    * Draw multiple horizon bars, which layout from left to barRightLimitPct (of the whole paint width).
+    *     Multiple bars stack vertical.
+    * If the largest value is less than defaultMaxValue, the whole bar length means defaultMaxValue.
+    *     else the the whole bar length is the max value.
+    */
+
+    data class BarData(
+        var text: String,
+        var value: Float,
+        var barPaint: Paint,
+        var textPaint: Paint
+    )
+
+    var emptyAreaPaint = Paint().apply {
+        color = Color.parseColor("#FFFFFF")
+    }
+
+    var barDatas = mutableListOf< BarData >()
+    var defaultMaxValue: Float = 100.0f
+    var barRightLimitPct: Float = 0.70f
+
+    override fun paintAfterGraph(canvas: Canvas) {
+        val wholeRect = decoratedItem.boundRect()
+        val heightDivide = wholeRect.height() / barDatas.size
+        val horizonLimit = barRightLimitPct * wholeRect.width()
+
+        var barMaxValue = barDatas.maxOf { it.value }
+        if (barMaxValue < defaultMaxValue) { barMaxValue = defaultMaxValue }
+
+        val gap = wholeRect.width() * barRightLimitPct
+        for (i in 0 until barDatas.size) {
+            val top = wholeRect.top + i * heightDivide
+            val bottom = top + heightDivide
+            val fullRect = RectF(wholeRect.left, top, gap, bottom)
+            val textRect = RectF(gap, top, wholeRect.right, bottom)
+            val barRect = RectF(fullRect).apply {
+                right = fullRect.left + barDatas[i].value * horizonLimit / barMaxValue
+            }
+            canvas.drawRect(fullRect, emptyAreaPaint)
+            canvas.drawRect(barRect, barDatas[i].barPaint)
+            canvas.drawText(barDatas[i].text, textRect, ALIGN_HORIZON_RIGHT, ALIGN_HORIZON_CENTER, barDatas[i].textPaint)
+        }
     }
 }
 
