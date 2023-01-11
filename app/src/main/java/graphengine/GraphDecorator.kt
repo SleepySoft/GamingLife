@@ -218,6 +218,7 @@ class MultipleHorizonStatisticsBarDecorator(context: GraphContext, decoratedItem
     var barDatas = mutableListOf< BarData >()
     var defaultMaxValue: Float = 100.0f
     var barRightLimitPct: Float = 0.70f
+    var barTextFormatter: ((BarData) -> String)? = null
 
     override fun paintAfterGraph(canvas: Canvas) {
         val wholeRect = decoratedItem.boundRect()
@@ -234,13 +235,18 @@ class MultipleHorizonStatisticsBarDecorator(context: GraphContext, decoratedItem
             val fullRect = RectF(wholeRect.left, top, gap, bottom)
             val textRect = RectF(gap, top, wholeRect.right, bottom)
             val barRect = RectF(fullRect).apply {
+                // inflate(-3.0f, -3.0f, -3.0f, -3.0f)
                 right = fullRect.left + barDatas[i].value * horizonLimit / barMaxValue
             }
+            val displayText = (barTextFormatter ?: { barData -> barData.text  })(barDatas[i])
+
             canvas.drawRect(fullRect, emptyAreaPaint)
             canvas.drawRect(barRect, barDatas[i].barPaint)
-            canvas.drawText(barDatas[i].text, textRect, ALIGN_HORIZON_RIGHT, ALIGN_HORIZON_CENTER, barDatas[i].textPaint)
+            canvas.drawText(displayText, textRect, ALIGN_HORIZON_RIGHT, ALIGN_HORIZON_CENTER, barDatas[i].textPaint)
         }
     }
+
+    private fun defaultBarTextFormatter(barData: BarData) : String = barData.text
 }
 
 

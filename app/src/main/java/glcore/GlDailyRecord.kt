@@ -118,6 +118,9 @@ class GlDailyRecord {
     }
 
     fun groupStatistics() : Map< String , Long > {
+        /*
+        * Return each task group lasting time. The key is top level group id. Value is the lasting time in ms.
+        */
         return mutableMapOf< String , Long >().apply {
             var prevTask: TaskRecord? = null
             for (taskRecord in taskRecords) {

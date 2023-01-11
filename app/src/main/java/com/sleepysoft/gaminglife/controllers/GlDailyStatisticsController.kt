@@ -75,6 +75,11 @@ class GlDailyStatisticsController(
                     this.strokeWidth = 2.0f
                 }
                 defaultMaxValue = (8 * TIME_ONE_HOUR).toFloat()
+                barTextFormatter = { barData -> "%s [%02d:%02d:%02d]".format(
+                    barData.text,
+                    barData.value.toInt() / 1000 / 3600,
+                    barData.value.toInt() / 1000 % 3600 / 60,
+                    barData.value.toInt() / 1000 % 3600 % 60) }
 
                 val taskDatas = GlRoot.systemConfig.getTopTasks()
                 val groupStatistics = mDailyRecord.groupStatistics()

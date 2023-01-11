@@ -85,6 +85,13 @@ fun RectF.inflate(inflatePct: Float) {
     bottom += vertInflate
 }
 
+fun RectF.inflate(l: Float, t: Float, r: Float, b: Float) {
+    left -= l
+    top -= t
+    right += r
+    bottom += b
+}
+
 fun RectF.toRect() : Rect {
     val rect = Rect()
     round(rect)
