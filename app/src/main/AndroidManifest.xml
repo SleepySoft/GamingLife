@@ -25,9 +25,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GamingLife">
         <activity
-            android:name=".CommonTextInputActivity"
-            android:launchMode="singleInstance"
+            android:name=".DailyBrowseCalenderActivity"
             android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".CommonTextInputActivity"
+            android:exported="false"
+            android:launchMode="singleInstance">
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
