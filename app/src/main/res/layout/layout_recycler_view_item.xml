@@ -6,14 +6,12 @@
     android:layout_height="wrap_content"
     android:background="@color/white"
     android:orientation="horizontal"
-    android:padding="5dp"
     tools:ignore="MissingConstraints">
 
     <Button
         android:id="@+id/id_button_item_button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="5dip"
         android:layout_weight="1"
         android:gravity="center"
         android:text="" />
