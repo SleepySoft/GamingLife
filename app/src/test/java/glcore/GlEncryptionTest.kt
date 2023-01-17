@@ -11,7 +11,7 @@ internal class GlEncryptionTest {
             val keyPair = this.createKeyPair(8, quitFlag)
             assert(keyPair != null)
             assert(keyPair?.publicKey != null)
-            assert((keyPair?.publicKey?.encoded?.get(0) ?: 0x00.toByte()) == 0xFF.toByte())
+            assert(keyPair?.publicKey?.encoded?.let { this.dataSha256(it)[0] } == 0xFF.toByte())
         }
     }
 }

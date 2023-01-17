@@ -12,7 +12,9 @@ class GlEncryption {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun createKeyPair(workloadProof: Int, quitFlag: List< Boolean >) : GlKeyPair? {
+        var loop = 0
         var keyPair: GlKeyPair? = null
+
         while (quitFlag.isNotEmpty()) {
             if (quitFlag[0]) {
                 keyPair = null
@@ -25,8 +27,17 @@ class GlEncryption {
             keyPair.generateKeyPair()
 
             keyPair.publicKey?.run {
+                loop += 1
+
                 val pubKeySha = dataSha256(this.encoded)
-                success = (calcWorkload(pubKeySha) >= workloadProof)
+                val workloadVal = calcWorkload(pubKeySha)
+
+                if (workloadVal >= workloadProof) {
+                    success = true
+                    println("Workload proof reached.")
+                    println("Calculation loop: %d".format(loop))
+                    println("SHA256 of public key: " + pubKeySha.toHexString())
+                }
             }
 
             if (success) {
