@@ -27,6 +27,8 @@ object GlFile {
 
     fun absPath(vararg paths: String) = joinPaths(glRoot(), *paths)
 
+    fun buildPath(vararg paths: String) = ensureFileDirExists(File(absPath(*paths)))
+
     fun glRoot() : String =
         if (defaultStorage == STORAGE_PLACE.STORAGE_EXTERNAL) glExternalRoot() else glInternalRoot()
 

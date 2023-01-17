@@ -42,6 +42,9 @@ class GlDailyRecord {
         dailyPath = GlRoot.getDailyFolderName(0)
         dailyFile = GL_FILE_DAILY_RECORD
 
+        // Build an empty path for current day. So the daily browse will list today.
+        GlFile.buildPath(dailyPath)
+
         // Init data
         dailyRecord.clear()
         dailyRecord.set(PATH_DAILY_START_TS, GlDateTime.dayStartTimeStamp())

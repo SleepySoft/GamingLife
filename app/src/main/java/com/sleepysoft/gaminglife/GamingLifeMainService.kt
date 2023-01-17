@@ -19,9 +19,10 @@ import glcore.GlRoot
 
 
 class GamingLifeMainService : Service() {
+    private var fistRun: Boolean = true
     private val mRunner: Runnable = Runnable { serviceLooper() }
     private val mHandler : Handler = Handler(Looper.getMainLooper())
-    private val mReceiver: BroadcastReceiver = ScreenBroadcastReceiver()
+    // private val mReceiver: BroadcastReceiver = ScreenBroadcastReceiver()
     private var mNotification: NotificationCompat.Builder? = null
 
     companion object {
@@ -65,6 +66,10 @@ class GamingLifeMainService : Service() {
     }
 
     private fun servicePolling() {
+        if (fistRun) {
+            fistRun = false
+            GlRoot.glService.checkSettleDailyData()
+        }
         updateNotification()
     }
 
