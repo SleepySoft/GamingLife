@@ -9,6 +9,9 @@ import java.security.MessageDigest
 
 
 class GlEncryption {
+    var powLoop = 0
+    var keyPairPow = 0
+    var powKeyPair = GlKeyPair()
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun createKeyPair(workloadProof: Int, quitFlag: List< Boolean >) : GlKeyPair? {
@@ -31,6 +34,18 @@ class GlEncryption {
 
                 val pubKeySha = dataSha256(this.encoded)
                 val workloadVal = calcWorkload(pubKeySha)
+
+                if (keyPairPow < workloadVal) {
+                    keyPairPow = workloadVal
+                    powKeyPair = keyPair
+                    powLoop = loop
+
+                    println("---------------------------------------------------------------")
+                    println("Max POW in loop %d: %d".format(loop, keyPairPow))
+                    println("  Public: " + keyPair.publicKeyString)
+                    println("  Private: " + keyPair.privateKeyString)
+                    println("---------------------------------------------------------------")
+                }
 
                 if (workloadVal >= workloadProof) {
                     success = true
