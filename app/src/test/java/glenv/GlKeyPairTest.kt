@@ -1,0 +1,99 @@
+package glcore
+
+import glenv.GlKeyPair
+import org.junit.Test
+import kotlin.random.Random
+
+internal class GlKeyPairTest {
+
+    @Test
+    fun testKeyPairGeneration() {
+        val glKeyPair1 = GlKeyPair().apply { generateKeyPair() }
+        val glKeyPair2 = GlKeyPair().apply { generateKeyPair() }
+
+        println("----------------------- Encryption 1 -----------------------")
+        println(glKeyPair1.publicKeyString)
+        println(glKeyPair1.privateKeyString)
+
+        println("----------------------- Encryption 2 -----------------------")
+        println(glKeyPair2.publicKeyString)
+        println(glKeyPair2.privateKeyString)
+
+        assert(glKeyPair1.publicKeyString != glKeyPair2.publicKeyString)
+        assert(glKeyPair1.privateKeyString != glKeyPair2.privateKeyString)
+    }
+
+    @Test
+    fun testKeyAttachment() {
+        val glKeyPair1 = GlKeyPair()
+        val glKeyPair2 = GlKeyPair()
+
+        glKeyPair1.generateKeyPair()
+        glKeyPair2.publicKeyString = glKeyPair1.publicKeyString
+        glKeyPair2.privateKeyString = glKeyPair1.privateKeyString
+
+        assert(glKeyPair1.publicKey == glKeyPair2.publicKey)
+        assert(glKeyPair1.privateKey == glKeyPair2.privateKey)
+    }
+
+    @Test
+    fun testInvalidKey() {
+        val glKeyPair = GlKeyPair()
+        assert(glKeyPair.publicKey == null)
+        assert(glKeyPair.publicKeyString == "")
+        assert(glKeyPair.privateKey == null)
+        assert(glKeyPair.privateKeyString == "")
+    }
+
+    // -----------------------------------------------------------------
+
+    @Test
+    fun testPublicKeyEncryptionAndPrivateKeyDecryptionShortData() {
+        val testString = "GamingLife by SleepySoft"
+        val glKeyPair = GlKeyPair().apply { generateKeyPair() }
+        val encryptedData = glKeyPair.publicKeyEncrypt(testString.encodeToByteArray())
+        val decryptionData = glKeyPair.privateKeyDecrypt(encryptedData)
+        assert(decryptionData.decodeToString() == testString)
+    }
+
+    @Test
+    fun testPrivateKeyEncryptionAndPublicKeyDecryptionShortData() {
+        val testString = "GamingLife by SleepySoft"
+        val glKeyPair = GlKeyPair().apply { generateKeyPair() }
+        val encryptedData = glKeyPair.privateKeyEncrypt(testString.encodeToByteArray())
+        val decryptionData = glKeyPair.publicKeyDecrypt(encryptedData)
+        assert(decryptionData.decodeToString() == testString)
+    }
+
+    // -----------------------------------------------------------------
+
+    @Test
+    fun testPublicKeyEncryptionAndPrivateKeyDecryptionLongData() {
+        val testData = ByteArray(128000).apply { Random.nextBytes(this) }
+        val glKeyPair = GlKeyPair().apply { generateKeyPair() }
+        val encryptedData = glKeyPair.publicKeyEncrypt(testData)
+        val decryptionData = glKeyPair.privateKeyDecrypt(encryptedData)
+
+        // println("--------------------------------------------------------------------")
+        // println(testData.toHexString())
+        // println("--------------------------------------------------------------------")
+        // println(decryptionData.toHexString())
+
+        assert(decryptionData.contentEquals(testData))
+    }
+
+    @Test
+    fun testPrivateKeyEncryptionAndPublicKeyDecryptionLongData() {
+        val testData = ByteArray(128000).apply { Random.nextBytes(this) }
+        val glKeyPair = GlKeyPair().apply { generateKeyPair() }
+        val encryptedData = glKeyPair.privateKeyEncrypt(testData)
+        val decryptionData = glKeyPair.publicKeyDecrypt(encryptedData)
+
+        // println("--------------------------------------------------------------------")
+        // println(testData.toHexString())
+        // println("--------------------------------------------------------------------")
+        // println(decryptionData.toHexString())
+
+        assert(decryptionData.contentEquals(testData))
+    }
+}

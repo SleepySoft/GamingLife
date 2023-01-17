@@ -5,7 +5,6 @@ import androidx.annotation.RequiresApi
 import java.io.ByteArrayOutputStream
 import java.security.Key
 import java.security.KeyFactory
-import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.PrivateKey
 import java.security.PublicKey
@@ -17,7 +16,7 @@ import javax.crypto.Cipher
 
 // https://blog.csdn.net/duner12138/article/details/112647484
 
-class GlEncryption {
+class GlKeyPair {
     companion object {
         const val ENCRYPT_SIZE_MAX = 245
         const val DECRYPT_SIZE_MAX = 256
