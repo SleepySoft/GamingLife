@@ -398,6 +398,7 @@ class GlTimeViewController(
                 item.radius = mSurroundRadius
             }
         }
+        mMenuConfigKeyPair.rect = RectF(200.0f, 0.0f, 400.0f, 100.0f)
         mMenuDailyStatistics.rect = RectF(0.0f, 0.0f, 200.0f, 100.0f)
     }
 
