@@ -5,6 +5,7 @@ import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.os.Handler
 import android.os.Looper
 import com.sleepysoft.gaminglife.DailyBrowseActivity
+import com.sleepysoft.gaminglife.activities.ConfigKeyPairActivity
 import glcore.*
 import graphengine.*
 import kotlin.math.cos
@@ -28,6 +29,7 @@ class GlTimeViewController(
     private var mSurroundItems = mutableListOf< GraphCircle >()
     private var mSurroundItemText = mutableListOf< AutoFitTextDecorator >()
 
+    private lateinit var mMenuConfigKeyPair: GraphRectangle
     private lateinit var mMenuDailyStatistics: GraphRectangle
 
     private var mHandler = Handler(Looper.getMainLooper())
@@ -67,6 +69,8 @@ class GlTimeViewController(
     override fun onItemClicked(item: GraphItem) {
         if (item == mMenuDailyStatistics) {
             mCtrlContext.launchActivity(DailyBrowseActivity::class.java)
+        } else if (item == mMenuConfigKeyPair) {
+            mCtrlContext.launchActivity(ConfigKeyPairActivity::class.java)
         }
     }
 
@@ -289,6 +293,24 @@ class GlTimeViewController(
                 mSurroundItemText.add(text)
             }
 
+            // --------------------------------------- Menu ---------------------------------------
+
+            mMenuConfigKeyPair = GraphRectangle().apply {
+                this.id = "TimeView.MenuConfigKeyPair"
+                this.graphItemDecorator.add(
+                    AutoFitTextDecorator(mCtrlContext, this).apply {
+                        this.mainText = "GLID"
+                        this.fontPaint = Paint(ANTI_ALIAS_FLAG).apply {
+                            this.color = Color.parseColor("#FFFFFF")
+                            this.textAlign = Paint.Align.CENTER
+                        }
+                    }
+                )
+            }
+            mMenuConfigKeyPair.graphActionDecorator.add(
+                ClickDecorator(mCtrlContext, mMenuConfigKeyPair, this))
+            layer.addGraphItem(mMenuConfigKeyPair)
+
             mMenuDailyStatistics = GraphRectangle().apply {
                 this.id = "TimeView.MenuDailyStatistics"
                 this.graphItemDecorator.add(
@@ -303,8 +325,10 @@ class GlTimeViewController(
             }
             mMenuDailyStatistics.graphActionDecorator.add(
                 ClickDecorator(mCtrlContext, mMenuDailyStatistics, this))
-
             layer.addGraphItem(mMenuDailyStatistics)
+
+            // ------------------------------------------------------------------------------------
+
             layer.addGraphItem(mCenterItem)
             layer.insertGraphItemAfter(mProgressItem, mCenterItem)
 
