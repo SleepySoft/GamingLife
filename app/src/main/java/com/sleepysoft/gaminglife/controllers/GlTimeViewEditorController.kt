@@ -284,8 +284,8 @@ class GlTimeViewEditorController(
 
         for (i in 0 until mSurroundItems.size) {
             val item = mSurroundItems[i]
-            item.origin.x = layoutArea.left + layoutArea.width() * (i + 1) / (mSurroundItems.size + 2).toFloat()
-            item.origin.y = layoutArea.centerY() + 160.0f     // TODO: Relative
+            item.origin.x = layoutArea.left + layoutArea.width() * (i + 1) / (mSurroundItems.size + 1).toFloat()
+            item.origin.y = layoutArea.centerY() + layoutArea.height() * 0.2f
             item.radius = 60.0f
         }
     }

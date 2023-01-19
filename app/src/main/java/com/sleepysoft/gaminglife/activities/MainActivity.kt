@@ -71,20 +71,20 @@ class MainActivity : AppCompatActivity() {
         // mHandler.postDelayed(runnable, 100)
     }
 
-    override fun onStart() {
+/*    override fun onStart() {
         super.onStart()
 
         val onLockScreen: Boolean = intent.getBooleanExtra("OnLockedScreen", false)
-    }
+    }*/
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+/*    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         when (requestCode) {
             REQUEST_CODE_STORAGE_PERMISSION -> glInit()
             else -> mCtrlContext.dispatchAsyncResult(requestCode, resultCode, data)
         }
-    }
+    }*/
 
     // ---------------------------------------------------------------------------------------------
 
@@ -143,7 +143,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.M)
+/*    @RequiresApi(Build.VERSION_CODES.M)
     private fun requireLockScreenShow() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
         {
@@ -168,7 +168,7 @@ class MainActivity : AppCompatActivity() {
                 )
             )
         }
-    }
+    }*/
 
     private fun requireExtStoragePermission() {
         val intent = Intent(this, PermissionActivity::class.java)
