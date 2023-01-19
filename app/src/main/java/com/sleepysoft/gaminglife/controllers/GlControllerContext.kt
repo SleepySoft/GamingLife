@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.RequiresApi
+import com.sleepysoft.gaminglife.toast
 import graphengine.GraphContext
 import graphengine.GraphView
 import java.lang.ref.WeakReference
@@ -44,6 +45,10 @@ class GlControllerContext : GraphContext {
 
     override fun refresh() {
         view.get()?.invalidate()
+    }
+
+    override fun toast(text: String) {
+        context.get()?.toast(text)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

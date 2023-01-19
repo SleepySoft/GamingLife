@@ -18,6 +18,8 @@ class GlTimeViewEditorController(
     private var selectedProgressData: MultipleSectionProgressDecorator.ProgressData? = null
 
     private var thisLayer: GraphLayer? = null
+    private lateinit var mEnsureButtonL: GraphCircle
+    private lateinit var mEnsureButtonR: GraphCircle
     private lateinit var statisticsBar: GraphRectangle
     private lateinit var progressDecorator: MultipleSectionProgressDecorator
     private lateinit var interactiveDecorator: InteractiveDecorator
@@ -91,6 +93,13 @@ class GlTimeViewEditorController(
         }
     }
 
+    override fun onItemTriggered(item: GraphItem) {
+        if ((item == mEnsureButtonL) || (item == mEnsureButtonR)) {
+            mDailyRecord.saveDailyRecord()
+            mCtrlContext.toast("保存成功")
+        }
+    }
+
     // ------------------------------------- Private Functions -------------------------------------
 
     private fun buildTimeViewEditorLayer() {
@@ -100,7 +109,7 @@ class GlTimeViewEditorController(
 
             buildMainGraph(layer)
             buildTaskGroupGraph(layer)
-            // rebuildDailyBar(layer)
+            buildOtherGraphItems(layer)
 
             thisLayer = layer
         }
@@ -159,6 +168,73 @@ class GlTimeViewEditorController(
         }
     }
 
+    private fun buildOtherGraphItems(layer: GraphLayer) {
+        mEnsureButtonL = GraphCircle().apply {
+            this.id = "TimeView.EnsureL"
+            this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#FF6347")
+                this.style = Paint.Style.FILL
+            }
+        }
+
+        val textL = AutoFitTextDecorator(mCtrlContext, mEnsureButtonL).apply {
+            this.mainText = "确定"
+            this.fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#FFFFFF")
+                this.textAlign = Paint.Align.CENTER
+            }
+        }
+        mEnsureButtonL.graphItemDecorator.add(textL)
+
+        val progressItemL = GraphCircleProgress(
+            mEnsureButtonL, 1.3f).apply {
+            this.visible = false
+            this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#FFA500")
+                this.style = Paint.Style.FILL
+            }
+        }
+        mEnsureButtonL.graphActionDecorator.add(
+            LongPressProgressDecorator(
+                mCtrlContext, mEnsureButtonL, progressItemL, 1000.0f, this).apply { init() })
+        layer.addGraphItem(mEnsureButtonL)
+        layer.insertGraphItemAfter(progressItemL, mEnsureButtonL)
+
+        // -----------------------------------------------------------------------------
+
+        mEnsureButtonR = GraphCircle().apply {
+            this.id = "TimeView.EnsureR"
+            this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#FF6347")
+                this.style = Paint.Style.FILL
+            }
+        }
+
+        val textR = AutoFitTextDecorator(mCtrlContext, mEnsureButtonR).apply {
+            this.mainText = "确定"
+            this.fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#FFFFFF")
+                this.textAlign = Paint.Align.CENTER
+            }
+        }
+        mEnsureButtonR.graphItemDecorator.add(textR)
+
+        val progressItemR = GraphCircleProgress(
+            mEnsureButtonR, 1.3f).apply {
+            this.visible = false
+            this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#FFA500")
+                this.style = Paint.Style.FILL
+            }
+        }
+        mEnsureButtonR.graphActionDecorator.add(
+            LongPressProgressDecorator(
+                mCtrlContext, mEnsureButtonR, progressItemR, 1000.0f, this).apply { init() })
+        layer.addGraphItem(mEnsureButtonR)
+        layer.insertGraphItemAfter(progressItemR, mEnsureButtonR)
+
+    }
+
     private fun rebuildDailyBar(layer: GraphLayer) {
 /*        dailySubBars.clear()
         layer.removeGraphItem { it.id == "TimeView.SubTaskBar" }
@@ -210,6 +286,9 @@ class GlTimeViewEditorController(
                 thisLayer?.run { visible = false }
             }
             else {
+                mDailyRecord.reloadDailyRecord()
+                updateProgress()
+
                 layoutLandscape(graphView)
                 thisLayer?.run { visible = true }
             }
@@ -282,12 +361,26 @@ class GlTimeViewEditorController(
 
         // Layout task bubble
 
+        val rectItems = RectF(layoutArea).apply {
+            inflate(-100.0f, 0.0f, -100.0f, 0.0f)
+        }
         for (i in 0 until mSurroundItems.size) {
             val item = mSurroundItems[i]
-            item.origin.x = layoutArea.left + layoutArea.width() * (i + 1) / (mSurroundItems.size + 1).toFloat()
-            item.origin.y = layoutArea.centerY() + layoutArea.height() * 0.2f
-            item.radius = 60.0f
+            item.origin.x = rectItems.left + rectItems.width() * (i + 1) / (mSurroundItems.size + 1).toFloat()
+            item.origin.y = rectItems.centerY() + rectItems.height() * 0.1f
+            item.radius = 60.0f     // TODO: Relative
         }
+
+        // Layout ensure button
+        // TODO: Relative
+
+        mEnsureButtonL.origin.x = layoutArea.left + 150.0f
+        mEnsureButtonL.origin.y = layoutArea.bottom - 150.0f
+        mEnsureButtonL.radius = 75.0f
+
+        mEnsureButtonR.origin.x = layoutArea.right - 150.0f
+        mEnsureButtonR.origin.y = layoutArea.bottom - 150.0f
+        mEnsureButtonR.radius = 75.0f
     }
 
 /*    private fun timeStampToBarBaseX(ts: Long) : Float {

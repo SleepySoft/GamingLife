@@ -31,6 +31,7 @@ class GlDailyRecord {
     var dailyExtraFiles = listOf< String >()
 
     var dailyTs: Long = 0
+    var originDate: Date = Date()
     var taskRecords: MutableList< TaskRecord > = mutableListOf()
     // val dailyGroupTime: MutableMap< String , Long > = mutableMapOf()
 
@@ -39,6 +40,7 @@ class GlDailyRecord {
     fun newDailyRecord() : Boolean {
         GlLog.i("New daily data.")
 
+        originDate = GlDateTime.datetime()
         dailyPath = GlRoot.getDailyFolderName(0)
         dailyFile = GL_FILE_DAILY_RECORD
 
@@ -63,12 +65,14 @@ class GlDailyRecord {
         dailyRecord.clear()
         dailyExtraFiles = listOf()
         dailyTs = 0
+        originDate = Date()
         taskRecords = mutableListOf()
     }
 
     fun loadDailyRecord(dateTime: Date) : Boolean {
         initDailyRecord()
 
+        originDate = dateTime
         dailyPath = GlRoot.getDailyFolderName(dateTime)
         dailyFile = if (GlDateTime.zeroDateHMS(dateTime).time == GlDateTime.dayStartTimeStamp()) {
             GL_FILE_DAILY_RECORD
@@ -76,11 +80,15 @@ class GlDailyRecord {
             GlFile.joinPaths(dailyPath, GL_FILE_DAILY_RECORD)
         }
 
+        return reloadDailyRecord()
+    }
+
+    fun reloadDailyRecord() : Boolean {
         return if (parseDailyFile(dailyFile) and collectDailyExtraFiles()) {
-            GlLog.i("GlDailyStatistics - Load daily data $dateTime SUCCESS.")
+            GlLog.i("GlDailyStatistics - Load daily data $originDate SUCCESS.")
             true
         } else {
-            GlLog.i("GlDailyStatistics - Load daily data $dateTime FAIL.")
+            GlLog.i("GlDailyStatistics - Load daily data $originDate FAIL.")
             false
         }
     }
