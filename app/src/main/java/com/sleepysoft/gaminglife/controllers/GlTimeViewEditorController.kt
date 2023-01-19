@@ -17,6 +17,7 @@ class GlTimeViewEditorController(
 
     private var selectedProgressData: MultipleSectionProgressDecorator.ProgressData? = null
 
+    private var thisLayer: GraphLayer? = null
     private lateinit var statisticsBar: GraphRectangle
     private lateinit var progressDecorator: MultipleSectionProgressDecorator
     private lateinit var interactiveDecorator: InteractiveDecorator
@@ -48,16 +49,27 @@ class GlTimeViewEditorController(
             if (!item.boundRect().contains(pos.x, pos.y)) {
                 // User drag outside the bar
                 selectedProgressData?.run {
-                    val taskData = this.userData as TaskData?
-                    taskData?.run {
+                    val taskRecord = this.userData as TaskRecord?
+                    taskRecord?.run {
                         // Find the task data from progress data and remove from record by its uuid
-                        mDailyRecord.removeTask(this.id)
+                        mDailyRecord.removeTask(this.uuid)
                         updateProgress()
                     }
                 }
             }
         } else if (mSurroundItems.contains(item)) {
-
+            val taskData = item.itemData as TaskData?
+            taskData?.let {
+                val pct = progressDecorator.xToPct(pos.x)
+                val timeStamp = mDailyRecord.dailyTs + (TIMESTAMP_COUNT_IN_DAY * pct).toLong()
+                mDailyRecord.addTask(TaskRecord().apply {
+                    taskID = ""
+                    groupID = it.id
+                    startTime = timeStamp
+                })
+                updateProgress()
+            }
+            item.offsetPixel = PointF(0.0f, 0.0f)
         }
 
         // Drop all select data
@@ -89,6 +101,8 @@ class GlTimeViewEditorController(
             buildMainGraph(layer)
             buildTaskGroupGraph(layer)
             // rebuildDailyBar(layer)
+
+            thisLayer = layer
         }
     }
 
@@ -193,9 +207,11 @@ class GlTimeViewEditorController(
             if (graphView.isPortrait()) {
                 // Do nothing
                 // This controller should not be layout as portrait
+                thisLayer?.run { visible = false }
             }
             else {
                 layoutLandscape(graphView)
+                thisLayer?.run { visible = true }
             }
         }
     }
@@ -205,14 +221,14 @@ class GlTimeViewEditorController(
 
         // Layout daily bar
 
-        dailyBarBase.rect.set(
+        statisticsBar.rect.set(
             layoutArea.left,
             layoutArea.centerY(),
             layoutArea.right,
             layoutArea.centerY() + 90.0f
         )
 
-*//*        val barBaseRect = dailyBarBase.boundRect()
+        val barBaseRect = statisticsBar.boundRect()
         for (i in 0 until dailySubBars.size) {
             val subBar = dailySubBars[i]
             val taskRec = subBar.itemData as TaskRecordEx
@@ -228,7 +244,7 @@ class GlTimeViewEditorController(
                 timeStampToBarBaseX(taskRec.endTime),
                 barBaseRect.bottom
             )
-        }*//*
+        }
 
         // Layout task bubble
 
@@ -253,12 +269,30 @@ class GlTimeViewEditorController(
     }*/
 
     private fun layoutLandscape(graphView: GraphView) {
+        val layoutArea = RectF(graphView.paintArea)
 
+        // Layout daily bar
+
+        statisticsBar.rect.run {
+            left = layoutArea.left
+            right = layoutArea.right
+            top = layoutArea.top + layoutArea.height() * 0.3f
+            bottom = top + 90.0f     // TODO: Relative
+        }
+
+        // Layout task bubble
+
+        for (i in 0 until mSurroundItems.size) {
+            val item = mSurroundItems[i]
+            item.origin.x = layoutArea.left + layoutArea.width() * (i + 1) / (mSurroundItems.size + 2).toFloat()
+            item.origin.y = layoutArea.centerY() + 160.0f     // TODO: Relative
+            item.radius = 60.0f
+        }
     }
 
 /*    private fun timeStampToBarBaseX(ts: Long) : Float {
         val dayStartTs = GlDateTime.dayStartTimeStamp()
-        val barBaseRect = dailyBarBase.boundRect()
+        val barBaseRect = statisticsBar.boundRect()
         if (ts <= dayStartTs) {
             return 0.0f
         } else if (ts >= dayStartTs + TIMESTAMP_COUNT_IN_DAY) {
@@ -272,6 +306,7 @@ class GlTimeViewEditorController(
         val dayTsBase = mDailyRecord.dailyTs
         val dayTsLimit = min(dayTsBase + TIMESTAMP_COUNT_IN_DAY - 1, GlDateTime.datetime().time)
 
+        progressDecorator.progressData.clear()
         for (task in mDailyRecord.taskRecords) {
             progressDecorator.progressData.add(
                 MultipleSectionProgressDecorator.ProgressData(

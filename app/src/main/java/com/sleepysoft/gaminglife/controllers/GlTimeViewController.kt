@@ -17,7 +17,6 @@ class GlTimeViewController(
     private val audioRecordController: GlAudioRecordLayerController)
     : GraphInteractiveListener(), GraphViewObserver {
 
-
     private lateinit var mTimeViewBaseLayer: GraphLayer
     private var mCenterRadius = 0.1f
     private var mSurroundRadius = 0.1f
@@ -340,9 +339,11 @@ class GlTimeViewController(
         mCtrlContext.graphView?.also { graphView ->
             if (graphView.isPortrait()) {
                 layoutPortrait(graphView)
+                mTimeViewBaseLayer.visible = true
             }
             else {
-                layoutLandscape(graphView)
+                // layoutLandscape(graphView)
+                mTimeViewBaseLayer.visible = false
             }
         }
     }

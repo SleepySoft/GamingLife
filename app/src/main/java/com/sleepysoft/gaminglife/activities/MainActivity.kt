@@ -16,9 +16,7 @@ import com.sleepysoft.gaminglife.PermissionActivity
 import com.sleepysoft.gaminglife.controllers.*
 import com.sleepysoft.gaminglife.toast
 import com.sleepysoft.gaminglife.views.GlView
-import glcore.GlFile
-import glcore.GlLog
-import glcore.GlRoot
+import glcore.*
 import glenv.GlEnv
 import graphengine.GraphView
 import java.lang.ref.WeakReference
@@ -36,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     private val mCtrlContext = GlControllerContext()
 
     private lateinit var timeViewController: GlTimeViewController
-    // private lateinit var timeViewControllerEx: GlTimeViewEditorController
+    private lateinit var timeViewEditorController: GlTimeViewEditorController
     private lateinit var audioRecordController: GlAudioRecordLayerController
 
 /*    companion object {
@@ -185,9 +183,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun buildGraphControllers() {
         mCtrlContext.graphView = GraphView(mCtrlContext)
+
         audioRecordController = GlAudioRecordLayerController(mCtrlContext).apply { init() }
-        timeViewController = GlTimeViewController(
-            mCtrlContext, audioRecordController).apply { init() }
+
+        timeViewController = GlTimeViewController(mCtrlContext, audioRecordController).apply { init() }
+
+        timeViewEditorController = GlTimeViewEditorController(
+            mCtrlContext,
+            GlDailyRecord().apply { loadDailyRecord(GlDateTime.datetime()) },
+            GlRoot.systemConfig).apply { init() }
+
         // timeViewControllerEx = GlTimeViewEditorController(mCtrlContext, GlRoot.glTaskModule).apply { init() }
     }
 
