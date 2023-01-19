@@ -6,6 +6,8 @@ import androidx.annotation.RequiresApi
 import com.sleepysoft.gaminglife.R
 import glcore.*
 import graphengine.*
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.min
 
 
@@ -20,6 +22,10 @@ class GlTimeViewEditorController(
     private var thisLayer: GraphLayer? = null
     private lateinit var mEnsureButtonL: GraphCircle
     private lateinit var mEnsureButtonR: GraphCircle
+
+    private lateinit var mTimeHintText: AutoFitTextDecorator
+    private lateinit var mTimeHintTextArea: GraphRectangle
+
     private lateinit var statisticsBar: GraphRectangle
     private lateinit var progressDecorator: MultipleSectionProgressDecorator
     private lateinit var interactiveDecorator: InteractiveDecorator
@@ -60,28 +66,37 @@ class GlTimeViewEditorController(
                 }
             }
         } else if (mSurroundItems.contains(item)) {
-            val taskData = item.itemData as TaskData?
-            taskData?.let {
-                val pct = progressDecorator.xToPct(pos.x)
-                val timeStamp = mDailyRecord.dailyTs + (TIMESTAMP_COUNT_IN_DAY * pct).toLong()
-                mDailyRecord.addTask(TaskRecord().apply {
-                    taskID = ""
-                    groupID = it.id
-                    startTime = timeStamp
-                })
-                updateProgress()
+            if (item.boundRect().intersect(statisticsBar.boundRect())) {
+                val taskData = item.itemData as TaskData?
+                taskData?.let {
+                    val pct = progressDecorator.xToPct(item.boundRect().centerX())
+                    val timeStamp = mDailyRecord.dailyTs + (TIMESTAMP_COUNT_IN_DAY * pct).toLong()
+                    mDailyRecord.addTask(TaskRecord().apply {
+                        taskID = ""
+                        groupID = it.id
+                        startTime = timeStamp
+                    })
+                    updateProgress()
+                }
             }
             item.offsetPixel = PointF(0.0f, 0.0f)
         }
 
         // Drop all select data
         selectedProgressData = null
+        mTimeHintTextArea.visible = false
     }
 
     override fun onItemDragging(item: GraphItem, intersectItems: List< GraphItem >, pos: PointF) {
         if (mSurroundItems.contains(item)) {
             if (item.boundRect().intersect(statisticsBar.boundRect())) {
-                // TODO: Show current scale
+                val pct = progressDecorator.xToPct(item.boundRect().centerX())
+                val timeStamp = mDailyRecord.dailyTs + (TIMESTAMP_COUNT_IN_DAY * pct).toLong()
+                mTimeHintText.mainText = SimpleDateFormat(
+                    "HH:mm:ss", Locale.getDefault()).format(Date(timeStamp))
+                mTimeHintTextArea.visible = true
+            } else {
+                mTimeHintTextArea.visible = false
             }
         }
     }
@@ -169,6 +184,30 @@ class GlTimeViewEditorController(
     }
 
     private fun buildOtherGraphItems(layer: GraphLayer) {
+        mTimeHintTextArea = GraphRectangle().apply {
+            this.id = "TimeView.MenuDailyStatistics"
+            this.visible = false
+            this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                this.color = Color.parseColor("#FF6347")
+                this.style = Paint.Style.STROKE
+                this.strokeWidth = 2.0f
+            }
+
+            mTimeHintText =
+                AutoFitTextDecorator(mCtrlContext, this).apply {
+                    this.mainText = ""
+                    this.fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                        this.color = Color.parseColor("#292421")
+                        this.textAlign = Paint.Align.CENTER
+                    }
+                }
+
+            this.graphItemDecorator.add(mTimeHintText)
+        }
+        layer.addGraphItem(mTimeHintTextArea)
+
+        // -----------------------------------------------------------------------------------------
+
         mEnsureButtonL = GraphCircle().apply {
             this.id = "TimeView.EnsureL"
             this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -200,7 +239,7 @@ class GlTimeViewEditorController(
         layer.addGraphItem(mEnsureButtonL)
         layer.insertGraphItemAfter(progressItemL, mEnsureButtonL)
 
-        // -----------------------------------------------------------------------------
+        // -----------------------------------------------------------------------------------------
 
         mEnsureButtonR = GraphCircle().apply {
             this.id = "TimeView.EnsureR"
@@ -370,6 +409,15 @@ class GlTimeViewEditorController(
             item.origin.y = rectItems.centerY() + rectItems.height() * 0.1f
             item.radius = 60.0f     // TODO: Relative
         }
+
+        // Layout time hint
+
+        mTimeHintTextArea.rect = RectF(
+            layoutArea.centerX() - 100.0f,
+            layoutArea.top + 80.0f,
+            layoutArea.centerX() + 100.0f,
+            layoutArea.top + 140.0f,
+        )
 
         // Layout ensure button
         // TODO: Relative
