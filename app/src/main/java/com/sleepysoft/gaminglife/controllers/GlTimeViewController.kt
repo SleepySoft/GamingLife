@@ -74,7 +74,7 @@ class GlTimeViewController(
         }
     }
 
-    override fun onItemDropped(item: GraphItem, intersectItems: List< GraphItem >) {
+    override fun onItemDropped(item: GraphItem, intersectItems: List< GraphItem >, pos: PointF) {
 
         if (item == mCenterItem) {
             // Drag center item to surround, closestItem as surroundItem
@@ -263,7 +263,7 @@ class GlTimeViewController(
                     this.style = Paint.Style.FILL
                 }
             }
-            mCenterItem.graphActionDecorator.add(InteractiveDecorator(mCtrlContext, mCenterItem, this))
+            mCenterItem.graphActionDecorator.add(InteractiveDecorator(mCtrlContext, mCenterItem, true, this))
             mCenterItem.graphActionDecorator.add(LongPressProgressDecorator(
                 mCtrlContext, mCenterItem, mProgressItem, 30.0f, this).apply { init() })
 
@@ -286,7 +286,7 @@ class GlTimeViewController(
                     }
                 }
                 item.graphItemDecorator.add(text)
-                item.graphActionDecorator.add(InteractiveDecorator(mCtrlContext, item, this))
+                item.graphActionDecorator.add(InteractiveDecorator(mCtrlContext, item, true, this))
                 layer.addGraphItem(item)
 
                 mSurroundItems.add(item)

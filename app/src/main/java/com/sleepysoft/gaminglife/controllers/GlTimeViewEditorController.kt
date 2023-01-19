@@ -1,45 +1,33 @@
 package com.sleepysoft.gaminglife.controllers
 
 import android.graphics.*
-import android.os.Handler
-import android.os.Looper
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.sleepysoft.gaminglife.R
 import glcore.*
 import graphengine.*
+import kotlin.math.min
 
 
-class GlTimeViewControllerEx(
+class GlTimeViewEditorController(
     private val mCtrlContext: GlControllerContext,
-    private val mGlTask: GlSystemConfig)
+    private val mDailyRecord: GlDailyRecord,
+    private val mGlSystemConfig: GlSystemConfig)
     : GraphInteractiveListener(), GraphViewObserver {
 
-    private var mHandler = Handler(Looper.getMainLooper())
-    private val mRunnable = Runnable { polling() }
+    private var selectedProgressData: MultipleSectionProgressDecorator.ProgressData? = null
 
-    private val recordBubble = GraphImage()
-    private val suggestionBubble = GraphCircle()
-
-    private val dailyBarBase = GraphRectangle()
-    private val dailySubBars = mutableListOf< GraphRectangle >()
+    private lateinit var statisticsBar: GraphRectangle
+    private lateinit var progressDecorator: MultipleSectionProgressDecorator
+    private lateinit var interactiveDecorator: InteractiveDecorator
 
     private var mSurroundItems = mutableListOf< GraphCircle >()
     private var mSurroundItemText = mutableListOf< AutoFitTextDecorator >()
 
     fun init() {
-        buildTimeViewLayer()
+        buildTimeViewEditorLayer()
         mCtrlContext.graphView?.mGraphViewObserver?.add(this)
-
-/*        adaptViewArea()
-        doLayout()*/
-
-        mHandler.postDelayed(mRunnable, 1000)
-    }
-
-    fun polling() {
-        if (dailySubBars.isNotEmpty()) {
-            dailySubBars.last().rect.right = timeStampToBarBaseX(GlDateTime.datetime().time)
-            mCtrlContext.refresh()
-        }
+        updateProgress()
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
@@ -54,70 +42,78 @@ class GlTimeViewControllerEx(
 
     // ----------------------- Implements GraphInteractiveListener interface -----------------------
 
-    override fun onItemClicked(item: GraphItem) {
+    @RequiresApi(Build.VERSION_CODES.N)
+    override fun onItemDropped(item: GraphItem, intersectItems: List<GraphItem>, pos: PointF) {
+        if (statisticsBar == item) {
+            if (!item.boundRect().contains(pos.x, pos.y)) {
+                // User drag outside the bar
+                selectedProgressData?.run {
+                    val taskData = this.userData as TaskData?
+                    taskData?.run {
+                        // Find the task data from progress data and remove from record by its uuid
+                        mDailyRecord.removeTask(this.id)
+                        updateProgress()
+                    }
+                }
+            }
+        } else if (mSurroundItems.contains(item)) {
 
+        }
+
+        // Drop all select data
+        selectedProgressData = null
     }
 
-    override fun onItemDropped(item: GraphItem, intersectItems: List<GraphItem>) {
-
+    override fun onItemDragging(item: GraphItem, intersectItems: List< GraphItem >, pos: PointF) {
+        if (mSurroundItems.contains(item)) {
+            if (item.boundRect().intersect(statisticsBar.boundRect())) {
+                // TODO: Show current scale
+            }
+        }
     }
 
-    override fun onItemTriggered(item: GraphItem) {
-
+    override fun onItemSelected(item: GraphItem, pos: PointF) {
+        if (statisticsBar == item) {
+            val pct = progressDecorator.xToPct(pos.x)
+            selectedProgressData = progressDecorator.pctToProgressData(pct)
+        }
     }
 
     // ------------------------------------- Private Functions -------------------------------------
 
-    private fun buildTimeViewLayer() {
+    private fun buildTimeViewEditorLayer() {
         mCtrlContext.graphView?.also { graphView ->
-            val layer = GraphLayer("TimeView.BaseLayer", true, graphView)
+            val layer = GraphLayer("TimeViewEditor.BaseLayer", false, graphView)
             graphView.addLayer(layer)
 
             buildMainGraph(layer)
             buildTaskGroupGraph(layer)
-            rebuildDailyBar(layer)
+            // rebuildDailyBar(layer)
         }
     }
 
     private fun buildMainGraph(layer: GraphLayer) {
-        val context = mCtrlContext.context.get()
-        if (context != null) {
-            with(recordBubble) {
-                this.id = "TimeView.Record"
-                this.mBitmapImage = BitmapFactory.decodeResource(
-                    context.resources, R.drawable.icon_audio_recording)
-            }
-        }
-        else {
-            assert(false)
-        }
-
-        with(suggestionBubble) {
-            this.id = "TimeView.Record"
-            this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                this.color = Color.parseColor(COLOR_SUGGESTION)
-                this.style = Paint.Style.FILL
-            }
-            this.graphItemDecorator.add(AutoFitTextDecorator(mCtrlContext, this).apply {
-                this.mainText = "?"
-                this.fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    this.color = Color.parseColor("#FFFFFF")
-                    this.textAlign = Paint.Align.CENTER
-                }
-            })
-        }
-
-        with(dailyBarBase) {
-            this.id = "TimeView.Record"
+        statisticsBar = GraphRectangle().apply {
+            this.id = "Statistics.BaseBar"
             this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 this.color = Color.parseColor(COLOR_DAILY_BAR_BASE)
                 this.style = Paint.Style.FILL
             }
         }
 
-        layer.addGraphItem(recordBubble)
-        layer.addGraphItem(suggestionBubble)
-        layer.addGraphItem(dailyBarBase)
+        progressDecorator = MultipleSectionProgressDecorator(mCtrlContext, statisticsBar).apply {
+            progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.125f, "03:00"))
+            progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.250f, "06:00"))
+            progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.500f, "12:00"))
+            progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.625f, "15:00"))
+            progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.750f, "18:00"))
+            progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.875f, "21:00"))
+        }
+        statisticsBar.graphItemDecorator.add(progressDecorator)
+        statisticsBar.graphActionDecorator.add(
+            InteractiveDecorator(mCtrlContext, statisticsBar, false, this))
+
+        layer.addGraphItem(statisticsBar)
     }
 
     private fun buildTaskGroupGraph(layer: GraphLayer) {
@@ -141,7 +137,7 @@ class GlTimeViewControllerEx(
             }
             item.graphItemDecorator.add(text)
             item.graphActionDecorator.add(
-                InteractiveDecorator(mCtrlContext, item, this))
+                InteractiveDecorator(mCtrlContext, item, true, this))
             layer.addGraphItem(item)
 
             mSurroundItems.add(item)
@@ -183,7 +179,7 @@ class GlTimeViewControllerEx(
                 this.id = "TimeView.SubTaskBar"
                 this.itemData = taskRecord
                 this.shapePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    this.color = Color.parseColor(mGlTask.colorOfTask(taskRecord.groupID))
+                    this.color = Color.parseColor(mGlSystemConfig.colorOfTask(taskRecord.groupID))
                     this.style = Paint.Style.FILL
                 }
             }
@@ -195,7 +191,8 @@ class GlTimeViewControllerEx(
     private fun doLayout() {
         mCtrlContext.graphView?.also { graphView ->
             if (graphView.isPortrait()) {
-                layoutPortrait(graphView)
+                // Do nothing
+                // This controller should not be layout as portrait
             }
             else {
                 layoutLandscape(graphView)
@@ -203,7 +200,7 @@ class GlTimeViewControllerEx(
         }
     }
 
-    private fun layoutPortrait(graphView: GraphView) {
+/*    private fun layoutPortrait(graphView: GraphView) {
         val layoutArea = RectF(graphView.paintArea)
 
         // Layout daily bar
@@ -215,7 +212,7 @@ class GlTimeViewControllerEx(
             layoutArea.centerY() + 90.0f
         )
 
-/*        val barBaseRect = dailyBarBase.boundRect()
+*//*        val barBaseRect = dailyBarBase.boundRect()
         for (i in 0 until dailySubBars.size) {
             val subBar = dailySubBars[i]
             val taskRec = subBar.itemData as TaskRecordEx
@@ -231,7 +228,7 @@ class GlTimeViewControllerEx(
                 timeStampToBarBaseX(taskRec.endTime),
                 barBaseRect.bottom
             )
-        }*/
+        }*//*
 
         // Layout task bubble
 
@@ -253,13 +250,13 @@ class GlTimeViewControllerEx(
         recordBubble.moveCenter(PointF(
             layoutArea.centerX() + 60.0f,
             layoutArea.centerY() + 220.0f ))
-    }
+    }*/
 
     private fun layoutLandscape(graphView: GraphView) {
 
     }
 
-    private fun timeStampToBarBaseX(ts: Long) : Float {
+/*    private fun timeStampToBarBaseX(ts: Long) : Float {
         val dayStartTs = GlDateTime.dayStartTimeStamp()
         val barBaseRect = dailyBarBase.boundRect()
         if (ts <= dayStartTs) {
@@ -269,5 +266,26 @@ class GlTimeViewControllerEx(
         } else {
             return barBaseRect.left + barBaseRect.width() * (ts - dayStartTs).toFloat() / TIMESTAMP_COUNT_IN_DAY
         }
+    }*/
+
+    private fun updateProgress() {
+        val dayTsBase = mDailyRecord.dailyTs
+        val dayTsLimit = min(dayTsBase + TIMESTAMP_COUNT_IN_DAY - 1, GlDateTime.datetime().time)
+
+        for (task in mDailyRecord.taskRecords) {
+            progressDecorator.progressData.add(
+                MultipleSectionProgressDecorator.ProgressData(
+                    (task.startTime - dayTsBase).toFloat() / TIMESTAMP_COUNT_IN_DAY,
+                    buildPaintForTask(task),
+                    task))
+        }
+        progressDecorator.progressEnd = (dayTsLimit - dayTsBase).toFloat() / TIMESTAMP_COUNT_IN_DAY
     }
+
+    private fun buildPaintForTask(task: TaskRecord) =
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.parseColor(
+                GlRoot.systemConfig.getTaskData(task.groupID)?.color ?: COLOR_DAILY_BAR_BASE)
+            this.style = Paint.Style.FILL
+        }
 }

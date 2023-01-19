@@ -188,7 +188,7 @@ class GlAudioRecordLayerController(
 
     // -------------------------------------------------------------------------------
 
-    override fun onItemDropped(item: GraphItem, intersectItems: List< GraphItem >) {
+    override fun onItemDropped(item: GraphItem, intersectItems: List< GraphItem >, pos: PointF) {
 
         GlRoot.env.glAudio.stopRecord()
 

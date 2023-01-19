@@ -152,7 +152,8 @@ class GlDailyStatisticsController(
             progressDecorator.progressData.add(
                 MultipleSectionProgressDecorator.ProgressData(
                     (task.startTime - dayTsBase).toFloat() / TIMESTAMP_COUNT_IN_DAY,
-                    buildPaintForTask(task)))
+                    buildPaintForTask(task),
+                    task))
         }
         progressDecorator.progressEnd = (dayTsLimit - dayTsBase).toFloat() / TIMESTAMP_COUNT_IN_DAY
     }

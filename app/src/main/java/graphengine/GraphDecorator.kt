@@ -64,6 +64,11 @@ open class GraphActionDecorator(context: GraphContext, decoratedItem: GraphItem)
         return ActionHandler.ACT.IGNORED
     }
 
+    // --------------------------------------------------------------
+
+    protected fun intersectItems(exceptItem: GraphItem?) : List< GraphItem > =
+        decoratedItem.itemLayer?.itemIntersectRect(
+            decoratedItem.boundRect()) { it.visible && it != exceptItem } ?: listOf()
 }
 
 
@@ -114,7 +119,8 @@ class MultipleSectionProgressDecorator(context: GraphContext, decoratedItem: Gra
     // The progress pct records
     data class ProgressData(
         var progressPct: Float,
-        var progressPaint: Paint
+        var progressPaint: Paint,
+        var userData: Any? = null
     )
 
     data class ProgressScale(
@@ -187,9 +193,26 @@ class MultipleSectionProgressDecorator(context: GraphContext, decoratedItem: Gra
         }
     }
 
-    private fun pctToX(pct: Float): Float {
+    fun xToPct(x: Float) : Float {
+        val wholeRect = decoratedItem.boundRect()
+        return (x - wholeRect.left) / wholeRect.width()
+    }
+
+    fun pctToX(pct: Float) : Float {
         val wholeRect = decoratedItem.boundRect()
         return wholeRect.left + pct * wholeRect.width()
+    }
+
+    fun pctToProgressData(pct: Float) : ProgressData? {
+        var data: ProgressData? = null
+        for (i in 0 .. progressData.size) {
+            val judgePct = if (i == progressData.size) progressEnd else progressData[i].progressPct
+            if (judgePct >= pct) {
+                data = if (i > 0) progressData[i - 1] else null
+                break
+            }
+        }
+        return data
     }
 }
 
@@ -270,9 +293,62 @@ class ClickDecorator(
 }
 
 
+/*class ActionPenetrateDecorator(
+    context: GraphContext,
+    decoratedItem: GraphItem,
+    var interactiveListener: GraphInteractiveListener? = null)
+    : GraphActionDecorator(context, decoratedItem) {
+
+    override fun onActionUp(pos: PointF): ActionHandler.ACT {
+        interactiveListener?.onItemDropped(decoratedItem, intersectItems(decoratedItem), pos)
+        context.refresh()
+        return ActionHandler.ACT.HANDLED
+    }
+
+*//*    override fun onActionDown(pos: PointF): ActionHandler.ACT {
+        return ActionHandler.ACT.IGNORED
+    }*//*
+
+    override fun onActionMove(
+        posBefore: PointF,
+        posNow: PointF,
+        distanceX: Float,
+        distanceY: Float
+    ): ActionHandler.ACT {
+        interactiveListener?.onItemDragging(decoratedItem, intersectItems(decoratedItem))
+        context.refresh()
+        return ActionHandler.ACT.IGNORED
+    }
+
+*//*    override fun onActionFling(
+        posBefore: PointF,
+        posNow: PointF,
+        velocityX: Float,
+        velocityY: Float
+    ): ActionHandler.ACT {
+        return ActionHandler.ACT.IGNORED
+    }*//*
+
+    override fun onActionClick(pos: PointF): ActionHandler.ACT {
+        interactiveListener?.onItemClicked(decoratedItem)
+        context.refresh()
+        return ActionHandler.ACT.HANDLED
+    }
+
+    override fun onActionSelect(pos: PointF): ActionHandler.ACT {
+        return ActionHandler.ACT.IGNORED
+    }
+
+    override fun onActionLongPress(pos: PointF): ActionHandler.ACT {
+        return ActionHandler.ACT.IGNORED
+    }
+}*/
+
+
 class InteractiveDecorator(
     context: GraphContext,
     decoratedItem: GraphItem,
+    var autoHandleDragging: Boolean = true,
     var interactiveListener: GraphInteractiveListener? = null)
     : GraphActionDecorator(context, decoratedItem) {
 
@@ -290,10 +366,14 @@ class InteractiveDecorator(
         if (trackingItem == decoratedItem) {
             GlLog.i("InteractiveDecorator.onActionUp [$decoratedItem]")
 
-            decoratedItem.inflatePct = 0.0f
+            if (autoHandleDragging) {
+                decoratedItem.inflatePct = 0.0f
+            }
+
             interactiveListener?.onItemDropped(
-                decoratedItem, intersectItems(decoratedItem))
+                decoratedItem, intersectItems(decoratedItem), pos)
             trackingItem = null
+
             context.refresh()
         }
         // Leak this action to other handler avoiding issues
@@ -305,9 +385,11 @@ class InteractiveDecorator(
         return if (decoratedItem == trackingItem) {
             GlLog.i("InteractiveDecorator.onActionMove [$decoratedItem]")
 
-            decoratedItem.shiftItem(-distanceX, -distanceY)
+            if (autoHandleDragging) {
+                decoratedItem.shiftItem(-distanceX, -distanceY)
+            }
             interactiveListener?.onItemDragging(
-                decoratedItem, intersectItems(decoratedItem))
+                decoratedItem, intersectItems(decoratedItem), posNow)
             context.refresh()
 
             ActionHandler.ACT.HANDLED
@@ -333,11 +415,14 @@ class InteractiveDecorator(
             GlLog.i("InteractiveDecorator.onActionSelect [$decoratedItem]")
 
             trackingItem = decoratedItem
-            decoratedItem.inflatePct = 10.0f
-            decoratedItem.itemLayer?.bringGraphItemToFront(decoratedItem)
-            interactiveListener?.onItemSelected(decoratedItem)
+
+            if (autoHandleDragging) {
+                decoratedItem.inflatePct = 10.0f
+                decoratedItem.itemLayer?.bringGraphItemToFront(decoratedItem)
+            }
 
             context.vibrate(100)
+            interactiveListener?.onItemSelected(decoratedItem, pos)
             context.refresh()
 
             ActionHandler.ACT.HANDLED
@@ -346,12 +431,6 @@ class InteractiveDecorator(
             ActionHandler.ACT.IGNORED
         }
     }
-
-    // --------------------------------------------------------------
-
-    private fun intersectItems(exceptItem: GraphItem?) : List< GraphItem > =
-        decoratedItem.itemLayer?.itemIntersectRect(
-            decoratedItem.boundRect()) { it.visible && it != exceptItem } ?: listOf()
 }
 
 

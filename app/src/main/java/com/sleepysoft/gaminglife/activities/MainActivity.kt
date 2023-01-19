@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     private val mCtrlContext = GlControllerContext()
 
     private lateinit var timeViewController: GlTimeViewController
-    // private lateinit var timeViewControllerEx: GlTimeViewControllerEx
+    // private lateinit var timeViewControllerEx: GlTimeViewEditorController
     private lateinit var audioRecordController: GlAudioRecordLayerController
 
 /*    companion object {
@@ -188,7 +188,7 @@ class MainActivity : AppCompatActivity() {
         audioRecordController = GlAudioRecordLayerController(mCtrlContext).apply { init() }
         timeViewController = GlTimeViewController(
             mCtrlContext, audioRecordController).apply { init() }
-        // timeViewControllerEx = GlTimeViewControllerEx(mCtrlContext, GlRoot.glTaskModule).apply { init() }
+        // timeViewControllerEx = GlTimeViewEditorController(mCtrlContext, GlRoot.glTaskModule).apply { init() }
     }
 
     private fun startGlService() {
