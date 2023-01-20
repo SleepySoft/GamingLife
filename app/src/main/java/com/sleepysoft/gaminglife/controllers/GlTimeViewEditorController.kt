@@ -111,6 +111,7 @@ class GlTimeViewEditorController(
     override fun onItemTriggered(item: GraphItem) {
         if ((item == mEnsureButtonL) || (item == mEnsureButtonR)) {
             mDailyRecord.saveDailyRecord()
+            GlRoot.dailyRecord.reloadDailyRecord()
             mCtrlContext.toast("保存成功")
         }
     }
@@ -142,6 +143,7 @@ class GlTimeViewEditorController(
         progressDecorator = MultipleSectionProgressDecorator(mCtrlContext, statisticsBar).apply {
             progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.125f, "03:00"))
             progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.250f, "06:00"))
+            progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.375f, "09:00"))
             progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.500f, "12:00"))
             progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.625f, "15:00"))
             progressScale.add(MultipleSectionProgressDecorator.ProgressScale(0.750f, "18:00"))
@@ -325,9 +327,7 @@ class GlTimeViewEditorController(
                 thisLayer?.run { visible = false }
             }
             else {
-                mDailyRecord.reloadDailyRecord()
                 updateProgress()
-
                 layoutLandscape(graphView)
                 thisLayer?.run { visible = true }
             }

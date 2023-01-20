@@ -184,6 +184,8 @@ class MainActivity : AppCompatActivity() {
     private fun buildGraphControllers() {
         mCtrlContext.graphView = GraphView(mCtrlContext)
 
+        // TODO: Maybe we just init the controller we need in different orientation.
+
         audioRecordController = GlAudioRecordLayerController(mCtrlContext).apply { init() }
 
         timeViewController = GlTimeViewController(mCtrlContext, audioRecordController).apply { init() }
