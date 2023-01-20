@@ -4,13 +4,18 @@ import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
+import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import android.view.WindowManager
 import android.widget.TextView
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.sleepysoft.gaminglife.DailyExtFileAdapter
 import com.sleepysoft.gaminglife.GamingLifeMainService
 import com.sleepysoft.gaminglife.PermissionActivity
 import com.sleepysoft.gaminglife.controllers.*
@@ -184,16 +189,19 @@ class MainActivity : AppCompatActivity() {
     private fun buildGraphControllers() {
         mCtrlContext.graphView = GraphView(mCtrlContext)
 
-        // TODO: Maybe we just init the controller we need in different orientation.
+        // Optimization: Only one controller will be activated on specific orientation.
+        // Once orientation change. The Activity will be rebuilt and re-inited.
 
-        audioRecordController = GlAudioRecordLayerController(mCtrlContext).apply { init() }
-
-        timeViewController = GlTimeViewController(mCtrlContext, audioRecordController).apply { init() }
-
-        timeViewEditorController = GlTimeViewEditorController(
-            mCtrlContext,
-            GlDailyRecord().apply { loadDailyRecord(GlDateTime.datetime()) },
-            GlRoot.systemConfig).apply { init() }
+        val orientation = this.resources.configuration.orientation
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            audioRecordController = GlAudioRecordLayerController(mCtrlContext).apply { init() }
+            timeViewController = GlTimeViewController(mCtrlContext, audioRecordController).apply { init() }
+        } else {
+            timeViewEditorController = GlTimeViewEditorController(
+                mCtrlContext,
+                GlDailyRecord().apply { loadDailyRecord(GlDateTime.datetime()) },
+                GlRoot.systemConfig).apply { init() }
+        }
 
         // timeViewControllerEx = GlTimeViewEditorController(mCtrlContext, GlRoot.glTaskModule).apply { init() }
     }
