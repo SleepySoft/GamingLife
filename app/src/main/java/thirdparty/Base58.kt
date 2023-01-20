@@ -27,9 +27,6 @@ private val alphabetIndices by lazy {
     IntArray(128) { alphabet.indexOf(it.toChar()) }
 }
 
-class Base58 {
-
-}
 
 /**
  * Encodes the bytes as a base58 string (no checksum is appended).

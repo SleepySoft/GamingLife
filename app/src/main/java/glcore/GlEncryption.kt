@@ -3,6 +3,7 @@ package glcore
 import android.os.Build
 import androidx.annotation.RequiresApi
 import glenv.GlKeyPair
+import thirdparty.encodeToBase58String
 import java.util.*
 import kotlin.experimental.and
 import java.security.MessageDigest
@@ -44,6 +45,8 @@ class GlEncryption {
                     println("Max POW in loop %d: %d".format(loop, keyPairPow))
                     println("  Public: " + keyPair.publicKeyString)
                     println("  Private: " + keyPair.privateKeyString)
+                    println("  Pub Sha: " + pubKeySha.toHexString())
+                    println("  GL ID: " + pubKeySha.encodeToBase58String())
                     println("---------------------------------------------------------------")
                 }
 
