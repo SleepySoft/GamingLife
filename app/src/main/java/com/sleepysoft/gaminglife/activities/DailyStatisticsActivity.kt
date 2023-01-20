@@ -1,24 +1,19 @@
 package com.sleepysoft.gaminglife
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.res.Configuration
 import android.os.Bundle
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
-import com.sleepysoft.gaminglife.controllers.GlAudioRecordLayerController
-import com.sleepysoft.gaminglife.controllers.GlControllerContext
-import com.sleepysoft.gaminglife.controllers.GlDailyStatisticsController
-import com.sleepysoft.gaminglife.controllers.GlTimeViewController
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.sleepysoft.gaminglife.controllers.*
 import com.sleepysoft.gaminglife.views.GlView
-import glcore.DAILY_FOLDER_PREFIX
-import glcore.GlDailyRecord
-import glcore.GlDateTime
-import glcore.GlFile
+import glcore.*
 import graphengine.GraphView
 import java.lang.ref.WeakReference
 
@@ -78,6 +73,7 @@ class DailyStatisticsActivity : AppCompatActivity() {
 
     private val mCtrlContext = GlControllerContext()
     lateinit var mDailyStatisticsController: GlDailyStatisticsController
+    private lateinit var timeViewEditorController: GlTimeViewEditorController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,17 +88,23 @@ class DailyStatisticsActivity : AppCompatActivity() {
         mStatisticsView = findViewById(R.id.id_view_statistics)
 
         mDailyExtFileList = findViewById(R.id.id_recycler_view_ext_files)
-        mDailyExtFileList.layoutManager =
-            LinearLayoutManager(this)
-        mDailyExtFileList.adapter = DailyExtFileAdapter(mDailyRecord, this)
-        mDailyExtFileList.addItemDecoration(
-            DividerItemDecoration(
-                this,
-                DividerItemDecoration.HORIZONTAL
-            )
-        )
 
-        buildContextAndController()
+        val orientation = this.resources.configuration.orientation
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mDailyExtFileList.layoutManager =
+                LinearLayoutManager(this)
+            mDailyExtFileList.adapter = DailyExtFileAdapter(mDailyRecord, this)
+            mDailyExtFileList.addItemDecoration(
+                DividerItemDecoration(
+                    this,
+                    DividerItemDecoration.HORIZONTAL
+                )
+            )
+        } else {
+            mDailyExtFileList.visibility = View.GONE
+        }
+
+        buildContextAndController(orientation)
 
         mStatisticsView.graphView = mCtrlContext.graphView
 
@@ -132,10 +134,16 @@ class DailyStatisticsActivity : AppCompatActivity() {
         }
     }
 
-    private fun buildContextAndController() {
+    private fun buildContextAndController(orientation: Int) {
         mCtrlContext.view = WeakReference(mStatisticsView)
         mCtrlContext.context = WeakReference(this)
         mCtrlContext.graphView = GraphView(mCtrlContext)
-        mDailyStatisticsController = GlDailyStatisticsController(mCtrlContext, mDailyRecord).apply { init() }
+
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mDailyStatisticsController = GlDailyStatisticsController(mCtrlContext, mDailyRecord).apply { init() }
+        } else {
+            timeViewEditorController = GlTimeViewEditorController(
+                mCtrlContext, mDailyRecord, GlRoot.systemConfig).apply { init() }
+        }
     }
 }
