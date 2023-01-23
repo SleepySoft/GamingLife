@@ -31,19 +31,35 @@ class CommonTextInputActivity : AppCompatActivity() {
         mButtonCancel = findViewById(R.id.id_button_cancel)
 
         mButtonOk.setOnClickListener {
-            val resultIntent = Intent().apply {
+            finishWithResult(mapOf("text" to mTextMain.text.toString()), true)
+
+/*            val resultIntent = Intent().apply {
                 putExtra("text", mTextMain.text.toString())
+                putExtra(
+                    GlControllerContext.KEY_REQUEST_CODE,
+                    intent.getIntExtra(
+                        GlControllerContext.KEY_REQUEST_CODE,
+                        GlControllerContext.REQUEST_INVALID))
+                putExtra(
+                    GlControllerContext.KEY_RESULT_CODE,
+                    GlControllerContext.RESULT_ACCEPTED)
             }
-            setResult(GlControllerContext.RESULT_COMMON_INPUT_TEXT_COMPLETE, resultIntent)
-            finish()
+            setResult(GlControllerContext.RESULT_ACCEPTED, resultIntent)
+            finish()*/
         }
 
         mButtonCancel.setOnClickListener {
-            setResult(GlControllerContext.RESULT_COMMON_INPUT_CANCELLED)
-            finish()
+            finishWithResult(mapOf(), false)
+
+/*            val resultIntent = Intent().apply {
+                putExtra(
+                    GlControllerContext.KEY_RESULT_CODE,
+                    GlControllerContext.RESULT_CANCELED)
+            }
+            setResult(GlControllerContext.RESULT_CANCELED, resultIntent)
+            finish()*/
         }
 
-        val intent = getIntent()
         mTextMain.text = intent.getStringExtra("text") ?: ""
     }
 }

@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.VibrationEffect
 import android.os.Vibrator
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RequiresApi
 import com.sleepysoft.gaminglife.toast
 import graphengine.GraphContext
@@ -23,15 +24,20 @@ import java.lang.ref.WeakReference
 //
 
 
-typealias AsyncResultHandler =  (requestCode: Int, resultCode: Int, data: Intent?) -> Unit
+typealias AsyncResultHandler = (requestCode: Int, resultCode: Int, data: Intent?) -> Unit
 
 
 class GlControllerContext : GraphContext {
     companion object {
+        const val KEY_RESULT_CODE = "ResultCode"
+        const val KEY_REQUEST_CODE = "RequestCode"
+
+        const val REQUEST_INVALID = 0xFFFF
         const val REQUEST_AUDIO_RECORD_CONTROLLER = 0x1001
 
-        const val RESULT_COMMON_INPUT_CANCELLED = 0x2001
-        const val RESULT_COMMON_INPUT_TEXT_COMPLETE = 0x2002
+        const val RESULT_INVALID = 0xFFFF
+        const val RESULT_ACCEPTED = 0x2001
+        const val RESULT_CANCELED = 0x2002
     }
 
     var graphView: GraphView? = null
@@ -40,6 +46,7 @@ class GlControllerContext : GraphContext {
     var context = WeakReference<Activity>(null)
     var vibrator = WeakReference< Vibrator >(null)
     val asyncResultHandler = mutableListOf< AsyncResultHandler >()
+    var requestDataLauncher = WeakReference<ActivityResultLauncher<Intent>>(null)
 
     // ---------------------------------- Implement GraphContext  ----------------------------------
 
@@ -69,7 +76,9 @@ class GlControllerContext : GraphContext {
             if (requestCode == null) {
                 contextRef.startActivity(activityIntent)
             } else {
-                contextRef.startActivityForResult(activityIntent, requestCode)
+                activityIntent.putExtra(KEY_REQUEST_CODE, requestCode)
+                requestDataLauncher.get()?.launch(activityIntent)
+                // contextRef.startActivityForResult(activityIntent, requestCode)
             }
         }
     }

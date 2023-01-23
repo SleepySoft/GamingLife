@@ -49,10 +49,10 @@ class GlAudioRecordLayerController(
                 requestCode: Int, resultCode: Int, data: Intent? ->
             if (requestCode == GlControllerContext.REQUEST_AUDIO_RECORD_CONTROLLER) {
                 when (resultCode) {
-                    GlControllerContext.RESULT_COMMON_INPUT_CANCELLED -> {
+                    GlControllerContext.RESULT_CANCELED -> {
                         onUserInputCancel()
                     }
-                    GlControllerContext.RESULT_COMMON_INPUT_TEXT_COMPLETE -> {
+                    GlControllerContext.RESULT_ACCEPTED -> {
                         val inputText = data?.getStringExtra("text") ?: ""
                         onTextInputOk(inputText)
                     }

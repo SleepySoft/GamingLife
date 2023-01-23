@@ -13,6 +13,8 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import android.view.WindowManager
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sleepysoft.gaminglife.DailyExtFileAdapter
@@ -41,6 +43,32 @@ class MainActivity : AppCompatActivity() {
     private lateinit var timeViewController: GlTimeViewController
     private lateinit var timeViewEditorController: GlTimeViewEditorController
     private lateinit var audioRecordController: GlAudioRecordLayerController
+
+    private val requestDataLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()) { result ->
+
+        val resultCode = result.data?.getIntExtra(
+            GlControllerContext.KEY_RESULT_CODE,
+            GlControllerContext.RESULT_INVALID) ?:
+        GlControllerContext.RESULT_INVALID
+
+        if (resultCode == GlControllerContext.RESULT_ACCEPTED) {
+            val requestCode = result.data?.getIntExtra(
+                GlControllerContext.KEY_REQUEST_CODE,
+                GlControllerContext.REQUEST_INVALID) ?:
+            GlControllerContext.REQUEST_INVALID
+
+            when (requestCode) {
+                REQUEST_CODE_STORAGE_PERMISSION -> glInit()
+                else -> mCtrlContext.dispatchAsyncResult(requestCode, resultCode, result.data)
+            }
+        }
+    }
+
+    private val filePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { _ ->
+        glInit()
+    }
 
 /*    companion object {
         private var mHandler = Handler(Looper.getMainLooper())
@@ -184,6 +212,7 @@ class MainActivity : AppCompatActivity() {
         mCtrlContext.view = WeakReference(mView)
         mCtrlContext.context = WeakReference(this)
         mCtrlContext.vibrator = WeakReference(mVibrator)
+        mCtrlContext.requestDataLauncher = WeakReference(requestDataLauncher)
     }
 
     private fun buildGraphControllers() {
