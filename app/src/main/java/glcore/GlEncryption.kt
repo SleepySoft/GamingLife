@@ -14,6 +14,10 @@ class GlEncryption {
     var keyPairPow = 0
     var powKeyPair = GlKeyPair()
 
+    companion object {
+        const val GLID_VERSION = 0
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun createKeyPair(workloadProof: Int, quitFlag: List< Boolean >) : GlKeyPair? {
         var loop = 0
@@ -34,7 +38,7 @@ class GlEncryption {
                 loop += 1
 
                 val pubKeySha = dataSha256(this.encoded)
-                val workloadVal = calcWorkload(pubKeySha)
+                val workloadVal = calcPoW(pubKeySha)
 
                 if (keyPairPow < workloadVal) {
                     keyPairPow = workloadVal
@@ -46,7 +50,7 @@ class GlEncryption {
                     println("  Public: " + keyPair.publicKeyString)
                     println("  Private: " + keyPair.privateKeyString)
                     println("  Pub Sha: " + pubKeySha.toHexString())
-                    println("  GL ID: " + pubKeySha.encodeToBase58String())
+                    println("  GL ID  : " + glidFromPublicKeyHash(pubKeySha))
                     println("---------------------------------------------------------------")
                 }
 
@@ -65,7 +69,19 @@ class GlEncryption {
         return keyPair
     }
 
-    fun calcWorkload(data: ByteArray) : Int {
+    fun glidFromPublicKey(keyPair: GlKeyPair): String {
+        return keyPair.publicKey?.run {
+            val pubKeySha = dataSha256(this.encoded)
+            glidFromPublicKeyHash(pubKeySha)
+        } ?: ""
+    }
+
+    fun glidFromPublicKeyHash(pubKeySha: ByteArray): String {
+        val pubKeyShaWithVersion = byteArrayOf(GLID_VERSION.toByte()) + pubKeySha
+        return pubKeyShaWithVersion.encodeToBase58String()
+    }
+
+    fun calcPoW(data: ByteArray) : Int {
         var sum = 0
         for (byte in data) {
             val byteSuffixBit1 = checkByteSuffixBit1(byte)

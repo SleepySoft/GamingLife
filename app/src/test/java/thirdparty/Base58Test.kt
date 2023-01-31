@@ -43,4 +43,17 @@ internal class Base58Test {
         doTestStringDecoding("NJp7CT1GRMgXWHVJwwLejZTVN56Bggv4WsQ5vbZMAcpPBaEMN", "0aac8ac7-735b-44ff-888c-b05210695639")
         println("testBase58BasicDecoding DONE")
     }
+
+    @Test
+    fun testBase58EncodeDigit() {
+        val bytes = mutableListOf< Byte >(0x05)
+
+        for (i in 0 until 32) {
+            bytes.add(0x00)
+        }
+        for (i in 0 until 32) {
+            bytes[i + 1] = 0xFF.toByte()
+            println("0xFF bytes %d -> %s".format(i + 1, bytes.toByteArray().encodeToBase58String()))
+        }
+    }
 }
