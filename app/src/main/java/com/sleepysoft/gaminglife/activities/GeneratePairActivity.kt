@@ -12,7 +12,9 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.sleepysoft.gaminglife.R
 import glcore.GlEncryption
-import glcore.GlLog
+
+
+const val THRESHOLD_POW = 8
 
 
 class GeneratePairActivity : AppCompatActivity() {
@@ -83,7 +85,9 @@ class GeneratePairActivity : AppCompatActivity() {
                 mCalculateGlIdThread = CalculateGlIdThread(
                     mExpectPoW, mGlEncryption, mQuitFlag).apply { start() }
 
+                mTextOutput.text = ""
                 mButtonGenerate.isEnabled = false
+
                 mHandler.postDelayed(mRunnable, 100)
             }
         }
@@ -94,14 +98,18 @@ class GeneratePairActivity : AppCompatActivity() {
                 mQuitFlag[0] = true
             }
         }
+
+        val buttonAcceptGlId: Button = findViewById< Button >(R.id.id_button_accept)
+        buttonAcceptGlId.setOnClickListener {
+            // TODO: Accept GLID
+        }
     }
 
     fun updateKeyGenInfo() {
         if (mPrevPoW != mGlEncryption.keyPairPow) {
             mPrevPoW = mGlEncryption.keyPairPow
-            val text = "Loop: %d -> Max PoW: %d\n".format(
-                mGlEncryption.powLoop, mGlEncryption.keyPairPow)
-            mTextOutput.append(text)
+            val text = resources.getString(R.string.FORMAT_GLID_GEN_LOG)
+            mTextOutput.append(text.format(mGlEncryption.powLoop, mGlEncryption.keyPairPow))
         }
 
         if (mCalculateGlIdThread.isAlive) {
@@ -109,8 +117,22 @@ class GeneratePairActivity : AppCompatActivity() {
         } else {
             mButtonGenerate.isEnabled = true
 
-            if (mPrevPoW >= mExpectPoW) {
+            if (mPrevPoW >= THRESHOLD_POW) {
                 // Got the expect PoW
+                with(mGlEncryption) {
+                    powKeyPair.publicKey?.let {
+                        val pubKeySha = dataSha256(it.encoded)
+                        val glId = glidFromPublicKeyHash(pubKeySha)
+                        val text = resources.getString(R.string.FORMAT_GLID_GEN_SUCCESS)
+
+                        mTextOutput.append("---------------------------------------------\n")
+                        mTextOutput.append(text.format(glId, this.keyPairPow))
+                        mTextOutput.append("---------------------------------------------\n")
+                    }
+                }
+            } else {
+                val text = resources.getString(R.string.FORMAT_GLID_GEN_FAIL)
+                mTextOutput.append(text)
             }
         }
     }
