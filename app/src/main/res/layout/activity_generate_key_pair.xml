@@ -41,7 +41,7 @@
             android:layout_height="match_parent"
             android:layout_weight="0"
             android:gravity="center"
-            android:text="TextView" />
+            android:text=" 8" />
     </LinearLayout>
 
     <LinearLayout

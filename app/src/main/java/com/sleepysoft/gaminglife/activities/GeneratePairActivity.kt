@@ -12,10 +12,12 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.sleepysoft.gaminglife.R
 import glcore.GlEncryption
+import glcore.GlLog
 
 
 class GeneratePairActivity : AppCompatActivity() {
     var mPrevPoW = 0
+    var mExpectPoW = 0
     val mQuitFlag = mutableListOf(false)
     val mGlEncryption = GlEncryption()
     var mCalculateGlIdThread = CalculateGlIdThread(8, mGlEncryption, mQuitFlag)
@@ -50,7 +52,11 @@ class GeneratePairActivity : AppCompatActivity() {
             max = 32
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
-                    mTextSeekPow.text = "%d".format(progress)
+                    if (progress < 10) {
+                        mTextSeekPow.text = " %d".format(progress)
+                    } else {
+                        mTextSeekPow.text = "%d".format(progress)
+                    }
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {
@@ -67,13 +73,15 @@ class GeneratePairActivity : AppCompatActivity() {
         // https://www.geeksforgeeks.org/how-to-make-textview-scrollable-in-android/
         mTextOutput.movementMethod = ScrollingMovementMethod()
 
-        mButtonGenerate = findViewById< Button >(R.id.id_button_generate_glid)
+        mButtonGenerate = findViewById(R.id.id_button_generate_glid)
         mButtonGenerate.setOnClickListener {
             if (!mCalculateGlIdThread.isAlive) {
                 mQuitFlag[0] = false
+                mPrevPoW = 0
+                mExpectPoW = mSeekBarPoW.progress
 
                 mCalculateGlIdThread = CalculateGlIdThread(
-                    mSeekBarPoW.progress, mGlEncryption, mQuitFlag).apply { start() }
+                    mExpectPoW, mGlEncryption, mQuitFlag).apply { start() }
 
                 mButtonGenerate.isEnabled = false
                 mHandler.postDelayed(mRunnable, 100)
@@ -100,6 +108,10 @@ class GeneratePairActivity : AppCompatActivity() {
             mHandler.postDelayed(mRunnable, 100)
         } else {
             mButtonGenerate.isEnabled = true
+
+            if (mPrevPoW >= mExpectPoW) {
+                // Got the expect PoW
+            }
         }
     }
 }
