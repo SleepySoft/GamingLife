@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">GamingLife</string>
+    <string name="HINT_GLID_POW">
+        请选择生成GLID的工作量证明\n\n
+        为了防止恶意注册，服务器要求提交的GLID需要至少8位的工作量证明。服务会也会根据GLID的工作量证明给你初始的资历点数。\n\n
+        越高的工作量证明意味着您的GLID越特别，同时初始的资历点数也越高，但同时也需要更大的运算量。超过16位的工作量证明建议使用计算机进行。
+    </string>
+    <string name="BUTTON_GENERATE_GLID">生成GLID</string>
+    <string name="BUTTON_STOP">停止</string>
 </resources>

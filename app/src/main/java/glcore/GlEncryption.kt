@@ -3,6 +3,9 @@ package glcore
 import android.os.Build
 import androidx.annotation.RequiresApi
 import glenv.GlKeyPair
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import thirdparty.encodeToBase58String
 import java.util.*
 import kotlin.experimental.and
@@ -10,9 +13,19 @@ import java.security.MessageDigest
 
 
 class GlEncryption {
+    var mutex = Mutex()
+
     var powLoop = 0
+        private set
+        get() = runBlocking{ mutex.withLock { field } }
+
     var keyPairPow = 0
+        private set
+        get() = runBlocking{ mutex.withLock { field } }
+
     var powKeyPair = GlKeyPair()
+        private set
+        get() = runBlocking{ mutex.withLock { field } }
 
     companion object {
         const val GLID_VERSION = 0
@@ -41,9 +54,14 @@ class GlEncryption {
                 val workloadVal = calcPoW(pubKeySha)
 
                 if (keyPairPow < workloadVal) {
-                    keyPairPow = workloadVal
-                    powKeyPair = keyPair
-                    powLoop = loop
+
+                    runBlocking {
+                        mutex.withLock {
+                            keyPairPow = workloadVal
+                            powKeyPair = keyPair
+                            powLoop = loop
+                        }
+                    }
 
                     println("---------------------------------------------------------------")
                     println("Max POW in loop %d: %d".format(loop, keyPairPow))

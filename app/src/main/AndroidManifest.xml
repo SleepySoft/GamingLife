@@ -22,7 +22,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GamingLife">
         <activity
-            android:name=".activities.ConfigKeyPairActivity"
+            android:name=".activities.GeneratePairActivity"
             android:exported="false">
             <meta-data
                 android:name="android.app.lib_name"

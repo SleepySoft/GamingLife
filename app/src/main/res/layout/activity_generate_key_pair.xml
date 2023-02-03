@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/id_text_pow_hint"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:lines="8"
+        android:text="@string/HINT_GLID_POW" />
+
+    <SeekBar
+        android:id="@+id/id_seek_pow"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:paddingTop="16dip"
+        android:paddingBottom="16dip" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/id_button_generate_glid"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="4"
+            android:text="@string/BUTTON_GENERATE_GLID"
+            style="?android:attr/buttonBarButtonStyle" />
+
+        <Button
+            android:id="@+id/id_button_cancel_generate"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/BUTTON_STOP"
+            style="?android:attr/buttonBarButtonStyle" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/id_text_output"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:lines="20" />
+
+</LinearLayout>
