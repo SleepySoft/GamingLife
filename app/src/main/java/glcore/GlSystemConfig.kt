@@ -132,13 +132,15 @@ class GlSystemConfig() {
         get() = (systemConfig.get(PATH_SYSTEM_PUBLIC_KEY) as String?) ?: ""
 
     var privateKey: String
+        @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
             val localKeyPair = GlKeyPair().apply {
-                if (!loadLocalKeyPair()) {
-
+                if (!loadLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)) {
+                    generateLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)
                 }
             }
-            systemConfig.set(PATH_SYSTEM_PUBLIC_KEY, value)
+            val privateKeyEncrypted = localKeyPair.privateKeyEncrypt(value.toByteArray())
+            systemConfig.set(PATH_SYSTEM_PUBLIC_KEY, privateKeyEncrypted)
         }
         get() = (systemConfig.get(PATH_SYSTEM_PUBLIC_KEY) as String?) ?: ""
 }
