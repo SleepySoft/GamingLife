@@ -2,6 +2,7 @@ package glcore
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import glenv.GlKeyPair
 
 
 class GlSystemConfig() {
@@ -96,7 +97,7 @@ class GlSystemConfig() {
 
     // ========================== Sets ==========================
 
-    @RequiresApi(Build.VERSION_CODES.N)
+/*    @RequiresApi(Build.VERSION_CODES.N)
     fun removeSubTask(glId: String) {
         taskSub.removeIf { it.id == glId }
     }
@@ -118,5 +119,26 @@ class GlSystemConfig() {
             (getTopTaskData(groupId) != null)) {
             taskLink[glId] = groupId
         }
-    }
+    }*/
+
+    // ------------------------------------------- GLID --------------------------------------------
+
+    var GLID: String
+        set(value) = systemConfig.set(PATH_SYSTEM_GLID, value).let {  }
+        get() = (systemConfig.get(PATH_SYSTEM_GLID) as String?) ?: ""
+
+    var publicKey: String
+        set(value) = systemConfig.set(PATH_SYSTEM_PUBLIC_KEY, value).let {  }
+        get() = (systemConfig.get(PATH_SYSTEM_PUBLIC_KEY) as String?) ?: ""
+
+    var privateKey: String
+        set(value) {
+            val localKeyPair = GlKeyPair().apply {
+                if (!loadLocalKeyPair()) {
+
+                }
+            }
+            systemConfig.set(PATH_SYSTEM_PUBLIC_KEY, value)
+        }
+        get() = (systemConfig.get(PATH_SYSTEM_PUBLIC_KEY) as String?) ?: ""
 }

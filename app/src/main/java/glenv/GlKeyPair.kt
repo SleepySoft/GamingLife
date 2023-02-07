@@ -1,13 +1,12 @@
 package glenv
 
 import android.os.Build
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
+import glcore.GlLog
 import java.io.ByteArrayOutputStream
-import java.security.Key
-import java.security.KeyFactory
-import java.security.KeyPairGenerator
-import java.security.PrivateKey
-import java.security.PublicKey
+import java.security.*
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
 import java.util.*
@@ -27,7 +26,8 @@ class GlKeyPair {
     var privateKey: PrivateKey? = null
         private set
 
-    var transformation: String = "RSA"
+    @RequiresApi(Build.VERSION_CODES.M)
+    var transformation: String = KeyProperties.KEY_ALGORITHM_RSA
 
     var publicKeyString: String = ""
         @RequiresApi(Build.VERSION_CODES.O)
@@ -51,10 +51,41 @@ class GlKeyPair {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateKeyPair() {
-        val generator = KeyPairGenerator.getInstance(transformation)
-        val keyPair = generator.genKeyPair()
-        privateKey = keyPair.private
-        publicKey = keyPair.public
+        generate(KeyPairGenerator.getInstance(transformation))
+    }
+
+    // --------------------------------------------------------------
+
+    fun loadLocalKeyPair(alias: String) : Boolean {
+        return try {
+            val keyStore = KeyStore.getInstance("AndroidKeyStore")
+            keyStore.load(null)
+            val entry = keyStore.getEntry(alias, null)
+            privateKey = (entry as KeyStore.PrivateKeyEntry).privateKey
+            publicKey = keyStore.getCertificate(alias).publicKey
+            true
+        } catch (e: Exception) {
+            GlLog.e("Load key fail: $alias")
+            GlLog.e(e.stackTraceToString())
+            false
+        } finally {
+
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun generateLocalKeyPair(alias: String) {
+        val spec = KeyGenParameterSpec.Builder(alias,
+            KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY).run {
+            build()
+        }
+
+        val generator = KeyPairGenerator.getInstance(
+            transformation, "AndroidKeyStore").apply {
+                initialize(spec)
+        }
+
+        generate(generator)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -78,6 +109,12 @@ class GlKeyPair {
     } ?: byteArrayOf()
 
     // ---------------------------------------------------------------------------------------------
+
+    private fun generate(generator: KeyPairGenerator) {
+        val keyPair = generator.genKeyPair()
+        privateKey = keyPair.private
+        publicKey = keyPair.public
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun keyEncrypt(key: Key, data: ByteArray) : ByteArray =

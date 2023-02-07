@@ -7,6 +7,8 @@ const val PATH_SYSTEM_TASK_GROUP_TOP = "/Config/Meta/TaskGroup/TopGroups"       
 const val PATH_SYSTEM_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"           // v as STRUCT_DEC_TASK_DATA
 const val PATH_SYSTEM_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"         // v as MutableMap< String, String >
 const val PATH_SYSTEM_TASK_RECORD_THRESHOLD = "/Config/User/TaskRecordThreshold"    // v as Long, in ms
+const val PATH_SYSTEM_PUBLIC_KEY = "/Config/User/Key/Account/PublicKey"
+const val PATH_SYSTEM_GLID = "/Config/User/Key/Account/GLID"
 
 const val PATH_RUNTIME_CURRENT_TASK = "/Runtime/TimeModule/CurrentTask"             // v as STRUCT_DEC_TASK_RECORD
 

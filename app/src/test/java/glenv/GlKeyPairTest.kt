@@ -45,6 +45,17 @@ internal class GlKeyPairTest {
         assert(glKeyPair.privateKeyString == "")
     }
 
+    // https://medium.com/@wujingwe/write-unit-test-which-has-androidkeystore-dependency-f12181ae6311
+
+/*    @Test
+    fun testLocalKeyPair() {
+        val glKeyPair1 = GlKeyPair().apply { generateLocalKeyPair("TestLocalKey") }
+        val glKeyPair2 = GlKeyPair().apply { loadLocalKeyPair("TestLocalKey") }
+
+        assert(glKeyPair1.publicKey == glKeyPair2.publicKey)
+        assert(glKeyPair1.privateKey == glKeyPair2.privateKey)
+    }*/
+
     // -----------------------------------------------------------------
 
     @Test
