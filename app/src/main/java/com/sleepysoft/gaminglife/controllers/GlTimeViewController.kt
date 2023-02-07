@@ -5,6 +5,7 @@ import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.os.Handler
 import android.os.Looper
 import com.sleepysoft.gaminglife.DailyBrowseActivity
+import com.sleepysoft.gaminglife.activities.GLIDManagementActivity
 import com.sleepysoft.gaminglife.activities.GeneratePairActivity
 import glcore.*
 import graphengine.*
@@ -69,7 +70,7 @@ class GlTimeViewController(
         if (item == mMenuDailyStatistics) {
             mCtrlContext.launchActivity(DailyBrowseActivity::class.java)
         } else if (item == mMenuConfigKeyPair) {
-            mCtrlContext.launchActivity(GeneratePairActivity::class.java)
+            mCtrlContext.launchActivity(GLIDManagementActivity::class.java)
         }
     }
 
