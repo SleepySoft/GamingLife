@@ -77,7 +77,7 @@ class GamingLifeMainService : Service() {
         channelID: String, channelNAME: String, level: Int) : String {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            val channel = NotificationChannel(channelID, channelNAME, level)
+            val channel = NotificationChannel(channelID, channelNAME, level).apply {  }
             manager.createNotificationChannel(channel)
         }
         return channelID
@@ -101,6 +101,7 @@ class GamingLifeMainService : Service() {
             NotificationManager.IMPORTANCE_HIGH
         )
         mNotification = NotificationCompat.Builder(this, channelId).apply {
+            setSilent(true)
             setShowWhen(false)
             setContentTitle("Task")
             setContentText("00:00")
@@ -108,7 +109,7 @@ class GamingLifeMainService : Service() {
             setSmallIcon(R.mipmap.ic_launcher)
             setAutoCancel(true)
             setOnlyAlertOnce(true)
-            priority = NotificationCompat.PRIORITY_HIGH
+            priority = NotificationCompat.PRIORITY_LOW
             notification.flags = Notification.FLAG_ONGOING_EVENT
         }
         mNotification?.run {
