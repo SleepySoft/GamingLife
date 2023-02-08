@@ -21,9 +21,18 @@
     <string name="COMMENTS_PRIVATE_KEY">私钥是你账号的唯一证明，请妥善保管且不要泄露给任何人，包括GaminLief官方。</string>
     <string name="COMMENTS_PUBLIC_KEY">GaminLief官方会用你的公钥验证你的账号，你的朋友也可以通过公钥加密给你的信息。\n公钥是安全的，但非必要请不要向大众和陌生人公开你的公钥。</string>
     <string name="COMMENTS_GLID">GLID是你在GamingLife世界的账号，你可以放心公开你的GLID。\n公开你的GLID不会泄露你的任何私密信息。</string>
-    <string name="COMMENTS_IMPORT_OR_CREATE_GLID">
-        本机没有记录任何的用户信息。\n
+
+    <string name="COMMENTS_NO_GLID">
+        本机没有任何GLID信息。\n\n
+    </string>
+
+    <string name="COMMENTS_ERROR_KEY">
+        载入私钥失败。\n
         \n
+        注意：您无法通过复制配置文件的方式将您的私钥导入(其它内容不受影响)。\n\n
+    </string>
+
+    <string name="COMMENTS_IMPORT_OR_CREATE_GLID">
         你可以通过下方的按钮导入你的用户私钥。\n
         或者你也可以创建一个新的GLID。\n
         \n

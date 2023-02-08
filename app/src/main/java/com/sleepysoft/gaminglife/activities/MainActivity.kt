@@ -17,11 +17,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.sleepysoft.gaminglife.DailyExtFileAdapter
-import com.sleepysoft.gaminglife.GamingLifeMainService
-import com.sleepysoft.gaminglife.PermissionActivity
+import com.sleepysoft.gaminglife.*
 import com.sleepysoft.gaminglife.controllers.*
-import com.sleepysoft.gaminglife.toast
 import com.sleepysoft.gaminglife.views.GlView
 import glcore.*
 import glenv.GlEnv
@@ -47,18 +44,9 @@ class MainActivity : AppCompatActivity() {
     private val requestDataLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result ->
 
-        val resultCode = result.data?.getIntExtra(
-            GlControllerContext.KEY_RESULT_CODE,
-            GlControllerContext.RESULT_INVALID) ?:
-        GlControllerContext.RESULT_INVALID
-
-        if (resultCode == GlControllerContext.RESULT_ACCEPTED) {
-            val requestCode = result.data?.getIntExtra(
-                GlControllerContext.KEY_REQUEST_CODE,
-                GlControllerContext.REQUEST_INVALID) ?:
-            GlControllerContext.REQUEST_INVALID
-
-            when (requestCode) {
+        val resultCode = result.resultCode()
+        if (result.resultCode() == GlControllerContext.RESULT_ACCEPTED) {
+            when (val requestCode = result.requestCode()) {
                 REQUEST_CODE_STORAGE_PERMISSION -> glInit()
                 else -> mCtrlContext.dispatchAsyncResult(requestCode, resultCode, result.data)
             }

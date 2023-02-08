@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
+import androidx.activity.result.ActivityResult
 import androidx.appcompat.app.AppCompatActivity
+import com.sleepysoft.gaminglife.activities.GLIDManagementActivity
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import glcore.GlLog
 import java.util.ArrayList
@@ -33,6 +35,11 @@ fun Intent.putAnyExtra(key: String, data: Any) {
 }
 
 
+fun Intent.setRequestCode(code: Int) {
+    putExtra(GlControllerContext.KEY_REQUEST_CODE, code)
+}
+
+
 fun AppCompatActivity.finishWithResult(data: Map< String , Any >, accepted: Boolean) {
     val resultCode = if (accepted)
         GlControllerContext.RESULT_ACCEPTED else
@@ -50,3 +57,17 @@ fun AppCompatActivity.finishWithResult(data: Map< String , Any >, accepted: Bool
     setResult(resultCode, resultIntent)
     finish()
 }
+
+
+fun ActivityResult.resultCode() : Int =
+    data?.getIntExtra(
+        GlControllerContext.KEY_RESULT_CODE,
+        GlControllerContext.RESULT_INVALID) ?:
+        GlControllerContext.RESULT_INVALID
+
+
+fun ActivityResult.requestCode() : Int =
+    data?.getIntExtra(
+        GlControllerContext.KEY_REQUEST_CODE,
+        GlControllerContext.REQUEST_INVALID) ?:
+        GlControllerContext.REQUEST_INVALID
