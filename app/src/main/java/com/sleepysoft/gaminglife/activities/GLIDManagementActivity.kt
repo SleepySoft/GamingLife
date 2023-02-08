@@ -1,14 +1,18 @@
 package com.sleepysoft.gaminglife.activities
 
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Layout
+import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import com.sleepysoft.gaminglife.*
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
+import glcore.GlRoot
 
 class GLIDManagementActivity : AppCompatActivity() {
 
@@ -30,19 +34,21 @@ class GLIDManagementActivity : AppCompatActivity() {
     lateinit var mButtonCreateNew: Button
     lateinit var mLayoutGroupWithoutKey: LinearLayout
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private val requestDataLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result ->
 
         if (result.resultCode() == GlControllerContext.RESULT_ACCEPTED) {
             when (val requestCode = result.requestCode()) {
-                REQUEST_CODE_FROM_QR -> Unit
-                REQUEST_CODE_FROM_TEXT -> Unit
-                REQUEST_CODE_FROM_CREATE -> Unit
+                REQUEST_CODE_FROM_QR -> loadGlId()
+                REQUEST_CODE_FROM_TEXT -> loadGlId()
+                REQUEST_CODE_FROM_CREATE -> loadGlId()
                 else -> Unit
             }
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_glidmanagement)
@@ -71,7 +77,9 @@ class GLIDManagementActivity : AppCompatActivity() {
         }
 
         mButtonSignOut.setOnClickListener {
-
+            GlRoot.systemConfig.GLID = ""
+            GlRoot.systemConfig.publicKey = ""
+            GlRoot.systemConfig.privateKey = ""
         }
 
         mButtonImportByQR = findViewById(R.id.id_button_import_scan)
@@ -90,7 +98,25 @@ class GLIDManagementActivity : AppCompatActivity() {
         }
 
         mButtonCreateNew.setOnClickListener {
+            val activityIntent = Intent(this, GeneratePairActivity::class.java)
+            activityIntent.setRequestCode(REQUEST_CODE_FROM_CREATE)
+            requestDataLauncher.launch(activityIntent)
+        }
 
+        loadGlId()
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun loadGlId() {
+        val privateKey = GlRoot.systemConfig.privateKey
+        if (privateKey.isNotEmpty()) {
+            mLayoutGroupWithKey.visibility = View.VISIBLE
+            mLayoutGroupWithoutKey.visibility = View.GONE
+        } else {
+            mLayoutGroupWithKey.visibility = View.GONE
+            mLayoutGroupWithoutKey.visibility = View.VISIBLE
         }
     }
 }

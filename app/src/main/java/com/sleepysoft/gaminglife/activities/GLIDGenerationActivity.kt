@@ -11,7 +11,9 @@ import android.widget.TextView
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.sleepysoft.gaminglife.R
+import com.sleepysoft.gaminglife.finishWithResult
 import glcore.GlEncryption
+import glcore.GlRoot
 
 
 const val THRESHOLD_POW = 8
@@ -101,7 +103,10 @@ class GeneratePairActivity : AppCompatActivity() {
 
         val buttonAcceptGlId: Button = findViewById< Button >(R.id.id_button_accept)
         buttonAcceptGlId.setOnClickListener {
-            // TODO: Accept GLID
+            GlRoot.systemConfig.GLID = glId()
+            GlRoot.systemConfig.publicKey = mGlEncryption.powKeyPair.publicKeyString
+            GlRoot.systemConfig.privateKey = mGlEncryption.powKeyPair.privateKeyString
+            finishWithResult(mapOf(), true)
         }
     }
 
@@ -119,21 +124,25 @@ class GeneratePairActivity : AppCompatActivity() {
 
             if (mPrevPoW >= THRESHOLD_POW) {
                 // Got the expect PoW
-                with(mGlEncryption) {
-                    powKeyPair.publicKey?.let {
-                        val pubKeySha = dataSha256(it.encoded)
-                        val glId = glidFromPublicKeyHash(pubKeySha)
-                        val text = resources.getString(R.string.FORMAT_GLID_GEN_SUCCESS)
+                val glId = glId()
+                val text = resources.getString(R.string.FORMAT_GLID_GEN_SUCCESS)
 
-                        mTextOutput.append("---------------------------------------------\n")
-                        mTextOutput.append(text.format(glId, this.keyPairPow))
-                        mTextOutput.append("---------------------------------------------\n")
-                    }
-                }
+                mTextOutput.append("---------------------------------------------\n")
+                mTextOutput.append(text.format(glId, mGlEncryption.keyPairPow))
+                mTextOutput.append("---------------------------------------------\n")
             } else {
                 val text = resources.getString(R.string.FORMAT_GLID_GEN_FAIL)
                 mTextOutput.append(text)
             }
         }
     }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private fun glId() :  String =
+        mGlEncryption.powKeyPair.publicKey?.let {
+            val pubKeySha = mGlEncryption.dataSha256(it.encoded)
+            val glId = mGlEncryption.glidFromPublicKeyHash(pubKeySha)
+            glId
+        } ?: ""
 }
