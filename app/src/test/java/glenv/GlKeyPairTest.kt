@@ -107,4 +107,18 @@ internal class GlKeyPairTest {
 
         assert(decryptionData.contentEquals(testData))
     }
+
+    @Test
+    fun testSignAndVerify() {
+        val message = ByteArray(128000).apply { Random.nextBytes(this) }
+        val glKeyPair = GlKeyPair().apply { generateKeyPair() }
+        val sign = glKeyPair.sign(message)
+        val verified = glKeyPair.verify(message, sign)
+
+        message[0] = (message[0] - 1).toByte()
+        val notVerified = !glKeyPair.verify(message, sign)
+
+        assert(verified)
+        assert(notVerified)
+    }
 }

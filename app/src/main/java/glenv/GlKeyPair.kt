@@ -29,15 +29,15 @@ class GlKeyPair {
     var privateKey: PrivateKey? = null
         private set
 
-    var algorithm: String = KeyProperties.KEY_ALGORITHM_RSA
-    val transformation: String = "$algorithm/ECB/PKCS1Padding"
-    // val transformation: String = "$algorithm/ECB/OAEPWithSHA-256AndMGF1Padding"
+    var signAlgorithm: String = "MD5WithRSA"
+    var encryptAlgorithm: String = KeyProperties.KEY_ALGORITHM_RSA
+    val encryptTransformation: String = "$encryptAlgorithm/ECB/PKCS1Padding"
 
     var publicKeyString: String = ""
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
             field = value
-            val keyFactory = KeyFactory.getInstance(algorithm)
+            val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
             publicKey = keyFactory.generatePublic(X509EncodedKeySpec(Base64.getDecoder().decode(value)))
         }
         @RequiresApi(Build.VERSION_CODES.O)
@@ -47,7 +47,7 @@ class GlKeyPair {
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
             field = value
-            val keyFactory = KeyFactory.getInstance(algorithm)
+            val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
             privateKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(Base64.getDecoder().decode(value)))
         }
         @RequiresApi(Build.VERSION_CODES.O)
@@ -55,7 +55,7 @@ class GlKeyPair {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateKeyPair() {
-        generate(KeyPairGenerator.getInstance(algorithm))
+        generate(KeyPairGenerator.getInstance(encryptAlgorithm))
     }
 
     // --------------------------------------------------------------
@@ -104,61 +104,49 @@ class GlKeyPair {
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateLocalKeyPair(alias: String) {
         val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
-            algorithm, "AndroidKeyStore")
-        val parameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(
-            alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT).run {
+            encryptAlgorithm, "AndroidKeyStore")
+
+        val parameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(alias,
+            KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY or
+                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT).run {
             setKeySize(DEFAULT_KEY_LEN)
+
             // setUserAuthenticationRequired(false)
-            // setCertificateSubject(X500Principal("CN=$alias"))
-            // setCertificateNotBefore(GlDateTime.datetime())
-            // setCertificateNotAfter(GlDateTime.datetime(100 * 365))
             // setRandomizedEncryptionRequired(true)
+
+            setCertificateSubject(X500Principal("CN=$alias"))
+            setCertificateNotBefore(GlDateTime.datetime())
+            setCertificateNotAfter(GlDateTime.datetime(100 * 365))
+
             setDigests(KeyProperties.DIGEST_SHA512,KeyProperties.DIGEST_SHA256)
-            // setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
+            setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
             setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
 
             build()
         }
         kpg.initialize(parameterSpec)
 
-/*        val builer = KeyGenParameterSpec.Builder(alias,
-            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT).apply {
-
-            setKeySize(KEY_LEN)
-            setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
-            setDigests(KeyProperties.DIGEST_SHA256)
-
-            // https://stackoverflow.com/a/49414593
-
-*//*            setRandomizedEncryptionRequired(false)
-            setDigests(
-                KeyProperties.DIGEST_NONE, KeyProperties.DIGEST_MD5,
-                KeyProperties.DIGEST_SHA1, KeyProperties.DIGEST_SHA224,
-                KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA384,
-                KeyProperties.DIGEST_SHA512)
-            setKeySize(KEY_LEN)
-            setEncryptionPaddings(
-                KeyProperties.ENCRYPTION_PADDING_NONE,
-                KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1,
-                KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
-            setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
-
-            setCertificateSubject(X500Principal("CN=Android, O=Android Authority"))
-            setCertificateSerialNumber(BigInteger(256, Random()))
-            setCertificateNotBefore(GlDateTime.datetime())
-            setCertificateNotAfter(GlDateTime.datetime(100 * 365))*//*
-        }
-
-        val keyStore = KeyStore.getInstance("AndroidKeyStore")
-        keyStore.load(null)
-
-        val spec = builer.build()
-        val generator = KeyPairGenerator.getInstance(
-            algorithm, "AndroidKeyStore").apply {
-                initialize(spec)
-        }*/
-
         generate(kpg)
+    }
+
+    // https://stackoverflow.com/questions/30458163/cannot-verify-rsa-signature-on-android
+
+    fun sign(message: ByteArray) : ByteArray {
+        return privateKey?.run {
+            val signature = Signature.getInstance(signAlgorithm)
+            signature.initSign(this)
+            signature.update(message)
+            signature.sign()
+        } ?: byteArrayOf()
+    }
+
+    fun verify(message: ByteArray, sign: ByteArray) : Boolean {
+        return publicKey?.run {
+            val signature = Signature.getInstance(signAlgorithm)
+            signature.initVerify(this)
+            signature.update(message)
+            signature.verify(sign)
+        } ?: false
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -201,7 +189,7 @@ class GlKeyPair {
     private fun keyCipher(key: Key, data: ByteArray, mode: Int, limit: Int) : ByteArray {
         var offset = 0
         val outputStream = ByteArrayOutputStream()
-        val cipher = Cipher.getInstance(transformation)
+        val cipher = Cipher.getInstance(encryptTransformation)
         cipher.init(mode, key)
         while (offset < data.size) {
             val remainingLen = data.size - offset
