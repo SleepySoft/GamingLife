@@ -53,53 +53,14 @@ class GlKeyPair {
         @RequiresApi(Build.VERSION_CODES.O)
         get() = Base64.getEncoder().encodeToString(privateKey?.encoded ?: ByteArray(0))
 
+    // ---------------------------------------------------------------------------------------------
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateKeyPair() {
         generate(KeyPairGenerator.getInstance(encryptAlgorithm))
     }
 
-    // --------------------------------------------------------------
-
-    fun deleteLocalKeyPair(alias: String) : Boolean {
-        return try {
-            val keyStore = KeyStore.getInstance("AndroidKeyStore")
-            keyStore.load(null)
-            keyStore.deleteEntry(alias)
-            true
-        } catch (e: Exception) {
-            GlLog.e("Delete key fail: $alias")
-            GlLog.e(e.stackTraceToString())
-            false
-        } finally {
-
-        }
-    }
-
-    fun loadLocalKeyPair(alias: String) : Boolean {
-        return try {
-            val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
-                load(null)
-            }
-            val entry: KeyStore.Entry = ks.getEntry(alias, null)
-            if (entry !is KeyStore.PrivateKeyEntry) {
-                throw Exception("Not an instance of a PrivateKeyEntry")
-            }
-
-/*            val keyStore = KeyStore.getInstance("AndroidKeyStore")
-            keyStore.load(null)
-            val entry = keyStore.getEntry(alias, null)*/
-
-            privateKey = entry.privateKey
-            publicKey = ks.getCertificate(alias).publicKey
-            true
-        } catch (e: Exception) {
-            GlLog.e("Load key fail: $alias")
-            GlLog.e(e.stackTraceToString())
-            false
-        } finally {
-
-        }
-    }
+    // ---------------------------------------------------------------------------------------------
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateLocalKeyPair(alias: String) {
@@ -128,6 +89,49 @@ class GlKeyPair {
 
         generate(kpg)
     }
+
+    fun loadLocalKeyPair(alias: String) : Boolean {
+        return try {
+            val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
+                load(null)
+            }
+            val entry: KeyStore.Entry = ks.getEntry(alias, null)
+            if (entry !is KeyStore.PrivateKeyEntry) {
+                throw Exception("Not an instance of a PrivateKeyEntry")
+            }
+
+/*            val keyStore = KeyStore.getInstance("AndroidKeyStore")
+            keyStore.load(null)
+            val entry = keyStore.getEntry(alias, null)*/
+
+            privateKey = entry.privateKey
+            publicKey = ks.getCertificate(alias).publicKey
+            true
+        } catch (e: Exception) {
+            GlLog.e("Load key fail: $alias")
+            GlLog.e(e.stackTraceToString())
+            false
+        } finally {
+
+        }
+    }
+
+    fun deleteLocalKeyPair(alias: String) : Boolean {
+        return try {
+            val keyStore = KeyStore.getInstance("AndroidKeyStore")
+            keyStore.load(null)
+            keyStore.deleteEntry(alias)
+            true
+        } catch (e: Exception) {
+            GlLog.e("Delete key fail: $alias")
+            GlLog.e(e.stackTraceToString())
+            false
+        } finally {
+
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
 
     // https://stackoverflow.com/questions/30458163/cannot-verify-rsa-signature-on-android
 
