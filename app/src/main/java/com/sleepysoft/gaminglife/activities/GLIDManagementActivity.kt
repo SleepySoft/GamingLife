@@ -18,6 +18,7 @@ import com.king.zxing.util.CodeUtils
 import com.sleepysoft.gaminglife.*
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import glcore.GlRoot
+import glcore.GlSystemConfig
 import pub.devrel.easypermissions.EasyPermissions
 
 class GLIDManagementActivity : AppCompatActivity() {
@@ -76,15 +77,21 @@ class GLIDManagementActivity : AppCompatActivity() {
         mLayoutGroupWithKey = findViewById(R.id.id_layout_with_key)
 
         mButtonViewGlid.setOnClickListener {
-
+            val intent = Intent(this, QRCodeViewerActivity::class.java)
+            intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, GlRoot.systemConfig.GLID)
+            ActivityCompat.startActivity(this, intent, null)
         }
 
         mButtonViewPubKey.setOnClickListener {
-
+            val intent = Intent(this, QRCodeViewerActivity::class.java)
+            intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, GlRoot.systemConfig.publicKey)
+            ActivityCompat.startActivity(this, intent, null)
         }
 
         mButtonViewPrvKey.setOnClickListener {
-
+            val intent = Intent(this, QRCodeViewerActivity::class.java)
+            intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, GlRoot.systemConfig.privateKey)
+            ActivityCompat.startActivity(this, intent, null)
         }
 
         mButtonRegOrCreate.setOnClickListener {
@@ -95,6 +102,7 @@ class GLIDManagementActivity : AppCompatActivity() {
             GlRoot.systemConfig.GLID = ""
             GlRoot.systemConfig.publicKey = ""
             GlRoot.systemConfig.privateKey = ""
+            loadGlId()
         }
 
         mButtonImportByQR = findViewById(R.id.id_button_import_scan)
@@ -204,8 +212,10 @@ class GLIDManagementActivity : AppCompatActivity() {
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, data.data)
             Thread {
                 val result = CodeUtils.parseCode(bitmap)
-                runOnUiThread {
-                    parseQRResult(result)
+                result?.run {
+                    runOnUiThread {
+                        parseQRResult(result)
+                    }
                 }
             }.start()
         } catch (e: Exception) {
