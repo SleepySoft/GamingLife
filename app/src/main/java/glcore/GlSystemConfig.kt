@@ -139,6 +139,7 @@ class GlSystemConfig() {
             try {
                 val localKeyPair = GlKeyPair().apply {
                     // Create new Key Pair when updating Private Key
+                    deleteLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)
                     generateLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)
                 }
 
@@ -178,7 +179,7 @@ class GlSystemConfig() {
                 val md = MessageDigest.getInstance("SHA-256")
                 val privateKeyBytesHash = md.digest(privateKeyBytes)
 
-                if (!privateKeyHash.equals(privateKeyBytesHash)) {
+                if (!privateKeyHash.contentEquals(privateKeyBytesHash)) {
                     throw java.lang.Exception("Decrypted Private Key Hash Error.")
                 }
 

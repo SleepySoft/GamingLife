@@ -109,6 +109,7 @@ class GeneratePairActivity : AppCompatActivity() {
             GlRoot.systemConfig.GLID = glId()
             GlRoot.systemConfig.publicKey = mGlEncryption.powKeyPair.publicKeyString
             GlRoot.systemConfig.privateKey = mGlEncryption.powKeyPair.privateKeyString
+            GlRoot.systemConfig.saveSystemConfig()
             finishWithResult(mapOf(), true)
         }
     }

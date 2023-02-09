@@ -7,7 +7,6 @@ import androidx.annotation.RequiresApi
 import glcore.GlDateTime
 import glcore.GlLog
 import java.io.ByteArrayOutputStream
-import java.math.BigInteger
 import java.security.*
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
@@ -20,8 +19,9 @@ import javax.security.auth.x500.X500Principal
 
 class GlKeyPair {
     companion object {
-        const val ENCRYPT_SIZE_MAX = 245
-        const val DECRYPT_SIZE_MAX = 256
+        const val DEFAULT_KEY_LEN = 2048
+        const val ENCRYPT_LIMIT = DEFAULT_KEY_LEN / 8 - 42      // PCKS1
+        const val DECRYPT_CHUNK = DEFAULT_KEY_LEN / 8
     }
 
     var publicKey: PublicKey? = null
@@ -29,9 +29,9 @@ class GlKeyPair {
     var privateKey: PrivateKey? = null
         private set
 
-    @RequiresApi(Build.VERSION_CODES.M)
     var algorithm: String = KeyProperties.KEY_ALGORITHM_RSA
-    val transformation: String = "RSA/ECB/PKCS1Padding"
+    val transformation: String = "$algorithm/ECB/PKCS1Padding"
+    // val transformation: String = "$algorithm/ECB/OAEPWithSHA-256AndMGF1Padding"
 
     var publicKeyString: String = ""
         @RequiresApi(Build.VERSION_CODES.O)
@@ -77,11 +77,20 @@ class GlKeyPair {
 
     fun loadLocalKeyPair(alias: String) : Boolean {
         return try {
-            val keyStore = KeyStore.getInstance("AndroidKeyStore")
+            val ks: KeyStore = KeyStore.getInstance("AndroidKeyStore").apply {
+                load(null)
+            }
+            val entry: KeyStore.Entry = ks.getEntry(alias, null)
+            if (entry !is KeyStore.PrivateKeyEntry) {
+                throw Exception("Not an instance of a PrivateKeyEntry")
+            }
+
+/*            val keyStore = KeyStore.getInstance("AndroidKeyStore")
             keyStore.load(null)
-            val entry = keyStore.getEntry(alias, null)
-            privateKey = (entry as KeyStore.PrivateKeyEntry).privateKey
-            publicKey = keyStore.getCertificate(alias).publicKey
+            val entry = keyStore.getEntry(alias, null)*/
+
+            privateKey = entry.privateKey
+            publicKey = ks.getCertificate(alias).publicKey
             true
         } catch (e: Exception) {
             GlLog.e("Load key fail: $alias")
@@ -94,21 +103,40 @@ class GlKeyPair {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateLocalKeyPair(alias: String) {
-        val keyStore = KeyStore.getInstance("AndroidKeyStore")
-        keyStore.load(null)
+        val kpg: KeyPairGenerator = KeyPairGenerator.getInstance(
+            algorithm, "AndroidKeyStore")
+        val parameterSpec: KeyGenParameterSpec = KeyGenParameterSpec.Builder(
+            alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT).run {
+            setKeySize(DEFAULT_KEY_LEN)
+            // setUserAuthenticationRequired(false)
+            // setCertificateSubject(X500Principal("CN=$alias"))
+            // setCertificateNotBefore(GlDateTime.datetime())
+            // setCertificateNotAfter(GlDateTime.datetime(100 * 365))
+            // setRandomizedEncryptionRequired(true)
+            setDigests(KeyProperties.DIGEST_SHA512,KeyProperties.DIGEST_SHA256)
+            // setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
+            setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1)
 
-        val spec = KeyGenParameterSpec.Builder(alias,
-            KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY).run {
+            build()
+        }
+        kpg.initialize(parameterSpec)
+
+/*        val builer = KeyGenParameterSpec.Builder(alias,
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT).apply {
+
+            setKeySize(KEY_LEN)
+            setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
+            setDigests(KeyProperties.DIGEST_SHA256)
 
             // https://stackoverflow.com/a/49414593
 
-            setRandomizedEncryptionRequired(false)
+*//*            setRandomizedEncryptionRequired(false)
             setDigests(
                 KeyProperties.DIGEST_NONE, KeyProperties.DIGEST_MD5,
                 KeyProperties.DIGEST_SHA1, KeyProperties.DIGEST_SHA224,
                 KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA384,
                 KeyProperties.DIGEST_SHA512)
-            setKeySize(2048)
+            setKeySize(KEY_LEN)
             setEncryptionPaddings(
                 KeyProperties.ENCRYPTION_PADDING_NONE,
                 KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1,
@@ -118,17 +146,19 @@ class GlKeyPair {
             setCertificateSubject(X500Principal("CN=Android, O=Android Authority"))
             setCertificateSerialNumber(BigInteger(256, Random()))
             setCertificateNotBefore(GlDateTime.datetime())
-            setCertificateNotAfter(GlDateTime.datetime(100 * 365))
-
-            build()
+            setCertificateNotAfter(GlDateTime.datetime(100 * 365))*//*
         }
 
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null)
+
+        val spec = builer.build()
         val generator = KeyPairGenerator.getInstance(
             algorithm, "AndroidKeyStore").apply {
                 initialize(spec)
-        }
+        }*/
 
-        generate(generator)
+        generate(kpg)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -161,11 +191,11 @@ class GlKeyPair {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun keyEncrypt(key: Key, data: ByteArray) : ByteArray =
-        keyCipher(key, data, Cipher.ENCRYPT_MODE, ENCRYPT_SIZE_MAX)
+        keyCipher(key, data, Cipher.ENCRYPT_MODE, ENCRYPT_LIMIT)
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun keyDecrypt(key: Key, data: ByteArray) : ByteArray =
-        keyCipher(key, data, Cipher.DECRYPT_MODE, DECRYPT_SIZE_MAX)
+        keyCipher(key, data, Cipher.DECRYPT_MODE, DECRYPT_CHUNK)
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun keyCipher(key: Key, data: ByteArray, mode: Int, limit: Int) : ByteArray {
