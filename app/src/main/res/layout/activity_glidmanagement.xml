@@ -138,6 +138,12 @@
             android:text="@string/BUTTON_IMPORT_FROM_QR" />
 
         <Button
+            android:id="@+id/id_button_import_image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/BUTTON_IMPORT_FROM_QR_IMG" />
+
+        <Button
             android:id="@+id/id_button_import_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

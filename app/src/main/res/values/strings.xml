@@ -11,9 +11,13 @@
     <string name="BUTTON_VIEW">查看</string>
     <string name="BUTTON_REGISTER_OR_CHECK_IN">登记/签到</string>
     <string name="BUTTON_SIGN_OUT">注销(!)</string>
-    <string name="BUTTON_IMPORT_FROM_QR">从二维码导入导入</string>
+    <string name="BUTTON_IMPORT_FROM_QR">扫描二维码导入</string>
+    <string name="BUTTON_IMPORT_FROM_QR_IMG">二维码图片导入</string>
     <string name="BUTTON_IMPORT_FROM_TEXT">从文本导入</string>
     <string name="BUTTON_CREATE">创建</string>
+
+    <string name="HINT_PERMISSION_CAMERA_QR">扫描二维码需要相机权限</string>
+    <string name="HINT_PERMISSION_EXT_STORAGE_QR">从图片扫描二维码需要存储权限</string>
 
     <string name="FORMAT_GLID_GEN_LOG">尝试次数: %d -> 最大工作量证明: %d\n</string>
     <string name="FORMAT_GLID_GEN_FAIL">没有生成符合标准的GLID\n</string>
