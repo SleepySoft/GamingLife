@@ -138,9 +138,8 @@ class GlSystemConfig() {
         set(value) {
             try {
                 val localKeyPair = GlKeyPair().apply {
-                    if (!loadLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)) {
-                        generateLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)
-                    }
+                    // Create new Key Pair when updating Private Key
+                    generateLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)
                 }
 
                 val privateKeyBytes = Base64.getDecoder().decode(value)

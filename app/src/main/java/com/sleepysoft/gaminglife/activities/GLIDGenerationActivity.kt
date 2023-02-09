@@ -20,7 +20,7 @@ const val THRESHOLD_POW = 8
 
 
 class GeneratePairActivity : AppCompatActivity() {
-    var mPrevPoW = 0
+    // var mPrevPoW = 0
     var mExpectPoW = 0
     val mQuitFlag = mutableListOf(false)
     val mGlEncryption = GlEncryption()
@@ -33,6 +33,8 @@ class GeneratePairActivity : AppCompatActivity() {
     lateinit var mTextOutput: TextView
     lateinit var mTextSeekPow: TextView
     lateinit var mButtonGenerate: Button
+    lateinit var mButtonAcceptGlId: Button
+    lateinit var mButtonCancelGenerate: Button
 
     class CalculateGlIdThread(
         var pow: Int,
@@ -81,7 +83,7 @@ class GeneratePairActivity : AppCompatActivity() {
         mButtonGenerate.setOnClickListener {
             if (!mCalculateGlIdThread.isAlive) {
                 mQuitFlag[0] = false
-                mPrevPoW = 0
+                // mPrevPoW = 0
                 mExpectPoW = mSeekBarPoW.progress
 
                 mCalculateGlIdThread = CalculateGlIdThread(
@@ -89,20 +91,21 @@ class GeneratePairActivity : AppCompatActivity() {
 
                 mTextOutput.text = ""
                 mButtonGenerate.isEnabled = false
+                mButtonCancelGenerate.isEnabled = true
 
                 mHandler.postDelayed(mRunnable, 100)
             }
         }
 
-        val buttonCancelGenerate: Button = findViewById< Button >(R.id.id_button_cancel_generate)
-        buttonCancelGenerate.setOnClickListener {
+        mButtonCancelGenerate = findViewById(R.id.id_button_cancel_generate)
+        mButtonCancelGenerate.setOnClickListener {
             if (mCalculateGlIdThread.isAlive) {
                 mQuitFlag[0] = true
             }
         }
 
-        val buttonAcceptGlId: Button = findViewById< Button >(R.id.id_button_accept)
-        buttonAcceptGlId.setOnClickListener {
+        mButtonAcceptGlId = findViewById(R.id.id_button_accept)
+        mButtonAcceptGlId.setOnClickListener {
             GlRoot.systemConfig.GLID = glId()
             GlRoot.systemConfig.publicKey = mGlEncryption.powKeyPair.publicKeyString
             GlRoot.systemConfig.privateKey = mGlEncryption.powKeyPair.privateKeyString
@@ -110,19 +113,29 @@ class GeneratePairActivity : AppCompatActivity() {
         }
     }
 
-    fun updateKeyGenInfo() {
-        if (mPrevPoW != mGlEncryption.keyPairPow) {
-            mPrevPoW = mGlEncryption.keyPairPow
-            val text = resources.getString(R.string.FORMAT_GLID_GEN_LOG)
-            mTextOutput.append(text.format(mGlEncryption.powLoop, mGlEncryption.keyPairPow))
+    override fun onDestroy() {
+        super.onDestroy()
+
+        if (mCalculateGlIdThread.isAlive) {
+            mQuitFlag[0] = true
         }
+    }
+
+    fun updateKeyGenInfo() {
+        val text = resources.getString(R.string.FORMAT_GLID_GEN_LOG)
+        mTextOutput.text = text.format(mGlEncryption.calcLoop, mGlEncryption.keyPairPow)
+
+/*        if (mPrevPoW != mGlEncryption.keyPairPow) {
+            mPrevPoW = mGlEncryption.keyPairPow
+        }*/
 
         if (mCalculateGlIdThread.isAlive) {
             mHandler.postDelayed(mRunnable, 100)
         } else {
             mButtonGenerate.isEnabled = true
+            mButtonCancelGenerate.isEnabled = false
 
-            if (mPrevPoW >= THRESHOLD_POW) {
+            if (mGlEncryption.keyPairPow >= THRESHOLD_POW) {
                 // Got the expect PoW
                 val glId = glId()
                 val text = resources.getString(R.string.FORMAT_GLID_GEN_SUCCESS)
@@ -130,9 +143,12 @@ class GeneratePairActivity : AppCompatActivity() {
                 mTextOutput.append("---------------------------------------------\n")
                 mTextOutput.append(text.format(glId, mGlEncryption.keyPairPow))
                 mTextOutput.append("---------------------------------------------\n")
+
+                mButtonAcceptGlId.isEnabled = true
             } else {
                 val text = resources.getString(R.string.FORMAT_GLID_GEN_FAIL)
                 mTextOutput.append(text)
+                mButtonAcceptGlId.isEnabled = false
             }
         }
     }

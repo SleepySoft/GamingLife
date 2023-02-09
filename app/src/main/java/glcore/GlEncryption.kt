@@ -15,7 +15,11 @@ import java.security.MessageDigest
 class GlEncryption {
     var mutex = Mutex()
 
-    var powLoop = 0
+    var calcLoop = 0
+        private set
+        get() = runBlocking{ mutex.withLock { field } }
+
+    var powOnLoop = 0
         private set
         get() = runBlocking{ mutex.withLock { field } }
 
@@ -50,6 +54,12 @@ class GlEncryption {
             keyPair.publicKey?.run {
                 loop += 1
 
+                runBlocking {
+                    mutex.withLock {
+                        calcLoop = loop
+                    }
+                }
+
                 val pubKeySha = dataSha256(this.encoded)
                 val workloadVal = calcPoW(pubKeySha)
 
@@ -59,7 +69,7 @@ class GlEncryption {
                         mutex.withLock {
                             keyPairPow = workloadVal
                             powKeyPair = keyPair
-                            powLoop = loop
+                            powOnLoop = loop
                         }
                     }
 

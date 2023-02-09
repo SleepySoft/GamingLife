@@ -4,13 +4,16 @@ import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
+import glcore.GlDateTime
 import glcore.GlLog
 import java.io.ByteArrayOutputStream
+import java.math.BigInteger
 import java.security.*
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
 import java.util.*
 import javax.crypto.Cipher
+import javax.security.auth.x500.X500Principal
 
 
 // https://blog.csdn.net/duner12138/article/details/112647484
@@ -27,13 +30,14 @@ class GlKeyPair {
         private set
 
     @RequiresApi(Build.VERSION_CODES.M)
-    var transformation: String = KeyProperties.KEY_ALGORITHM_RSA
+    var algorithm: String = KeyProperties.KEY_ALGORITHM_RSA
+    val transformation: String = "RSA/ECB/PKCS1Padding"
 
     var publicKeyString: String = ""
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
             field = value
-            val keyFactory = KeyFactory.getInstance(transformation)
+            val keyFactory = KeyFactory.getInstance(algorithm)
             publicKey = keyFactory.generatePublic(X509EncodedKeySpec(Base64.getDecoder().decode(value)))
         }
         @RequiresApi(Build.VERSION_CODES.O)
@@ -43,7 +47,7 @@ class GlKeyPair {
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
             field = value
-            val keyFactory = KeyFactory.getInstance(transformation)
+            val keyFactory = KeyFactory.getInstance(algorithm)
             privateKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(Base64.getDecoder().decode(value)))
         }
         @RequiresApi(Build.VERSION_CODES.O)
@@ -51,10 +55,25 @@ class GlKeyPair {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateKeyPair() {
-        generate(KeyPairGenerator.getInstance(transformation))
+        generate(KeyPairGenerator.getInstance(algorithm))
     }
 
     // --------------------------------------------------------------
+
+    fun deleteLocalKeyPair(alias: String) : Boolean {
+        return try {
+            val keyStore = KeyStore.getInstance("AndroidKeyStore")
+            keyStore.load(null)
+            keyStore.deleteEntry(alias)
+            true
+        } catch (e: Exception) {
+            GlLog.e("Delete key fail: $alias")
+            GlLog.e(e.stackTraceToString())
+            false
+        } finally {
+
+        }
+    }
 
     fun loadLocalKeyPair(alias: String) : Boolean {
         return try {
@@ -75,13 +94,37 @@ class GlKeyPair {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateLocalKeyPair(alias: String) {
+        val keyStore = KeyStore.getInstance("AndroidKeyStore")
+        keyStore.load(null)
+
         val spec = KeyGenParameterSpec.Builder(alias,
             KeyProperties.PURPOSE_SIGN or KeyProperties.PURPOSE_VERIFY).run {
+
+            // https://stackoverflow.com/a/49414593
+
+            setRandomizedEncryptionRequired(false)
+            setDigests(
+                KeyProperties.DIGEST_NONE, KeyProperties.DIGEST_MD5,
+                KeyProperties.DIGEST_SHA1, KeyProperties.DIGEST_SHA224,
+                KeyProperties.DIGEST_SHA256, KeyProperties.DIGEST_SHA384,
+                KeyProperties.DIGEST_SHA512)
+            setKeySize(2048)
+            setEncryptionPaddings(
+                KeyProperties.ENCRYPTION_PADDING_NONE,
+                KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1,
+                KeyProperties.ENCRYPTION_PADDING_RSA_OAEP)
+            setSignaturePaddings(KeyProperties.SIGNATURE_PADDING_RSA_PKCS1)
+
+            setCertificateSubject(X500Principal("CN=Android, O=Android Authority"))
+            setCertificateSerialNumber(BigInteger(256, Random()))
+            setCertificateNotBefore(GlDateTime.datetime())
+            setCertificateNotAfter(GlDateTime.datetime(100 * 365))
+
             build()
         }
 
         val generator = KeyPairGenerator.getInstance(
-            transformation, "AndroidKeyStore").apply {
+            algorithm, "AndroidKeyStore").apply {
                 initialize(spec)
         }
 
@@ -128,7 +171,8 @@ class GlKeyPair {
     private fun keyCipher(key: Key, data: ByteArray, mode: Int, limit: Int) : ByteArray {
         var offset = 0
         val outputStream = ByteArrayOutputStream()
-        val cipher = Cipher.getInstance(transformation).apply { init(mode, key) }
+        val cipher = Cipher.getInstance(transformation)
+        cipher.init(mode, key)
         while (offset < data.size) {
             val remainingLen = data.size - offset
             val processLen = if (remainingLen > limit) limit else remainingLen
