@@ -21,6 +21,12 @@ internal class GlEncryptionTest {
         val encryption = GlEncryption().apply {
             createKeyPair(0, quitFlag)
         }
-        val keyPairSerialized = GlEncryption.serializeKeyPair(encryption.powKeyPair)
+
+        val originalKeyPair = encryption.powKeyPair
+        val keyPairSerialized = GlEncryption.serializeKeyPair(originalKeyPair)
+        val keyPairDeserialized = GlEncryption.deserializeKeyPair(keyPairSerialized)
+
+        assert(originalKeyPair.publicKeyBytes.contentEquals(keyPairDeserialized.publicKeyBytes))
+        assert(originalKeyPair.privateKeyBytes.contentEquals(keyPairDeserialized.privateKeyBytes))
     }
 }

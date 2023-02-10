@@ -33,25 +33,35 @@ class GlKeyPair {
     var encryptAlgorithm: String = KeyProperties.KEY_ALGORITHM_RSA
     val encryptTransformation: String = "$encryptAlgorithm/ECB/PKCS1Padding"
 
-    var publicKeyString: String = ""
-        @RequiresApi(Build.VERSION_CODES.O)
+    var publicKeyBytes: ByteArray
         set(value) {
-            field = value
             val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
-            publicKey = keyFactory.generatePublic(X509EncodedKeySpec(Base64.getDecoder().decode(value)))
+            publicKey = keyFactory.generatePublic(X509EncodedKeySpec(value))
         }
-        @RequiresApi(Build.VERSION_CODES.O)
-        get() = Base64.getEncoder().encodeToString(publicKey?.encoded ?: ByteArray(0))
+        get() = publicKey?.encoded ?: ByteArray(0)
 
-    var privateKeyString: String = ""
+    var privateKeyBytes: ByteArray
+        set(value) {
+            val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
+            privateKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(value))
+        }
+        get() = privateKey?.encoded ?: ByteArray(0)
+
+    var publicKeyString: String
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
-            field = value
-            val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
-            privateKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(Base64.getDecoder().decode(value)))
+            publicKeyBytes = Base64.getDecoder().decode(value)
         }
         @RequiresApi(Build.VERSION_CODES.O)
-        get() = Base64.getEncoder().encodeToString(privateKey?.encoded ?: ByteArray(0))
+        get() = Base64.getEncoder().encodeToString(publicKeyBytes)
+
+    var privateKeyString: String
+        @RequiresApi(Build.VERSION_CODES.O)
+        set(value) {
+            privateKeyBytes = Base64.getDecoder().decode(value)
+        }
+        @RequiresApi(Build.VERSION_CODES.O)
+        get() = Base64.getEncoder().encodeToString(privateKeyBytes)
 
     // ---------------------------------------------------------------------------------------------
 

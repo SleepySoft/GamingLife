@@ -7,6 +7,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import thirdparty.encodeToBase58String
+import java.security.KeyStore
 import java.util.*
 import kotlin.experimental.and
 import java.security.MessageDigest
@@ -78,8 +79,8 @@ class GlEncryption {
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        fun serializeKeyPair(keyPair: GlKeyPair) : String {
-            return if (keyPair.privateKey != null && keyPair.publicKey != null) {
+        fun serializeKeyPair(keyPair: GlKeyPair) : String =
+            if (keyPair.privateKey != null && keyPair.publicKey != null) {
                 val publicKeyBytes = keyPair.publicKey!!.encoded
                 val privateKeyBytes = keyPair.privateKey!!.encoded
 
@@ -90,19 +91,41 @@ class GlEncryption {
                 ) + privateKeyBytes + publicKeyBytes
 
                 val dataCompressed = compress(buffer)
-                val dataSha = dataSha256(dataCompressed)
-                val dataBase64 = Base64.getEncoder().encodeToString(buffer + dataSha.copyOfRange(0, 2))
+                val dataBase64 = Base64.getEncoder().encodeToString(dataCompressed)
 
                 dataBase64
             } else {
                 ""
             }
-        }
 
-        fun deserializeKeyPair(keyPairStr: String) : GlKeyPair {
-            return GlKeyPair()
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun deserializeKeyPair(keyPairStr: String) : GlKeyPair =
+            try {
+                val dataCompressed = Base64.getDecoder().decode(keyPairStr)
+                val buffer = decompress(dataCompressed)
+
+                val version = buffer[0]
+
+                when (version.toInt()) {
+                    1 -> {
+                        val privateKeySize = buffer[1]
+                        val publicKeySize = buffer[2]
+                        GlKeyPair().apply {
+                            publicKeyBytes = buffer.copyOfRange(
+                                3 + privateKeySize, 3 + privateKeySize + publicKeySize)
+                            privateKeyBytes = buffer.copyOfRange(
+                                3, 3 + privateKeySize)
+                        }
+                    }
+                    else -> throw Exception("Unsupported KeyPair version.")
+                }
+            } catch (e: Exception) {
+                GlLog.e(e.stackTraceToString())
+                GlKeyPair()
+            } finally {
+
+            }
         }
-    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun createKeyPair(workloadProof: Int, quitFlag: List< Boolean >) : GlKeyPair? {
@@ -132,7 +155,7 @@ class GlEncryption {
                 val pubKeySha = dataSha256(this.encoded)
                 val workloadVal = calcPoW(pubKeySha)
 
-                if ((keyPairPow < workloadVal) || (keyPairPow == 0)) {
+                if ((workloadVal > keyPairPow) || (workloadProof == 0)) {
 
                     runBlocking {
                         mutex.withLock {
