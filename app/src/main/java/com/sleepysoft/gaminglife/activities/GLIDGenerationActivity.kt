@@ -158,8 +158,8 @@ class GeneratePairActivity : AppCompatActivity() {
 
     private fun glId() :  String =
         mGlEncryption.powKeyPair.publicKey?.let {
-            val pubKeySha = mGlEncryption.dataSha256(it.encoded)
-            val glId = mGlEncryption.glidFromPublicKeyHash(pubKeySha)
+            val pubKeySha = GlEncryption.dataSha256(it.encoded)
+            val glId = GlEncryption.glidFromPublicKeyHash(pubKeySha)
             glId
         } ?: ""
 }

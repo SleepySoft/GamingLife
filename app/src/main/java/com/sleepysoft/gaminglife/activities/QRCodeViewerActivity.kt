@@ -33,10 +33,16 @@ class QRCodeViewerActivity : AppCompatActivity() {
 
     private fun createQRCode(content: String) {
         Thread {
-            val logo = BitmapFactory.decodeResource(resources, R.drawable.ic_idle)
-            val bitmap = CodeUtils.createQRCode(content, 800, logo)
-            runOnUiThread {
-                mImageQR.setImageBitmap(bitmap)
+            try {
+                val logo = BitmapFactory.decodeResource(resources, R.drawable.ic_idle)
+                val bitmap = CodeUtils.createQRCode(content, 800, logo)
+                runOnUiThread {
+                    mImageQR.setImageBitmap(bitmap)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+
             }
         }.start()
     }

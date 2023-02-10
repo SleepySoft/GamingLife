@@ -89,6 +89,9 @@ class GLIDManagementActivity : AppCompatActivity() {
         }
 
         mButtonViewPrvKey.setOnClickListener {
+            val encoded = "%d|%s|%s".format(
+                1, GlRoot.systemConfig.privateKey, GlRoot.systemConfig.publicKey)
+
             val intent = Intent(this, QRCodeViewerActivity::class.java)
             intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, GlRoot.systemConfig.privateKey)
             ActivityCompat.startActivity(this, intent, null)

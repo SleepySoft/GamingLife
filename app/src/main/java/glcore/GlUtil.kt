@@ -1,7 +1,9 @@
 package glcore
 
+import java.io.*
 import java.util.*
-import kotlin.collections.HashMap
+import java.util.zip.DeflaterOutputStream
+import java.util.zip.InflaterInputStream
 
 fun trueOrNull(v: Boolean) : Boolean? = if (v) true else null
 
@@ -247,4 +249,24 @@ object PathDictSerializer : KSerializer< PathDict > {
     }
 }
 */
+
+
+fun compress(data: ByteArray): ByteArray {
+    val baos = ByteArrayOutputStream()
+    val out: OutputStream = DeflaterOutputStream(baos)
+    out.write(data)
+    out.close()
+    return baos.toByteArray()
+}
+
+fun decompress(data: ByteArray): ByteArray {
+    val inputStream: InputStream = InflaterInputStream(ByteArrayInputStream(data))
+    val baos = ByteArrayOutputStream()
+    val buffer = ByteArray(2048)
+    var len: Int
+    while (inputStream.read(buffer).also { len = it } > 0) {
+        baos.write(buffer, 0, len)
+    }
+    return baos.toByteArray()
+}
 
