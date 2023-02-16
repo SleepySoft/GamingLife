@@ -65,6 +65,13 @@ class GlKeyPair {
 
     // ---------------------------------------------------------------------------------------------
 
+    fun keyPariMatches() : Boolean {
+        return (publicKey != null) && (privateKey != null) &&
+                verify("Sleepy".toByteArray(), sign("Sleepy".toByteArray()))
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateKeyPair() {
         generate(KeyPairGenerator.getInstance(encryptAlgorithm))

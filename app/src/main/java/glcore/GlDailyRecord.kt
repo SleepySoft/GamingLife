@@ -18,6 +18,7 @@ class GlDailyRecord {
                     dailyFolders.add(folder)
                 }
             }
+            dailyFolders.sort()
             return dailyFolders
         }
     }

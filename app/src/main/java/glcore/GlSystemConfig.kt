@@ -8,6 +8,8 @@ import java.util.*
 
 
 class GlSystemConfig() {
+    val mainKeyPair: GlKeyPair = GlKeyPair()
+
     private val systemConfig: PathDict = PathDict()
 
     private var taskTop: MutableList< TaskData > = mutableListOf()
@@ -16,6 +18,7 @@ class GlSystemConfig() {
 
     // ---------------------------------------------------------------------------------------------
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun loadSystemConfig() : Boolean =
         loadPathDict(GL_FILE_SYSTEM_CONFIG, systemConfig) && parseSystemConfig()
 
@@ -31,6 +34,7 @@ class GlSystemConfig() {
         return saveSystemConfig()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun parseSystemConfig(): Boolean {
         return try {
             val taskTopList = systemConfig.get(PATH_SYSTEM_TASK_GROUP_TOP) as List< * >
@@ -41,6 +45,12 @@ class GlSystemConfig() {
 
             val taskLinkDict = systemConfig.get(PATH_SYSTEM_TASK_GROUP_LINK) as MutableMap< *, * >
             taskLink = toStrStruct(taskLinkDict)
+
+            (systemConfig.get(PATH_SYSTEM_PUBLIC_KEY) as String?)?.run {
+                mainKeyPair.publicKeyString = this
+            }
+
+            mainKeyPair.privateKeyBytes = loadPrivateKeyFromJson()
 
             true
 
@@ -130,8 +140,13 @@ class GlSystemConfig() {
         get() = (systemConfig.get(PATH_SYSTEM_GLID) as String?) ?: ""
 
     var publicKey: String
-        set(value) = systemConfig.set(PATH_SYSTEM_PUBLIC_KEY, value).let {  }
-        get() = (systemConfig.get(PATH_SYSTEM_PUBLIC_KEY) as String?) ?: ""
+        @RequiresApi(Build.VERSION_CODES.O)
+        set(value) {
+            mainKeyPair.publicKeyString = value
+            systemConfig.set(PATH_SYSTEM_PUBLIC_KEY, value)
+        }
+        @RequiresApi(Build.VERSION_CODES.O)
+        get() = mainKeyPair.publicKeyString
 
     var privateKey: String
         @RequiresApi(Build.VERSION_CODES.O)
@@ -154,6 +169,8 @@ class GlSystemConfig() {
 
                 systemConfig.set(PATH_SYSTEM_PRIVATE_KEY, privateKeyEncryptedBase64)
                 systemConfig.set(PATH_SYSTEM_PRIVATE_KEY_HASH, privateKeyHashBase64)
+
+                mainKeyPair.privateKeyBytes = privateKeyBytes
             } catch (e: Exception) {
                 GlLog.e("Private Key storage FAIL.")
                 GlLog.e(e.stackTraceToString())
@@ -162,34 +179,37 @@ class GlSystemConfig() {
             }
         }
         @RequiresApi(Build.VERSION_CODES.O)
-        get() {
-            return try {
-                val localKeyPair = GlKeyPair()
-                if (!localKeyPair.loadLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)) {
-                    throw java.lang.Exception("No Local Key Pair. The Private Key cannot be decrypted.")
-                }
+        get() = mainKeyPair.privateKeyString
 
-                val privateKeyHashBase64 = (systemConfig.get(PATH_SYSTEM_PRIVATE_KEY_HASH) as String?) ?: ""
-                val privateKeyEncryptedBase64 = (systemConfig.get(PATH_SYSTEM_PRIVATE_KEY) as String?) ?: ""
-
-                val privateKeyHash = Base64.getDecoder().decode(privateKeyHashBase64)
-                val privateKeyEncrypted = Base64.getDecoder().decode(privateKeyEncryptedBase64)
-
-                val privateKeyBytes = localKeyPair.privateKeyDecrypt(privateKeyEncrypted)
-                val md = MessageDigest.getInstance("SHA-256")
-                val privateKeyBytesHash = md.digest(privateKeyBytes)
-
-                if (!privateKeyHash.contentEquals(privateKeyBytesHash)) {
-                    throw java.lang.Exception("Decrypted Private Key Hash Error.")
-                }
-
-                Base64.getEncoder().encodeToString(privateKeyBytes)
-            } catch (e: Exception) {
-                GlLog.e("Private Key base64 FAIL.")
-                GlLog.e(e.stackTraceToString())
-                ""
-            } finally {
-
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun loadPrivateKeyFromJson() : ByteArray {
+        return try {
+            val localKeyPair = GlKeyPair()
+            if (!localKeyPair.loadLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)) {
+                throw java.lang.Exception("No Local Key Pair. The Private Key cannot be decrypted.")
             }
+
+            val privateKeyHashBase64 = (systemConfig.get(PATH_SYSTEM_PRIVATE_KEY_HASH) as String?) ?: ""
+            val privateKeyEncryptedBase64 = (systemConfig.get(PATH_SYSTEM_PRIVATE_KEY) as String?) ?: ""
+
+            val privateKeyHash = Base64.getDecoder().decode(privateKeyHashBase64)
+            val privateKeyEncrypted = Base64.getDecoder().decode(privateKeyEncryptedBase64)
+
+            val privateKeyBytes = localKeyPair.privateKeyDecrypt(privateKeyEncrypted)
+            val md = MessageDigest.getInstance("SHA-256")
+            val privateKeyBytesHash = md.digest(privateKeyBytes)
+
+            if (!privateKeyHash.contentEquals(privateKeyBytesHash)) {
+                throw java.lang.Exception("Decrypted Private Key Hash Error.")
+            }
+
+            privateKeyBytes
+        } catch (e: Exception) {
+            GlLog.e("Private Key base64 FAIL.")
+            GlLog.e(e.stackTraceToString())
+            byteArrayOf()
+        } finally {
+
         }
+    }
 }
