@@ -17,6 +17,7 @@ import com.king.zxing.CaptureActivity
 import com.king.zxing.util.CodeUtils
 import com.sleepysoft.gaminglife.*
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
+import glcore.GlEncryption
 import glcore.GlRoot
 import glcore.GlSystemConfig
 import pub.devrel.easypermissions.EasyPermissions
@@ -93,6 +94,7 @@ class GLIDManagementActivity : AppCompatActivity() {
                 1, GlRoot.systemConfig.privateKey, GlRoot.systemConfig.publicKey)
 
             val intent = Intent(this, QRCodeViewerActivity::class.java)
+            // val keyPairSerialized = GlEncryption.serializeKeyPair(GlRoot.systemConfig.mainKeyPair)
             intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, GlRoot.systemConfig.privateKey)
             ActivityCompat.startActivity(this, intent, null)
         }

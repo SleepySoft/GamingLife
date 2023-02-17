@@ -7,8 +7,13 @@ import androidx.annotation.RequiresApi
 import glcore.GlDateTime
 import glcore.GlLog
 import java.io.ByteArrayOutputStream
+import java.math.BigInteger
 import java.security.*
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
 import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.RSAPrivateKeySpec
+import java.security.spec.RSAPublicKeySpec
 import java.security.spec.X509EncodedKeySpec
 import java.util.*
 import javax.crypto.Cipher
@@ -75,6 +80,18 @@ class GlKeyPair {
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateKeyPair() {
         generate(KeyPairGenerator.getInstance(encryptAlgorithm))
+    }
+
+    fun generateKeyPair(modulus: BigInteger, publicExponent: BigInteger, privateExponent: BigInteger) {
+        // https://stackoverflow.com/a/24547249
+
+        val publicSpec = RSAPublicKeySpec(modulus, publicExponent)
+        val privateSpec = RSAPrivateKeySpec(modulus, privateExponent)
+
+        val factory: KeyFactory = KeyFactory.getInstance(encryptAlgorithm)
+
+        publicKey = factory.generatePublic(publicSpec)
+        privateKey = factory.generatePrivate(privateSpec)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -196,6 +213,35 @@ class GlKeyPair {
         val keyPair = generator.genKeyPair()
         privateKey = keyPair.private
         publicKey = keyPair.public
+
+        // https://stackoverflow.com/a/19819805
+        // https://en.wikipedia.org/wiki/RSA_(cryptosystem)
+        // https://crypto.stackexchange.com/questions/79604/private-exponent-on-rsa-key
+        // https://crypto.stackexchange.com/questions/18031/how-to-find-modulus-from-a-rsa-public-key
+        // https://crypto.stackexchange.com/questions/81615/calculating-rsa-public-modulus-from-private-exponent-and-public-exponent
+
+        val rsaPub = publicKey as RSAPublicKey
+        val rsaPrv = privateKey as RSAPrivateKey
+
+        val pubModulus = rsaPub.modulus
+        val pubExponent = rsaPub.publicExponent
+
+        val prvModulus = rsaPrv.modulus
+        val prvExponent = rsaPrv.privateExponent
+
+        println("===================================================================")
+        println("pubModulus")
+        println(pubModulus)
+        println("..............................")
+        println("pubExponent")
+        println(pubExponent)
+        println("-------------------------------------------------------------------")
+        println("prvModulus")
+        println(prvModulus)
+        println("..............................")
+        println("prvExponent")
+        println(prvExponent)
+        println("===================================================================")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
