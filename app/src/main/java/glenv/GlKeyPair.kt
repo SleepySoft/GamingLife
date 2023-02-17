@@ -111,17 +111,17 @@ class GlKeyPair {
         // Use RSAPrivateCrtKeySpec avoiding error:04000090:RSA routines:OPENSSL_internal:VALUE_MISSING
         // https://stackoverflow.com/questions/67613519/using-rsaprivatekey-and-not-rsaprivatecrtkey-to-save-an-rsa-private-key-to-and
         // https://stackoverflow.com/questions/34932367/java-generating-rsa-key-pair-from-5-crt-components
-        val privateSpec = RSAPrivateCrtKeySpec(modulus, publicExponent, privateExponent,
-            null, null, null, null, null)
 
-        val factory: KeyFactory = KeyFactory.getInstance(encryptAlgorithm)
+        val params = calculatePKCS1Parameters(modulus, privateExponent, publicExponent)
+        if (params.size == 5) {
+            val privateSpec = RSAPrivateCrtKeySpec(
+                modulus, publicExponent, privateExponent,
+                params[0], params[1], params[2], params[3], params[4])
+            val factory: KeyFactory = KeyFactory.getInstance(encryptAlgorithm)
 
-/*        for (p in Security.getProviders()) {
-            println(p)
-        }*/
-
-        publicKey = factory.generatePublic(publicSpec)
-        privateKey = factory.generatePrivate(privateSpec)
+            publicKey = factory.generatePublic(publicSpec)
+            privateKey = factory.generatePrivate(privateSpec)
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -269,5 +269,147 @@ class GlKeyPair {
         outputStream.close()
         return outputStream.toByteArray()
         // return Base64.getEncoder().encode(outputStream.toByteArray()).toString()
+    }
+
+    // https://stackoverflow.com/a/29837139
+    // Return value: [primeP, primeQ, primeExponentP, primeExponentQ, crtCoefficient]
+
+    fun calculatePKCS1Parameters(
+        mod: BigInteger, privExponent: BigInteger, pubExponent: BigInteger) : List< BigInteger >
+    {
+        val n = mod
+        val d = privExponent
+        val e = pubExponent
+
+        val zero = BigInteger.ZERO
+        val one = BigInteger.ONE
+        val two = BigInteger.valueOf(2)
+        val four = BigInteger.valueOf(4)
+
+
+        val de = e*d
+        val modulusplus1 = n + one
+        val deminus1 = de - one
+        var p = zero
+        var q = zero
+
+        val kprima = de/n
+
+        val ks = arrayOf(kprima, kprima - one, kprima + one)
+
+        var found = false
+        for (k in ks)
+        {
+            val fi = deminus1/k
+            val pplusq = modulusplus1 - fi
+            val delta = pplusq*pplusq - n*four
+
+            val sqrt = newtonPlusSqrt(delta)
+            p = (pplusq + sqrt)/two
+            if (n % p != zero) {
+                continue
+            }
+            q = (pplusq - sqrt)/two
+            found = true
+            break
+        }
+
+        return if (found)
+        {
+            val dp = d % (p - one)
+            val dq = d % (q - one)
+            val inverseq = q.modInverse(p)
+
+            listOf< BigInteger >(p, q, dp, dq, inverseq)
+        } else {
+            listOf()
+        }
+    }
+
+    // https://stackoverflow.com/a/71540415
+
+    // A fast square root by Ryan Scott White. (MIT License)
+    fun newtonPlusSqrt(x: BigInteger): BigInteger {
+        if (x.compareTo(BigInteger.valueOf(144838757784765629L)) < 0) {
+            val xAsLong = x.toLong()
+            var vInt = Math.sqrt(xAsLong.toDouble()).toLong()
+            if (vInt * vInt > xAsLong) vInt--
+            return BigInteger.valueOf(vInt)
+        }
+        val xAsDub = x.toDouble()
+        var result: BigInteger
+        if (xAsDub < 2.1267e37) // 2.12e37 largest here since sqrt(long.max*long.max) > long.max
+        {
+            val vInt = Math.sqrt(xAsDub).toLong()
+            result = BigInteger.valueOf(vInt + x.divide(BigInteger.valueOf(vInt)).toLong() shr 1)
+        } else if (xAsDub < 4.3322e127) {
+            // Convert a double to a BigInteger
+            val bits = java.lang.Double.doubleToLongBits(Math.sqrt(xAsDub))
+            val exp = ((bits shr 52).toInt() and 0x7ff) - 1075
+            result = BigInteger.valueOf(bits and (1L shl 52) - 1 or (1L shl 52)).shiftLeft(exp)
+            result = x.divide(result).add(result).shiftRight(1)
+            if (xAsDub > 2e63) {
+                result = x.divide(result).add(result).shiftRight(1)
+            }
+        } else  // handle large numbers over 4.3322e127
+        {
+            val xLen = x.bitLength()
+            val wantedPrecision = (xLen + 1) / 2
+            val xLenMod = xLen + (xLen and 1) + 1
+
+            //////// Do the first Sqrt on Hardware ////////
+            val tempX = x.shiftRight(xLenMod - 63).toLong()
+            val tempSqrt1 = Math.sqrt(tempX.toDouble())
+            var valLong = java.lang.Double.doubleToLongBits(tempSqrt1) and 0x1fffffffffffffL
+            if (valLong == 0L) valLong = 1L shl 53
+
+            //////// Classic Newton Iterations ////////
+            result = BigInteger.valueOf(valLong).shiftLeft(53 - 1)
+                .add(x.shiftRight(xLenMod - 3 * 53).divide(BigInteger.valueOf(valLong)))
+            var size = 106
+            while (size < 256) {
+                result =
+                    result.shiftLeft(size - 1).add(x.shiftRight(xLenMod - 3 * size).divide(result))
+                size = size shl 1
+            }
+            if (xAsDub > 4e254) // 4e254 = 1<<845.77 
+            {
+                val numOfNewtonSteps = 31 - Integer.numberOfLeadingZeros(wantedPrecision / size) + 1
+
+                ////// Apply Starting Size ////////
+                val wantedSize = (wantedPrecision shr numOfNewtonSteps) + 2
+                val needToShiftBy = size - wantedSize
+                result = result.shiftRight(needToShiftBy)
+                size = wantedSize
+                do {
+                    //////// Newton Plus Iteration ////////
+                    val shiftX = xLenMod - 3 * size
+                    val valSqrd = result.multiply(result).shiftLeft(size - 1)
+                    val valSU = x.shiftRight(shiftX).subtract(valSqrd)
+                    result = result.shiftLeft(size).add(valSU.divide(result))
+                    size *= 2
+                } while (size < wantedPrecision)
+            }
+            result = result.shiftRight(size - wantedPrecision)
+        }
+
+        // Detect a round ups. This function can be further optimized - see article.
+        // For a ~7% speed bump the following line can be removed but round-ups will occur.
+        if (result.multiply(result).compareTo(x) > 0) result = result.subtract(BigInteger.ONE)
+
+        // // Enabling the below will guarantee an error is stopped for larger numbers.
+        // // Note: As of this writing, there are no known errors.
+        // BigInteger tmp = val.multiply(val);
+        // if (tmp.compareTo(x) > 0)  {
+        //     System.out.println("val^2(" + val.multiply(val).toString() + ") >=  x(" + x.toString() + ")"); 
+        //     System.console().readLine();
+        //     //throw new Exception("Sqrt function had internal error - value too high");   
+        // }
+        // if (tmp.add(val.shiftLeft(1)).add(BigInteger.ONE).compareTo(x) <= 0) {
+        //     System.out.println("(val+1)^2(" + val.add(BigInteger.ONE).multiply(val.add(BigInteger.ONE)).toString() + ") >=  x(" + x.toString() + ")"); 
+        //     System.console().readLine();
+        //     //throw new Exception("Sqrt function had internal error - value too low");    
+        // }
+        return result
     }
 }

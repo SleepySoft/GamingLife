@@ -31,7 +31,7 @@ internal class GlEncryptionTest {
         assert(keyPairDeserialized.verify(challenge, originalKeyPair.sign(challenge)))
 
         assert(originalKeyPair.publicKeyBytes.contentEquals(keyPairDeserialized.publicKeyBytes))
-        assert(!originalKeyPair.privateKeyBytes.contentEquals(keyPairDeserialized.privateKeyBytes))
+        assert(originalKeyPair.privateKeyBytes.contentEquals(keyPairDeserialized.privateKeyBytes))
 
         println("=> Original public key string:")
         println(originalKeyPair.publicKeyString)
