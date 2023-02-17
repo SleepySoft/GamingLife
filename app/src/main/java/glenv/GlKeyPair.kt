@@ -9,12 +9,7 @@ import glcore.GlLog
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.security.*
-import java.security.interfaces.RSAPrivateKey
-import java.security.interfaces.RSAPublicKey
-import java.security.spec.PKCS8EncodedKeySpec
-import java.security.spec.RSAPrivateKeySpec
-import java.security.spec.RSAPublicKeySpec
-import java.security.spec.X509EncodedKeySpec
+import java.security.spec.*
 import java.util.*
 import javax.crypto.Cipher
 import javax.security.auth.x500.X500Principal
@@ -40,15 +35,39 @@ class GlKeyPair {
 
     var publicKeyBytes: ByteArray
         set(value) {
-            val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
-            publicKey = keyFactory.generatePublic(X509EncodedKeySpec(value))
+            publicKey = try {
+                if (value.isNotEmpty()) {
+                    val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
+                    keyFactory.generatePublic(X509EncodedKeySpec(value))
+                } else {
+                    // Not enter exception when empty
+                    null
+                }
+            } catch (e: Exception) {
+                GlLog.e(e.stackTraceToString())
+                null
+            } finally {
+
+            }
         }
         get() = publicKey?.encoded ?: ByteArray(0)
 
     var privateKeyBytes: ByteArray
         set(value) {
-            val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
-            privateKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(value))
+            privateKey = try {
+                if (value.isNotEmpty()) {
+                    val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
+                    keyFactory.generatePrivate(PKCS8EncodedKeySpec(value))
+                } else {
+                    // Not enter exception when empty
+                    null
+                }
+            } catch (e: Exception) {
+                GlLog.e(e.stackTraceToString())
+                null
+            } finally {
+
+            }
         }
         get() = privateKey?.encoded ?: ByteArray(0)
 
@@ -70,10 +89,11 @@ class GlKeyPair {
 
     // ---------------------------------------------------------------------------------------------
 
-    fun keyPariMatches() : Boolean {
-        return (publicKey != null) && (privateKey != null) &&
-                verify("Sleepy".toByteArray(), sign("Sleepy".toByteArray()))
-    }
+    fun keyPairValid() : Boolean = (!keyPairEmpty() && keyPairMatches())
+
+    fun keyPairEmpty() : Boolean = ((publicKey == null) && (privateKey == null))
+
+    fun keyPairMatches() : Boolean = verify("Sleepy".toByteArray(), sign("Sleepy".toByteArray()))
 
     // ---------------------------------------------------------------------------------------------
 
@@ -86,9 +106,19 @@ class GlKeyPair {
         // https://stackoverflow.com/a/24547249
 
         val publicSpec = RSAPublicKeySpec(modulus, publicExponent)
-        val privateSpec = RSAPrivateKeySpec(modulus, privateExponent)
+        // val privateSpec = RSAPrivateKeySpec(modulus, privateExponent)
+
+        // Use RSAPrivateCrtKeySpec avoiding error:04000090:RSA routines:OPENSSL_internal:VALUE_MISSING
+        // https://stackoverflow.com/questions/67613519/using-rsaprivatekey-and-not-rsaprivatecrtkey-to-save-an-rsa-private-key-to-and
+        // https://stackoverflow.com/questions/34932367/java-generating-rsa-key-pair-from-5-crt-components
+        val privateSpec = RSAPrivateCrtKeySpec(modulus, publicExponent, privateExponent,
+            null, null, null, null, null)
 
         val factory: KeyFactory = KeyFactory.getInstance(encryptAlgorithm)
+
+/*        for (p in Security.getProviders()) {
+            println(p)
+        }*/
 
         publicKey = factory.generatePublic(publicSpec)
         privateKey = factory.generatePrivate(privateSpec)
@@ -213,35 +243,6 @@ class GlKeyPair {
         val keyPair = generator.genKeyPair()
         privateKey = keyPair.private
         publicKey = keyPair.public
-
-        // https://stackoverflow.com/a/19819805
-        // https://en.wikipedia.org/wiki/RSA_(cryptosystem)
-        // https://crypto.stackexchange.com/questions/79604/private-exponent-on-rsa-key
-        // https://crypto.stackexchange.com/questions/18031/how-to-find-modulus-from-a-rsa-public-key
-        // https://crypto.stackexchange.com/questions/81615/calculating-rsa-public-modulus-from-private-exponent-and-public-exponent
-
-        val rsaPub = publicKey as RSAPublicKey
-        val rsaPrv = privateKey as RSAPrivateKey
-
-        val pubModulus = rsaPub.modulus
-        val pubExponent = rsaPub.publicExponent
-
-        val prvModulus = rsaPrv.modulus
-        val prvExponent = rsaPrv.privateExponent
-
-        println("===================================================================")
-        println("pubModulus")
-        println(pubModulus)
-        println("..............................")
-        println("pubExponent")
-        println(pubExponent)
-        println("-------------------------------------------------------------------")
-        println("prvModulus")
-        println(prvModulus)
-        println("..............................")
-        println("prvExponent")
-        println(prvExponent)
-        println("===================================================================")
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

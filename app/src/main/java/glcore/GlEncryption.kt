@@ -82,12 +82,14 @@ class GlEncryption {
 
         @RequiresApi(Build.VERSION_CODES.O)
         fun serializeKeyPair(keyPair: GlKeyPair) : String =
-            if (keyPair.keyPariMatches()) {
+            if (keyPair.keyPairMatches()) {
                 // https://stackoverflow.com/a/19819805
                 // https://en.wikipedia.org/wiki/RSA_(cryptosystem)
                 // https://crypto.stackexchange.com/questions/79604/private-exponent-on-rsa-key
                 // https://crypto.stackexchange.com/questions/18031/how-to-find-modulus-from-a-rsa-public-key
                 // https://crypto.stackexchange.com/questions/81615/calculating-rsa-public-modulus-from-private-exponent-and-public-exponent
+
+                // Note: android.security.keystore2.AndroidKeyStoreRSAPrivateKey cannot be cast to java.security.interfaces.RSAPrivateKey
 
                 val rsaPub = keyPair.publicKey as RSAPublicKey
                 val rsaPrv = keyPair.privateKey as RSAPrivateKey

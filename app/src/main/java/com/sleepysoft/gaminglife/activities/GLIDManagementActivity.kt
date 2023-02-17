@@ -8,6 +8,7 @@ import android.provider.MediaStore
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -19,7 +20,6 @@ import com.sleepysoft.gaminglife.*
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import glcore.GlEncryption
 import glcore.GlRoot
-import glcore.GlSystemConfig
 import pub.devrel.easypermissions.EasyPermissions
 
 class GLIDManagementActivity : AppCompatActivity() {
@@ -94,8 +94,8 @@ class GLIDManagementActivity : AppCompatActivity() {
                 1, GlRoot.systemConfig.privateKey, GlRoot.systemConfig.publicKey)
 
             val intent = Intent(this, QRCodeViewerActivity::class.java)
-            // val keyPairSerialized = GlEncryption.serializeKeyPair(GlRoot.systemConfig.mainKeyPair)
-            intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, GlRoot.systemConfig.privateKey)
+            val keyPairSerialized = GlEncryption.serializeKeyPair(GlRoot.systemConfig.mainKeyPair)
+            intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, keyPairSerialized)
             ActivityCompat.startActivity(this, intent, null)
         }
 
@@ -139,6 +139,7 @@ class GLIDManagementActivity : AppCompatActivity() {
         loadGlId()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -212,6 +213,7 @@ class GLIDManagementActivity : AppCompatActivity() {
         startActivityForResult(pickIntent, REQUEST_CODE_FROM_IMG)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun parseImage(data: Intent) {
         try {
             val bitmap = MediaStore.Images.Media.getBitmap(contentResolver, data.data)
@@ -228,7 +230,15 @@ class GLIDManagementActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun parseQRResult(result: String) {
-        toast(result)
+        val keyPair = GlEncryption.deserializeKeyPair(result)
+        if (keyPair.keyPairValid()) {
+            GlRoot.systemConfig.publicKey = keyPair.publicKeyString
+            GlRoot.systemConfig.privateKey = keyPair.privateKeyString
+            loadGlId()
+        } else {
+            toast(getString(R.string.HINT_LOAD_PRIVATE_KEY_ERROR))
+        }
     }
 }

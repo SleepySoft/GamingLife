@@ -19,11 +19,13 @@
     <string name="HINT_PERMISSION_CAMERA_QR">扫描二维码需要相机权限</string>
     <string name="HINT_PERMISSION_EXT_STORAGE_QR">从图片扫描二维码需要存储权限</string>
 
+    <string name="HINT_LOAD_PRIVATE_KEY_ERROR">导入GLID失败</string>
+
     <string name="FORMAT_GLID_GEN_LOG">尝试次数: %d -> 最大工作量证明: %d\n</string>
     <string name="FORMAT_GLID_GEN_FAIL">没有生成符合标准的GLID\n</string>
     <string name="FORMAT_GLID_GEN_SUCCESS">获得可用的GLID: %s\n工作量证明：%d\n</string>
     <string name="COMMENTS_PRIVATE_KEY">私钥是你账号的唯一证明，请妥善保管且不要泄露给任何人，包括GaminLief官方。</string>
-    <string name="COMMENTS_PUBLIC_KEY">GaminLief官方会用你的公钥验证你的账号，你的朋友也可以通过公钥加密给你的信息。\n公钥是安全的，但非必要请不要向大众和陌生人公开你的公钥。</string>
+    <string name="COMMENTS_PUBLIC_KEY">GaminLife官方会用你的公钥验证你的账号，你的朋友也可以通过公钥加密给你的信息。\n公钥是安全的，但非必要请不要向大众和陌生人公开你的公钥。</string>
     <string name="COMMENTS_GLID">GLID是你在GamingLife世界的账号，你可以放心公开你的GLID。\n公开你的GLID不会泄露你的任何私密信息。</string>
 
     <string name="COMMENTS_NO_GLID">
