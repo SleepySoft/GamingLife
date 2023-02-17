@@ -29,5 +29,18 @@ internal class GlEncryptionTest {
         val challenge = "Sleepy".toByteArray()
         assert(originalKeyPair.verify(challenge, keyPairDeserialized.sign(challenge)))
         assert(keyPairDeserialized.verify(challenge, originalKeyPair.sign(challenge)))
+
+        assert(originalKeyPair.publicKeyBytes.contentEquals(keyPairDeserialized.publicKeyBytes))
+        assert(!originalKeyPair.privateKeyBytes.contentEquals(keyPairDeserialized.privateKeyBytes))
+
+        println("=> Original public key string:")
+        println(originalKeyPair.publicKeyString)
+        println("=> Deserialized public key string:")
+        println(keyPairDeserialized.publicKeyString)
+
+        println("=> Original private key string:")
+        println(originalKeyPair.privateKeyString)
+        println("=> Deserialized private key string:")
+        println(keyPairDeserialized.privateKeyString)
     }
 }
