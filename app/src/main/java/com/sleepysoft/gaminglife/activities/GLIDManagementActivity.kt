@@ -232,7 +232,11 @@ class GLIDManagementActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun parseQRResult(result: String) {
-        val keyPair = GlEncryption.deserializeKeyPair(result)
+
+        // val keyPairSerialized = result
+        val keyPairSerialized = "AQ==|AISSAWYstJP1xbUao886vzQU2N0lqWunbSKqwh7LFqkM64crS4d7751YZ7Ec1ppzjOLmJVvJVSKf0mv9KiPSpcbufQNgbGgySmcPqCEE39T96Bwjv3VmQqvBjLIMB0x6YMB5195FwpPjWVbnT0apQcOf1i6PMihm9ALl4K6aJeq9argMotOUEyxTM7jm33GJOTWPVJ40koGwtgFT5JBdmeRmVbzQD3sdIl7Y0paINW1Ohvxi+2/ze2Jrpcqqk3kJqVSas6Xf6z2Ijxssn0PL27Gue0L6CYpms5SCoRhQn77Jy0cToDZXMAOaQB9N4rTC2RP837z/ZP3tHPptNHO6TDk=|BPEYYkGqXZWc0Bp1HsV22S8pwlykCyJLnC43XER/zL9xjDFd+GfzT6869kw357wE9XRU0i4YIVlJ08K1Lm6sxVSgjl6qy9uMEHlx8AEpgtwQKfRfL7YnKBXn878lCoHJV4NzO5LoJPElpGqs9tpaXDt6FXQ7D2x/DhiZnoiafzyQm9g6XCv5HlDl1GI0JicoYf6TVDf1+1P2QVLyzld89970/7ES6fTwx74Grc574D4NGW6e/Pumyl1NEC6AUmTWQ87+oKHZvOxhIYnxhRgRzTqdn0I0QlJ1ULPAlz68OWt/NxcPSSpdntzbtzKNEcB4GlWnxZ9NWv8/zn7/7BkJ/Q==|AQAB"
+
+        val keyPair = GlEncryption.deserializeKeyPair(keyPairSerialized)
         if (keyPair.keyPairValid()) {
             GlRoot.systemConfig.publicKey = keyPair.publicKeyString
             GlRoot.systemConfig.privateKey = keyPair.privateKeyString

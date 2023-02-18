@@ -304,7 +304,7 @@ class GlKeyPair {
             val pplusq = modulusplus1 - fi
             val delta = pplusq*pplusq - n*four
 
-            val sqrt = newtonPlusSqrt(delta)
+            val sqrt = sqrt(delta)
             p = (pplusq + sqrt)/two
             if (n % p != zero) {
                 continue
@@ -411,5 +411,16 @@ class GlKeyPair {
         //     //throw new Exception("Sqrt function had internal error - value too low");    
         // }
         return result
+    }
+
+    fun sqrt(x: BigInteger): BigInteger {
+        var half = BigInteger.ZERO.setBit(x.bitLength() / 2)
+        var cur = half
+        while (true) {
+            val tmp = half.add(x.divide(half)).shiftRight(1)
+            if (tmp == half || tmp == cur) return tmp
+            cur = half
+            half = tmp
+        }
     }
 }
