@@ -9,10 +9,15 @@ import glcore.GlLog
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.security.*
+import java.security.interfaces.RSAPrivateCrtKey
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
 import java.security.spec.*
 import java.util.*
 import javax.crypto.Cipher
 import javax.security.auth.x500.X500Principal
+
+
 
 
 // https://blog.csdn.net/duner12138/article/details/112647484
@@ -106,22 +111,47 @@ class GlKeyPair {
         // https://stackoverflow.com/a/24547249
 
         val publicSpec = RSAPublicKeySpec(modulus, publicExponent)
-        // val privateSpec = RSAPrivateKeySpec(modulus, privateExponent)
+        val privateSpec = RSAPrivateKeySpec(modulus, privateExponent)
+        val factory: KeyFactory = KeyFactory.getInstance(encryptAlgorithm)
 
         // Use RSAPrivateCrtKeySpec avoiding error:04000090:RSA routines:OPENSSL_internal:VALUE_MISSING
         // https://stackoverflow.com/questions/67613519/using-rsaprivatekey-and-not-rsaprivatecrtkey-to-save-an-rsa-private-key-to-and
         // https://stackoverflow.com/questions/34932367/java-generating-rsa-key-pair-from-5-crt-components
 
-        val params = calculatePKCS1Parameters(modulus, privateExponent, publicExponent)
+        // Hard to recover p and q from n, e, d
+/*        val params = calculatePKCS1Parameters(modulus, privateExponent, publicExponent)
         if (params.size == 5) {
             val privateSpec = RSAPrivateCrtKeySpec(
                 modulus, publicExponent, privateExponent,
-                params[0], params[1], params[2], params[3], params[4])
-            val factory: KeyFactory = KeyFactory.getInstance(encryptAlgorithm)
+                params[0], params[1], params[2], params[3], params[4])*/
 
-            publicKey = factory.generatePublic(publicSpec)
-            privateKey = factory.generatePrivate(privateSpec)
-        }
+        publicKey = factory.generatePublic(publicSpec)
+        privateKey = factory.generatePrivate(privateSpec)
+    }
+
+    fun generateCrtKeyPair(p: BigInteger, q: BigInteger, e: BigInteger) {
+        val n = p.multiply(q)
+        val p_1 = p - BigInteger.ONE
+        val q_1 = p - BigInteger.ONE
+        val fn = (p_1).multiply(q_1)
+
+        // https://stackoverflow.com/a/61282287
+        val d = e.modInverse((p_1/p_1.gcd(q_1)) * q_1)
+
+        println(d)
+
+        val dp = d % (p - ONE)
+        val dq = d % (q - ONE)
+        val inverseq = q.modInverse(p)
+
+        val publicSpec = RSAPublicKeySpec(n, e)
+        // val privateSpec = RSAPrivateCrtKeySpec(n, e, d, p, q, dp, dq, inverseq)
+        val factory: KeyFactory = KeyFactory.getInstance(encryptAlgorithm)
+
+        val privateSpec = RSAPrivateCrtKeySpec(null, null, null, p, q, dp, dq, inverseq)
+
+        publicKey = factory.generatePublic(publicSpec)
+        privateKey = factory.generatePrivate(privateSpec)
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -239,6 +269,51 @@ class GlKeyPair {
 
     // ---------------------------------------------------------------------------------------------
 
+    fun toJavaKeyPair() : KeyPair = KeyPair(publicKey, privateKey)
+
+    fun dumpRsaKeyPairInfo() {
+        val rsaPub = publicKey as RSAPublicKey
+        val rsaPrv = privateKey as RSAPrivateKey
+        val rsaPrvCrt = privateKey as RSAPrivateCrtKey
+
+        // Note: pubModulus == prvModulus
+
+        val pubModulus = rsaPub.modulus
+        val pubExponent = rsaPub.publicExponent
+
+        val prvModulus = rsaPrv.modulus
+        val prvExponent = rsaPrv.privateExponent
+
+        println("==========================================================================")
+        print("pubModulus: "); println(pubModulus)
+        print("pubExponent: "); println(pubExponent)
+        println("--------------------------------------------------------------------------")
+        print("prvModulus: "); println(prvModulus)
+        print("prvExponent: "); println(prvExponent)
+        println("==========================================================================")
+
+        // ----------------------------------------------------------------
+
+        val primeP = rsaPrvCrt.primeP
+        val primeQ = rsaPrvCrt.primeQ
+        val primeExponentP = rsaPrvCrt.primeExponentP
+        val primeExponentQ = rsaPrvCrt.primeExponentQ
+        val crtCoefficient = rsaPrvCrt.crtCoefficient
+
+
+        println("==========================================================================")
+        print("primeP: "); println(primeP)
+        print("primeQ: "); println(primeQ)
+        println("--------------------------------------------------------------------------")
+        print("primeExponentP: "); println(primeExponentP)
+        print("primeExponentQ: "); println(primeExponentQ)
+        println("--------------------------------------------------------------------------")
+        print("crtCoefficient: "); println(crtCoefficient)
+        println("==========================================================================")
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
     private fun generate(generator: KeyPairGenerator) {
         val keyPair = generator.genKeyPair()
         privateKey = keyPair.private
@@ -274,7 +349,109 @@ class GlKeyPair {
     // https://stackoverflow.com/a/29837139
     // Return value: [primeP, primeQ, primeExponentP, primeExponentQ, crtCoefficient]
 
-    fun calculatePKCS1Parameters(
+
+    private val ONE = BigInteger.ONE
+    private val TWO = BigInteger.valueOf(2)
+    private val ZERO = BigInteger.ZERO
+
+    private fun isEven(bi: BigInteger): Boolean {
+        return bi.mod(TWO) == ZERO
+    }
+
+    private fun getRandomBi(n: BigInteger, rnd: Random): BigInteger? {
+        // From http://stackoverflow.com/a/2290089
+        var r: BigInteger
+        do {
+            r = BigInteger(n.bitLength(), rnd)
+        } while (r.compareTo(n) >= 0)
+        return r
+    }
+
+
+    fun calculatePKCS1Parameters(n: BigInteger, d: BigInteger, e: BigInteger) : List< BigInteger > {
+        // Step 1: Let k = de – 1. If k is odd, then go to Step 4
+        val k: BigInteger = d.multiply(e).subtract(ONE)
+        if (isEven(k)) {
+
+            // Step 2 (express k as (2^t)r, where r is the largest odd integer
+            // dividing k and t >= 1)
+            var r = k
+            var t = ZERO
+            do {
+                r = r.divide(TWO)
+                t = t.add(ONE)
+            } while (isEven(r))
+
+            // Step 3
+            val random = Random()
+            var success = false
+            var y: BigInteger? = null
+            step3loop@ for (i in 1..100) {
+
+                // 3a
+                val g = getRandomBi(n, random)
+
+                // 3b
+                y = g!!.modPow(r, n)
+
+                // 3c
+                if (y == ONE || y == n.subtract(ONE)) {
+                    // 3g
+                    continue@step3loop
+                }
+
+                // 3d
+                var j = ONE
+                while (j.compareTo(t) <= 0) {
+
+                    // 3d1
+                    val x = y!!.modPow(TWO, n)
+
+                    // 3d2
+                    if (x == ONE) {
+                        success = true
+                        break@step3loop
+                    }
+
+                    // 3d3
+                    if (x == n.subtract(ONE)) {
+                        // 3g
+                        continue@step3loop
+                    }
+
+                    // 3d4
+                    y = x
+                    j = j.add(ONE)
+                }
+
+                // 3e
+                val x = y!!.modPow(TWO, n)
+                if (x == ONE) {
+                    success = true
+                    break@step3loop
+                }
+
+                // 3g
+                // (loop again)
+            }
+            if (success) {
+                // Step 5
+                val p = y!!.subtract(ONE).gcd(n)
+                val q = n.divide(p)
+
+                val dp = d % (p - ONE)
+                val dq = d % (q - ONE)
+                val inverseq = q.modInverse(p)
+                return listOf(p, q, dp, dq, inverseq)
+            }
+        }
+
+        // Step 4
+        // throw RuntimeException("Prime factors not found")
+        return listOf()
+    }
+
+/*    fun calculatePKCS1Parameters(
         mod: BigInteger, privExponent: BigInteger, pubExponent: BigInteger) : List< BigInteger >
     {
         val n = mod
@@ -422,5 +599,5 @@ class GlKeyPair {
             cur = half
             half = tmp
         }
-    }
+    }*/
 }

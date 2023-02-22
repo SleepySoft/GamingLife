@@ -45,6 +45,12 @@ internal class GlKeyPairTest {
         assert(glKeyPair.privateKeyString == "")
     }
 
+    @Test
+    fun testKeyPairInfo() {
+        val glKeyPair = GlKeyPair().apply { generateKeyPair() }
+        glKeyPair.dumpRsaKeyPairInfo()
+    }
+
     // https://medium.com/@wujingwe/write-unit-test-which-has-androidkeystore-dependency-f12181ae6311
 
 /*    @Test

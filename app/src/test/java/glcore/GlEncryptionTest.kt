@@ -1,6 +1,10 @@
 package glcore
 
+import glenv.GlKeyPair
 import org.junit.Test
+import java.security.interfaces.RSAPrivateCrtKey
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
 
 internal class GlEncryptionTest {
 
@@ -16,22 +20,18 @@ internal class GlEncryptionTest {
     }
 
     fun verifyKeyPairSerializeAndDeserialize() : Boolean {
-        val quitFlag = mutableListOf(false)
-        val encryption = GlEncryption().apply {
-            createKeyPair(0, quitFlag)
-        }
+        val originalKeyPair = GlKeyPair().apply { generateKeyPair() }
+        originalKeyPair.dumpRsaKeyPairInfo()
 
-        val originalKeyPair = encryption.powKeyPair
         val keyPairSerialized = GlEncryption.serializeKeyPair(originalKeyPair)
-        // val keyPairSerialized = "AQ==|AL5/+Xo4qCxUduokaojuv3Gz9cJZZmT29qFKHojsufZFWVr7SfRQ9VK6MmDSzSsBzkCMXkYJk75pugasJw3EkCHJWQ9Bf+g4B37USjLnbUkfk5bldEiaq+ldXb1GjVSVNTXdYvcUreb2ndA2HA+g2X98ruk24N9UZB6qeE727wVbg4NCWyrH1IiCtpf2aJt16sDg2AX+G1ykiw+GNwI+8Z2qU14cY2cFMCCbxs47013uBrABieDzC2K40MioSPmTDUATRbj63o3Kppqv9s2J1VTZSUX35TG4duVk5CEN92sXop4bUzZ7hhG+ePekECm9SdV9ofgsmQeA2e09P3wvLi8=|AOjWgmPHD1/sQ2we40sUhR2OJLpNivNDTfwItXzZdHINt6mWFE49cmj3xZuScpkEtZOV/aQ2qhGSKE1l6e+dN1p62N/mSIlzJU/F9oR0jDiHRipC45Fz4atAjJ9Ltgwr7JDQIKYSIHvfJZ4+HkFiPttHChw13aSzzhITsF86C+uX7LJxILzbxjUJC/TA8Gi7Gzf8XpVFPNUKDkFNQYdcpOlL1MNXRxt+7b/GxkgqKEMfcqE/hy06S/55skmXLFGixFhbhN0oe2S3476oHqLCuz0qr1HN61JQh0+sN69lVw33d90SBl/Vy+HvtenqxcIBhzH406EXFyydd59PW+UpeQ==|AQAB"
         val keyPairDeserialized = GlEncryption.deserializeKeyPair(keyPairSerialized)
 
         val challenge = "Sleepy".toByteArray()
         val result =
-            originalKeyPair.verify(challenge, keyPairDeserialized.sign(challenge)) &&
-            keyPairDeserialized.verify(challenge, originalKeyPair.sign(challenge)) &&
             originalKeyPair.publicKeyBytes.contentEquals(keyPairDeserialized.publicKeyBytes) &&
-            originalKeyPair.privateKeyBytes.contentEquals(keyPairDeserialized.privateKeyBytes)
+            originalKeyPair.privateKeyBytes.contentEquals(keyPairDeserialized.privateKeyBytes) &&
+            originalKeyPair.verify(challenge, keyPairDeserialized.sign(challenge)) &&
+            keyPairDeserialized.verify(challenge, originalKeyPair.sign(challenge))
 
         if (!result) {
             println("==========================================================================")
@@ -72,5 +72,30 @@ internal class GlEncryptionTest {
             }
         }
         println("Success: $successCount ; Fail: $failCount .")
+    }
+
+    @Test
+    fun testCrtParametersFromPQE() {
+        val glKeyPair = GlKeyPair().apply { generateKeyPair() }
+        with(glKeyPair) {
+
+            val rsaPub = publicKey as RSAPublicKey
+            val rsaPrv = privateKey as RSAPrivateKey
+            val rsaPrvCrt = privateKey as RSAPrivateCrtKey
+
+            val pubModulus = rsaPub.modulus
+            val pubExponent = rsaPub.publicExponent
+
+            val prvModulus = rsaPrv.modulus
+            val prvExponent = rsaPrv.privateExponent
+
+            // ----------------------------------------------------------------
+
+            val primeP = rsaPrvCrt.primeP
+            val primeQ = rsaPrvCrt.primeQ
+            val primeExponentP = rsaPrvCrt.primeExponentP
+            val primeExponentQ = rsaPrvCrt.primeExponentQ
+            val crtCoefficient = rsaPrvCrt.crtCoefficient
+        }
     }
 }

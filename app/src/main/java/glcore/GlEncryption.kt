@@ -9,6 +9,7 @@ import kotlinx.coroutines.sync.withLock
 import thirdparty.encodeToBase58String
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.security.interfaces.RSAPrivateCrtKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.*
@@ -88,25 +89,25 @@ class GlEncryption {
                 // https://crypto.stackexchange.com/questions/79604/private-exponent-on-rsa-key
                 // https://crypto.stackexchange.com/questions/18031/how-to-find-modulus-from-a-rsa-public-key
                 // https://crypto.stackexchange.com/questions/81615/calculating-rsa-public-modulus-from-private-exponent-and-public-exponent
+                // https://www.tabnine.com/code/java/methods/java.security.interfaces.RSAPrivateCrtKey/getPrimeQ
 
                 // Note: android.security.keystore2.AndroidKeyStoreRSAPrivateKey cannot be cast to java.security.interfaces.RSAPrivateKey
 
                 val rsaPub = keyPair.publicKey as RSAPublicKey
-                val rsaPrv = keyPair.privateKey as RSAPrivateKey
+                val rsaPrvCrt = keyPair.privateKey as RSAPrivateCrtKey
 
-                // pubModulus == prvModulus
-                // val pubModulus = rsaPub.modulus
-                val pubExponent = rsaPub.publicExponent
+                // ----------------------------------------------------------------
 
-                val prvModulus = rsaPrv.modulus
-                val prvExponent = rsaPrv.privateExponent
+                val primeP = rsaPrvCrt.primeP               // p
+                val primeQ = rsaPrvCrt.primeQ               // q
+                val publicExponent = rsaPub.publicExponent  // e
 
                 val versionBase64 = Base64.getEncoder().encodeToString(byteArrayOf(KEYPAIR_VERSION.toByte()))
-                val modulusBase64 = Base64.getEncoder().encodeToString(prvModulus.toByteArray())
-                val prvExponentBase64 = Base64.getEncoder().encodeToString(prvExponent.toByteArray())
-                val pubExponentBase64 = Base64.getEncoder().encodeToString(pubExponent.toByteArray())
+                val primePBase64 = Base64.getEncoder().encodeToString(primeP.toByteArray())
+                val primeQBase64 = Base64.getEncoder().encodeToString(primeQ.toByteArray())
+                val publicExponentBase64 = Base64.getEncoder().encodeToString(publicExponent.toByteArray())
 
-                "$versionBase64|$modulusBase64|$prvExponentBase64|$pubExponentBase64"
+                "$versionBase64|$primePBase64|$primeQBase64|$publicExponentBase64"
             } else {
                 ""
             }
@@ -123,16 +124,16 @@ class GlEncryption {
 
                 when (BigInteger(versionBytes).toInt()) {
                     KEYPAIR_VERSION -> {
-                        val modulusBytes = Base64.getDecoder().decode(parts[1])
-                        val prvExponentBytes = Base64.getDecoder().decode(parts[2])
-                        val pubExponentBytes = Base64.getDecoder().decode(parts[3])
+                        val primePBytes = Base64.getDecoder().decode(parts[1])
+                        val primeQBytes = Base64.getDecoder().decode(parts[2])
+                        val publicExponentBytes = Base64.getDecoder().decode(parts[3])
 
-                        val modulus = BigInteger(modulusBytes)
-                        val pubExponent = BigInteger(pubExponentBytes)
-                        val prvExponent = BigInteger(prvExponentBytes)
+                        val primeP = BigInteger(primePBytes)
+                        val primeQ = BigInteger(primeQBytes)
+                        val publicExponent = BigInteger(publicExponentBytes)
 
                         val keyPair = GlKeyPair().apply {
-                            generateKeyPair(modulus, pubExponent, prvExponent)
+                            generateCrtKeyPair(primeP, primeQ, publicExponent)
                         }
 
                         keyPair
