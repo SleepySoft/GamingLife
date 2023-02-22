@@ -2,6 +2,7 @@ package glcore
 
 import glenv.GlKeyPair
 import org.junit.Test
+import java.math.BigInteger
 import java.security.interfaces.RSAPrivateCrtKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -96,6 +97,35 @@ internal class GlEncryptionTest {
             val primeExponentP = rsaPrvCrt.primeExponentP
             val primeExponentQ = rsaPrvCrt.primeExponentQ
             val crtCoefficient = rsaPrvCrt.crtCoefficient
+
+            // ----------------------------------------------------------------
+
+            val p = primeP
+            val q = primeQ
+            val e = pubExponent
+
+            // ----------------------------------------------------------------
+
+            val n = p.multiply(q)
+            assert(n == pubModulus)
+            assert(n == prvModulus)
+
+            val p_1 = p - BigInteger.ONE
+            val q_1 = p - BigInteger.ONE
+            val fn = (p_1).multiply(q_1)
+
+            // https://stackoverflow.com/a/61282287
+            val d = e.modInverse((p_1/p_1.gcd(q_1)) * q_1)
+            assert(d == prvExponent)
+
+            val dp = d % (p - BigInteger.ONE)
+            assert(dp == primeExponentP)
+
+            val dq = d % (q - BigInteger.ONE)
+            assert(dq == primeExponentQ)
+
+            val inverseq = q.modInverse(p)
+            assert(inverseq == crtCoefficient)
         }
     }
 }
