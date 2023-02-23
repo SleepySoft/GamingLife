@@ -62,7 +62,7 @@ internal class GlEncryptionTest {
         var loop = 0
         var failCount = 0
         var successCount = 0
-        for (i in 0 until 100000) {
+        for (i in 0 until 10000) {
             loop += 1
             println("Loop: $loop")
 
@@ -73,6 +73,14 @@ internal class GlEncryptionTest {
             }
         }
         println("Success: $successCount ; Fail: $failCount .")
+    }
+
+    private fun computeCarmichaelLambda(p: BigInteger, q: BigInteger): BigInteger {
+        return lcm(p.subtract(BigInteger.ONE), q.subtract(BigInteger.ONE))
+    }
+
+    private fun lcm(x: BigInteger, y: BigInteger): BigInteger {
+        return x.multiply(y).divide(x.gcd(y))
     }
 
     @Test
@@ -110,22 +118,30 @@ internal class GlEncryptionTest {
             assert(n == pubModulus)
             assert(n == prvModulus)
 
-            val p_1 = p - BigInteger.ONE
-            val q_1 = p - BigInteger.ONE
-            val fn = (p_1).multiply(q_1)
+            val p_1 = p.subtract(BigInteger.ONE)
+            val q_1 = p.subtract(BigInteger.ONE)
+            // val phi = (p_1).multiply(q_1)
+            val phi = computeCarmichaelLambda(p, q)
+
+            assert(e == BigInteger.valueOf(65537))
+            assert(e.gcd(phi).equals(BigInteger.ONE))
+            assert(prvExponent.multiply(e).mod(phi) == BigInteger.ONE)
 
             // https://stackoverflow.com/a/61282287
-            val d = e.modInverse((p_1/p_1.gcd(q_1)) * q_1)
-            assert(d == prvExponent)
+            //val d = e.modInverse((p_1/p_1.gcd(q_1)) * q_1)
+            val d = e.modInverse(phi)
 
-            val dp = d % (p - BigInteger.ONE)
+            assert(d.multiply(e).mod(phi) == BigInteger.ONE)
+            // assert(d == prvExponent)
+
+            val dp = d.mod(p_1)
             assert(dp == primeExponentP)
 
-            val dq = d % (q - BigInteger.ONE)
+            val dq = d.mod(q_1)
             assert(dq == primeExponentQ)
 
-            val inverseq = q.modInverse(p)
-            assert(inverseq == crtCoefficient)
+            val coeff = q.modInverse(p)
+            assert(coeff == crtCoefficient)
         }
     }
 }

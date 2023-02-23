@@ -27,6 +27,12 @@ class GlKeyPair {
         const val DEFAULT_KEY_LEN = 2048
         const val ENCRYPT_LIMIT = DEFAULT_KEY_LEN / 8 - 42      // PCKS1
         const val DECRYPT_CHUNK = DEFAULT_KEY_LEN / 8
+
+        fun dumpProviders() {
+            for (p in Security.getProviders()) {
+                println(p)
+            }
+        }
     }
 
     var publicKey: PublicKey? = null
@@ -34,8 +40,9 @@ class GlKeyPair {
     var privateKey: PrivateKey? = null
         private set
 
-    var signAlgorithm: String = "MD5WithRSA"
-    var encryptAlgorithm: String = KeyProperties.KEY_ALGORITHM_RSA
+    val signAlgorithm: String = "MD5WithRSA"
+    // val keyPairProvider: String = ""
+    val encryptAlgorithm: String = KeyProperties.KEY_ALGORITHM_RSA
     val encryptTransformation: String = "$encryptAlgorithm/ECB/PKCS1Padding"
 
     var publicKeyBytes: ByteArray
@@ -62,7 +69,8 @@ class GlKeyPair {
             privateKey = try {
                 if (value.isNotEmpty()) {
                     val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
-                    keyFactory.generatePrivate(PKCS8EncodedKeySpec(value))
+                    val prvKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(value))
+                    prvKey
                 } else {
                     // Not enter exception when empty
                     null
@@ -104,7 +112,18 @@ class GlKeyPair {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateKeyPair() {
-        generate(KeyPairGenerator.getInstance(encryptAlgorithm))
+        val generator = KeyPairGenerator.getInstance(encryptAlgorithm)
+/*        println("==================================================================")
+        println("All provider: ")
+        dumpProviders()
+        println("------------------------------------------------------------------")
+        print("Generate KeyPair using provider: ")
+        println(generator.provider)
+        println("==================================================================")*/
+        generate(generator)
+
+        println(publicKey?.encoded)
+        println(privateKey?.encoded)
     }
 
     fun generateKeyPair(modulus: BigInteger, publicExponent: BigInteger, privateExponent: BigInteger) {
@@ -129,26 +148,31 @@ class GlKeyPair {
         privateKey = factory.generatePrivate(privateSpec)
     }
 
-    fun generateCrtKeyPair(p: BigInteger, q: BigInteger, e: BigInteger) {
+    private fun computeCarmichaelLambda(p: BigInteger, q: BigInteger): BigInteger {
+        return lcm(p.subtract(BigInteger.ONE), q.subtract(BigInteger.ONE))
+    }
+
+    private fun lcm(x: BigInteger, y: BigInteger): BigInteger {
+        return x.multiply(y).divide(x.gcd(y))
+    }
+
+    fun generateCrtKeyPair(p: BigInteger, q: BigInteger, e: BigInteger, d: BigInteger?) {
         val n = p.multiply(q)
-        val p_1 = p - BigInteger.ONE
-        val q_1 = p - BigInteger.ONE
-        val fn = (p_1).multiply(q_1)
+        val phi = computeCarmichaelLambda(p, q)
 
         // https://stackoverflow.com/a/61282287
-        val d = e.modInverse((p_1/p_1.gcd(q_1)) * q_1)
+        val dx = d ?: e.modInverse(phi)
 
-        println(d)
-
-        val dp = d % (p - ONE)
-        val dq = d % (q - ONE)
-        val inverseq = q.modInverse(p)
+        val dp = dx % (p - ONE)
+        val dq = dx % (q - ONE)
+        val coeff = q.modInverse(p)
 
         val publicSpec = RSAPublicKeySpec(n, e)
-        // val privateSpec = RSAPrivateCrtKeySpec(n, e, d, p, q, dp, dq, inverseq)
+        val privateSpec = RSAPrivateCrtKeySpec(n, e, dx, p, q, dp, dq, coeff)
         val factory: KeyFactory = KeyFactory.getInstance(encryptAlgorithm)
 
-        val privateSpec = RSAPrivateCrtKeySpec(null, null, null, p, q, dp, dq, inverseq)
+        // Who says that those parameters can be null?
+        // val privateSpec = RSAPrivateCrtKeySpec(null, null, null, p, q, dp, dq, inverseq)
 
         publicKey = factory.generatePublic(publicSpec)
         privateKey = factory.generatePrivate(privateSpec)
