@@ -33,6 +33,30 @@ class GlKeyPair {
                 println(p)
             }
         }
+
+        fun verifyKeyPair(keyPair: KeyPair) {
+            assert(keyPair.private is RSAPrivateKey)
+            assert(keyPair.private is RSAPrivateCrtKey)
+
+            val prvKeyEncoded = keyPair.private.encoded
+
+            val keyFactory = KeyFactory.getInstance("RSA")
+            val privateKeyFromEncoded = keyFactory.generatePrivate(PKCS8EncodedKeySpec(prvKeyEncoded))
+
+            assert(privateKeyFromEncoded is RSAPrivateKey)
+            assert(privateKeyFromEncoded is RSAPrivateCrtKey)           // In Unit Test
+            // assert(privateKeyFromEncoded !is RSAPrivateCrtKey)       // On android
+            println(privateKeyFromEncoded.encoded)
+
+            val privateSpec = RSAPrivateKeySpec(
+                (keyPair.private as RSAPrivateKey).modulus,
+                (keyPair.private as RSAPrivateKey).privateExponent)
+            val privateKeyFromND = keyFactory.generatePrivate(privateSpec)
+
+            assert(privateKeyFromND is RSAPrivateKey)
+            assert(privateKeyFromND !is RSAPrivateCrtKey)
+            println(privateKeyFromND.encoded)                   // OK in Unit Test. Exception on Android.
+        }
     }
 
     var publicKey: PublicKey? = null
@@ -342,6 +366,7 @@ class GlKeyPair {
         val keyPair = generator.genKeyPair()
         privateKey = keyPair.private
         publicKey = keyPair.public
+        verifyKeyPair(keyPair)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -372,7 +397,6 @@ class GlKeyPair {
 
     // https://stackoverflow.com/a/29837139
     // Return value: [primeP, primeQ, primeExponentP, primeExponentQ, crtCoefficient]
-
 
     private val ONE = BigInteger.ONE
     private val TWO = BigInteger.valueOf(2)

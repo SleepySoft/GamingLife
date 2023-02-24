@@ -3,9 +3,14 @@ package glcore
 import glenv.GlKeyPair
 import org.junit.Test
 import java.math.BigInteger
+import java.security.KeyFactory
+import java.security.KeyPair
+import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateCrtKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
+import java.security.spec.PKCS8EncodedKeySpec
+import java.security.spec.X509EncodedKeySpec
 
 internal class GlEncryptionTest {
 
@@ -143,5 +148,12 @@ internal class GlEncryptionTest {
             val coeff = q.modInverse(p)
             assert(coeff == crtCoefficient)
         }
+    }
+
+    @Test
+    fun testRSAKeyPairAndRSACRTKeypair() {
+        val generator = KeyPairGenerator.getInstance("RSA")
+        val keyPair = generator.genKeyPair()
+        GlKeyPair.verifyKeyPair(keyPair)
     }
 }
