@@ -44,9 +44,9 @@ class GlKeyPair {
             val privateKeyFromEncoded = keyFactory.generatePrivate(PKCS8EncodedKeySpec(prvKeyEncoded))
 
             assert(privateKeyFromEncoded is RSAPrivateKey)
-            assert(privateKeyFromEncoded is RSAPrivateCrtKey)           // In Unit Test
-            // assert(privateKeyFromEncoded !is RSAPrivateCrtKey)       // On android
-            println(privateKeyFromEncoded.encoded)
+            // assert(privateKeyFromEncoded is RSAPrivateCrtKey)        // Unit Test
+            // assert(privateKeyFromEncoded !is RSAPrivateCrtKey)       // Android
+            println(privateKeyFromEncoded.encoded)                      // Both OK
 
             val privateSpec = RSAPrivateKeySpec(
                 (keyPair.private as RSAPrivateKey).modulus,
@@ -184,11 +184,10 @@ class GlKeyPair {
         val n = p.multiply(q)
         val phi = computeCarmichaelLambda(p, q)
 
-        // https://stackoverflow.com/a/61282287
         val dx = d ?: e.modInverse(phi)
 
-        val dp = dx % (p - ONE)
-        val dq = dx % (q - ONE)
+        val dp = dx % (p - BigInteger.ONE)
+        val dq = dx % (q - BigInteger.ONE)
         val coeff = q.modInverse(p)
 
         val publicSpec = RSAPublicKeySpec(n, e)
@@ -348,7 +347,6 @@ class GlKeyPair {
         val primeExponentQ = rsaPrvCrt.primeExponentQ
         val crtCoefficient = rsaPrvCrt.crtCoefficient
 
-
         println("==========================================================================")
         print("primeP: "); println(primeP)
         print("primeQ: "); println(primeQ)
@@ -366,7 +364,9 @@ class GlKeyPair {
         val keyPair = generator.genKeyPair()
         privateKey = keyPair.private
         publicKey = keyPair.public
-        verifyKeyPair(keyPair)
+
+        // For test
+        // verifyKeyPair(keyPair)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -398,7 +398,7 @@ class GlKeyPair {
     // https://stackoverflow.com/a/29837139
     // Return value: [primeP, primeQ, primeExponentP, primeExponentQ, crtCoefficient]
 
-    private val ONE = BigInteger.ONE
+/*    private val ONE = BigInteger.ONE
     private val TWO = BigInteger.valueOf(2)
     private val ZERO = BigInteger.ZERO
 
@@ -497,7 +497,7 @@ class GlKeyPair {
         // Step 4
         // throw RuntimeException("Prime factors not found")
         return listOf()
-    }
+    }*/
 
 /*    fun calculatePKCS1Parameters(
         mod: BigInteger, privExponent: BigInteger, pubExponent: BigInteger) : List< BigInteger >
