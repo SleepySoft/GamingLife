@@ -19,15 +19,15 @@ import javax.crypto.Cipher
 import javax.security.auth.x500.X500Principal
 
 
+class KeyPairUitlity() {
 
-
-// https://blog.csdn.net/duner12138/article/details/112647484
-
-class GlKeyPair {
     companion object {
-        const val DEFAULT_KEY_LEN = 2048
-        const val ENCRYPT_LIMIT = DEFAULT_KEY_LEN / 8 - 42      // PCKS1
-        const val DECRYPT_CHUNK = DEFAULT_KEY_LEN / 8
+        const val DEFAULT_PUBLIC_EXPONENT = 65537L
+        const val SERIALIZE_VERSION_RSA_KEYPAIR = 1
+        const val SERIALIZE_VERSION_RSA_KEYPAIR_CRT = 11
+        const val SERIALIZE_VERSION_RSA_PRIVATE_KEY_CRT = 12
+
+        // ----------------------------------------- Debug -----------------------------------------
 
         fun dumpProviders() {
             for (p in Security.getProviders()) {
@@ -101,32 +101,157 @@ class GlKeyPair {
             assert(privateKeyFromND !is RSAPrivateCrtKey)
             println(privateKeyFromND.encoded)                   // OK in Unit Test. Exception on Android.
         }
-    }
 
-    var publicKey: PublicKey? = null
-    var privateKey: PrivateKey? = null
+        // ---------------------------------------- KeyPair ----------------------------------------
 
-    val signAlgorithm: String = "MD5WithRSA"
-    val encryptAlgorithm: String = KeyProperties.KEY_ALGORITHM_RSA
-    val encryptTransformation: String = "$encryptAlgorithm/ECB/PKCS1Padding"
+        // --------------------------- Serialize ---------------------------
 
-    //
-    // Do not use private.encoded to dump private key for avoiding bug on Android.
-    // For more information please visit: http://sleepysoft.xyz/archives/413
-    //
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun serializeKeyPair(keyPair: KeyPair, serializeVersion: Int = GlEncryption.KEYPAIR_VERSION_RSA_AUTO) : String =
+            when (keyPair.private) {
+                is RSAPrivateCrtKey -> serializeRsaCrtKeyPair(keyPair)
+                is RSAPrivateKey -> serializeRsaKeyPair(keyPair)
+                else -> ""
+            }
 
-/*    var publicKeyBytes: ByteArray
-        set(value) {
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun serializeRsaKeyPair(keyPair: KeyPair) : String {
+            val rsaPub = keyPair.public as RSAPublicKey
+            val rsaPrv = keyPair.private as RSAPrivateKey
+
+            val modulus = rsaPrv.modulus                    // n
+            val publicExponent = rsaPub.publicExponent      // e
+            val privateExponent = rsaPrv.privateExponent    // d
+
+            val versionBase64 = Base64.getEncoder().encodeToString(byteArrayOf(SERIALIZE_VERSION_RSA_KEYPAIR.toByte()))
+            val modulusBase64 = Base64.getEncoder().encodeToString(modulus.toByteArray())
+            val privateExponentBase64 = Base64.getEncoder().encodeToString(privateExponent.toByteArray())
+            val publicExponentBase64 = Base64.getEncoder().encodeToString(publicExponent.toByteArray())
+
+            // version|n|d|e
+            return "$versionBase64|$modulusBase64|$privateExponentBase64|$publicExponentBase64"
         }
-        get() = publicKey?.encoded ?: ByteArray(0)
 
-    var privateKeyBytes: ByteArray
-        set(value) {
-            privateKey = try {
-                if (value.isNotEmpty()) {
-                    val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
-                    val prvKey = keyFactory.generatePrivate(PKCS8EncodedKeySpec(value))
-                    prvKey
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun serializeRsaCrtKeyPair(keyPair: KeyPair) : String =
+            serializeRsaCrtPrivateKey(keyPair.private, (keyPair.public as RSAPublicKey).publicExponent)
+
+        // -------------------------- Deserialize --------------------------
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun deserializeKeyPair(serializedData: String) : KeyPair =
+            try {
+                val parts = serializedData.split("|")
+                if (parts.size < 2) {
+                    throw Exception("Invalid private key serialize format.")
+                }
+
+                val versionBytes = Base64.getDecoder().decode(parts[0])
+
+                when (BigInteger(versionBytes).toInt()) {
+                    SERIALIZE_VERSION_RSA_KEYPAIR -> deserializeRsaKeyPair(parts)
+                    SERIALIZE_VERSION_RSA_KEYPAIR_CRT -> deserializeRsaCrtKeyPair(parts)
+                    SERIALIZE_VERSION_RSA_PRIVATE_KEY_CRT -> deserializeRsaCrtKeyPair(parts)
+                    else -> throw Exception("Unsupported KeyPair version.")
+                }
+            } catch (e: Exception) {
+                GlLog.e(e.stackTraceToString())
+                KeyPair(null, null)
+            } finally {
+
+            }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        private fun deserializeRsaKeyPair(parts: List< String >) : KeyPair {
+            if (parts.size != 4) {
+                throw Exception("Error private key serialize format.")
+            }
+
+            val modulusBytes = Base64.getDecoder().decode(parts[1])
+            val publicExponentBytes = Base64.getDecoder().decode(parts[3])
+            val privateExponentBytes = Base64.getDecoder().decode(parts[2])
+
+            val modulus = BigInteger(modulusBytes)
+            val publicExponent = BigInteger(publicExponentBytes)
+            val privateExponent = BigInteger(privateExponentBytes)
+
+            val keyPair = GlKeyPair().apply {
+                generateKeyPair(modulus, publicExponent, privateExponent)
+            }
+
+            return keyPair.toJavaKeyPair()
+        }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        private fun deserializeRsaCrtKeyPair(parts: List< String >) : KeyPair {
+            if (parts.size != 5) {
+                throw Exception("Error private key serialize format.")
+            }
+
+            val primePBytes = Base64.getDecoder().decode(parts[1])
+            val primeQBytes = Base64.getDecoder().decode(parts[2])
+            val publicExponentBytes = Base64.getDecoder().decode(parts[4])
+            val privateExponentBytes = Base64.getDecoder().decode(parts[3])
+
+            val primeP = BigInteger(primePBytes)
+            val primeQ = BigInteger(primeQBytes)
+            val publicExponent = BigInteger(publicExponentBytes)
+            val privateExponent = BigInteger(privateExponentBytes)
+
+            val keyPair = GlKeyPair().apply {
+                generateCrtKeyPair(primeP, primeQ, publicExponent, privateExponent)
+            }
+
+            return keyPair.toJavaKeyPair()
+        }
+
+        // -------------------------------------- Single Key ---------------------------------------
+
+        // -------------------------- Private Key --------------------------
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun serializeRsaCrtPrivateKey(privateKey: PrivateKey, publicExponent: BigInteger?) : String {
+
+            // https://stackoverflow.com/a/19819805
+            // https://en.wikipedia.org/wiki/RSA_(cryptosystem)
+            // https://crypto.stackexchange.com/questions/79604/private-exponent-on-rsa-key
+            // https://crypto.stackexchange.com/questions/18031/how-to-find-modulus-from-a-rsa-public-key
+            // https://crypto.stackexchange.com/questions/81615/calculating-rsa-public-modulus-from-private-exponent-and-public-exponent
+            // https://www.tabnine.com/code/java/methods/java.security.interfaces.RSAPrivateCrtKey/getPrimeQ
+
+            val rsaPrv = privateKey as RSAPrivateKey
+
+            val modulus = rsaPrv.modulus                    // n
+            val privateExponent = rsaPrv.privateExponent    // d
+            val version = if (publicExponent != null)
+                SERIALIZE_VERSION_RSA_KEYPAIR else SERIALIZE_VERSION_RSA_KEYPAIR_CRT
+
+            val versionBase64 = Base64.getEncoder().encodeToString(byteArrayOf(version.toByte()))
+            val modulusBase64 = Base64.getEncoder().encodeToString(modulus.toByteArray())
+            val privateExponentBase64 = Base64.getEncoder().encodeToString(privateExponent.toByteArray())
+            val publicExponentBase64 = Base64.getEncoder().encodeToString(
+                (publicExponent ?: BigInteger.valueOf(DEFAULT_PUBLIC_EXPONENT)).toByteArray())
+
+            // version|n|d|e
+            return "$versionBase64|$modulusBase64|$privateExponentBase64|$publicExponentBase64"
+        }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun deserializePrivateKey(serializedData: String) : PrivateKey? = deserializeKeyPair(serializedData).private
+
+        // --------------------------- Public Key ---------------------------
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun serializeRsaPublicKey(publicKey: PublicKey) : String =
+            Base64.getEncoder().encodeToString(publicKey.encoded)
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun deserializeRsaPublicKey(serializedData: String) : PublicKey? {
+            val publicKeyBytes = Base64.getDecoder().decode(serializedData)
+            return try {
+                if (publicKeyBytes.isNotEmpty()) {
+                    val keyFactory = KeyFactory.getInstance("RSA")
+                    keyFactory.generatePublic(X509EncodedKeySpec(publicKeyBytes))
                 } else {
                     // Not enter exception when empty
                     null
@@ -138,7 +263,27 @@ class GlKeyPair {
 
             }
         }
-        get() = privateKey?.encoded ?: ByteArray(0)*/
+    }
+}
+
+
+// https://blog.csdn.net/duner12138/article/details/112647484
+
+class GlKeyPair {
+    companion object {
+        const val DEFAULT_KEY_LEN = 2048
+        const val ENCRYPT_LIMIT = DEFAULT_KEY_LEN / 8 - 42      // PCKS1
+        const val DECRYPT_CHUNK = DEFAULT_KEY_LEN / 8
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    var publicKey: PublicKey? = null
+    var privateKey: PrivateKey? = null
+
+    val signAlgorithm: String = "MD5WithRSA"
+    val encryptAlgorithm: String = KeyProperties.KEY_ALGORITHM_RSA
+    val encryptTransformation: String = "$encryptAlgorithm/ECB/PKCS1Padding"
 
     var publicKeyString: String
         @RequiresApi(Build.VERSION_CODES.O)
