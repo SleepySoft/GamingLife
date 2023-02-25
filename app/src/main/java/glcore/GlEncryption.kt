@@ -83,6 +83,7 @@ class GlEncryption {
             return md.digest(data)
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         fun serializeKeyPair(keyPair: GlKeyPair, serializeVersion: Int = KEYPAIR_VERSION_RSA_AUTO) : String =
             if (keyPair.keyPairMatches()) {
                 when (serializeVersion) {
@@ -101,6 +102,7 @@ class GlEncryption {
                 ""
             }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         private fun serializeRSAKeyPair(keyPair: GlKeyPair) : String {
             println("serializeRSAKeyPair")
 
@@ -120,6 +122,7 @@ class GlEncryption {
             return "$versionBase64|$modulusBase64|$privateExponentBase64|$publicExponentBase64"
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         private fun serializeRSACRTKeyPair(keyPair: GlKeyPair) : String {
             println("serializeRSACRTKeyPair")
 
@@ -153,6 +156,7 @@ class GlEncryption {
             return "$versionBase64|$primePBase64|$primeQBase64|$privateExponentBase64|$publicExponentBase64"
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         fun deserializeKeyPair(keyPairStr: String) : GlKeyPair =
             try {
                 val parts = keyPairStr.split("|")

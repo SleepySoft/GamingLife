@@ -5,6 +5,7 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import androidx.annotation.RequiresApi
 import glcore.GlDateTime
+import glcore.GlEncryption
 import glcore.GlLog
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
@@ -34,6 +35,49 @@ class GlKeyPair {
             }
         }
 
+        fun dumpRsaKeyPairInfo(keyPair: KeyPair) {
+            val rsaPub = keyPair.public as RSAPublicKey
+            val rsaPrv = keyPair.private as RSAPrivateKey
+
+            // Note: pubModulus == prvModulus
+
+            val pubModulus = rsaPub.modulus
+            val pubExponent = rsaPub.publicExponent
+
+            val prvModulus = rsaPrv.modulus
+            val prvExponent = rsaPrv.privateExponent
+
+            println("==========================================================================")
+            print("pubModulus: "); println(pubModulus)
+            print("pubExponent: "); println(pubExponent)
+            println("--------------------------------------------------------------------------")
+            print("prvModulus: "); println(prvModulus)
+            print("prvExponent: "); println(prvExponent)
+            println("==========================================================================")
+
+            // ----------------------------------------------------------------
+
+            if (keyPair.private is RSAPrivateCrtKey) {
+                val rsaPrvCrt = keyPair.private as RSAPrivateCrtKey
+
+                val primeP = rsaPrvCrt.primeP
+                val primeQ = rsaPrvCrt.primeQ
+                val primeExponentP = rsaPrvCrt.primeExponentP
+                val primeExponentQ = rsaPrvCrt.primeExponentQ
+                val crtCoefficient = rsaPrvCrt.crtCoefficient
+
+                println("==========================================================================")
+                print("primeP: "); println(primeP)
+                print("primeQ: "); println(primeQ)
+                println("--------------------------------------------------------------------------")
+                print("primeExponentP: "); println(primeExponentP)
+                print("primeExponentQ: "); println(primeExponentQ)
+                println("--------------------------------------------------------------------------")
+                print("crtCoefficient: "); println(crtCoefficient)
+                println("==========================================================================")
+            }
+        }
+
         fun verifyKeyPair(keyPair: KeyPair) {
             assert(keyPair.private is RSAPrivateKey)
             assert(keyPair.private is RSAPrivateCrtKey)
@@ -60,31 +104,19 @@ class GlKeyPair {
     }
 
     var publicKey: PublicKey? = null
-        private set
     var privateKey: PrivateKey? = null
-        private set
 
     val signAlgorithm: String = "MD5WithRSA"
-    // val keyPairProvider: String = ""
     val encryptAlgorithm: String = KeyProperties.KEY_ALGORITHM_RSA
     val encryptTransformation: String = "$encryptAlgorithm/ECB/PKCS1Padding"
 
-    var publicKeyBytes: ByteArray
-        set(value) {
-            publicKey = try {
-                if (value.isNotEmpty()) {
-                    val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
-                    keyFactory.generatePublic(X509EncodedKeySpec(value))
-                } else {
-                    // Not enter exception when empty
-                    null
-                }
-            } catch (e: Exception) {
-                GlLog.e(e.stackTraceToString())
-                null
-            } finally {
+    //
+    // Do not use private.encoded to dump private key for avoiding bug on Android.
+    // For more information please visit: http://sleepysoft.xyz/archives/413
+    //
 
-            }
+/*    var publicKeyBytes: ByteArray
+        set(value) {
         }
         get() = publicKey?.encoded ?: ByteArray(0)
 
@@ -106,23 +138,48 @@ class GlKeyPair {
 
             }
         }
-        get() = privateKey?.encoded ?: ByteArray(0)
+        get() = privateKey?.encoded ?: ByteArray(0)*/
 
     var publicKeyString: String
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
-            publicKeyBytes = Base64.getDecoder().decode(value)
+            val publicKeyBytes = Base64.getDecoder().decode(value)
+            publicKey = try {
+                if (value.isNotEmpty()) {
+                    val keyFactory = KeyFactory.getInstance(encryptAlgorithm)
+                    keyFactory.generatePublic(X509EncodedKeySpec(publicKeyBytes))
+                } else {
+                    // Not enter exception when empty
+                    null
+                }
+            } catch (e: Exception) {
+                GlLog.e(e.stackTraceToString())
+                null
+            } finally {
+
+            }
         }
         @RequiresApi(Build.VERSION_CODES.O)
-        get() = Base64.getEncoder().encodeToString(publicKeyBytes)
+        get() = Base64.getEncoder().encodeToString(privateKey?.encoded ?: ByteArray(0))
 
     var privateKeyString: String
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
-            privateKeyBytes = Base64.getDecoder().decode(value)
+            val keyPair = GlEncryption.deserializeKeyPair(value)
+            publicKey = keyPair.publicKey
+            privateKey = keyPair.privateKey
         }
         @RequiresApi(Build.VERSION_CODES.O)
-        get() = Base64.getEncoder().encodeToString(privateKeyBytes)
+        get() = GlEncryption.serializeKeyPair(this)
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun toJavaKeyPair() : KeyPair = KeyPair(publicKey, privateKey)
+
+    fun fromJavaKeyPair(keyPair: KeyPair) {
+        publicKey = keyPair.public
+        privateKey = keyPair.private
+    }
 
     // ---------------------------------------------------------------------------------------------
 
@@ -137,6 +194,7 @@ class GlKeyPair {
     @RequiresApi(Build.VERSION_CODES.O)
     fun generateKeyPair() {
         val generator = KeyPairGenerator.getInstance(encryptAlgorithm)
+
 /*        println("==================================================================")
         println("All provider: ")
         dumpProviders()
@@ -144,10 +202,11 @@ class GlKeyPair {
         print("Generate KeyPair using provider: ")
         println(generator.provider)
         println("==================================================================")*/
+
         generate(generator)
 
-        println(publicKey?.encoded)
-        println(privateKey?.encoded)
+/*        println(publicKey?.encoded)
+        println(privateKey?.encoded)*/
     }
 
     fun generateKeyPair(modulus: BigInteger, publicExponent: BigInteger, privateExponent: BigInteger) {
@@ -313,50 +372,6 @@ class GlKeyPair {
     fun privateKeyDecrypt(data: ByteArray) : ByteArray = privateKey?.run {
         keyDecrypt(this, data)
     } ?: byteArrayOf()
-
-    // ---------------------------------------------------------------------------------------------
-
-    fun toJavaKeyPair() : KeyPair = KeyPair(publicKey, privateKey)
-
-    fun dumpRsaKeyPairInfo() {
-        val rsaPub = publicKey as RSAPublicKey
-        val rsaPrv = privateKey as RSAPrivateKey
-        val rsaPrvCrt = privateKey as RSAPrivateCrtKey
-
-        // Note: pubModulus == prvModulus
-
-        val pubModulus = rsaPub.modulus
-        val pubExponent = rsaPub.publicExponent
-
-        val prvModulus = rsaPrv.modulus
-        val prvExponent = rsaPrv.privateExponent
-
-        println("==========================================================================")
-        print("pubModulus: "); println(pubModulus)
-        print("pubExponent: "); println(pubExponent)
-        println("--------------------------------------------------------------------------")
-        print("prvModulus: "); println(prvModulus)
-        print("prvExponent: "); println(prvExponent)
-        println("==========================================================================")
-
-        // ----------------------------------------------------------------
-
-        val primeP = rsaPrvCrt.primeP
-        val primeQ = rsaPrvCrt.primeQ
-        val primeExponentP = rsaPrvCrt.primeExponentP
-        val primeExponentQ = rsaPrvCrt.primeExponentQ
-        val crtCoefficient = rsaPrvCrt.crtCoefficient
-
-        println("==========================================================================")
-        print("primeP: "); println(primeP)
-        print("primeQ: "); println(primeQ)
-        println("--------------------------------------------------------------------------")
-        print("primeExponentP: "); println(primeExponentP)
-        print("primeExponentQ: "); println(primeExponentQ)
-        println("--------------------------------------------------------------------------")
-        print("crtCoefficient: "); println(crtCoefficient)
-        println("==========================================================================")
-    }
 
     // ---------------------------------------------------------------------------------------------
 
