@@ -237,6 +237,7 @@ class GLIDManagementActivity : AppCompatActivity() {
         val glKeyPair = GlKeyPair().apply { fromJavaKeyPair(keyPair) }
         if (glKeyPair.keyPairValid()) {
             GlRoot.systemConfig.mainKeyPair= glKeyPair
+            GlRoot.systemConfig.saveSystemConfig()
             loadGlId()
         } else {
             toast(getString(R.string.HINT_LOAD_PRIVATE_KEY_ERROR))
