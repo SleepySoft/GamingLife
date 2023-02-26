@@ -19,7 +19,7 @@ import javax.crypto.Cipher
 import javax.security.auth.x500.X500Principal
 
 
-class KeyPairUitlity() {
+class KeyPairUtility() {
 
     companion object {
         const val DEFAULT_PUBLIC_EXPONENT = 65537L
@@ -106,8 +106,15 @@ class KeyPairUitlity() {
 
         // --------------------------- Serialize ---------------------------
 
+        //
+        // Why we use custom serialization instead of PrivateKey.encoded()
+        //    1. Saving storage space. The private key encoded data cannot be contained in one QR code.
+        //    2. The KeyFactory.generatePrivate(PKCS8EncodedKeySpec(data)) on Android has issue (CRT data lost).
+        //          For more information, please visit: http://sleepysoft.xyz/archives/413
+        //
+
         @RequiresApi(Build.VERSION_CODES.O)
-        fun serializeKeyPair(keyPair: KeyPair, serializeVersion: Int = GlEncryption.KEYPAIR_VERSION_RSA_AUTO) : String =
+        fun serializeKeyPair(keyPair: KeyPair) : String =
             when (keyPair.private) {
                 is RSAPrivateCrtKey -> serializeRsaCrtKeyPair(keyPair)
                 is RSAPrivateKey -> serializeRsaKeyPair(keyPair)
@@ -305,17 +312,23 @@ class GlKeyPair {
             }
         }
         @RequiresApi(Build.VERSION_CODES.O)
-        get() = Base64.getEncoder().encodeToString(privateKey?.encoded ?: ByteArray(0))
+        get() = Base64.getEncoder().encodeToString(publicKey?.encoded ?: ByteArray(0))
 
     var privateKeyString: String
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
-            val keyPair = GlEncryption.deserializeKeyPair(value)
-            publicKey = keyPair.publicKey
-            privateKey = keyPair.privateKey
+            val keyPair = KeyPairUtility.deserializeKeyPair(value)
+            fromJavaKeyPair(keyPair)
         }
         @RequiresApi(Build.VERSION_CODES.O)
-        get() = GlEncryption.serializeKeyPair(this)
+        get() = KeyPairUtility.serializeKeyPair(toJavaKeyPair())
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun dropKeyPair() {
+        publicKey = null
+        privateKey = null
+    }
 
     // ---------------------------------------------------------------------------------------------
 

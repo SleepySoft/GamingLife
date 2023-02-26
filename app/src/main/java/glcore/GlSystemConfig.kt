@@ -3,13 +3,12 @@ package glcore
 import android.os.Build
 import androidx.annotation.RequiresApi
 import glenv.GlKeyPair
+import glenv.KeyPairUtility
 import java.security.MessageDigest
 import java.util.*
 
 
 class GlSystemConfig() {
-    val mainKeyPair: GlKeyPair = GlKeyPair()
-
     private val systemConfig: PathDict = PathDict()
 
     private var taskTop: MutableList< TaskData > = mutableListOf()
@@ -50,7 +49,7 @@ class GlSystemConfig() {
                 mainKeyPair.publicKeyString = this
             }
 
-            mainKeyPair.privateKeyBytes = loadPrivateKeyFromJson()
+            loadPrivateKeyFromJson()
 
             true
 
@@ -139,7 +138,14 @@ class GlSystemConfig() {
         set(value) = systemConfig.set(PATH_SYSTEM_GLID, value).let {  }
         get() = (systemConfig.get(PATH_SYSTEM_GLID) as String?) ?: ""
 
-    var publicKey: String
+    var mainKeyPair: GlKeyPair = GlKeyPair()
+        @RequiresApi(Build.VERSION_CODES.O)
+        set(value) {
+            field = value
+            savePrivateKeyToJson()
+        }
+
+/*    var publicKey: String
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
             mainKeyPair.publicKeyString = value
@@ -151,38 +157,45 @@ class GlSystemConfig() {
     var privateKey: String
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
-            try {
-                val localKeyPair = GlKeyPair().apply {
-                    // Create new Key Pair when updating Private Key
-                    deleteLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)
-                    generateLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)
-                }
-
-                val privateKeyBytes = Base64.getDecoder().decode(value)
-
-                val md = MessageDigest.getInstance("SHA-256")
-                val privateKeyHash = md.digest(privateKeyBytes)
-                val privateKeyHashBase64 = Base64.getEncoder().encodeToString(privateKeyHash)
-
-                val privateKeyEncrypted = localKeyPair.publicKeyEncrypt(privateKeyBytes)
-                val privateKeyEncryptedBase64 = Base64.getEncoder().encodeToString(privateKeyEncrypted)
-
-                systemConfig.set(PATH_SYSTEM_PRIVATE_KEY, privateKeyEncryptedBase64)
-                systemConfig.set(PATH_SYSTEM_PRIVATE_KEY_HASH, privateKeyHashBase64)
-
-                mainKeyPair.privateKeyBytes = privateKeyBytes
-            } catch (e: Exception) {
-                GlLog.e("Private Key storage FAIL.")
-                GlLog.e(e.stackTraceToString())
-            } finally {
-
-            }
         }
         @RequiresApi(Build.VERSION_CODES.O)
-        get() = mainKeyPair.privateKeyString
+        get() = mainKeyPair.privateKeyString*/
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun loadPrivateKeyFromJson() : ByteArray {
+    private fun savePrivateKeyToJson() : Boolean {
+        return try {
+            val localKeyPair = GlKeyPair().apply {
+                // Create new Key Pair when updating Private Key
+                deleteLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)
+                generateLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)
+            }
+
+            val keyPair = mainKeyPair.toJavaKeyPair()
+            val privateKeySerialized = KeyPairUtility.serializeKeyPair(keyPair)
+            val privateKeyBytes = privateKeySerialized.encodeToByteArray()
+
+            val md = MessageDigest.getInstance("SHA-256")
+            val privateKeyHash = md.digest(privateKeyBytes)
+            val privateKeyHashBase64 = Base64.getEncoder().encodeToString(privateKeyHash)
+
+            val privateKeyEncrypted = localKeyPair.publicKeyEncrypt(privateKeyBytes)
+            val privateKeyEncryptedBase64 = Base64.getEncoder().encodeToString(privateKeyEncrypted)
+
+            systemConfig.set(PATH_SYSTEM_PRIVATE_KEY, privateKeyEncryptedBase64)
+            systemConfig.set(PATH_SYSTEM_PRIVATE_KEY_HASH, privateKeyHashBase64)
+
+            true
+        } catch (e: Exception) {
+            GlLog.e("Private Key storage FAIL.")
+            GlLog.e(e.stackTraceToString())
+            false
+        } finally {
+
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun loadPrivateKeyFromJson() : Boolean {
         return try {
             val localKeyPair = GlKeyPair()
             if (!localKeyPair.loadLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)) {
@@ -203,11 +216,16 @@ class GlSystemConfig() {
                 throw java.lang.Exception("Decrypted Private Key Hash Error.")
             }
 
-            privateKeyBytes
+            val privateKeySerialized = privateKeyBytes.decodeToString()
+            val keyPair = KeyPairUtility.deserializeKeyPair(privateKeySerialized)
+
+            mainKeyPair.fromJavaKeyPair(keyPair)
+
+            true
         } catch (e: Exception) {
             GlLog.e("Private Key base64 FAIL.")
             GlLog.e(e.stackTraceToString())
-            byteArrayOf()
+            false
         } finally {
 
         }

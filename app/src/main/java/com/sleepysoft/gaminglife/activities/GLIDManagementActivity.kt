@@ -8,7 +8,6 @@ import android.provider.MediaStore
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -18,8 +17,9 @@ import com.king.zxing.CaptureActivity
 import com.king.zxing.util.CodeUtils
 import com.sleepysoft.gaminglife.*
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
-import glcore.GlEncryption
 import glcore.GlRoot
+import glenv.GlKeyPair
+import glenv.KeyPairUtility
 import pub.devrel.easypermissions.EasyPermissions
 
 class GLIDManagementActivity : AppCompatActivity() {
@@ -56,7 +56,7 @@ class GLIDManagementActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()) { result ->
 
         if (result.resultCode() == GlControllerContext.RESULT_ACCEPTED) {
-            when (val requestCode = result.requestCode()) {
+            when (result.requestCode()) {
                 REQUEST_CODE_FROM_QR -> loadGlId()
                 REQUEST_CODE_FROM_TEXT -> loadGlId()
                 REQUEST_CODE_FROM_CREATE -> loadGlId()
@@ -85,15 +85,20 @@ class GLIDManagementActivity : AppCompatActivity() {
 
         mButtonViewPubKey.setOnClickListener {
             val intent = Intent(this, QRCodeViewerActivity::class.java)
-            intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, GlRoot.systemConfig.publicKey)
-            ActivityCompat.startActivity(this, intent, null)
+            val publicKeySerialized = GlRoot.systemConfig.mainKeyPair.publicKeyString
+            if (publicKeySerialized.isNotEmpty()) {
+                intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, publicKeySerialized)
+                ActivityCompat.startActivity(this, intent, null)
+            }
         }
 
         mButtonViewPrvKey.setOnClickListener {
             val intent = Intent(this, QRCodeViewerActivity::class.java)
-            val keyPairSerialized = GlEncryption.serializeKeyPair(GlRoot.systemConfig.mainKeyPair)
-            intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, keyPairSerialized)
-            ActivityCompat.startActivity(this, intent, null)
+            val privateKeySerialized = GlRoot.systemConfig.mainKeyPair.privateKeyString
+            if (privateKeySerialized.isNotEmpty()) {
+                intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, privateKeySerialized)
+                ActivityCompat.startActivity(this, intent, null)
+            }
         }
 
         mButtonRegOrCreate.setOnClickListener {
@@ -102,8 +107,7 @@ class GLIDManagementActivity : AppCompatActivity() {
 
         mButtonSignOut.setOnClickListener {
             GlRoot.systemConfig.GLID = ""
-            GlRoot.systemConfig.publicKey = ""
-            GlRoot.systemConfig.privateKey = ""
+            GlRoot.systemConfig.mainKeyPair = GlKeyPair()
             loadGlId()
         }
 
@@ -158,8 +162,8 @@ class GLIDManagementActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun loadGlId() {
-        val privateKey = GlRoot.systemConfig.privateKey
-        if (privateKey.isNotEmpty()) {
+        val mainKeyPair = GlRoot.systemConfig.mainKeyPair
+        if (mainKeyPair.keyPairValid()) {
             mLayoutGroupWithKey.visibility = View.VISIBLE
             mLayoutGroupWithoutKey.visibility = View.GONE
         } else {
@@ -229,14 +233,10 @@ class GLIDManagementActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun parseQRResult(result: String) {
-
-        // val keyPairSerialized = result
-        val keyPairSerialized = "AQ==|AISSAWYstJP1xbUao886vzQU2N0lqWunbSKqwh7LFqkM64crS4d7751YZ7Ec1ppzjOLmJVvJVSKf0mv9KiPSpcbufQNgbGgySmcPqCEE39T96Bwjv3VmQqvBjLIMB0x6YMB5195FwpPjWVbnT0apQcOf1i6PMihm9ALl4K6aJeq9argMotOUEyxTM7jm33GJOTWPVJ40koGwtgFT5JBdmeRmVbzQD3sdIl7Y0paINW1Ohvxi+2/ze2Jrpcqqk3kJqVSas6Xf6z2Ijxssn0PL27Gue0L6CYpms5SCoRhQn77Jy0cToDZXMAOaQB9N4rTC2RP837z/ZP3tHPptNHO6TDk=|BPEYYkGqXZWc0Bp1HsV22S8pwlykCyJLnC43XER/zL9xjDFd+GfzT6869kw357wE9XRU0i4YIVlJ08K1Lm6sxVSgjl6qy9uMEHlx8AEpgtwQKfRfL7YnKBXn878lCoHJV4NzO5LoJPElpGqs9tpaXDt6FXQ7D2x/DhiZnoiafzyQm9g6XCv5HlDl1GI0JicoYf6TVDf1+1P2QVLyzld89970/7ES6fTwx74Grc574D4NGW6e/Pumyl1NEC6AUmTWQ87+oKHZvOxhIYnxhRgRzTqdn0I0QlJ1ULPAlz68OWt/NxcPSSpdntzbtzKNEcB4GlWnxZ9NWv8/zn7/7BkJ/Q==|AQAB"
-
-        val keyPair = GlEncryption.deserializeKeyPair(keyPairSerialized)
-        if (keyPair.keyPairValid()) {
-            GlRoot.systemConfig.publicKey = keyPair.publicKeyString
-            GlRoot.systemConfig.privateKey = keyPair.privateKeyString
+        val keyPair = KeyPairUtility.deserializeKeyPair(result)
+        val glKeyPair = GlKeyPair().apply { fromJavaKeyPair(keyPair) }
+        if (glKeyPair.keyPairValid()) {
+            GlRoot.systemConfig.mainKeyPair= glKeyPair
             loadGlId()
         } else {
             toast(getString(R.string.HINT_LOAD_PRIVATE_KEY_ERROR))

@@ -107,8 +107,7 @@ class GeneratePairActivity : AppCompatActivity() {
         mButtonAcceptGlId = findViewById(R.id.id_button_accept)
         mButtonAcceptGlId.setOnClickListener {
             GlRoot.systemConfig.GLID = glId()
-            GlRoot.systemConfig.publicKey = mGlEncryption.powKeyPair.publicKeyString
-            GlRoot.systemConfig.privateKey = mGlEncryption.powKeyPair.privateKeyString
+            GlRoot.systemConfig.mainKeyPair = mGlEncryption.powKeyPair
             GlRoot.systemConfig.saveSystemConfig()
             finishWithResult(mapOf(), true)
         }
