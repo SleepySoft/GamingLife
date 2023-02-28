@@ -1,7 +1,9 @@
 package glcore
 
 import glenv.GlKeyPair
+import glenv.KeyPairUtility
 import org.junit.Test
+import java.util.*
 import kotlin.random.Random
 
 internal class GlKeyPairTest {
@@ -43,12 +45,6 @@ internal class GlKeyPairTest {
         assert(glKeyPair.publicKeyString == "")
         assert(glKeyPair.privateKey == null)
         assert(glKeyPair.privateKeyString == "")
-    }
-
-    @Test
-    fun testKeyPairInfo() {
-        val glKeyPair = GlKeyPair().apply { generateKeyPair() }
-        glKeyPair.dumpRsaKeyPairInfo()
     }
 
     // https://medium.com/@wujingwe/write-unit-test-which-has-androidkeystore-dependency-f12181ae6311
@@ -126,5 +122,37 @@ internal class GlKeyPairTest {
 
         assert(verified)
         assert(notVerified)
+    }
+
+    // -------------------------------------------------------------------------------------
+
+    @Test
+    fun testKeyPairInfo() {
+        val glKeyPair = GlKeyPair().apply { generateKeyPair() }
+        KeyPairUtility.dumpRsaKeyPairInfo(glKeyPair.toJavaKeyPair())
+    }
+
+    @Test
+    fun testDumpDataForPythonSide() {
+        val data = "SleepySoft".toByteArray()
+        val glKeyPair = GlKeyPair().apply { generateKeyPair() }
+
+        println("============================================================================")
+
+        println("Public key serialized:")
+        println(glKeyPair.publicKeyString)
+
+        println("Test data base64: ")
+        println(Base64.getEncoder().encodeToString(data))
+
+        val dataEncrypted = glKeyPair.privateKeyEncrypt(data)
+        println("Encrypted data base64:")
+        println(Base64.getEncoder().encodeToString(dataEncrypted))
+
+        val dataSigned = glKeyPair.sign(data)
+        println("Signed data base64:")
+        println(Base64.getEncoder().encodeToString(dataSigned))
+
+        println("============================================================================")
     }
 }
