@@ -43,7 +43,7 @@ class GlSystemConfig() {
             taskSub = TaskData.fromAnyStructList(taskSubList).toMutableList()
 
             val taskLinkDict = systemConfig.get(PATH_SYSTEM_TASK_GROUP_LINK) as MutableMap< *, * >
-            taskLink = toStrStruct(taskLinkDict)
+            taskLink = castToStrStruct(taskLinkDict)
 
             (systemConfig.get(PATH_SYSTEM_PUBLIC_KEY) as String?)?.run {
                 mainKeyPair.publicKeyString = this

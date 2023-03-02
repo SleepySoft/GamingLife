@@ -1,6 +1,7 @@
 package glenv
 
-import glcore.GlStrStruct
+import glcore.GlJson
+import glcore.castToStrStruct
 import okhttp3.*
 import java.io.IOException
 
@@ -27,25 +28,35 @@ class GlHttpRequest(
         }
 
         fun catUrlParameter(url: String, param: String) =
-            if (param.isNotBlank()) (url.removeSuffix("/") + "?" + param) else url
+            if (param.isNotEmpty() && param.isNotBlank()) (url.removeSuffix("/") + "?" + param) else url
+
+        fun responseString(response: Response) : String =
+            if (response.code() < 300) response.body()?.string() ?: "" else ""
+
+        fun responseDict(response: Response) : Map< String, String > {
+            val responseString = responseString(response)
+            val anyDict = GlJson.deserializeAnyDict(responseString)
+            val strDict = castToStrStruct(responseString)
+            return strDict
+        }
     }
 
-    fun get(relativeUrl: String, params: GlStrStruct,
-            callback: ((call: Call, response: Response) -> Unit)?) : Response {
-        val paramString = joinParameters(params)
+    fun get(relativeUrl: String, params: Map< String, String >? = null,
+            callback: ((call: Call, response: Response) -> Unit)? = null) : Response {
+        val paramString = params?.let { joinParameters(it) } ?: ""
         val relativeUrlWithParams = catUrlParameter(relativeUrl, paramString)
         return doRequest(relativeUrlWithParams, requestBody = null, callback)
     }
 
     fun postJson(relativeUrl: String, jsonStr: String,
-                 callback: ((call: Call, response: Response) -> Unit)?) : Response {
+                 callback: ((call: Call, response: Response) -> Unit)? = null) : Response {
         val requestBody: RequestBody = RequestBody.create(
             MediaType.parse("application/json"), jsonStr)
         return doRequest(relativeUrl, requestBody, callback)
     }
 
-    fun postParams(relativeUrl: String, params: GlStrStruct,
-                   callback: ((call: Call, response: Response) -> Unit)?) : Response {
+    fun postParams(relativeUrl: String, params: Map< String, String >,
+                   callback: ((call: Call, response: Response) -> Unit)? = null) : Response {
         val requestBody: RequestBody = FormBody.Builder().run {
             for ((k, v) in params) {
                 add(k, v)

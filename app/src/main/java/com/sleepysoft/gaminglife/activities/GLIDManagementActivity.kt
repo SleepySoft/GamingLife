@@ -17,9 +17,14 @@ import com.king.zxing.CaptureActivity
 import com.king.zxing.util.CodeUtils
 import com.sleepysoft.gaminglife.*
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
+import glcore.GlEncryption
 import glcore.GlRoot
 import glenv.GlKeyPair
 import glenv.KeyPairUtility
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.EasyPermissions
 
 class GLIDManagementActivity : AppCompatActivity() {
@@ -37,6 +42,8 @@ class GLIDManagementActivity : AppCompatActivity() {
         const val KEY_IS_QR_CODE = "key_code"
         const val KEY_IS_CONTINUOUS = "key_continuous_scan"
     }
+
+    var networkJob: Job? = null
 
     lateinit var mButtonViewGlid: Button
     lateinit var mButtonViewPubKey: Button
@@ -65,6 +72,7 @@ class GLIDManagementActivity : AppCompatActivity() {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,7 +110,12 @@ class GLIDManagementActivity : AppCompatActivity() {
         }
 
         mButtonRegOrCreate.setOnClickListener {
-
+            if (networkJob == null) {
+                networkJob = GlobalScope.launch {
+                    GlRoot.glServerSession.register(
+                        GlEncryption.GLID_VERSION, GlRoot.systemConfig.mainKeyPair)
+                }
+            }
         }
 
         mButtonSignOut.setOnClickListener {
@@ -156,6 +169,13 @@ class GLIDManagementActivity : AppCompatActivity() {
                 REQUEST_PERMISSION_IMAGE -> selectImage()
             }
         }
+    }
+
+    override fun onDestroy() {
+        networkJob?.run {
+            cancel()
+        }
+        super.onDestroy()
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -20,6 +20,9 @@ const val PATH_DAILY_TASK_RECORD = "/Daily/TimeModule/TaskHistory"              
 
 // --------------------------------------------- Value ---------------------------------------------
 
+const val SERVICE_LOCAL = "http://127.0.0.1/GamingLife"
+const val SERVICE_REMOTE = "http://127.0.0.1/GamingLife"
+
 const val LONG_LONG_PRESS_TIMEOUT = 1500                    // ms
 const val TIMESTAMP_COUNT_IN_DAY = 24 * 60 * 60 * 1000      // Gl ts unit is ms
 const val TIME_DEFAULT_TASK_RECORD_THRESHOLD = 10 * 1000    // ms
@@ -89,7 +92,7 @@ typealias GlStrStructDict = MutableMap< String, GlStrStruct >
 typealias GlStructDeclare = Map< String, KClass< * > >
 
 
-fun toAnyStruct(data: Any?) : GlAnyDict {
+fun castToAnyStruct(data: Any?) : GlAnyDict {
     if (data == null) {
         return mutableMapOf()
     }
@@ -106,7 +109,7 @@ fun toAnyStruct(data: Any?) : GlAnyDict {
 }
 
 
-fun toStrStruct(data: Any?) : GlStrStruct {
+fun castToStrStruct(data: Any?) : GlStrStruct {
     if (data == null) {
         return mutableMapOf()
     }

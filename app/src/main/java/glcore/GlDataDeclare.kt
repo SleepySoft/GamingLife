@@ -38,7 +38,7 @@ open class TaskData : IGlDeclare() {
     }
 
     override fun fromAnyStruct(data: Any?): Boolean {
-        val anyStruct = toAnyStruct(data)
+        val anyStruct = castToAnyStruct(data)
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
@@ -93,7 +93,7 @@ open class TaskRecord : IGlDeclare() {
     }
 
     override fun fromAnyStruct(data: Any?): Boolean {
-        val anyStruct = toAnyStruct(data)
+        val anyStruct = castToAnyStruct(data)
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             

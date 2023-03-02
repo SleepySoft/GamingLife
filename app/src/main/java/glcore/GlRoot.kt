@@ -1,6 +1,7 @@
 package glcore
 
 import glenv.GlEnv
+import glenv.GlHttpRequest
 import java.io.File
 import java.util.*
 
@@ -21,6 +22,9 @@ object GlRoot {
     val glService = GlService()
     val dailyRecord = GlDailyRecord()
     val systemConfig = GlSystemConfig()
+
+    val glHttpRequest = GlHttpRequest(SERVICE_LOCAL)
+    val glServerSession = GlServerSession(glHttpRequest)
 
     fun init(glEnv: GlEnv) : Int {
         if (mInited) {
