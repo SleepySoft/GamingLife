@@ -51,18 +51,21 @@ dependencies {
     // implementation files('libs/activation.jar')
 
     // noinspection GradleCompatible
-    implementation 'androidx.appcompat:appcompat:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
     implementation 'com.sun.mail:android-mail:1.6.0'
     implementation 'com.sun.mail:android-activation:1.6.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1'
     implementation 'com.google.android.material:material:1.8.0'
-    // implementation 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.20'
     implementation 'com.journeyapps:zxing-android-embedded:4.1.0'
     implementation 'com.google.zxing:core:3.5.1'
     implementation 'me.dm7.barcodescanner:zxing:1.9.4'
     implementation 'com.github.jenly1314:zxing-lite:2.3.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+    // implementation 'com.squareup.okhttp3:okhttp:3.14.9'
+    // implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    // implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
