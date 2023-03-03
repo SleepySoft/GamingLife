@@ -20,8 +20,8 @@ const val PATH_DAILY_TASK_RECORD = "/Daily/TimeModule/TaskHistory"              
 
 // --------------------------------------------- Value ---------------------------------------------
 
-const val SERVICE_LOCAL = "http://127.0.0.1:12288/GamingLife"
-const val SERVICE_REMOTE = "http://127.0.0.1:12288/GamingLife"
+const val SERVICE_LOCAL = "http://10.0.2.2:12288/GamingLife"
+const val SERVICE_REMOTE = "http://10.0.2.2:12288/GamingLife"
 
 const val LONG_LONG_PRESS_TIMEOUT = 1500                    // ms
 const val TIMESTAMP_COUNT_IN_DAY = 24 * 60 * 60 * 1000      // Gl ts unit is ms
