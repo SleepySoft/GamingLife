@@ -114,6 +114,7 @@ class GLIDManagementActivity : AppCompatActivity() {
                 networkJob = GlobalScope.launch {
                     GlRoot.glServerSession.register(
                         GlEncryption.GLID_VERSION, GlRoot.systemConfig.mainKeyPair)
+                    networkJob = null
                 }
             }
         }

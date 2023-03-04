@@ -16,7 +16,7 @@ class GlServerSession(
     var proofOfQualifications: Long = 0
 
     companion object {
-        const val REST_ROOT = "rest/"
+        const val REST_ROOT = "rest"
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
