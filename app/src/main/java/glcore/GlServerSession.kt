@@ -26,16 +26,17 @@ class GlServerSession(
             return false
         }
 
-        val challengeBytes = keyPair.privateKeyEncrypt(challenge.encodeToByteArray())
-        val challengeBase64 = Base64.getEncoder().encodeToString(challengeBytes)
+        val signature = keyPair.sign(challenge.encodeToByteArray())
+        val signatureBase64 = Base64.getEncoder().encodeToString(signature)
 
         val request = mapOf< String , String >(
             "version" to version.toString(),
-            "public_key" to keyPair.publicKeyString,
-            "random_challenge" to challengeBase64
+            "public_key_base64" to keyPair.publicKeyString,
+            "challenge_text" to challenge,
+            "signature_base64" to signatureBase64
         )
 
-        val response = httpRequest.postParams("$REST_ROOT/register", request)
+        val response = httpRequest.postParams("$REST_ROOT/check_in", request)
         val responseDict = GlHttpRequest.responseDict(response)
 
         return try {
@@ -54,7 +55,7 @@ class GlServerSession(
     }
 
     fun getRandomChallenge(): String {
-        val response = httpRequest.get("$REST_ROOT/random_challenge")
+        val response = httpRequest.get("$REST_ROOT/get_random_challenge")
         return GlHttpRequest.responseString(response)
     }
 }
