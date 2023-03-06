@@ -36,7 +36,7 @@ class GlHttpRequest(
         fun responseDict(response: Response) : Map< String, String > {
             val responseString = responseString(response)
             val anyDict = GlJson.deserializeAnyDict(responseString)
-            val strDict = castToStrStruct(responseString)
+            val strDict = castToStrStruct(anyDict)
             return strDict
         }
     }
