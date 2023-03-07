@@ -116,13 +116,14 @@ fun castToStrStruct(data: Any?) : GlStrStruct {
     if (data !is Map< *, * >) {
         return mutableMapOf()
     }
+    val strDict = mutableMapOf< String , String >()
     for ((k, v) in data) {
-        if ((k !is String) || (v !is String)) {
-            return mutableMapOf()
-        }
+        // if ((k !is String) || (v !is String)) {
+        //     return mutableMapOf()
+        // }
+        strDict[k.toString()] = v.toString()
     }
-    @Suppress("UNCHECKED_CAST")
-    return data as GlStrStruct
+    return strDict
 }
 
 
