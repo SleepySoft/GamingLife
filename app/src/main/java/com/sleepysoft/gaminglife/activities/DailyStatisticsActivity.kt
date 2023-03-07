@@ -16,6 +16,7 @@ import com.sleepysoft.gaminglife.views.GlView
 import glcore.*
 import graphengine.GraphView
 import java.lang.ref.WeakReference
+import java.util.*
 
 
 class DailyExtFileAdapter(
@@ -43,6 +44,7 @@ class DailyExtFileAdapter(
             holder.fileActionButton.text = "统计信息"
             holder.fileActionButton.setOnClickListener {
                 dailyStatisticsActivity.onShowStatistics()
+                // dailyStatisticsActivity.onTestShowNextDayStatistics()
             }
         }
         else {
@@ -80,6 +82,7 @@ class DailyStatisticsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_daily_statistics)
 
         val dateStr: String = intent.getStringExtra("dateStr") ?: "日期错误"
+
         mDailyRecord.loadDailyRecord(GlDateTime.stringToDate(dateStr))
 
         title = "GamingLife - 回顾 ($dateStr)"
@@ -111,9 +114,20 @@ class DailyStatisticsActivity : AppCompatActivity() {
         onShowStatistics()
     }
 
+    fun switchDailyStatistics(dateStr: String) {
+        title = "GamingLife - 回顾 ($dateStr)"
+        mDailyRecord.loadDailyRecord(GlDateTime.stringToDate(dateStr))
+        mDailyStatisticsController.updateDailyRecord(mDailyRecord)
+    }
+
     fun onShowStatistics() {
         mMdViewer.visibility = View.GONE
         mStatisticsView.visibility = View.VISIBLE
+    }
+
+    fun onTestShowNextDayStatistics() {
+        val nextDay = Date(mDailyRecord.originDate.time + TIMESTAMP_COUNT_IN_DAY)
+        switchDailyStatistics(GlDateTime.formatDateToDay(nextDay))
     }
 
     fun onShowExtFile(fileName: String) {

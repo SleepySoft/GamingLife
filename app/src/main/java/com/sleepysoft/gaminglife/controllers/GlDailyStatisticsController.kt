@@ -9,7 +9,7 @@ import kotlin.math.min
 
 class GlDailyStatisticsController(
     private val mCtrlContext: GlControllerContext,
-    private val mDailyRecord: GlDailyRecord) : GraphViewObserver {
+    private var mDailyRecord: GlDailyRecord) : GraphViewObserver {
 
     private lateinit var statisticsBar: GraphRectangle
     private lateinit var progressDecorator: MultipleSectionProgressDecorator
@@ -21,6 +21,18 @@ class GlDailyStatisticsController(
         buildStatisticsLayer()
         mCtrlContext.graphView?.mGraphViewObserver?.add(this)
         updateProgress()
+        updateStatistics()
+    }
+
+    fun release() {
+        mCtrlContext.graphView?.mGraphViewObserver?.remove(this)
+    }
+
+    fun updateDailyRecord(dailyRecord: GlDailyRecord) {
+        mDailyRecord = dailyRecord
+        updateProgress()
+        updateStatistics()
+        mCtrlContext.refresh()
     }
 
     // -------------------------- Implements GraphViewObserver interface ---------------------------
@@ -81,7 +93,7 @@ class GlDailyStatisticsController(
                     barData.value.toInt() / 1000 % 3600 / 60,
                     barData.value.toInt() / 1000 % 3600 % 60) }
 
-                val taskDatas = GlRoot.systemConfig.getTopTasks()
+/*                val taskDatas = GlRoot.systemConfig.getTopTasks()
                 val groupStatistics = mDailyRecord.groupStatistics()
 
                 for (taskData in taskDatas) {
@@ -98,7 +110,7 @@ class GlDailyStatisticsController(
                             this.textAlign = Paint.Align.CENTER
                         }
                     ))
-                }
+                }*/
             }
             multipleStatisticsBar.graphItemDecorator.add(multipleStatisticsDecorator)
 
@@ -148,6 +160,7 @@ class GlDailyStatisticsController(
         val dayTsBase = mDailyRecord.dailyTs
         val dayTsLimit = min(dayTsBase + TIMESTAMP_COUNT_IN_DAY - 1, GlDateTime.datetime().time)
 
+        progressDecorator.progressData.clear()
         for (task in mDailyRecord.taskRecords) {
             progressDecorator.progressData.add(
                 MultipleSectionProgressDecorator.ProgressData(
@@ -156,6 +169,29 @@ class GlDailyStatisticsController(
                     task))
         }
         progressDecorator.progressEnd = (dayTsLimit - dayTsBase).toFloat() / TIMESTAMP_COUNT_IN_DAY
+    }
+
+    private fun updateStatistics() {
+        val taskDatas = GlRoot.systemConfig.getTopTasks()
+        val groupStatistics = mDailyRecord.groupStatistics()
+
+        multipleStatisticsDecorator.barDatas.clear()
+        for (taskData in taskDatas) {
+            multipleStatisticsDecorator.barDatas.add(
+                MultipleHorizonStatisticsBarDecorator.BarData(
+                text=taskData.name,
+                value=(groupStatistics[taskData.id] ?: 0).toFloat(),
+                barPaint=Paint().apply {
+                    this.color = Color.parseColor(taskData.color)
+                    this.style = Paint.Style.FILL
+                },
+                textPaint=Paint().apply {
+                    this.color = Color.parseColor("#000000")
+                    this.textSize = 30.0f
+                    this.textAlign = Paint.Align.CENTER
+                }
+            ))
+        }
     }
 
     private fun buildPaintForTask(task: TaskRecord) =
