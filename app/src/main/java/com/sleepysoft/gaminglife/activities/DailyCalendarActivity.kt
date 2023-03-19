@@ -79,7 +79,8 @@ class DailyCalendarActivity
       CalendarView.OnMonthChangeListener,
       CalendarView.OnCalendarSelectListener {
 
-    val mDailyRecord = GlDailyRecord()
+    private val mDailyRecord = GlDailyRecord()
+    private val mDailyDataList = GlDailyRecord.listArchivedDailyData()
 
     private val mCtrlContext = GlControllerContext()
     lateinit var mDailyStatisticsController: GlDailyStatisticsController
@@ -133,17 +134,17 @@ class DailyCalendarActivity
             mCalendarView.scrollToCurrent()
         })
 
-        val schemeCalendar = Calendar()
+/*        val schemeCalendar = Calendar()
         schemeCalendar.year = 2023
         schemeCalendar.month = 3
         schemeCalendar.day = 16
 
-/*        val customScheme = CustomScheme()
+        val customScheme = CustomScheme()
         customScheme.schemeColor = Color.RED // 设置标记颜色
 
-        schemeCalendar.addScheme(customScheme)*/
+        schemeCalendar.addScheme(customScheme)
 
-        mCalendarView.addSchemeDate(schemeCalendar)
+        mCalendarView.addSchemeDate(schemeCalendar)*/
 
         updateCalendarTopDisplay()
 
@@ -174,6 +175,7 @@ class DailyCalendarActivity
         mStatisticsView.graphView = mCtrlContext.graphView
 
         onShowStatistics()
+        updateCalendarMarks()
         updateDailyStatisticsByCalendar(mCalendarView.selectedCalendar)
     }
 
@@ -237,7 +239,16 @@ class DailyCalendarActivity
     }
 
     override fun onMonthChange(year: Int, month: Int) {
+        updateCalendarMarks()
+    }
 
+    // ---------------------------------------------------------------------------------------------
+
+    private fun updateCalendarMarks() {
+        for (dateStr in mDailyDataList) {
+            val y = dateStr.substring(0, 4).toInt()
+            val m = dateStr.substring(4, 2).toInt()
+        }
     }
 
     private fun updateCalendarTopDisplay() {
