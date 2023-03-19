@@ -5,6 +5,7 @@ import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.os.Handler
 import android.os.Looper
 import com.sleepysoft.gaminglife.DailyBrowseActivity
+import com.sleepysoft.gaminglife.activities.DailyCalendarActivity
 import com.sleepysoft.gaminglife.activities.GLIDManagementActivity
 import com.sleepysoft.gaminglife.activities.GeneratePairActivity
 import glcore.*
@@ -68,7 +69,8 @@ class GlTimeViewController(
 
     override fun onItemClicked(item: GraphItem) {
         if (item == mMenuDailyStatistics) {
-            mCtrlContext.launchActivity(DailyBrowseActivity::class.java)
+            // mCtrlContext.launchActivity(DailyBrowseActivity::class.java)
+            mCtrlContext.launchActivity(DailyCalendarActivity::class.java)
         } else if (item == mMenuConfigKeyPair) {
             mCtrlContext.launchActivity(GLIDManagementActivity::class.java)
         }

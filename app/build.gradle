@@ -5,7 +5,6 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
-
 android {
     compileSdk 33
 
@@ -66,6 +65,9 @@ dependencies {
     // implementation 'com.squareup.okhttp3:okhttp:3.14.9'
     // implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     // implementation 'com.squareup.retrofit2:converter-gson:2.5.0'
+    implementation 'com.haibin:calendarview:3.7.1'
+    // implementation 'com.haibin:calendarview:3.6.8'
+    // implementation 'com.prolificinteractive:material-calendarview:2.0.1'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
