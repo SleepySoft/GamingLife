@@ -4,10 +4,8 @@ import android.graphics.*
 import android.graphics.Paint.ANTI_ALIAS_FLAG
 import android.os.Handler
 import android.os.Looper
-import com.sleepysoft.gaminglife.DailyBrowseActivity
 import com.sleepysoft.gaminglife.activities.DailyCalendarActivity
 import com.sleepysoft.gaminglife.activities.GLIDManagementActivity
-import com.sleepysoft.gaminglife.activities.GeneratePairActivity
 import glcore.*
 import graphengine.*
 import kotlin.math.cos

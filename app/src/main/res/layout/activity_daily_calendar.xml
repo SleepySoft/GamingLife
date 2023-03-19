@@ -73,7 +73,7 @@
     <com.haibin.calendarview.CalendarLayout
         android:id="@+id/calendarLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:background="#fff"
         android:orientation="vertical"
         app:calendar_content_view_id="@+id/nestedScrollView"
@@ -127,15 +127,35 @@
         <androidx.core.widget.NestedScrollView
             android:id="@+id/nestedScrollView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:fillViewport="true" >
 
             <LinearLayout
-                android:id="@+id/linearView"
+                android:id="@+id/liner_statistics"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:clickable="true"
                 android:orientation="vertical"
                 tools:ignore="KeyboardInaccessibleWidget">
+
+                <TextView
+                    android:id="@+id/id_text_view_md"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="55"
+                    android:visibility="gone" />
+
+                <com.sleepysoft.gaminglife.views.GlView
+                    android:id="@+id/id_view_statistics"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="55" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/id_recycler_view_ext_files"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="45" />
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

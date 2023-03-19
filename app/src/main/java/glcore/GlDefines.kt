@@ -70,6 +70,7 @@ const val COLOR_TASK_CREATE     = "#4485F4"             // Blue
 const val COLOR_RECORD          = "#B2FF59"             // Light Green A200
 const val COLOR_SUGGESTION      = "#EEFF41"             // Lime A200
 const val COLOR_DAILY_BAR_BASE  = "#BDBDBD"             // Gray 400
+const val COLOR_STAT_BK         = "#E5E5E5"
 
 const val COLOR_BLUE_100        = "#BBDEFB"
 const val COLOR_INDIGO_100      = "#C5CAE9"
