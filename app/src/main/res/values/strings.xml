@@ -21,6 +21,8 @@
 
     <string name="HINT_LOAD_PRIVATE_KEY_ERROR">导入GLID失败</string>
 
+    <string name="FORMAT_CALENDAR_M_D">"%d月%d日"</string>
+
     <string name="FORMAT_GLID_GEN_LOG">尝试次数: %d -> 最大工作量证明: %d\n</string>
     <string name="FORMAT_GLID_GEN_FAIL">没有生成符合标准的GLID\n</string>
     <string name="FORMAT_GLID_GEN_SUCCESS">获得可用的GLID: %s\n工作量证明：%d\n</string>
@@ -44,4 +46,6 @@
         \n
         导入或创建后别忘了向GamingLife的世界登记哦。
     </string>
+
+    <string name="VIEW_BACK_TO_TODAY">今日</string>
 </resources>
