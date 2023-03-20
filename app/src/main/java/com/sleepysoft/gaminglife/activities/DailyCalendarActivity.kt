@@ -276,8 +276,7 @@ class DailyCalendarActivity
         mTextLunar.text = calendar.lunar
         mTextYear.text = mCalendarView.curYear.toString()
         mTextMonthDay.text = resources.getString(
-            R.string.FORMAT_CALENDAR_M_D).format(
-            mCalendarView.curMonth, mCalendarView.curDay)
+            R.string.FORMAT_CALENDAR_M_D).format(calendar.month, calendar.day)
     }
 
     private fun updateDailyStatistics(dateStr: String) {
