@@ -1,21 +1,23 @@
 package com.sleepysoft.gaminglife.activities
 
+import android.R.color
+import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.haibin.calendarview.Calendar
 import com.haibin.calendarview.CalendarLayout
 import com.haibin.calendarview.CalendarView
 import com.sleepysoft.gaminglife.R
-import android.content.res.Configuration
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.sleepysoft.gaminglife.controllers.*
 import com.sleepysoft.gaminglife.views.GlView
 import glcore.*
@@ -117,6 +119,7 @@ class DailyCalendarActivity
         // calendarLayout.shrink() //折叠
 
         mCalendarView.setOnCalendarSelectListener(this)
+        mCalendarView.setOnMonthChangeListener(this)
 
         mTextMonthDay.setOnClickListener(View.OnClickListener {
             if (!mCalendarLayout.isExpand) {
@@ -175,7 +178,7 @@ class DailyCalendarActivity
         mStatisticsView.graphView = mCtrlContext.graphView
 
         onShowStatistics()
-        updateCalendarMarks()
+        updateCalendarMarksByCurrentDate()
         updateDailyStatisticsByCalendar(mCalendarView.selectedCalendar)
     }
 
@@ -239,16 +242,32 @@ class DailyCalendarActivity
     }
 
     override fun onMonthChange(year: Int, month: Int) {
-        updateCalendarMarks()
+        updateCalendarMarks(year, month)
     }
 
     // ---------------------------------------------------------------------------------------------
 
-    private fun updateCalendarMarks() {
-        for (dateStr in mDailyDataList) {
-            val y = dateStr.substring(0, 4).toInt()
-            val m = dateStr.substring(4, 2).toInt()
+    private fun updateCalendarMarks(year: Int, month: Int) {
+        val prefix = String.format("$DAILY_FOLDER_PREFIX%04d%02d", year, month)
+        val daysWithData = mDailyDataList.filter { it.startsWith(prefix) }
+
+        val schemeMap = mutableMapOf< String, Calendar >()
+
+        for (dateStr in daysWithData) {
+            val calendar = Calendar()
+            val dayInt = dateStr.substring(dateStr.length - 2).toInt()
+
+            calendar.year = year
+            calendar.month = month
+            calendar.day = dayInt
+            calendar.schemeColor = Color.parseColor(COLOR_SCHEME)
+            calendar.scheme = "GL"
+
+            schemeMap[calendar.toString()] = calendar
         }
+
+        mCalendarView.clearSchemeDate()
+        mCalendarView.setSchemeDate(schemeMap)
     }
 
     private fun updateCalendarTopDisplay() {
@@ -274,5 +293,9 @@ class DailyCalendarActivity
     private fun updateDailyStatisticsByCalendar(calendar: Calendar) {
         val dateStr = "%04d%02d%02d".format(calendar.year, calendar.month, calendar.day)
         updateDailyStatistics(dateStr)
+    }
+
+    private fun updateCalendarMarksByCurrentDate() {
+        updateCalendarMarks(mCalendarView.curYear, mCalendarView.curMonth)
     }
 }

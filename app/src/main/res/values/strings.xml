@@ -48,5 +48,5 @@
     </string>
 
     <string name="VIEW_BACK_TO_TODAY">今日</string>
-    <string name="TITLE_STATISTICS">GamingLife - 回顾 (%s)</string>
+    <string name="TITLE_STATISTICS">GamingLife (%s)</string>
 </resources>
