@@ -250,18 +250,21 @@ class DailyCalendarActivity
     private fun updateCalendarMarks(year: Int, month: Int) {
         val prefix = String.format("$DAILY_FOLDER_PREFIX%04d%02d", year, month)
         val daysWithData = mDailyDataList.filter { it.startsWith(prefix) }
+        val daysDateWithData = daysWithData.map { it.removePrefix(DAILY_FOLDER_PREFIX) }
 
         val schemeMap = mutableMapOf< String, Calendar >()
 
-        for (dateStr in daysWithData) {
+        for (dateStr in daysDateWithData) {
             val calendar = Calendar()
+            val extFiles = GlDailyRecord.listDailyExtraFiles(dateStr)
             val dayInt = dateStr.substring(dateStr.length - 2).toInt()
 
             calendar.year = year
             calendar.month = month
             calendar.day = dayInt
-            calendar.schemeColor = Color.parseColor(COLOR_SCHEME)
             calendar.scheme = "GL"
+            calendar.schemeColor = Color.parseColor(
+                if (extFiles.isNotEmpty()) COLOR_SCHEME_EXTREME else COLOR_SCHEME_NORMAL)
 
             schemeMap[calendar.toString()] = calendar
         }

@@ -21,6 +21,12 @@ class GlDailyRecord {
             dailyFolders.sort()
             return dailyFolders
         }
+        
+        fun listDailyExtraFiles(dateStr: String) : List< String > {
+            val dailyPath = DAILY_FOLDER_TEMPLATE.format(dateStr)
+            val dailyExtraFiles = GlFile.listFiles(dailyPath, GlFile.LIST_FILE)
+            return dailyExtraFiles.filter { !it.lowercase().endsWith(".json") }
+        }
     }
 
     var dailyPath: String = ""
@@ -120,7 +126,6 @@ class GlDailyRecord {
         reshapeTaskRecords()
     }
     
-    @RequiresApi(Build.VERSION_CODES.N)
     fun removeTask(uuid: String) {
         taskRecords.removeIf { it.uuid == uuid }
     }
@@ -191,9 +196,6 @@ class GlDailyRecord {
     private fun collectDailyExtraFiles() : Boolean {
         dailyExtraFiles = GlFile.listFiles(dailyPath, GlFile.LIST_FILE)
         dailyExtraFiles = dailyExtraFiles.filter { !it.lowercase().endsWith(".json") }
-
-        // GlLog.i("Collect daily files: $dailyExtraFiles")
-
         return true
     }
 

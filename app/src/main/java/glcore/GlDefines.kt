@@ -75,7 +75,8 @@ const val COLOR_BLUE_100        = "#BBDEFB"
 const val COLOR_INDIGO_100      = "#C5CAE9"
 
 const val COLOR_STAT_BK         = "#E5E5E5"
-const val COLOR_SCHEME          = "#0099CC"
+const val COLOR_SCHEME_NORMAL   = "#87CEEB"
+const val COLOR_SCHEME_EXTREME  = "#FFBC40"
 
 
 // ---------------------------------------- Struct Support -----------------------------------------
