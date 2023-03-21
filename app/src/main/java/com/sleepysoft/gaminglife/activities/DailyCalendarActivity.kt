@@ -72,6 +72,10 @@ class NotHideMediaController(context: Context) : MediaController(context) {
     override fun hide() {
         // Do not hide
     }
+
+    fun doHide() {
+        super.hide()
+    }
 }
 
 
@@ -88,6 +92,15 @@ class DailyCalendarActivity
       CalendarView.OnMonthChangeListener,
       CalendarView.OnCalendarSelectListener {
 
+    companion object {
+        // Workaround: For the orientation change
+        private var selectDateStr: String = ""
+    }
+
+    // ----------------------------------------------
+
+    private var mOrientation = Configuration.ORIENTATION_PORTRAIT
+
     private val mDailyRecord = GlDailyRecord()
     private val mDailyDataList = GlDailyRecord.listArchivedDailyData()
 
@@ -101,14 +114,12 @@ class DailyCalendarActivity
     lateinit var mStatisticsLayout: LinearLayout
     lateinit var mDailyExtFileListAdapter: DailyExtFileAdapter
 
-    // var mPlayerReady = false
     var mMediaPlayer = MediaPlayer()
     var mToBePlayedMediaUri = ""
 
-    // lateinit var mVideoView: VideoView
     lateinit var mSurfaceView: SurfaceView
     lateinit var mSurfaceHolder: SurfaceHolder
-    lateinit var mMediaController : NotHideMediaController
+    lateinit var mMediaController : MediaController
 
     // ----------------------------------------------
 
@@ -118,7 +129,10 @@ class DailyCalendarActivity
     private lateinit var mTextToday: TextView
 
     private lateinit var mCalendarView: CalendarView
+    private lateinit var mRelativeLayout: RelativeLayout
     private lateinit var mCalendarLayout: CalendarLayout
+
+    // ----------------------------------------------
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -132,7 +146,54 @@ class DailyCalendarActivity
         mTextToday = findViewById(R.id.text_today)
 
         mCalendarView = findViewById(R.id.calendarView)
+        mRelativeLayout = findViewById(R.id.rl_tool)
         mCalendarLayout = findViewById(R.id.calendarLayout)
+
+        // -----------------------------------------------------------------------------------------
+
+        mMdViewer = findViewById(R.id.id_text_view_md)
+        mDailyExtFileList = findViewById(R.id.id_recycler_view_ext_files)
+        mStatisticsLayout = findViewById(R.id.liner_statistics)
+
+        mSurfaceView = findViewById(R.id.surface_view_av)
+        mMediaController = MediaController(this)
+        mMediaController.setAnchorView(mSurfaceView)
+
+        mDailyExtFileListAdapter = DailyExtFileAdapter(mDailyRecord, this)
+
+        // --------------------------------------------------------
+
+        mOrientation = this.resources.configuration.orientation
+
+        mStatisticsView = if (mOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            findViewById(R.id.id_view_statistics)
+        } else {
+            // If landscape, the calendar will not be selected.
+            // So we have to init the mDailyRecord manually.
+            // TODO: Do Refactor for the process logic
+
+            if (selectDateStr.isNotEmpty()) {
+                mDailyRecord.loadDailyRecord(GlDateTime.stringToDate(selectDateStr))
+            } else {
+                val now = GlDateTime.datetime()
+                mDailyRecord.loadDailyRecord(now)
+                selectDateStr = GlDateTime.formatDateToDay(now)
+            }
+            findViewById(R.id.id_view_statistics_landscape)
+        }
+
+        buildContextAndController(mOrientation)
+        mStatisticsView.visibility = View.VISIBLE
+        mStatisticsView.graphView = mCtrlContext.graphView
+
+        if (mOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            initAsPortrait()
+        } else {
+            initAsLandscape()
+        }
+    }
+
+    private fun initAsPortrait() {
 
         mCalendarView.setOnCalendarSelectListener(this)
         mCalendarView.setOnMonthChangeListener(this)
@@ -153,40 +214,20 @@ class DailyCalendarActivity
             mCalendarView.scrollToCurrent()
         })
 
-        // -----------------------------------------------------------------------------------------
+        // --------------------------------------------------------
 
-        mMdViewer = findViewById(R.id.id_text_view_md)
-        mStatisticsView = findViewById(R.id.id_view_statistics)
-        mDailyExtFileList = findViewById(R.id.id_recycler_view_ext_files)
-        mStatisticsLayout = findViewById(R.id.liner_statistics)
-
-        mSurfaceView = findViewById(R.id.surface_view_av)
         mSurfaceHolder = mSurfaceView.holder
         mSurfaceHolder.addCallback(this)
 
-        mMediaController = NotHideMediaController(this)
-        mMediaController.setAnchorView(mSurfaceView)
-
-        mDailyExtFileListAdapter = DailyExtFileAdapter(mDailyRecord, this)
-
-        val orientation = this.resources.configuration.orientation
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            with(mDailyExtFileList) {
-                adapter = mDailyExtFileListAdapter
-                layoutManager = LinearLayoutManager(this@DailyCalendarActivity)
-                addItemDecoration(
-                    DividerItemDecoration(
-                        this@DailyCalendarActivity, DividerItemDecoration.HORIZONTAL))
-            }
-        } else {
-            mDailyExtFileList.visibility = View.GONE
+        with(mDailyExtFileList) {
+            adapter = mDailyExtFileListAdapter
+            layoutManager = LinearLayoutManager(this@DailyCalendarActivity)
+            addItemDecoration(
+                DividerItemDecoration(
+                    this@DailyCalendarActivity, DividerItemDecoration.HORIZONTAL))
         }
 
-        buildContextAndController(orientation)
-
-        mStatisticsView.graphView = mCtrlContext.graphView
-
-        // -----------------------------------------------------------------------------------------
+        // -----------------------------------------------------
 
         onShowStatistics()
         updateCalendarTopDisplay()
@@ -194,19 +235,38 @@ class DailyCalendarActivity
         updateDailyStatisticsByCalendar(mCalendarView.selectedCalendar)
     }
 
+    private fun initAsLandscape() {
+        mRelativeLayout.visibility = View.GONE
+        mCalendarLayout.visibility = View.GONE
+
+        updateDailyStatistics(selectDateStr)
+
+/*        mTextYear.visibility = View.GONE
+        mTextLunar.visibility = View.GONE
+        mTextMonthDay.visibility = View.GONE
+        mTextToday.visibility = View.GONE
+        mCalendarView.visibility = View.GONE
+        mMediaController.visibility = View.GONE
+
+        mDailyExtFileList.visibility = View.GONE*/
+    }
+
+/*    override fun onPause() {
+        super.onPause()
+        mMediaController.doHide()
+    }*/
+
     // ---------------------------------------------------------------------------------------------
 
     fun onShowStatistics() {
         mMdViewer.visibility = View.GONE
         mSurfaceView.visibility = View.GONE
-        // mVideoView.visibility = View.GONE
         mStatisticsView.visibility = View.VISIBLE
     }
 
     fun onShowExtFile(fileName: String) {
         mStatisticsView.visibility = View.GONE
         mSurfaceView.visibility = View.GONE
-        // mVideoView.visibility = View.GONE
         mMdViewer.visibility = View.GONE
 
         checkEndPlay()
@@ -222,8 +282,6 @@ class DailyCalendarActivity
             }
             fileName.lowercase().endsWith(".wav") -> {
                 mSurfaceView.visibility = View.VISIBLE
-                // mVideoView.visibility = View.VISIBLE
-
                 newPlayer(fileAbsPath)
             }
             else -> {
@@ -240,7 +298,8 @@ class DailyCalendarActivity
         mCtrlContext.graphView = GraphView(mCtrlContext)
 
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mDailyStatisticsController = GlDailyStatisticsController(mCtrlContext, mDailyRecord).apply { init() }
+            mDailyStatisticsController = GlDailyStatisticsController(
+                mCtrlContext, mDailyRecord).apply { init() }
         } else {
             timeViewEditorController = GlTimeViewEditorController(
                 mCtrlContext, mDailyRecord, GlRoot.systemConfig).apply { init() }
@@ -275,6 +334,10 @@ class DailyCalendarActivity
     // ---------------------------------------------------------------------------------------------
 
     override fun surfaceCreated(holder: SurfaceHolder) {
+        if (mOrientation != Configuration.ORIENTATION_PORTRAIT) {
+            return
+        }
+
         mMediaPlayer = MediaPlayer()
         mMediaPlayer.setDisplay(holder)
 
@@ -304,7 +367,16 @@ class DailyCalendarActivity
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
-        mMediaPlayer.release()
+        if (mOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            try {
+                mMediaPlayer.release()
+            } catch (e: Exception) {
+                println("Play Release Error.")
+                GlLog.e(e.stackTraceToString())
+            } finally {
+
+            }
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -347,10 +419,17 @@ class DailyCalendarActivity
     @SuppressLint("NotifyDataSetChanged")
     private fun updateDailyStatistics(dateStr: String) {
         title = resources.getString(R.string.TITLE_STATISTICS).format(dateStr)
+
         if (mDailyRecord.loadDailyRecord(GlDateTime.stringToDate(dateStr))) {
-            mStatisticsLayout.visibility = View.VISIBLE
-            mDailyExtFileListAdapter.notifyDataSetChanged()
-            mDailyStatisticsController.updateDailyRecord(mDailyRecord)
+            if (mOrientation == Configuration.ORIENTATION_PORTRAIT) {
+                selectDateStr = dateStr
+                mStatisticsLayout.visibility = View.VISIBLE
+                mDailyExtFileListAdapter.notifyDataSetChanged()
+                mDailyStatisticsController.updateDailyRecord(mDailyRecord)
+            } else {
+                // Will not update on portrait mode.
+                // timeViewEditorController
+            }
         } else {
             mStatisticsLayout.visibility = View.INVISIBLE
         }

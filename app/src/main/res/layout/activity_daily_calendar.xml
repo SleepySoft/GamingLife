@@ -7,6 +7,12 @@
     android:background="#ffffff"
     android:orientation="vertical">
 
+    <com.sleepysoft.gaminglife.views.GlView
+        android:id="@+id/id_view_statistics_landscape"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
     <RelativeLayout
         android:id="@+id/rl_tool"
         android:layout_width="match_parent"
@@ -147,13 +153,6 @@
 
                 <SurfaceView
                     android:id="@+id/surface_view_av"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="55"
-                    android:visibility="gone" />
-
-                <VideoView
-                    android:id="@+id/video_view_av"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="55"
