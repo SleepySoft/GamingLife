@@ -1,15 +1,13 @@
 package com.sleepysoft.gaminglife.activities
 
-import android.R.color
+import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
+import android.media.MediaPlayer
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.view.*
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,7 +21,6 @@ import com.sleepysoft.gaminglife.views.GlView
 import glcore.*
 import graphengine.GraphView
 import java.lang.ref.WeakReference
-import java.util.*
 
 
 class DailyExtFileAdapter(
@@ -71,12 +68,22 @@ class DailyExtFileAdapter(
 }
 
 
+class NotHideMediaController(context: Context) : MediaController(context) {
+    override fun hide() {
+        // Do not hide
+    }
+}
+
+
 // =================================================================================================
-// -------------------------------------------------------------------------------------------------
+// The usage and layout of CalendarView is referenced to:
+//     https://github.com/huanghaibin-dev/CalendarView
+// Any many thanks to new bing. It helps me a lot on this file.
 // =================================================================================================
 
 class DailyCalendarActivity
     : AppCompatActivity(),
+      SurfaceHolder.Callback,
       CalendarView.OnWeekChangeListener,
       CalendarView.OnMonthChangeListener,
       CalendarView.OnCalendarSelectListener {
@@ -92,6 +99,18 @@ class DailyCalendarActivity
     lateinit var mStatisticsView: GlView
     lateinit var mDailyExtFileList: RecyclerView
     lateinit var mStatisticsLayout: LinearLayout
+    lateinit var mDailyExtFileListAdapter: DailyExtFileAdapter
+
+    // var mPlayerReady = false
+    var mMediaPlayer = MediaPlayer()
+    var mToBePlayedMediaUri = ""
+
+    // lateinit var mVideoView: VideoView
+    lateinit var mSurfaceView: SurfaceView
+    lateinit var mSurfaceHolder: SurfaceHolder
+    lateinit var mMediaController : NotHideMediaController
+
+    // ----------------------------------------------
 
     private lateinit var mTextYear: TextView
     private lateinit var mTextLunar: TextView
@@ -115,9 +134,6 @@ class DailyCalendarActivity
         mCalendarView = findViewById(R.id.calendarView)
         mCalendarLayout = findViewById(R.id.calendarLayout)
 
-        // calendarLayout.expand() //展开
-        // calendarLayout.shrink() //折叠
-
         mCalendarView.setOnCalendarSelectListener(this)
         mCalendarView.setOnMonthChangeListener(this)
 
@@ -137,20 +153,6 @@ class DailyCalendarActivity
             mCalendarView.scrollToCurrent()
         })
 
-/*        val schemeCalendar = Calendar()
-        schemeCalendar.year = 2023
-        schemeCalendar.month = 3
-        schemeCalendar.day = 16
-
-        val customScheme = CustomScheme()
-        customScheme.schemeColor = Color.RED // 设置标记颜色
-
-        schemeCalendar.addScheme(customScheme)
-
-        mCalendarView.addSchemeDate(schemeCalendar)*/
-
-        updateCalendarTopDisplay()
-
         // -----------------------------------------------------------------------------------------
 
         mMdViewer = findViewById(R.id.id_text_view_md)
@@ -158,17 +160,24 @@ class DailyCalendarActivity
         mDailyExtFileList = findViewById(R.id.id_recycler_view_ext_files)
         mStatisticsLayout = findViewById(R.id.liner_statistics)
 
+        mSurfaceView = findViewById(R.id.surface_view_av)
+        mSurfaceHolder = mSurfaceView.holder
+        mSurfaceHolder.addCallback(this)
+
+        mMediaController = NotHideMediaController(this)
+        mMediaController.setAnchorView(mSurfaceView)
+
+        mDailyExtFileListAdapter = DailyExtFileAdapter(mDailyRecord, this)
+
         val orientation = this.resources.configuration.orientation
         if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            mDailyExtFileList.layoutManager =
-                LinearLayoutManager(this)
-            mDailyExtFileList.adapter = DailyExtFileAdapter(mDailyRecord, this)
-            mDailyExtFileList.addItemDecoration(
-                DividerItemDecoration(
-                    this,
-                    DividerItemDecoration.HORIZONTAL
-                )
-            )
+            with(mDailyExtFileList) {
+                adapter = mDailyExtFileListAdapter
+                layoutManager = LinearLayoutManager(this@DailyCalendarActivity)
+                addItemDecoration(
+                    DividerItemDecoration(
+                        this@DailyCalendarActivity, DividerItemDecoration.HORIZONTAL))
+            }
         } else {
             mDailyExtFileList.visibility = View.GONE
         }
@@ -177,7 +186,10 @@ class DailyCalendarActivity
 
         mStatisticsView.graphView = mCtrlContext.graphView
 
+        // -----------------------------------------------------------------------------------------
+
         onShowStatistics()
+        updateCalendarTopDisplay()
         updateCalendarMarksByCurrentDate()
         updateDailyStatisticsByCalendar(mCalendarView.selectedCalendar)
     }
@@ -186,24 +198,39 @@ class DailyCalendarActivity
 
     fun onShowStatistics() {
         mMdViewer.visibility = View.GONE
+        mSurfaceView.visibility = View.GONE
+        // mVideoView.visibility = View.GONE
         mStatisticsView.visibility = View.VISIBLE
     }
 
     fun onShowExtFile(fileName: String) {
-        mMdViewer.visibility = View.VISIBLE
         mStatisticsView.visibility = View.GONE
+        mSurfaceView.visibility = View.GONE
+        // mVideoView.visibility = View.GONE
+        mMdViewer.visibility = View.GONE
 
-        if (fileName.lowercase().endsWith(".md")) {
-            val filePath= GlFile.joinPaths(mDailyRecord.dailyPath, fileName)
-            val fileData = GlFile.loadFile(filePath)
-            val fileText = fileData.decodeToString()
-            mMdViewer.text = fileText
-        } else if (fileName.lowercase().endsWith(".wav")) {
-            // TODO: Play wav
-            mMdViewer.text = "音频文件，还未支持"
-        } else {
-            // No support yet.
-            mMdViewer.text = "不支持的文件类型"
+        checkEndPlay()
+        val filePath = GlFile.joinPaths(mDailyRecord.dailyPath, fileName)
+        val fileAbsPath = GlFile.absPath(filePath)
+
+        when {
+            fileName.lowercase().endsWith(".md") -> {
+                val fileData = GlFile.loadFile(filePath)
+                val fileText = fileData.decodeToString()
+                mMdViewer.visibility = View.VISIBLE
+                mMdViewer.text = fileText
+            }
+            fileName.lowercase().endsWith(".wav") -> {
+                mSurfaceView.visibility = View.VISIBLE
+                // mVideoView.visibility = View.VISIBLE
+
+                newPlayer(fileAbsPath)
+            }
+            else -> {
+                // No support yet.
+                mMdViewer.visibility = View.VISIBLE
+                mMdViewer.text = "不支持的文件类型"
+            }
         }
     }
 
@@ -223,7 +250,7 @@ class DailyCalendarActivity
     // ---------------------------------------------------------------------------------------------
 
     override fun onCalendarOutOfRange(calendar: Calendar?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onCalendarSelect(calendar: Calendar?, isClick: Boolean) {
@@ -238,11 +265,46 @@ class DailyCalendarActivity
     }
 
     override fun onWeekChange(weekCalendars: MutableList<Calendar>?) {
-        TODO("Not yet implemented")
+
     }
 
     override fun onMonthChange(year: Int, month: Int) {
         updateCalendarMarks(year, month)
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    override fun surfaceCreated(holder: SurfaceHolder) {
+        mMediaPlayer = MediaPlayer()
+        mMediaPlayer.setDisplay(holder)
+
+        mMediaController.setMediaPlayer(object : MediaController.MediaPlayerControl {
+            override fun start() { mMediaPlayer.start() }
+            override fun pause() { mMediaPlayer.pause() }
+            override fun getDuration(): Int { return mMediaPlayer.duration }
+            override fun getCurrentPosition(): Int { return mMediaPlayer.currentPosition }
+            override fun seekTo(pos: Int) { mMediaPlayer.seekTo(pos) }
+            override fun isPlaying(): Boolean { return mMediaPlayer.isPlaying }
+            override fun getBufferPercentage(): Int { return 0 }
+            override fun canPause(): Boolean { return true }
+            override fun canSeekBackward(): Boolean { return true }
+            override fun canSeekForward(): Boolean { return true }
+            override fun getAudioSessionId(): Int { return 0 }
+        })
+
+        if (mToBePlayedMediaUri.isNotEmpty()) {
+            doPlay(mToBePlayedMediaUri)
+        }
+
+        mMediaController.show()
+    }
+
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
+
+    }
+
+    override fun surfaceDestroyed(holder: SurfaceHolder) {
+        mMediaPlayer.release()
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -282,10 +344,12 @@ class DailyCalendarActivity
             R.string.FORMAT_CALENDAR_M_D).format(calendar.month, calendar.day)
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun updateDailyStatistics(dateStr: String) {
         title = resources.getString(R.string.TITLE_STATISTICS).format(dateStr)
         if (mDailyRecord.loadDailyRecord(GlDateTime.stringToDate(dateStr))) {
             mStatisticsLayout.visibility = View.VISIBLE
+            mDailyExtFileListAdapter.notifyDataSetChanged()
             mDailyStatisticsController.updateDailyRecord(mDailyRecord)
         } else {
             mStatisticsLayout.visibility = View.INVISIBLE
@@ -299,5 +363,51 @@ class DailyCalendarActivity
 
     private fun updateCalendarMarksByCurrentDate() {
         updateCalendarMarks(mCalendarView.curYear, mCalendarView.curMonth)
+    }
+
+    private fun newPlayer(uri: String) {
+/*        val newSurfaceView = SurfaceView(this)
+        val newSurfaceHolder = newSurfaceView.holder
+        newSurfaceHolder.addCallback(this)*/
+
+        mToBePlayedMediaUri = uri
+/*        mMediaController.setAnchorView(newSurfaceView)
+
+        // ------------------ Replace the SurfaceView ------------------
+
+        val index = mStatisticsLayout.indexOfChild(mSurfaceView)
+        val layoutParams = mSurfaceView.layoutParams as LinearLayout.LayoutParams
+
+        newSurfaceView.layoutParams = layoutParams
+
+        mStatisticsLayout.removeView(mSurfaceView)
+        mStatisticsLayout.addView(newSurfaceView, index)
+
+        mSurfaceView = newSurfaceView
+        mSurfaceHolder = newSurfaceHolder*/
+    }
+
+    private fun doPlay(uri: String) {
+        try {
+            mMediaPlayer.setDataSource(uri)
+            mMediaPlayer.prepare()
+            mMediaPlayer.start()
+        } catch (e: Exception) {
+            println("Play Error.")
+            GlLog.e(e.stackTraceToString())
+        } finally {
+
+        }
+    }
+
+    private fun checkEndPlay() {
+        try {
+            mMediaPlayer.stop()
+        } catch (e: Exception) {
+            // println("Stop play Error.")
+            // GlLog.e(e.stackTraceToString())
+        } finally {
+
+        }
     }
 }

@@ -145,6 +145,20 @@
                     android:layout_weight="55"
                     android:visibility="gone" />
 
+                <SurfaceView
+                    android:id="@+id/surface_view_av"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="55"
+                    android:visibility="gone" />
+
+                <VideoView
+                    android:id="@+id/video_view_av"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="55"
+                    android:visibility="gone" />
+
                 <com.sleepysoft.gaminglife.views.GlView
                     android:id="@+id/id_view_statistics"
                     android:layout_width="match_parent"
