@@ -2,16 +2,21 @@ package com.sleepysoft.gaminglife.controllers
 
 import android.content.Intent
 import android.graphics.*
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.sleepysoft.gaminglife.CommonTextInputActivity
+import com.sleepysoft.gaminglife.GamingLifeMainService
 import com.sleepysoft.gaminglife.R
+import glcore.RECORD_FILE_NAME_AUDIO
 import glcore.GlFile
-import glcore.GlRoot
 import graphengine.*
 
 
 class GlAudioRecordLayerController(
     private val mCtrlContext: GlControllerContext)
     : GraphViewObserver, GraphInteractiveListener() {
+
+    private val mRecordPath = GlFile.absPath(RECORD_FILE_NAME_AUDIO)
 
     private lateinit var mVoiceRecordEffectLayer: GraphLayer
     private lateinit var mAudioCircle: GraphImage
@@ -61,6 +66,7 @@ class GlAudioRecordLayerController(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     fun popupInput(operatingPos: PointF,
                    returnFunction: (inputType: String, result: Any?) -> Unit) {
         layoutItems()
@@ -76,7 +82,8 @@ class GlAudioRecordLayerController(
         mCtrlContext.graphView?.bringLayerToFront(mVoiceRecordEffectLayer)
         mCtrlContext.refresh()
 
-        GlRoot.env.glAudio.startRecord(GlFile.glRoot())
+        // GlRoot.env.glAudio.startRecord(GlFile.glRoot())
+        GamingLifeMainService.serviceInstance.get()?.startRecord(mRecordPath)
     }
 
     private fun releaseControl() {
@@ -190,7 +197,8 @@ class GlAudioRecordLayerController(
 
     override fun onItemDropped(item: GraphItem, intersectItems: List< GraphItem >, pos: PointF) {
 
-        GlRoot.env.glAudio.stopRecord()
+        // GlRoot.env.glAudio.stopRecord()
+        GamingLifeMainService.serviceInstance.get()?.stopRecord()
 
         item.offsetPixel.x = 0.0f
         item.offsetPixel.y = 0.0f
@@ -198,7 +206,7 @@ class GlAudioRecordLayerController(
         if (intersectItems.isEmpty()) {
             // Just release the record button
 
-            GlRoot.env.glAudio.join(1500)
+            // GlRoot.env.glAudio.join(1500)
 
             // Copy wav to daily folder and rename
             onAudioRecordOk()
@@ -286,7 +294,7 @@ class GlAudioRecordLayerController(
     }
 
     private fun onAudioRecordOk() {
-        mReturnFunction?.run { this("Audio", GlRoot.env.glAudio.WAVPath) }
+        mReturnFunction?.run { this("Audio", mRecordPath) }
     }
 
     private fun onUserInputCancel() {

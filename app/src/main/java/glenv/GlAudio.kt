@@ -7,9 +7,8 @@ import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
 import androidx.core.app.ActivityCompat
-import glcore.FILE_NAME_AUDIO_TEMP_PCM
-import glcore.FILE_NAME_AUDIO_TEMP_WAV
 import glcore.GlLog
+import glcore.RECORD_FILE_NAME_AUDIO
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
@@ -43,8 +42,8 @@ class GlAudio {
 
     fun init() {
         val ctx: Context = GlApp.applicationContext()
-        PCMPath = "${ctx.filesDir.absolutePath}/$FILE_NAME_AUDIO_TEMP_PCM"
-        WAVPath = "${ctx.filesDir.absolutePath}/$FILE_NAME_AUDIO_TEMP_WAV"
+        PCMPath = "${ctx.filesDir.absolutePath}/$RECORD_FILE_NAME_AUDIO"
+        WAVPath = "${ctx.filesDir.absolutePath}/$RECORD_FILE_NAME_AUDIO"
         bufferSizeInByte = AudioRecord.getMinBufferSize(SampleRate, Channel, EncodingType)
     }
 
@@ -79,8 +78,8 @@ class GlAudio {
         } else {
             GlLog.i("Start record.")
 
-            PCMPath = "$savePath/$FILE_NAME_AUDIO_TEMP_PCM"
-            WAVPath = "$savePath/$FILE_NAME_AUDIO_TEMP_WAV"
+            PCMPath = "$savePath/$RECORD_FILE_NAME_AUDIO"
+            WAVPath = "$savePath/$RECORD_FILE_NAME_AUDIO"
 
             audioRecorder ?: createRecorder()
             audioRecorder?.startRecording()

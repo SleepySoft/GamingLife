@@ -1,37 +1,31 @@
 package com.sleepysoft.gaminglife.activities
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.*
-import android.provider.Settings
-import android.view.View
+import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
-import android.view.WindowManager
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.sleepysoft.gaminglife.*
 import com.sleepysoft.gaminglife.controllers.*
 import com.sleepysoft.gaminglife.views.GlView
 import glcore.*
 import glenv.GlEnv
 import graphengine.GraphView
+import pub.devrel.easypermissions.EasyPermissions
 import java.lang.ref.WeakReference
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     companion object {
-        private const val REQUEST_CODE_STORAGE_PERMISSION = 1024
+        private const val REQUEST_CODE_PERMISSION = 1024
     }
 
-    private var mInitRound: Int = 0
+    // private var mInitRound: Int = 0
 
     private lateinit var mView: GlView
     private lateinit var mVibrator: Vibrator
@@ -46,77 +40,86 @@ class MainActivity : AppCompatActivity() {
 
         val resultCode = result.resultCode()
         if (result.resultCode() == GlControllerContext.RESULT_ACCEPTED) {
-            when (val requestCode = result.requestCode()) {
-                REQUEST_CODE_STORAGE_PERMISSION -> glInit()
-                else -> mCtrlContext.dispatchAsyncResult(requestCode, resultCode, result.data)
-            }
+            val requestCode = result.requestCode()
+            mCtrlContext.dispatchAsyncResult(requestCode, resultCode, result.data)
         }
     }
 
-    private val filePermissionLauncher =
+/*    private val filePermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { _ ->
         glInit()
-    }
-
-/*    companion object {
-        private var mHandler = Handler(Looper.getMainLooper())
-    }
-
-    private class PrivateRunnable(acitvity: MainActivity,
-                                  private val handlerRef: Handler) : Runnable {
-        private val activityRef = WeakReference(acitvity)
-
-        override fun run() {
-            activityRef.get()?.run {
-                doPeriod()
-                handlerRef.postDelayed(this@PrivateRunnable, 100)
-            }
-        }
-    }
-    private val runnable = PrivateRunnable(this, mHandler)*/
+    }*/
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (EasyPermissions.hasPermissions(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO)) {
+            doInitialization(useInternalStorage=false)
+        } else {
+            EasyPermissions.requestPermissions(this,
+                getString(R.string.HINT_PERMISSION_BATCH),
+                REQUEST_CODE_PERMISSION,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.RECORD_AUDIO)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+        if (requestCode == REQUEST_CODE_PERMISSION) {
+            if (perms.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                doInitialization(useInternalStorage=false)
+            } else {
+                doInitialization(useInternalStorage=true)
+            }
+        }
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+        if (requestCode == REQUEST_CODE_PERMISSION) {
+            if (perms.contains(Manifest.permission.RECORD_AUDIO)) {
+                toast(getString(R.string.HINT_RISK_WHEN_RECORD_DENIED))
+            }
+            if (perms.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                doInitialization(useInternalStorage=true)
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    private fun doInitialization(useInternalStorage: Boolean) {
         mView = GlView(this)
         setContentView(mView)
 
         createVibrator()
-        // requireLockScreenShow()
         initControllerContext()
 
-        glInit()
-
-        // RuntimeTest.testEntry(this)
-        // mHandler.postDelayed(runnable, 100)
-    }
-
-/*    override fun onStart() {
-        super.onStart()
-
-        val onLockScreen: Boolean = intent.getBooleanExtra("OnLockedScreen", false)
-    }*/
-
-/*    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        when (requestCode) {
-            REQUEST_CODE_STORAGE_PERMISSION -> glInit()
-            else -> mCtrlContext.dispatchAsyncResult(requestCode, resultCode, data)
+        if (useInternalStorage) {
+            GlFile.defaultStorage = GlFile.STORAGE_PLACE.STORAGE_INTERNAL
+            AlertDialog.Builder(this).apply {
+                this.setTitle(getString(R.string.HINT_TEXT_TIPS))
+                this.setCancelable(true)
+                this.setView(TextView(this@MainActivity).apply {
+                    text = getString(R.string.HINT_RISK_WHEN_USING_INTERNAL_STORAGE)
+                })
+            }.create().show()
         }
-    }*/
 
-    // ---------------------------------------------------------------------------------------------
-
-    @SuppressLint("SetTextI18n")
-    private fun glInit() {
-        GlLog.i("GlInit, round = $mInitRound")
-
-        when (val errorCode = GlRoot.init(GlEnv().apply { init() })) {
+        when (GlRoot.init(GlEnv().apply { init() })) {
             GlRoot.ERROR_NONE -> glStart()
             GlRoot.ERROR_INITED -> glStart()
-            GlRoot.ERROR_FILE_PERMISSION -> when (mInitRound) {
+/*            GlRoot.ERROR_FILE_PERMISSION -> when (mInitRound) {
                 0 -> {
                     requireExtStoragePermission()
                     mInitRound = 1
@@ -144,7 +147,7 @@ class MainActivity : AppCompatActivity() {
                 GlLog.e("Gaming life init fail. Error code: $errorCode")
                 toast("Gaming life init fail. Error code: $errorCode")
                 finish()
-            }
+            }*/
         }
     }
 
@@ -152,48 +155,6 @@ class MainActivity : AppCompatActivity() {
         buildGraphControllers()
         mView.graphView = mCtrlContext.graphView
         startGlService()
-    }
-
-    private fun createVibrator() {
-        mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            vibratorManager.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
-    }
-
-/*    @RequiresApi(Build.VERSION_CODES.M)
-    private fun requireLockScreenShow() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
-        {
-            setShowWhenLocked(true)
-        }
-        else
-        {
-            window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
-        }
-
-        val canOverlay: Boolean = Settings.canDrawOverlays(this)
-        if (canOverlay) {
-            GlLog.i("Overlay permission OK.")
-        }
-        else {
-            startActivity(
-                Intent(
-                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:$packageName")
-                )
-            )
-        }
-    }*/
-
-    private fun requireExtStoragePermission() {
-        val intent = Intent(this, PermissionActivity::class.java)
-        startActivityForResult(intent, REQUEST_CODE_STORAGE_PERMISSION)
     }
 
     private fun initControllerContext() {
@@ -231,6 +192,58 @@ class MainActivity : AppCompatActivity() {
             startService(intent);
         }
     }
+
+    private fun createVibrator() {
+        mVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+    }
+
+/*    override fun onStart() {
+        super.onStart()
+
+        val onLockScreen: Boolean = intent.getBooleanExtra("OnLockedScreen", false)
+    }*/
+
+/*    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        when (requestCode) {
+            REQUEST_CODE_STORAGE_PERMISSION -> glInit()
+            else -> mCtrlContext.dispatchAsyncResult(requestCode, resultCode, data)
+        }
+    }*/
+
+/*    @RequiresApi(Build.VERSION_CODES.M)
+    private fun requireLockScreenShow() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1)
+        {
+            setShowWhenLocked(true)
+        }
+        else
+        {
+            window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+        }
+
+        val canOverlay: Boolean = Settings.canDrawOverlays(this)
+        if (canOverlay) {
+            GlLog.i("Overlay permission OK.")
+        }
+        else {
+            startActivity(
+                Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:$packageName")
+                )
+            )
+        }
+    }*/
 
 /*    private fun registerScreenStatusListener() {
         val filter = IntentFilter()

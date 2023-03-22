@@ -4,6 +4,7 @@ import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Intent
 import android.content.IntentFilter
+import android.media.MediaRecorder
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -16,6 +17,7 @@ import glcore.*
 import glcore.GlDateTime
 import glcore.GlLog
 import glcore.GlRoot
+import java.lang.ref.WeakReference
 
 
 class GamingLifeMainService : Service() {
@@ -24,8 +26,10 @@ class GamingLifeMainService : Service() {
     private val mHandler : Handler = Handler(Looper.getMainLooper())
     // private val mReceiver: BroadcastReceiver = ScreenBroadcastReceiver()
     private var mNotification: NotificationCompat.Builder? = null
+    private var mRecorder: MediaRecorder? = null
 
     companion object {
+        var serviceInstance = WeakReference< GamingLifeMainService >(null)
         const val NOTIFICATION_ID_DEFAULT_INT = 299792458
         const val NOTIFICATION_ID_DEFAULT_STR = "GamingLife.Notification.Default"
     }
@@ -35,12 +39,13 @@ class GamingLifeMainService : Service() {
 
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate() {
         GlLog.i("GL service onCreate")
 
         // val intentFilter = IntentFilter(Intent.ACTION_SCREEN_OFF)
         // registerReceiver(mReceiver, intentFilter)
+
+        serviceInstance = WeakReference(this)
 
         createNotification()
 
@@ -56,6 +61,32 @@ class GamingLifeMainService : Service() {
         GlLog.i("GL service onDestroy")
         super.onDestroy()
         // unregisterReceiver(mReceiver)
+
+        stopRecord()
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @RequiresApi(Build.VERSION_CODES.S)
+    fun startRecord(filePath: String) {
+        mRecorder?.run { stopRecord() }
+        mRecorder = MediaRecorder(this)
+        mRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
+        mRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+        mRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+        mRecorder?.setOutputFile(filePath)
+        mRecorder?.prepare()
+    }
+
+    fun stopRecord() {
+        try {
+            mRecorder?.stop()
+            mRecorder?.release()
+        } catch (e: Exception) {
+            println("Stop record fail: $e")
+        } finally {
+            mRecorder = null
+        }
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -83,7 +114,6 @@ class GamingLifeMainService : Service() {
         return channelID
     }
 
-    @RequiresApi(Build.VERSION_CODES.N)
     private fun createNotification() {
         val intent = Intent(this, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

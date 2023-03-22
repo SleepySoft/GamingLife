@@ -2,8 +2,10 @@ package com.sleepysoft.gaminglife.controllers
 
 import android.graphics.*
 import android.graphics.Paint.ANTI_ALIAS_FLAG
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import androidx.annotation.RequiresApi
 import com.sleepysoft.gaminglife.activities.DailyCalendarActivity
 import com.sleepysoft.gaminglife.activities.GLIDManagementActivity
 import glcore.*
@@ -108,6 +110,7 @@ class GlTimeViewController(
         item.offsetPixel.y = 0.0f
     }
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onItemTriggered(item: GraphItem) {
         if (item == mCenterItem) {
             audioRecordController.popupInput(
@@ -482,7 +485,7 @@ class GlTimeViewController(
                 GlRoot.saveContentToDailyFolder(result.toByteArray(), "md")
             }
             "Audio" -> {
-                GlRoot.archiveRootPathFileToDailyFolder(FILE_NAME_AUDIO_TEMP_WAV)
+                GlRoot.archiveRootPathFileToDailyFolder(GlFile.absPath(RECORD_FILE_NAME_AUDIO))
             }
             else -> {
 
