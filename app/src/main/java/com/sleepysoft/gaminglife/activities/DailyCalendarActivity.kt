@@ -156,6 +156,9 @@ class DailyCalendarActivity
         mStatisticsLayout = findViewById(R.id.liner_statistics)
 
         mSurfaceView = findViewById(R.id.surface_view_av)
+        mSurfaceView.setOnClickListener {
+            mMediaController.show()
+        }
         mMediaController = MediaController(this)
         mMediaController.setAnchorView(mSurfaceView)
 
@@ -342,12 +345,12 @@ class DailyCalendarActivity
         mMediaPlayer.setDisplay(holder)
 
         mMediaController.setMediaPlayer(object : MediaController.MediaPlayerControl {
-            override fun start() { mMediaPlayer.start() }
-            override fun pause() { mMediaPlayer.pause() }
-            override fun getDuration(): Int { return mMediaPlayer.duration }
-            override fun getCurrentPosition(): Int { return mMediaPlayer.currentPosition }
-            override fun seekTo(pos: Int) { mMediaPlayer.seekTo(pos) }
-            override fun isPlaying(): Boolean { return mMediaPlayer.isPlaying }
+            override fun start() { ex{ mMediaPlayer.start() } }
+            override fun pause() { ex{ mMediaPlayer.pause() } }
+            override fun getDuration(): Int { return exr(0){ mMediaPlayer.duration } }
+            override fun getCurrentPosition(): Int { return exr(0){ mMediaPlayer.currentPosition } }
+            override fun seekTo(pos: Int) { exr(0){ mMediaPlayer.seekTo(pos) } }
+            override fun isPlaying(): Boolean { return exr(false){ mMediaPlayer.isPlaying } }
             override fun getBufferPercentage(): Int { return 0 }
             override fun canPause(): Boolean { return true }
             override fun canSeekBackward(): Boolean { return true }
@@ -470,7 +473,7 @@ class DailyCalendarActivity
         try {
             mMediaPlayer.setDataSource(uri)
             mMediaPlayer.prepare()
-            mMediaPlayer.start()
+            // mMediaPlayer.start()
         } catch (e: Exception) {
             println("Play Error.")
             GlLog.e(e.stackTraceToString())

@@ -4,8 +4,71 @@ import java.io.*
 import java.util.*
 import java.util.zip.DeflaterOutputStream
 import java.util.zip.InflaterInputStream
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.InvocationKind
+import kotlin.contracts.contract
+
+
+/**
+ * Use ?. operation on boolean expression with this function.
+ *
+ * @param v The value for judgement。
+ * @return Return true if v is true else null
+ */
 
 fun trueOrNull(v: Boolean) : Boolean? = if (v) true else null
+
+
+/**
+ * Wrap a block which has no return value to handle its exception。
+ *
+ * @param silent If true. There's no exception information output。
+ * @param block The block to call
+ * @return UNIT
+ */
+
+@OptIn(ExperimentalContracts::class)
+fun ex(silent: Boolean=false, block: () -> Unit) {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    try {
+        block()
+    } catch (e: Exception) {
+        if (!silent) {
+            println("ex - Exception: $e")
+        }
+    } finally {
+
+    }
+}
+
+
+/**
+ * Wrap a block which has return value to handle its exception。
+ *
+ * @param returnOnException The return value if this block gets exception。
+ * @param silent If true. There's no exception information output。
+ * @param block The block to call
+ * @return The block's return value if no exception else returnOnException
+ */
+
+@OptIn(ExperimentalContracts::class)
+fun < T > exr(returnOnException: T, silent: Boolean=false, block: () -> T) : T {
+    contract {
+        callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+    }
+    return try {
+        block()
+    } catch (e: Exception) {
+        if (!silent) {
+            println("exr - Exception: $e")
+        }
+        returnOnException
+    } finally {
+
+    }
+}
 
 
 // https://kotlinlang.org/docs/multiplatform-connect-to-apis.html#generate-a-uuid
@@ -13,6 +76,7 @@ fun randomUUID() = UUID.randomUUID().toString()
 
 
 // https://stackoverflow.com/a/52225984
+@OptIn(ExperimentalUnsignedTypes::class)
 fun ByteArray.toHexString() =
     asUByteArray().joinToString("") { it.toString(16).padStart(2, '0') }
 
