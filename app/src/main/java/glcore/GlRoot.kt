@@ -109,11 +109,16 @@ object GlRoot {
      * @param archiveDate The date to specify the daily folder.
      */
     fun archiveJsonFilesToDailyFolder(archiveDate: Date) {
-        for (fileName in GL_FILES) {
+        // 20230323: Only copy daily data
+        GlFile.copyFileAbsolute(
+            GlFile.absPath(GL_FILE_DAILY_RECORD),
+            GlFile.absPath(getDailyFolderName(archiveDate), GL_FILE_DAILY_RECORD))
+
+/*        for (fileName in GL_FILES) {
             GlFile.copyFileAbsolute(
                 GlFile.absPath(fileName),
                 GlFile.absPath(getDailyFolderName(archiveDate), fileName))
-        }
+        }*/
     }
 
     /**
