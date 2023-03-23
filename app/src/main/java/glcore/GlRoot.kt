@@ -1,5 +1,7 @@
 package glcore
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import glenv.GlEnv
 import glenv.GlHttpRequest
 import java.io.File
@@ -26,6 +28,7 @@ object GlRoot {
     val glHttpRequest = GlHttpRequest(SERVICE_LOCAL)
     val glServerSession = GlServerSession(glHttpRequest)
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun init(glEnv: GlEnv) : Int {
         if (mInited) {
             return ERROR_INITED
@@ -119,11 +122,13 @@ object GlRoot {
      * @param fileName The relative file name that you want to copy
      * @param archiveDate The date to specify the daily folder.
      */
-    fun archiveRootPathFileToDailyFolder(fileName: String, archiveDate: Date) {
+    fun archiveRootPathFileToDailyFolder(fileName: String, archiveDate: Date): Boolean {
         val srcFile = File(GlFile.glRoot(), fileName)
-        val desFileName = GlFile.joinPaths(GlFile.glRoot(),
-            getDailyFolderName(archiveDate), "${getFileNameTs()}.${srcFile.extension}")
-        GlFile.copyFileAbsolute(srcFile.absolutePath, desFileName)
+        val desFileName = GlFile.joinPaths(
+            GlFile.glRoot(),
+            getDailyFolderName(archiveDate), "${getFileNameTs()}.${srcFile.extension}"
+        )
+        return GlFile.copyFileAbsolute(srcFile.absolutePath, desFileName)
     }
 
     /**
@@ -132,7 +137,7 @@ object GlRoot {
      * @param fileName The relative file name that you want to copy
      * @param offsetDays The date that specified by day offset of today to specify the daily folder.
      */
-    fun archiveRootPathFileToDailyFolder(fileName: String, offsetDays: Int = 0) =
+    fun archiveRootPathFileToDailyFolder(fileName: String, offsetDays: Int = 0) : Boolean =
         archiveRootPathFileToDailyFolder(fileName, GlDateTime.datetime(offsetDays = offsetDays))
 
     private fun ensureStorage() : Boolean {

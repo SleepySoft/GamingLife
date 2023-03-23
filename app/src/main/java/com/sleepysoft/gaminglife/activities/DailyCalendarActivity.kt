@@ -280,7 +280,7 @@ class DailyCalendarActivity
                 mMdViewer.visibility = View.VISIBLE
                 mMdViewer.text = fileText
             }
-            fileName.lowercase().endsWith(".wav") -> {
+            fileName.lowercase().endsWith(".mp3") -> {
                 mSurfaceView.visibility = View.VISIBLE
                 newPlayer(fileAbsPath)
             }

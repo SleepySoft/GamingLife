@@ -98,6 +98,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     // ---------------------------------------------------------------------------------------------
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun doInitialization(useInternalStorage: Boolean) {
         mView = GlView(this)
         setContentView(mView)

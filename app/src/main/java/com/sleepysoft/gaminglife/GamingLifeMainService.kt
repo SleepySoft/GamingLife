@@ -70,12 +70,14 @@ class GamingLifeMainService : Service() {
     @RequiresApi(Build.VERSION_CODES.S)
     fun startRecord(filePath: String) {
         mRecorder?.run { stopRecord() }
-        mRecorder = MediaRecorder(this)
+        mRecorder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            MediaRecorder(this) else MediaRecorder()
         mRecorder?.setAudioSource(MediaRecorder.AudioSource.MIC)
         mRecorder?.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
         mRecorder?.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
         mRecorder?.setOutputFile(filePath)
         mRecorder?.prepare()
+        mRecorder?.start()
     }
 
     fun stopRecord() {
