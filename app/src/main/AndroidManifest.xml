@@ -27,6 +27,20 @@
         android:theme="@style/Theme.GamingLife"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".activities.AdventureTaskListActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
+            android:name=".activities.AdventureTaskEditorActivity"
+            android:exported="false">
+            <meta-data
+                android:name="android.app.lib_name"
+                android:value="" />
+        </activity>
+        <activity
             android:name=".activities.DailyCalendarActivity"
             android:exported="false">
             <meta-data

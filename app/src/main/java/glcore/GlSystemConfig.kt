@@ -106,7 +106,20 @@ class GlSystemConfig() {
         return taskData
     }
 
+    // The design does not work as expect
+
+    fun getPeriodicTasks() : List< PeriodicTask > {
+        val taskDictList = systemConfig.getListDictAny(PATH_SYSTEM_PERIODIC_TASK)
+        val periodicTasks = PeriodicTask.fromAnyStructList(taskDictList)
+        return periodicTasks
+    }
+
     // ========================== Sets ==========================
+
+    fun updatePeriodicTasks(periodicTasks: List< PeriodicTask >) {
+        val taskDictList = IGlDeclare.toAnyStructList(periodicTasks)
+        systemConfig.set(PATH_SYSTEM_PERIODIC_TASK, taskDictList, forceWrite = true)
+    }
 
 /*    @RequiresApi(Build.VERSION_CODES.N)
     fun removeSubTask(glId: String) {
@@ -144,22 +157,6 @@ class GlSystemConfig() {
             field = value
             savePrivateKeyToJson()
         }
-
-/*    var publicKey: String
-        @RequiresApi(Build.VERSION_CODES.O)
-        set(value) {
-            mainKeyPair.publicKeyString = value
-            systemConfig.set(PATH_SYSTEM_PUBLIC_KEY, value)
-        }
-        @RequiresApi(Build.VERSION_CODES.O)
-        get() = mainKeyPair.publicKeyString
-
-    var privateKey: String
-        @RequiresApi(Build.VERSION_CODES.O)
-        set(value) {
-        }
-        @RequiresApi(Build.VERSION_CODES.O)
-        get() = mainKeyPair.privateKeyString*/
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun savePrivateKeyToJson() : Boolean {

@@ -121,10 +121,10 @@ open class TaskRecord : IGlDeclare() {
 
 // -------------------------------------------------------------------------------------------------
 
-open class TaskClass : IGlDeclare() {
+open class PeriodicTask : IGlDeclare() {
     var name: String = ""
     var classification: String = ""
-    var period: UInt = 0u
+    var periodic: UInt = 0u
     var batch: UInt = 0u
     var batchSize: UInt = 0u
     
@@ -133,16 +133,16 @@ open class TaskClass : IGlDeclare() {
     val structDeclare = mapOf< String, KClass< * > >(
         "name" to String::class, 
         "classification" to String::class, 
-        "period" to UInt::class, 
+        "periodic" to UInt::class, 
         "batch" to UInt::class, 
         "batchSize" to UInt::class
     )
     
     companion object {
-        fun fromAnyStructList(anyStructList: List< * >): List< TaskClass > {
-            return mutableListOf< TaskClass >().apply {
+        fun fromAnyStructList(anyStructList: List< * >): List< PeriodicTask > {
+            return mutableListOf< PeriodicTask >().apply {
                 for (anyStruct in anyStructList) {
-                    val data = TaskClass().apply { fromAnyStruct(anyStruct) }
+                    val data = PeriodicTask().apply { fromAnyStruct(anyStruct) }
                     if (data.dataValid) {
                         this.add(data)
                     }
@@ -158,7 +158,7 @@ open class TaskClass : IGlDeclare() {
             
             name = anyStruct.get("name") as String
             classification = anyStruct.get("classification") as String
-            period = anyStruct.get("period") as UInt
+            periodic = anyStruct.get("periodic") as UInt
             batch = anyStruct.get("batch") as UInt
             batchSize = anyStruct.get("batchSize") as UInt
             true
@@ -175,9 +175,64 @@ open class TaskClass : IGlDeclare() {
             
             "name" to name, 
             "classification" to classification, 
-            "period" to period, 
+            "periodic" to periodic, 
             "batch" to batch, 
             "batchSize" to batchSize
+        )
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+open class StageGoal : IGlDeclare() {
+    var periodicTask: String = ""
+    var goalCount: String = ""
+    var continuous: Boolean = false
+    
+    override var uuid: String = randomUUID()
+    
+    val structDeclare = mapOf< String, KClass< * > >(
+        "periodicTask" to String::class, 
+        "goalCount" to String::class, 
+        "continuous" to Boolean::class
+    )
+    
+    companion object {
+        fun fromAnyStructList(anyStructList: List< * >): List< StageGoal > {
+            return mutableListOf< StageGoal >().apply {
+                for (anyStruct in anyStructList) {
+                    val data = StageGoal().apply { fromAnyStruct(anyStruct) }
+                    if (data.dataValid) {
+                        this.add(data)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun fromAnyStruct(data: Any?): Boolean {
+        val anyStruct = castToAnyStruct(data)
+        dataValid = if (checkStruct(anyStruct, structDeclare)) {
+            uuid = (anyStruct.get("uuid") as? String) ?: uuid
+            
+            periodicTask = anyStruct.get("periodicTask") as String
+            goalCount = anyStruct.get("goalCount") as String
+            continuous = anyStruct.get("continuous") as Boolean
+            true
+        }
+        else {
+            false
+        }
+        return dataValid
+    }
+
+    override fun toAnyStruct(): GlAnyStruct {
+        return mutableMapOf(
+            "uuid" to uuid,
+            
+            "periodicTask" to periodicTask, 
+            "goalCount" to goalCount, 
+            "continuous" to continuous
         )
     }
 }

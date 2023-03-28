@@ -9,7 +9,7 @@ import androidx.activity.result.ActivityResult
 import androidx.appcompat.app.AppCompatActivity
 import com.sleepysoft.gaminglife.activities.GLIDManagementActivity
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
-import glcore.GlLog
+import glcore.*
 import java.util.ArrayList
 
 
@@ -71,3 +71,15 @@ fun ActivityResult.requestCode() : Int =
         GlControllerContext.KEY_REQUEST_CODE,
         GlControllerContext.REQUEST_INVALID) ?:
         GlControllerContext.REQUEST_INVALID
+
+
+fun taskGroupIcon(groupID: String) =
+    when (groupID) {
+        GROUP_ID_IDLE -> R.drawable.ic_idle
+        GROUP_ID_ENJOY -> R.drawable.ic_enjoy
+        GROUP_ID_LIFE -> R.drawable.ic_life
+        GROUP_ID_WORK -> R.drawable.ic_work
+        GROUP_ID_PROMOTE -> R.drawable.ic_promote
+        GROUP_ID_CREATE -> R.drawable.ic_create
+        else -> R.drawable.ic_idle
+    }

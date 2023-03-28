@@ -11,11 +11,17 @@
     "startTime": "Long"
   },
 
-  "TaskClass": {
+  "PeriodicTask": {
     "name": "String",
     "classification": "String",
-    "period": "UInt",
+    "periodic": "UInt",
     "batch": "UInt",
     "batchSize": "UInt"
+  },
+
+  "StageGoal": {
+    "periodicTask": "String",
+    "goalCount": "String",
+    "continuous": "Boolean"
   }
 }

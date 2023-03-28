@@ -5,6 +5,7 @@ import traceback
 # TODO: Update this table if any new support type been added.
 
 INIT_VALUE_TABLE = {
+    'Boolean': 'false',
     'String': '""',
     'Float': '0.0f',
     'Long': '0L',

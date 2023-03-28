@@ -154,15 +154,7 @@ class GamingLifeMainService : Service() {
             this.setContentTitle(GlRoot.glService.getCurrentTaskName())
             this.setContentText(GlRoot.glService.getCurrentTaskLastTimeFormatted())
 
-            setSmallIcon(when (GlRoot.glService.getCurrentTaskInfo().groupID) {
-                GROUP_ID_IDLE -> R.drawable.ic_idle
-                GROUP_ID_ENJOY -> R.drawable.ic_enjoy
-                GROUP_ID_LIFE -> R.drawable.ic_life
-                GROUP_ID_WORK -> R.drawable.ic_work
-                GROUP_ID_PROMOTE -> R.drawable.ic_promote
-                GROUP_ID_CREATE -> R.drawable.ic_create
-                else -> R.drawable.ic_idle
-            })
+            setSmallIcon(taskGroupIcon(GlRoot.glService.getCurrentTaskInfo().groupID))
 
             val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             manager.notify(NOTIFICATION_ID_DEFAULT_INT, this.build())
