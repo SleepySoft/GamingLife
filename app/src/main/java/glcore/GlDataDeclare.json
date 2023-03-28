@@ -9,5 +9,13 @@
     "taskID": "String",
     "groupID": "String",
     "startTime": "Long"
+  },
+
+  "TaskClass": {
+    "name": "String",
+    "classification": "String",
+    "period": "UInt",
+    "batch": "UInt",
+    "batchSize": "UInt"
   }
 }

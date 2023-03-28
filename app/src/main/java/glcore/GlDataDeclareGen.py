@@ -8,6 +8,7 @@ INIT_VALUE_TABLE = {
     'String': '""',
     'Float': '0.0f',
     'Long': '0L',
+    'UInt': '0u',
     'Int': '0'
 }
 
@@ -52,7 +53,7 @@ open class <<class_name>> : IGlDeclare() {
     }
 
     override fun fromAnyStruct(data: Any?): Boolean {
-        val anyStruct = toAnyStruct(data)
+        val anyStruct = castToAnyStruct(data)
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             

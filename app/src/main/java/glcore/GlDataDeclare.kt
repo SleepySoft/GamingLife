@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
 open class TaskData : IGlDeclare() {
     var id: String = ""
     var name: String = ""
-    var color: String = COLOR_TASK_IDLE
+    var color: String = ""
     
     override var uuid: String = randomUUID()
     
@@ -115,6 +115,69 @@ open class TaskRecord : IGlDeclare() {
             "taskID" to taskID, 
             "groupID" to groupID, 
             "startTime" to startTime
+        )
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+
+open class TaskClass : IGlDeclare() {
+    var name: String = ""
+    var classification: String = ""
+    var period: UInt = 0u
+    var batch: UInt = 0u
+    var batchSize: UInt = 0u
+    
+    override var uuid: String = randomUUID()
+    
+    val structDeclare = mapOf< String, KClass< * > >(
+        "name" to String::class, 
+        "classification" to String::class, 
+        "period" to UInt::class, 
+        "batch" to UInt::class, 
+        "batchSize" to UInt::class
+    )
+    
+    companion object {
+        fun fromAnyStructList(anyStructList: List< * >): List< TaskClass > {
+            return mutableListOf< TaskClass >().apply {
+                for (anyStruct in anyStructList) {
+                    val data = TaskClass().apply { fromAnyStruct(anyStruct) }
+                    if (data.dataValid) {
+                        this.add(data)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun fromAnyStruct(data: Any?): Boolean {
+        val anyStruct = castToAnyStruct(data)
+        dataValid = if (checkStruct(anyStruct, structDeclare)) {
+            uuid = (anyStruct.get("uuid") as? String) ?: uuid
+            
+            name = anyStruct.get("name") as String
+            classification = anyStruct.get("classification") as String
+            period = anyStruct.get("period") as UInt
+            batch = anyStruct.get("batch") as UInt
+            batchSize = anyStruct.get("batchSize") as UInt
+            true
+        }
+        else {
+            false
+        }
+        return dataValid
+    }
+
+    override fun toAnyStruct(): GlAnyStruct {
+        return mutableMapOf(
+            "uuid" to uuid,
+            
+            "name" to name, 
+            "classification" to classification, 
+            "period" to period, 
+            "batch" to batch, 
+            "batchSize" to batchSize
         )
     }
 }
