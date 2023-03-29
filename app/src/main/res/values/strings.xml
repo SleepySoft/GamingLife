@@ -57,4 +57,35 @@
 
     <string name="VIEW_BACK_TO_TODAY">今日</string>
     <string name="TITLE_STATISTICS">GamingLife (%s)</string>
+
+    <string name="LABEL_TASK_QUANTIFY">量化</string>
+    <string name="LABEL_TASK_SINGLE">单次任务</string>
+    <string name="LABEL_TASK_BATCH">批次任务</string>
+    <string name="LABEL_TASK_NAME">任务名</string>
+    <string name="LABEL_TASK_PERIOD">任务周期</string>
+    <string name="LABEL_TASK_TYPE">任务类型</string>
+    <string name="LABEL_TASK_BATCH_COUNT">批次</string>
+    <string name="LABEL_TASK_BATCH_SIZE">单次数量</string>
+
+    <string-array name="ARRAY_1_TO_10">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+    </string-array>
+
+    <string-array name="TASK_PERIOD_ARRAY">
+        <item>每日</item>
+        <item>每周</item>
+        <item>每两周</item>
+        <item>每月</item>
+        <item>每季度</item>
+    </string-array>
+
 </resources>

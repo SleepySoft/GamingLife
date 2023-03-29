@@ -44,6 +44,8 @@ class AdventureTaskListAdapter(
 }
 
 
+// -------------------------------------------------------------------------------------------------
+
 class AdventureTaskListActivity : AppCompatActivity() {
     lateinit var mTaskRecycleVew: RecyclerView
 

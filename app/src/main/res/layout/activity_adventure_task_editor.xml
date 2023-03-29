@@ -1,9 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".activities.AdventureTaskEditorActivity">
+    android:layout_height="wrap_content">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <TableRow>
+        <TextView
+            android:text="@string/LABEL_TASK_TYPE"
+            android:padding="3dip" />
+        <LinearLayout
+            android:orientation="horizontal">
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_main" />
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_main" />
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_main" />
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_main" />
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_main" />
+            <ImageView
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/ic_main" />
+        </LinearLayout>
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:text="@string/LABEL_TASK_NAME"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:autofillHints="" />
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:text="@string/LABEL_TASK_PERIOD"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Spinner
+            android:entries="@array/TASK_PERIOD_ARRAY" />
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:text="@string/LABEL_TASK_QUANTIFY"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <RadioGroup>
+            <RadioButton
+                android:text="@string/LABEL_TASK_SINGLE"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <RadioButton
+                android:text="@string/LABEL_TASK_BATCH"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </RadioGroup>
+    </TableRow>
+    <TableRow>
+        <TextView
+            android:text="@string/LABEL_TASK_BATCH_COUNT"
+            android:padding="3dip" />
+        <Spinner
+            android:entries="@array/ARRAY_1_TO_10" />
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:text="@string/LABEL_TASK_BATCH_SIZE"
+            android:padding="3dip" />
+
+        <LinearLayout
+            android:orientation="horizontal">
+            <SeekBar
+                android:max="100"
+                android:layout_weight="9"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
+            <EditText
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </TableRow>
+
+</TableLayout>
