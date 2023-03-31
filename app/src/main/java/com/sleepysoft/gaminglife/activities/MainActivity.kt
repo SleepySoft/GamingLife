@@ -27,9 +27,6 @@ import java.lang.ref.WeakReference
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     companion object {
         private const val REQUEST_CODE_PERMISSION = 1024
-        private var mWindowManager: WindowManager? = null
-        @SuppressLint("StaticFieldLeak")
-        private var mFloatingView: View? = null
     }
 
     // private var mInitRound: Int = 0
@@ -74,7 +71,17 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
 
         createFloatWindow()
+
+        val contentView = findViewById<View>(android.R.id.content)
+        contentView?.post {
+            GlFloatViewFactory.moveFloatViewUnderActionBar(this, FloatMenuView::class.java)
+        }
     }
+
+/*    override fun onStart() {
+        super.onStart()
+        GlFloatViewFactory.moveFloatViewUnderActionBar(this, FloatMenuView::class.java)
+    }*/
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

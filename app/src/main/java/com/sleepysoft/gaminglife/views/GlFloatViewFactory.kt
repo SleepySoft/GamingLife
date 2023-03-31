@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +33,11 @@ object GlFloatViewFactory{
     const val SINGLETON_MARK = "SINGLETON"
 
     private val floatViews = mutableMapOf<Class<*>, GlFloatView>()
+
+    fun <T : GlFloatView> getFloatView(clazz: Class<T>) : T? {
+        @Suppress("UNCHECKED_CAST")
+        return floatViews[clazz] as? T
+    }
 
     fun <T : GlFloatView> createFloatView(context: Context, clazz: Class<T>, layout: Int? = null) : T? {
         var instance: GlFloatView? = null
@@ -82,6 +88,53 @@ object GlFloatViewFactory{
             false
         } finally {
 
+        }
+    }
+
+    fun <T : GlFloatView> shiftFloatView(context: Context, clazz: Class<T>,
+                                         left: Int?=null, top: Int?=null,
+                                         right: Int?=null, bottom: Int?=null) {
+        getFloatView(clazz)?.run {
+            val windowManager = context.getSystemService(AppCompatActivity.WINDOW_SERVICE) as WindowManager
+            val layoutParams = this.layoutParams as WindowManager.LayoutParams
+
+            if (left != null) {
+                layoutParams.x = left
+            }
+            if (right != null) {
+                if (left == null) {
+                    layoutParams.x = (y - layoutParams.width).toInt()
+                } else {
+                    layoutParams.width = right - left
+                }
+            }
+
+            if (top != null) {
+                layoutParams.y = top
+            }
+            if (bottom != null) {
+                if (top == null) {
+                    layoutParams.y = bottom - layoutParams.height
+                } else {
+                    layoutParams.width = bottom - top
+                }
+            }
+
+            windowManager.updateViewLayout(this, layoutParams)
+        }
+    }
+
+    fun <T : GlFloatView> moveFloatViewUnderActionBar(refActivity: AppCompatActivity, clazz: Class<T>) {
+        getFloatView(clazz)?.run {
+            // val actionBarView = refActivity.supportActionBar?.customView
+            // val topLimit = actionBarView?.bottom ?: 0
+
+            // val contentView = refActivity.findViewById<View>(android.R.id.content)
+            // val actionBarHeight = contentView?.top ?: 0
+
+            val actionBarHeight = refActivity.supportActionBar?.height ?: 0
+
+            shiftFloatView(refActivity, clazz, top=actionBarHeight)
         }
     }
 }

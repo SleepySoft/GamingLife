@@ -6,56 +6,61 @@
 
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:stretchColumns="*" >
 
         <TableRow>
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="日常"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="15sp"
                 android:color="@android:color/transparent"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text=""
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="15sp"
                 android:color="@android:color/transparent"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text=""
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="15sp"
                 android:color="@android:color/transparent"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text=""
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="15sp"
                 android:color="@android:color/transparent"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="配置"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="15sp"
                 android:color="@android:color/transparent"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
@@ -79,47 +84,52 @@
 
         <TableRow>
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="日常"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="15sp"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text=""
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="15sp"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text=""
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="15sp"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text=""
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="15sp"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="配置"
                 android:textStyle="bold"
-                android:textSize="12sp"
+                android:textSize="15sp"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
         </TableRow>
