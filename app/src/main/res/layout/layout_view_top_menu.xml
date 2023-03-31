@@ -94,8 +94,8 @@
         android:id="@+id/table_sub_menu_daily"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         android:stretchColumns="*" >
 
         <TableRow>
@@ -113,24 +113,26 @@
                 android:padding="5dp" />
 
             <Button
+                android:id="@+id/button_sub_challenge"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text=""
+                android:text="挑战"
                 android:textStyle="bold"
                 android:textSize="15sp"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
             <Button
+                android:id="@+id/button_sub_plan"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text=""
+                android:text="规划"
                 android:textStyle="bold"
                 android:textSize="15sp"
                 android:background="@drawable/button_flat"
@@ -166,8 +168,8 @@
         android:id="@+id/table_sub_menu_config"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="15dp"
-        android:layout_marginRight="15dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         android:visibility="gone"
         android:stretchColumns="*" >
 

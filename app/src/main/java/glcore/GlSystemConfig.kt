@@ -8,6 +8,12 @@ import java.security.MessageDigest
 import java.util.*
 
 
+/**
+ * The thinking of GL serialization mechanism.
+ * 
+ *
+ */
+
 class GlSystemConfig() {
     private val systemConfig: PathDict = PathDict()
 
@@ -26,9 +32,7 @@ class GlSystemConfig() {
     fun rebuildSystemConfig() : Boolean {
         GlLog.i("Rebuild System Config")
         systemConfig.clear()
-        systemConfig.set(PATH_SYSTEM_TASK_GROUP_TOP, TASK_GROUP_TOP_PRESET.toMutableList())
-        systemConfig.set(PATH_SYSTEM_TASK_GROUP_SUB, mutableListOf< TaskData >())
-        systemConfig.set(PATH_SYSTEM_TASK_GROUP_LINK, mutableMapOf< String, String >())
+        rebuildTaskGroup()
         systemConfig.set(PATH_SYSTEM_TASK_RECORD_THRESHOLD, TIME_DEFAULT_TASK_RECORD_THRESHOLD)
         return saveSystemConfig()
     }
@@ -36,23 +40,10 @@ class GlSystemConfig() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun parseSystemConfig(): Boolean {
         return try {
-            val taskTopList = systemConfig.get(PATH_SYSTEM_TASK_GROUP_TOP) as List< * >
-            taskTop = TaskData.fromAnyStructList(taskTopList).toMutableList()
-
-            val taskSubList = systemConfig.get(PATH_SYSTEM_TASK_GROUP_SUB) as List< * >
-            taskSub = TaskData.fromAnyStructList(taskSubList).toMutableList()
-
-            val taskLinkDict = systemConfig.get(PATH_SYSTEM_TASK_GROUP_LINK) as MutableMap< *, * >
-            taskLink = castToStrStruct(taskLinkDict)
-
-            (systemConfig.get(PATH_SYSTEM_PUBLIC_KEY) as String?)?.run {
-                mainKeyPair.publicKeyString = this
-            }
-
-            loadPrivateKeyFromJson()
+            loadTaskGroup() || rebuildTaskGroup()
+            loadGLIDAndKeyPairs()
 
             true
-
         } catch (e: Exception) {
             GlLog.e("Parse System Config FAIL.")
             GlLog.e(e.stackTraceToString())
@@ -69,9 +60,7 @@ class GlSystemConfig() {
         get() = (systemConfig.get(PATH_SYSTEM_TASK_RECORD_THRESHOLD) as? Long) ?: TIME_DEFAULT_TASK_RECORD_THRESHOLD.toLong()
 
 
-    // ------------------------------------------- Task --------------------------------------------
-
-    // ========================== Gets ==========================
+    // ----------------------------------------- Task Group ----------------------------------------
 
     fun getTopTasks(): List< TaskData > = taskTop
 
@@ -106,15 +95,43 @@ class GlSystemConfig() {
         return taskData
     }
 
-    // The design does not work as expect
+    // --------------------------- Private ---------------------------
+
+    private fun loadTaskGroup() : Boolean {
+        return try {
+            val taskTopList = systemConfig.get(PATH_SYSTEM_TASK_GROUP_TOP) as List< * >
+            taskTop = TaskData.fromAnyStructList(taskTopList).toMutableList()
+
+            val taskSubList = systemConfig.get(PATH_SYSTEM_TASK_GROUP_SUB) as List< * >
+            taskSub = TaskData.fromAnyStructList(taskSubList).toMutableList()
+
+            val taskLinkDict = systemConfig.get(PATH_SYSTEM_TASK_GROUP_LINK) as MutableMap< *, * >
+            taskLink = castToStrStruct(taskLinkDict)
+
+            true
+        } catch (e: Exception) {
+            GlLog.e("Load task group fail.")
+            GlLog.e(e.stackTraceToString())
+            false
+        } finally {
+
+        }
+    }
+
+    private fun rebuildTaskGroup() : Boolean {
+        systemConfig.set(PATH_SYSTEM_TASK_GROUP_TOP, TASK_GROUP_TOP_PRESET.toMutableList())
+        systemConfig.set(PATH_SYSTEM_TASK_GROUP_SUB, mutableListOf< TaskData >())
+        systemConfig.set(PATH_SYSTEM_TASK_GROUP_LINK, mutableMapOf< String, String >())
+        return true
+    }
+
+    // --------------------------------------- Periodic Task ---------------------------------------
 
     fun getPeriodicTasks() : List< PeriodicTask > {
         val taskDictList = systemConfig.getListDictAny(PATH_SYSTEM_PERIODIC_TASK)
         val periodicTasks = PeriodicTask.fromAnyStructList(taskDictList)
         return periodicTasks
     }
-
-    // ========================== Sets ==========================
 
     fun updatePeriodicTasks(periodicTasks: List< PeriodicTask >) {
         val taskDictList = IGlDeclare.toAnyStructList(periodicTasks)
@@ -155,11 +172,29 @@ class GlSystemConfig() {
         @RequiresApi(Build.VERSION_CODES.O)
         set(value) {
             field = value
-            savePrivateKeyToJson()
+            savePrivateKeyToSysConfig()
         }
 
+    // -------------------------- Private --------------------------
+
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun savePrivateKeyToJson() : Boolean {
+    private fun loadGLIDAndKeyPairs() : Boolean {
+        (systemConfig.get(PATH_SYSTEM_PUBLIC_KEY) as String?)?.run {
+            mainKeyPair.publicKeyString = this
+        }
+        return loadPrivateKeyFromSysConfig()
+    }
+
+
+    /**
+     * Save the mainKeyPair to System Config
+     * It will re-generate a new local keypair in keystore and encrypt the user private key.
+     *
+     * @return True if everything is OK else false
+     */
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun savePrivateKeyToSysConfig() : Boolean {
         return try {
             val localKeyPair = GlKeyPair().apply {
                 // Create new Key Pair when updating Private Key
@@ -191,8 +226,18 @@ class GlSystemConfig() {
         }
     }
 
+    /**
+     * Load mainKeyPair from System Config.
+     * It will decrypt the key data in config with the local keypair.
+     * Note that if you just copy the json file form other device. The local keypair will not match.
+     *      Which causes the keypair import fail.
+     * If you want to import your keypair. Please use the QR code or exported data.
+     *
+     * @return True if everything is OK else false
+     */
+
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun loadPrivateKeyFromJson() : Boolean {
+    private fun loadPrivateKeyFromSysConfig() : Boolean {
         return try {
             val localKeyPair = GlKeyPair()
             if (!localKeyPair.loadLocalKeyPair(LOCAL_KEYPAIR_MAIN_NAME)) {

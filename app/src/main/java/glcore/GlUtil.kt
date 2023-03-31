@@ -169,7 +169,7 @@ class PathDict(attachMap: MutableMap<String, Any>? = null) {
     fun getListDictAny(key: String): GlAnyStructList {
         val data = get(key) as List< * >?
         @Suppress("UNCHECKED_CAST")
-        return (data ?: listOf< GlAnyStruct >()) as GlAnyStructList
+        return (data ?: mutableListOf< GlAnyStruct >()) as GlAnyStructList
     }
 
     fun remove(key: String) {

@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.TableLayout
 import com.sleepysoft.gaminglife.R
+import com.sleepysoft.gaminglife.activities.AdventureTaskListActivity
 import com.sleepysoft.gaminglife.activities.DailyCalendarActivity
 import com.sleepysoft.gaminglife.activities.GLIDManagementActivity
 import com.sleepysoft.gaminglife.activities.MainActivity
@@ -18,6 +19,8 @@ class FloatMenuView(context: Context) : GlFloatView(context, R.layout.layout_vie
     lateinit var buttonMainDaily: Button
     lateinit var layoutGroupDaily: TableLayout
     lateinit var buttonSubStatistics: Button
+    lateinit var buttonSubChallenge: Button
+    lateinit var buttonSubPlan: Button
 
     lateinit var buttonMainConfig: Button
     lateinit var layoutGroupConfig: TableLayout
@@ -41,6 +44,8 @@ class FloatMenuView(context: Context) : GlFloatView(context, R.layout.layout_vie
         buttonMainDaily = findViewById(R.id.button_main_daily)
         layoutGroupDaily = findViewById(R.id.table_sub_menu_daily)
         buttonSubStatistics = findViewById(R.id.button_sub_statistics)
+        buttonSubChallenge = findViewById(R.id.button_sub_challenge)
+        buttonSubPlan = findViewById(R.id.button_sub_plan)
 
         buttonMainDaily.setOnClickListener {
             hideAllSubMenuExcept(layoutGroupDaily)
@@ -51,6 +56,12 @@ class FloatMenuView(context: Context) : GlFloatView(context, R.layout.layout_vie
 
         buttonSubStatistics.setOnClickListener {
             val intent = Intent(context, DailyCalendarActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+            context.startActivity(intent)
+        }
+
+        buttonSubChallenge.setOnClickListener {
+            val intent = Intent(context, AdventureTaskListActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
             context.startActivity(intent)
         }
