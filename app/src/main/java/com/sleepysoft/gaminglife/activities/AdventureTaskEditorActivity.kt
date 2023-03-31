@@ -24,7 +24,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter*/
 
-        val spinnerPeriod = findViewById<View>(R.id.spinner_task_period) as Spinner
+/*        val spinnerPeriod = findViewById<View>(R.id.spinner_task_period) as Spinner
         with(spinnerPeriod) {
             val adapter = ArrayAdapter.createFromResource(
                 this@AdventureTaskEditorActivity,
@@ -32,6 +32,6 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
             )
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             this.adapter = adapter
-        }
+        }*/
     }
 }

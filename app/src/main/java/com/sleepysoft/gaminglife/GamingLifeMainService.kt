@@ -1,22 +1,17 @@
 package com.sleepysoft.gaminglife
 
+import android.annotation.SuppressLint
 import android.app.*
-import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
+import android.graphics.PixelFormat
 import android.media.MediaRecorder
-import android.os.Build
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
+import android.os.*
+import android.view.*
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import com.sleepysoft.gaminglife.activities.MainActivity
 import glcore.*
-import glcore.GlDateTime
-import glcore.GlLog
-import glcore.GlRoot
 import java.lang.ref.WeakReference
 
 
@@ -34,9 +29,8 @@ class GamingLifeMainService : Service() {
         const val NOTIFICATION_ID_DEFAULT_STR = "GamingLife.Notification.Default"
     }
 
-    override fun onBind(intent: Intent): IBinder {
-        TODO("Return the communication channel to the service.")
-
+    override fun onBind(intent: Intent): IBinder? {
+        return null
     }
 
     override fun onCreate() {

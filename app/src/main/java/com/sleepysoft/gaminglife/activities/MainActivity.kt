@@ -1,17 +1,21 @@
 package com.sleepysoft.gaminglife.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.*
+import android.view.*
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.sleepysoft.gaminglife.*
 import com.sleepysoft.gaminglife.controllers.*
+import com.sleepysoft.gaminglife.views.FloatMenuView
+import com.sleepysoft.gaminglife.views.GlFloatViewFactory
 import com.sleepysoft.gaminglife.views.GlView
 import glcore.*
 import glenv.GlEnv
@@ -23,6 +27,9 @@ import java.lang.ref.WeakReference
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     companion object {
         private const val REQUEST_CODE_PERMISSION = 1024
+        private var mWindowManager: WindowManager? = null
+        @SuppressLint("StaticFieldLeak")
+        private var mFloatingView: View? = null
     }
 
     // private var mInitRound: Int = 0
@@ -65,6 +72,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.RECORD_AUDIO)
         }
+
+        createFloatWindow()
     }
 
     override fun onRequestPermissionsResult(
@@ -75,6 +84,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
         if (requestCode == REQUEST_CODE_PERMISSION) {
             if (perms.contains(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
@@ -85,6 +95,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
         if (requestCode == REQUEST_CODE_PERMISSION) {
             if (perms.contains(Manifest.permission.RECORD_AUDIO)) {
@@ -204,6 +215,11 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
+    @SuppressLint("InflateParams")
+    fun createFloatWindow() {
+        GlFloatViewFactory.createFloatView(this, FloatMenuView::class.java)
+    }
+
 /*    override fun onStart() {
         super.onStart()
 
@@ -227,9 +243,9 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
         else
         {
-            window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD or
-                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+            window.addFlags(WindowManager.FLAG_DISMISS_KEYGUARD or
+                    WindowManager.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.FLAG_TURN_SCREEN_ON)
         }
 
         val canOverlay: Boolean = Settings.canDrawOverlays(this)

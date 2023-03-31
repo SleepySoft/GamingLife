@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:stretchColumns="*" >
+
+        <TableRow>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="日常"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:color="@android:color/transparent"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:color="@android:color/transparent"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:color="@android:color/transparent"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:color="@android:color/transparent"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="配置"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:color="@android:color/transparent"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+        </TableRow>
+    </TableLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#000000"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp" />
+
+    <TableLayout
+        android:id="@+id/table_sub_menu_daily"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:stretchColumns="*" >
+
+        <TableRow>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="日常"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="配置"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+        </TableRow>
+    </TableLayout>
+
+</LinearLayout>
