@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         glInit()
     }*/
 
-    @RequiresApi(Build.VERSION_CODES.O)
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -75,6 +75,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         val contentView = findViewById<View>(android.R.id.content)
         contentView?.post {
             GlFloatViewFactory.moveFloatViewUnderActionBar(this, FloatMenuView::class.java)
+            GlFloatViewFactory.stretchFloatViewAs(
+                this, FloatMenuView::class.java, true, false)
         }
     }
 

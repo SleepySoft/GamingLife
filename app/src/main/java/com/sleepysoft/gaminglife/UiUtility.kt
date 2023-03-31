@@ -1,11 +1,17 @@
 package com.sleepysoft.gaminglife
 
+import android.app.Activity
 import android.widget.Toast
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
+import android.util.DisplayMetrics
+import android.util.Size
+import android.view.WindowInsets
 import androidx.activity.result.ActivityResult
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.sleepysoft.gaminglife.activities.GLIDManagementActivity
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
@@ -37,6 +43,20 @@ fun Intent.putAnyExtra(key: String, data: Any) {
 
 fun Intent.setRequestCode(code: Int) {
     putExtra(GlControllerContext.KEY_REQUEST_CODE, code)
+}
+
+
+@RequiresApi(Build.VERSION_CODES.R)
+fun Activity.getActivitySize() : Size {
+    val display = windowManager.currentWindowMetrics
+    val windowInsets = display.windowInsets
+    val insets = windowInsets.getInsetsIgnoringVisibility(
+        WindowInsets.Type.navigationBars() or WindowInsets.Type.displayCutout())
+    val insetsWidth = insets.right + insets.left
+    val insetsHeight = insets.top + insets.bottom
+    val width = display.bounds.width() - insetsWidth
+    val height = display.bounds.height() - insetsHeight
+    return Size(width, height)
 }
 
 

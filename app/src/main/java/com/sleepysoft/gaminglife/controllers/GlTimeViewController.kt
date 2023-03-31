@@ -30,8 +30,8 @@ class GlTimeViewController(
     private var mSurroundItems = mutableListOf< GraphCircle >()
     private var mSurroundItemText = mutableListOf< AutoFitTextDecorator >()
 
-    private lateinit var mMenuConfigKeyPair: GraphRectangle
-    private lateinit var mMenuDailyStatistics: GraphRectangle
+/*    private lateinit var mMenuConfigKeyPair: GraphRectangle
+    private lateinit var mMenuDailyStatistics: GraphRectangle*/
 
     private var mHandler = Handler(Looper.getMainLooper())
     private val mRunnable = Runnable { polling() }
@@ -68,12 +68,12 @@ class GlTimeViewController(
     // ----------------------- Implements GraphInteractiveListener interface -----------------------
 
     override fun onItemClicked(item: GraphItem) {
-        if (item == mMenuDailyStatistics) {
+/*        if (item == mMenuDailyStatistics) {
             // mCtrlContext.launchActivity(DailyBrowseActivity::class.java)
             mCtrlContext.launchActivity(DailyCalendarActivity::class.java)
         } else if (item == mMenuConfigKeyPair) {
             mCtrlContext.launchActivity(GLIDManagementActivity::class.java)
-        }
+        }*/
     }
 
     override fun onItemDropped(item: GraphItem, intersectItems: List< GraphItem >, pos: PointF) {
@@ -298,7 +298,7 @@ class GlTimeViewController(
 
             // --------------------------------------- Menu ---------------------------------------
 
-            mMenuConfigKeyPair = GraphRectangle().apply {
+/*            mMenuConfigKeyPair = GraphRectangle().apply {
                 this.id = "TimeView.MenuConfigKeyPair"
                 this.graphItemDecorator.add(
                     AutoFitTextDecorator(mCtrlContext, this).apply {
@@ -328,7 +328,7 @@ class GlTimeViewController(
             }
             mMenuDailyStatistics.graphActionDecorator.add(
                 ClickDecorator(mCtrlContext, mMenuDailyStatistics, this))
-            layer.addGraphItem(mMenuDailyStatistics)
+            layer.addGraphItem(mMenuDailyStatistics)*/
 
             // ------------------------------------------------------------------------------------
 
@@ -403,8 +403,8 @@ class GlTimeViewController(
                 item.radius = mSurroundRadius
             }
         }
-        mMenuConfigKeyPair.rect = RectF(200.0f, 0.0f, 400.0f, 100.0f)
-        mMenuDailyStatistics.rect = RectF(0.0f, 0.0f, 200.0f, 100.0f)
+/*        mMenuConfigKeyPair.rect = RectF(200.0f, 0.0f, 400.0f, 100.0f)
+        mMenuDailyStatistics.rect = RectF(0.0f, 0.0f, 200.0f, 100.0f)*/
     }
 
     private fun layoutLandscape(graphView: GraphView) {

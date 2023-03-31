@@ -1,14 +1,19 @@
 package com.sleepysoft.gaminglife.views
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.PixelFormat
+import android.os.Build
+import android.util.DisplayMetrics
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.widget.FrameLayout
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.sleepysoft.gaminglife.R
+import com.sleepysoft.gaminglife.getActivitySize
 
 
 open class GlFloatView: FrameLayout {
@@ -91,36 +96,63 @@ object GlFloatViewFactory{
         }
     }
 
-    fun <T : GlFloatView> shiftFloatView(context: Context, clazz: Class<T>,
-                                         left: Int?=null, top: Int?=null,
-                                         right: Int?=null, bottom: Int?=null) {
+    fun <T : GlFloatView> changeFloatViewLayoutParam(
+        context: Context, clazz: Class<T>, decorator: (lp: WindowManager.LayoutParams) -> Unit) {
+
         getFloatView(clazz)?.run {
             val windowManager = context.getSystemService(AppCompatActivity.WINDOW_SERVICE) as WindowManager
             val layoutParams = this.layoutParams as WindowManager.LayoutParams
 
-            if (left != null) {
-                layoutParams.x = left
-            }
-            if (right != null) {
-                if (left == null) {
-                    layoutParams.x = (y - layoutParams.width).toInt()
-                } else {
-                    layoutParams.width = right - left
-                }
-            }
-
-            if (top != null) {
-                layoutParams.y = top
-            }
-            if (bottom != null) {
-                if (top == null) {
-                    layoutParams.y = bottom - layoutParams.height
-                } else {
-                    layoutParams.width = bottom - top
-                }
-            }
+            decorator(layoutParams)
 
             windowManager.updateViewLayout(this, layoutParams)
+        }
+    }
+
+    fun <T : GlFloatView> shiftFloatView(context: Context, clazz: Class<T>,
+                                         left: Int?=null, top: Int?=null,
+                                         right: Int?=null, bottom: Int?=null) {
+        getFloatView(clazz)?.run {
+            changeFloatViewLayoutParam(context, clazz) { layoutParams->
+                if (left != null) {
+                    layoutParams.x = left
+                }
+                if (right != null) {
+                    if (left == null) {
+                        layoutParams.x = (y - layoutParams.width).toInt()
+                    } else {
+                        layoutParams.width = right - left
+                    }
+                }
+
+                if (top != null) {
+                    layoutParams.y = top
+                }
+                if (bottom != null) {
+                    if (top == null) {
+                        layoutParams.y = bottom - layoutParams.height
+                    } else {
+                        layoutParams.width = bottom - top
+                    }
+                }
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun <T : GlFloatView> stretchFloatViewAs(
+        refActivity: Activity, clazz: Class<T>, horizon: Boolean, vertical: Boolean) {
+        changeFloatViewLayoutParam(refActivity, clazz) { layoutParams->
+
+            val size = refActivity.getActivitySize()
+
+            if (horizon) {
+                layoutParams.width = size.width
+            }
+
+            if (vertical) {
+                layoutParams.height = size.height
+            }
         }
     }
 

@@ -10,7 +10,9 @@
         android:stretchColumns="*" >
 
         <TableRow>
+
             <Button
+                android:id="@+id/button_main_daily"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -55,6 +57,18 @@
                 android:padding="5dp" />
 
             <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:color="@android:color/transparent"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:id="@+id/button_main_config"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -68,11 +82,13 @@
     </TableLayout>
 
     <View
+        android:id="@+id/view_separator"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#000000"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp" />
+        android:visibility="invisible"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="3dp" />
 
     <TableLayout
         android:id="@+id/table_sub_menu_daily"
@@ -84,16 +100,21 @@
 
         <TableRow>
             <Button
+                android:id="@+id/button_sub_statistics"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="日常"
+                android:text="记录"
                 android:textStyle="bold"
                 android:textSize="15sp"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
             <Button
+                android:minWidth="0dp"
+                android:minHeight="0dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -104,6 +125,8 @@
                 android:padding="5dp" />
 
             <Button
+                android:minWidth="0dp"
+                android:minHeight="0dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -114,6 +137,8 @@
                 android:padding="5dp" />
 
             <Button
+                android:minWidth="0dp"
+                android:minHeight="0dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -124,10 +149,85 @@
                 android:padding="5dp" />
 
             <Button
+                android:minWidth="0dp"
+                android:minHeight="0dp"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="配置"
+                android:text=""
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+        </TableRow>
+    </TableLayout>
+
+    <TableLayout
+        android:id="@+id/table_sub_menu_config"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:visibility="gone"
+        android:stretchColumns="*" >
+
+        <TableRow>
+            <Button
+                android:id="@+id/table_sub_glid"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="GLID"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:background="@drawable/button_flat"
+                android:padding="5dp" />
+
+            <Button
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text=""
                 android:textStyle="bold"
                 android:textSize="15sp"
                 android:background="@drawable/button_flat"
