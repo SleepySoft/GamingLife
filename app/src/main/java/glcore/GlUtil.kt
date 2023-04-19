@@ -1,5 +1,6 @@
 package glcore
 
+import com.sleepysoft.gaminglife.views.GlFloatView
 import java.io.*
 import java.util.*
 import java.util.zip.DeflaterOutputStream
@@ -285,6 +286,27 @@ fun loadPathDict(fileName: String, pathDict: PathDict) : Boolean {
     pathDict.attach(GlJson.deserializeAnyDict(fileContent))
     pathDict.hasUpdate = false
     return fileContent.isNotEmpty()
+}
+
+
+class GlDataListEditor<T : IGlDeclare>(
+    val pathDict: PathDict, val dataPath: String) {
+
+    fun getGlDataList() : MutableList< T > {
+        return mutableListOf()
+    }
+
+    fun upsertGlData(glData: T) {
+
+    }
+
+    fun removeGlData(uuid: String) {
+
+    }
+
+    fun glDataExits(uuid: String) : Boolean {
+        return false
+    }
 }
 
 
