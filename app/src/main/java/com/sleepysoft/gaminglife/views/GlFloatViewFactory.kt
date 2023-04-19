@@ -16,6 +16,8 @@ import com.sleepysoft.gaminglife.R
 import com.sleepysoft.gaminglife.getActivitySize
 
 
+// Or use DialogFragment?
+
 open class GlFloatView: FrameLayout {
     constructor(context: Context) : super(context)
 
@@ -24,7 +26,7 @@ open class GlFloatView: FrameLayout {
     }
 
     fun inflate(layout: Int) {
-        LayoutInflater.from(context).inflate(R.layout.layout_view_top_menu, this)
+        LayoutInflater.from(context).inflate(layout, this)
         initLayout()
     }
 
@@ -35,7 +37,7 @@ open class GlFloatView: FrameLayout {
 
 
 object GlFloatViewFactory{
-    const val SINGLETON_MARK = "SINGLETON"
+    private const val SINGLETON_MARK = "SINGLETON"
 
     private val floatViews = mutableMapOf<Class<*>, GlFloatView>()
 
@@ -94,6 +96,16 @@ object GlFloatViewFactory{
         } finally {
 
         }
+    }
+
+    fun <T : GlFloatView> showFloatView(clazz: Class<T>) {
+        val instance = floatViews[clazz]
+        instance?.run { visibility = View.VISIBLE }
+    }
+
+    fun <T : GlFloatView> hideFloatView(clazz: Class<T>) {
+        val instance = floatViews[clazz]
+        instance?.run { visibility = View.GONE }
     }
 
     fun <T : GlFloatView> changeFloatViewLayoutParam(

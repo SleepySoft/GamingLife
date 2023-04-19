@@ -14,6 +14,10 @@ import com.sleepysoft.gaminglife.activities.MainActivity
 
 class FloatMenuView(context: Context) : GlFloatView(context, R.layout.layout_view_top_menu) {
 
+    companion object {
+        const val SINGLETON = true
+    }
+
     lateinit var viewSeparator: View
 
     lateinit var buttonMainDaily: Button

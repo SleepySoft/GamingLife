@@ -30,6 +30,7 @@
                 android:text=""
                 android:textStyle="bold"
                 android:textSize="15sp"
+                android:visibility="invisible"
                 android:color="@android:color/transparent"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
@@ -41,6 +42,7 @@
                 android:text=""
                 android:textStyle="bold"
                 android:textSize="15sp"
+                android:visibility="invisible"
                 android:color="@android:color/transparent"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
@@ -52,6 +54,7 @@
                 android:text=""
                 android:textStyle="bold"
                 android:textSize="15sp"
+                android:visibility="invisible"
                 android:color="@android:color/transparent"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
@@ -63,6 +66,7 @@
                 android:text=""
                 android:textStyle="bold"
                 android:textSize="15sp"
+                android:visibility="invisible"
                 android:color="@android:color/transparent"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
@@ -147,6 +151,7 @@
                 android:text=""
                 android:textStyle="bold"
                 android:textSize="15sp"
+                android:visibility="invisible"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
@@ -159,6 +164,7 @@
                 android:text=""
                 android:textStyle="bold"
                 android:textSize="15sp"
+                android:visibility="invisible"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
         </TableRow>
@@ -170,7 +176,7 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
-        android:visibility="gone"
+        android:visibility="invisible"
         android:stretchColumns="*" >
 
         <TableRow>
@@ -196,6 +202,7 @@
                 android:text=""
                 android:textStyle="bold"
                 android:textSize="15sp"
+                android:visibility="invisible"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
@@ -208,6 +215,7 @@
                 android:text=""
                 android:textStyle="bold"
                 android:textSize="15sp"
+                android:visibility="invisible"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
@@ -220,6 +228,7 @@
                 android:text=""
                 android:textStyle="bold"
                 android:textSize="15sp"
+                android:visibility="invisible"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
 
@@ -232,6 +241,7 @@
                 android:text=""
                 android:textStyle="bold"
                 android:textSize="15sp"
+                android:visibility="invisible"
                 android:background="@drawable/button_flat"
                 android:padding="5dp" />
         </TableRow>

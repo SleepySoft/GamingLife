@@ -1,5 +1,6 @@
 package com.sleepysoft.gaminglife.activities
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +19,7 @@ import com.sleepysoft.gaminglife.R
 import com.sleepysoft.gaminglife.taskGroupIcon
 import glcore.GlRoot
 import glcore.PeriodicTask
+import glenv.GlApp
 
 
 class AdventureTaskListAdapter(
@@ -27,17 +30,19 @@ class AdventureTaskListAdapter(
         val iconTask: ImageView = view.findViewById(R.id.icon_task_icon)
         val textTaskName: TextView = view.findViewById(R.id.text_task_name)
         val textTaskPeriod: TextView = view.findViewById(R.id.text_task_period)
-        val buttonEdit: TextView = view.findViewById(R.id.button_edit)
-        val buttonDelete: TextView = view.findViewById(R.id.button_delete)
+        val buttonEdit: ImageButton = view.findViewById(R.id.button_edit)
+        val buttonDelete: ImageButton = view.findViewById(R.id.button_delete)
         val layoutEdit: LinearLayout = view.findViewById(R.id.layout_edit)
 
-        val buttonNewCreate: ImageButton = view.findViewById(R.id.button_new_create)
+/*        val buttonNewCreate: ImageButton = view.findViewById(R.id.button_new_create)
         val buttonNewPromote: ImageButton = view.findViewById(R.id.button_new_promote)
         val buttonNewWork: ImageButton = view.findViewById(R.id.button_new_work)
         val buttonNewEnjoy: ImageButton = view.findViewById(R.id.button_new_enjoy)
         val buttonNewLife: ImageButton = view.findViewById(R.id.button_new_life)
-        val buttonNewIdle: ImageButton = view.findViewById(R.id.button_new_idle)
+        val buttonNewIdle: ImageButton = view.findViewById(R.id.button_new_idle)*/
+
         val layoutCreate: LinearLayout = view.findViewById(R.id.layout_create)
+        val buttonCreate: ImageButton = view.findViewById(R.id.button_create)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) : ViewHolder {
@@ -50,21 +55,31 @@ class AdventureTaskListAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (position < mPeriodicTasks.size) {
             val ptask = mPeriodicTasks[position]
+
             holder.iconTask.setImageResource(taskGroupIcon(ptask.classification))
             holder.textTaskName.text = ptask.name
             holder.textTaskPeriod.text = ptask.periodic.toString()
 
             holder.buttonEdit.setOnClickListener {
-
+                val intent = Intent(GlApp.applicationContext(), AdventureTaskEditorActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("edit", ptask.uuid)
+                ActivityCompat.startActivity(GlApp.applicationContext(), intent, null)
             }
 
             holder.buttonDelete.setOnClickListener {
 
             }
-
         } else {
             holder.layoutEdit.visibility = View.GONE
             holder.layoutCreate.visibility = View.VISIBLE
+
+            holder.buttonCreate.setOnClickListener {
+                val intent = Intent(GlApp.applicationContext(), AdventureTaskEditorActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.putExtra("edit", "")
+                ActivityCompat.startActivity(GlApp.applicationContext(), intent, null)
+            }
         }
     }
 
