@@ -88,4 +88,13 @@
         <item>每季度</item>
     </string-array>
 
+    <string-array name="TASK_GROUP_ARRAY">
+        <item>创作</item>
+        <item>提升</item>
+        <item>生活</item>
+        <item>放松</item>
+        <item>玩乐</item>
+        <item>工作</item>
+    </string-array>
+
 </resources>

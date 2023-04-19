@@ -77,13 +77,13 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             GlFloatViewFactory.hideFloatView(FloatMenuView::class.java)
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
             GlFloatViewFactory.showFloatView(FloatMenuView::class.java)
-        }
 
-        val contentView = findViewById<View>(android.R.id.content)
-        contentView?.post {
-            GlFloatViewFactory.moveFloatViewUnderActionBar(this, FloatMenuView::class.java)
-            GlFloatViewFactory.stretchFloatViewAs(
-                this, FloatMenuView::class.java, true, false)
+            val contentView = findViewById<View>(android.R.id.content)
+            contentView?.post {
+                GlFloatViewFactory.moveFloatViewUnderActionBar(this, FloatMenuView::class.java)
+                GlFloatViewFactory.stretchFloatViewAs(
+                    this, FloatMenuView::class.java, true, false)
+            }
         }
     }
 
