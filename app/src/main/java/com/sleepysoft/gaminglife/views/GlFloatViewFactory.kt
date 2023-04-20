@@ -31,9 +31,9 @@ open class GlFloatView: FrameLayout {
     }
 
     override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        GlFloatViewFactory.removeFloatView(this)
         println("=> Detached from window")
+        GlFloatViewFactory.unregisterFloatView(this)
+        super.onDetachedFromWindow()
     }
 
     fun inflate(layout: Int) {
@@ -57,14 +57,8 @@ object GlFloatViewFactory{
         return floatViews[clazz] as? T
     }
 
-    fun removeFloatView(instance: GlFloatView) {
-        floatViews.filterValues { it != instance }
-    }
-
-    fun <T : GlFloatView> removeFloatView(clazz: Class<T>) {
-        if (clazz in floatViews.keys) {
-            floatViews.remove(clazz)
-        }
+    fun unregisterFloatView(instance: GlFloatView) {
+        floatViews.entries.removeIf { it.value == instance }
     }
 
     fun <T : GlFloatView> createFloatView(context: Context, clazz: Class<T>, layout: Int? = null) : T? {
