@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             // GlFloatViewFactory.hideFloatView(FloatMenuView::class.java)
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
 
-            createFloatWindow()
+            GlFloatViewFactory.createFloatView(this, FloatMenuView::class.java)
             // GlFloatViewFactory.showFloatView(FloatMenuView::class.java)
 
             val contentView = findViewById<View>(android.R.id.content)
@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
 /*    override fun onStart() {
         super.onStart()
-        GlFloatViewFactory.moveFloatViewUnderActionBar(this, FloatMenuView::class.java)
+        // GlFloatViewFactory.moveFloatViewUnderActionBar(this, FloatMenuView::class.java)
     }
 
     override fun onResume() {
@@ -233,11 +233,6 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
             @Suppress("DEPRECATION")
             getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
-    }
-
-    @SuppressLint("InflateParams")
-    fun createFloatWindow() {
-        GlFloatViewFactory.createFloatView(this, FloatMenuView::class.java)
     }
 
 /*    override fun onStart() {
