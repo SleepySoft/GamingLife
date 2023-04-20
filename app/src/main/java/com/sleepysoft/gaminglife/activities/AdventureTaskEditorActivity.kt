@@ -52,8 +52,6 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adventure_task_editor)
 
-        val uuid = intent.getStringExtra("edit")
-
         spinnerTaskGroup = findViewById(R.id.spinner_task_group)
         textTaskName = findViewById(R.id.text_task_name)
 
@@ -80,11 +78,32 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
 
         // ----------------------------------------------------------
 
-        seekTimeEstimation.progress = 1
-        editTimeEstimation.setText("5")
+        val uuid = intent.getStringExtra("edit")
+        val data: PeriodicTask? =
+            if (uuid?.isNotEmpty() == true) {
+                GlRoot.systemConfig.periodicTaskEditor.getGlData(uuid)
+            } else {
+                null
+            }
 
-        seekBatchSize.progress = 1
-        editBatchSize.setText("1")
+        if (data != null) {
+
+            this.name = taskName
+            this.classification = SPINNER_TASK_GROUP_ORDER[taskGroup]
+            this.periodic = SPINNER_TASK_PERIOD_ORDER[taskPeriod].toUInt()
+            this.timeQuality = taskTimeQuality.toUInt()
+            this.timeEstimation = timeEstimation.toUInt()
+            this.batch = (if (single) 1 else batchSpinner + 1).toUInt()
+            this.batchSize =  batchSize.toUInt()
+        } else {
+            seekTimeEstimation.progress = 1
+            editTimeEstimation.setText("5")
+
+            seekBatchSize.progress = 1
+            editBatchSize.setText("1")
+        }
+
+        // ----------------------------------------------------------
 
         buttonOk.setOnClickListener {
             val taskGroup = spinnerTaskGroup.selectedItemPosition
