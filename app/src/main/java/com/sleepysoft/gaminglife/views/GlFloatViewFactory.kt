@@ -25,6 +25,17 @@ open class GlFloatView: FrameLayout {
         inflate(layout)
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        println("=> Attached to window")
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        GlFloatViewFactory.removeFloatView(this)
+        println("=> Detached from window")
+    }
+
     fun inflate(layout: Int) {
         LayoutInflater.from(context).inflate(layout, this)
         initLayout()
@@ -46,6 +57,16 @@ object GlFloatViewFactory{
         return floatViews[clazz] as? T
     }
 
+    fun removeFloatView(instance: GlFloatView) {
+        floatViews.filterValues { it != instance }
+    }
+
+    fun <T : GlFloatView> removeFloatView(clazz: Class<T>) {
+        if (clazz in floatViews.keys) {
+            floatViews.remove(clazz)
+        }
+    }
+
     fun <T : GlFloatView> createFloatView(context: Context, clazz: Class<T>, layout: Int? = null) : T? {
         var instance: GlFloatView? = null
 
@@ -64,7 +85,6 @@ object GlFloatViewFactory{
             }
 
             instance?.run {
-                floatViews[clazz] = instance
                 val windowManager = context.getSystemService(AppCompatActivity.WINDOW_SERVICE) as WindowManager
                 val layoutParams = WindowManager.LayoutParams(
                     WindowManager.LayoutParams.WRAP_CONTENT,
@@ -80,6 +100,10 @@ object GlFloatViewFactory{
                     gravity = Gravity.START or Gravity.TOP
                 }
                 windowManager.addView(instance, layoutParams)
+
+                if (checkHasStaticMember(clazz, SINGLETON_MARK)) {
+                    floatViews[clazz] = instance
+                }
             }
         }
 

@@ -70,13 +70,13 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 Manifest.permission.RECORD_AUDIO)
         }
 
-        createFloatWindow()
-
         val orientation = resources.configuration.orientation
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            GlFloatViewFactory.hideFloatView(FloatMenuView::class.java)
+            // GlFloatViewFactory.hideFloatView(FloatMenuView::class.java)
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            GlFloatViewFactory.showFloatView(FloatMenuView::class.java)
+
+            createFloatWindow()
+            // GlFloatViewFactory.showFloatView(FloatMenuView::class.java)
 
             val contentView = findViewById<View>(android.R.id.content)
             contentView?.post {
@@ -90,6 +90,10 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 /*    override fun onStart() {
         super.onStart()
         GlFloatViewFactory.moveFloatViewUnderActionBar(this, FloatMenuView::class.java)
+    }
+
+    override fun onResume() {
+        super.onResume()
     }*/
 
     override fun onRequestPermissionsResult(
