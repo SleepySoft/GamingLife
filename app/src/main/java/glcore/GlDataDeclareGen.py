@@ -41,10 +41,12 @@ open class <<class_name>> : IGlDeclare() {
     )
     
     companion object {
+        fun factory(): <<class_name>> = <<class_name>>()
+        
         fun fromAnyStructList(anyStructList: List< * >): List< <<class_name>> > {
             return mutableListOf< <<class_name>> >().apply {
                 for (anyStruct in anyStructList) {
-                    val data = <<class_name>>().apply { fromAnyStruct(anyStruct) }
+                    val data = factory().apply { fromAnyStruct(anyStruct) }
                     if (data.dataValid) {
                         this.add(data)
                     }

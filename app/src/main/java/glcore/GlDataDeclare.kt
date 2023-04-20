@@ -25,10 +25,12 @@ open class TaskData : IGlDeclare() {
     )
     
     companion object {
+        fun factory(): TaskData = TaskData()
+        
         fun fromAnyStructList(anyStructList: List< * >): List< TaskData > {
             return mutableListOf< TaskData >().apply {
                 for (anyStruct in anyStructList) {
-                    val data = TaskData().apply { fromAnyStruct(anyStruct) }
+                    val data = factory().apply { fromAnyStruct(anyStruct) }
                     if (data.dataValid) {
                         this.add(data)
                     }
@@ -80,10 +82,12 @@ open class TaskRecord : IGlDeclare() {
     )
     
     companion object {
+        fun factory(): TaskRecord = TaskRecord()
+        
         fun fromAnyStructList(anyStructList: List< * >): List< TaskRecord > {
             return mutableListOf< TaskRecord >().apply {
                 for (anyStruct in anyStructList) {
-                    val data = TaskRecord().apply { fromAnyStruct(anyStruct) }
+                    val data = factory().apply { fromAnyStruct(anyStruct) }
                     if (data.dataValid) {
                         this.add(data)
                     }
@@ -139,10 +143,12 @@ open class PeriodicTask : IGlDeclare() {
     )
     
     companion object {
+        fun factory(): PeriodicTask = PeriodicTask()
+        
         fun fromAnyStructList(anyStructList: List< * >): List< PeriodicTask > {
             return mutableListOf< PeriodicTask >().apply {
                 for (anyStruct in anyStructList) {
-                    val data = PeriodicTask().apply { fromAnyStruct(anyStruct) }
+                    val data = factory().apply { fromAnyStruct(anyStruct) }
                     if (data.dataValid) {
                         this.add(data)
                     }
@@ -198,10 +204,12 @@ open class StageGoal : IGlDeclare() {
     )
     
     companion object {
+        fun factory(): StageGoal = StageGoal()
+        
         fun fromAnyStructList(anyStructList: List< * >): List< StageGoal > {
             return mutableListOf< StageGoal >().apply {
                 for (anyStruct in anyStructList) {
-                    val data = StageGoal().apply { fromAnyStruct(anyStruct) }
+                    val data = factory().apply { fromAnyStruct(anyStruct) }
                     if (data.dataValid) {
                         this.add(data)
                     }

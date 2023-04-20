@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.sleepysoft.gaminglife.R
+import com.sleepysoft.gaminglife.finishWithResult
 import glcore.*
 
 
@@ -46,6 +47,8 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adventure_task_editor)
 
+        val uuid = intent.getStringExtra("edit")
+
         spinnerTaskGroup = findViewById(R.id.spinner_task_group)
         textTaskName = findViewById(R.id.text_task_name)
 
@@ -58,6 +61,9 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
 
         seekBatchSize = findViewById(R.id.seek_batch_size)
         editBatchSize = findViewById(R.id.edit_batch_size)
+
+        seekBatchSize.progress = 1
+        editBatchSize.setText("1")
 
         buttonOk = findViewById(R.id.button_ok)
         buttonCancel = findViewById(R.id.button_cancel)
@@ -72,7 +78,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
             val batchSizeText = editBatchSize.text.toString()
             val batchSize = batchSizeText.toIntOrNull() ?: 0
 
-            if (single && (batchSize <= 0)) {
+            if (batch && (batchSize <= 0)) {
                 // 弹出错误框
                 AlertDialog.Builder(this)
                     .setTitle("错误")
@@ -87,11 +93,14 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
                     this.batch = (if (single) 1 else batchSpinner + 1).toUInt()
                     this.batchSize =  batchSize.toUInt()
                 }
+                GlRoot.systemConfig.periodicTaskEditor.upsertGlData(periodicTaskData)
+
+                finishWithResult(mapOf(), true)
             }
         }
 
         buttonCancel.setOnClickListener {
-            finish()
+            finishWithResult(mapOf(), false)
         }
 
         seekBatchSize.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {

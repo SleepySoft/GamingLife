@@ -21,6 +21,9 @@ class GlSystemConfig() {
     private var taskSub: MutableList< TaskData > = mutableListOf()
     private var taskLink: MutableMap< String , String > = mutableMapOf()        // sub id: top id
 
+    var periodicTaskEditor: GlDataListEditor< PeriodicTask > =
+        GlDataListEditor(systemConfig, PATH_SYSTEM_PERIODIC_TASK) { PeriodicTask.factory() }
+
     // ---------------------------------------------------------------------------------------------
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -123,19 +126,6 @@ class GlSystemConfig() {
         systemConfig.set(PATH_SYSTEM_TASK_GROUP_SUB, mutableListOf< TaskData >())
         systemConfig.set(PATH_SYSTEM_TASK_GROUP_LINK, mutableMapOf< String, String >())
         return true
-    }
-
-    // --------------------------------------- Periodic Task ---------------------------------------
-
-    fun getPeriodicTasks() : List< PeriodicTask > {
-        val taskDictList = systemConfig.getListDictAny(PATH_SYSTEM_PERIODIC_TASK)
-        val periodicTasks = PeriodicTask.fromAnyStructList(taskDictList)
-        return periodicTasks
-    }
-
-    fun updatePeriodicTasks(periodicTasks: List< PeriodicTask >) {
-        val taskDictList = IGlDeclare.toAnyStructList(periodicTasks)
-        systemConfig.set(PATH_SYSTEM_PERIODIC_TASK, taskDictList, forceWrite = true)
     }
 
 /*    @RequiresApi(Build.VERSION_CODES.N)
