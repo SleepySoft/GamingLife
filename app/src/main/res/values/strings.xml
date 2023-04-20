@@ -63,6 +63,8 @@
     <string name="LABEL_TASK_BATCH">批次任务</string>
     <string name="LABEL_TASK_NAME">任务名</string>
     <string name="LABEL_TASK_PERIOD">任务周期</string>
+    <string name="LABEL_TASK_TIME_REQUIREMENT">时间质量</string>
+    <string name="LABEL_TASK_TIME_ESTIMATION">时间长度</string>
     <string name="LABEL_TASK_TYPE">任务类型</string>
     <string name="LABEL_TASK_BATCH_COUNT">批次</string>
     <string name="LABEL_TASK_BATCH_SIZE">单次数量</string>
@@ -88,13 +90,22 @@
         <item>每季度</item>
     </string-array>
 
-    <string-array name="TASK_GROUP_ARRAY">
+    <string-array name="TASK_GROUP_DISPLAY_ARRAY">
         <item>创作</item>
         <item>提升</item>
         <item>生活</item>
         <item>放松</item>
         <item>玩乐</item>
         <item>工作</item>
+    </string-array>
+
+    <string-array name="TASK_TIME_QUALITY_ARRAY">
+        <item>不指定</item>
+        <item>碎片时间</item>
+        <item>忙里偷闲的时间</item>
+        <item>低质量的时间段</item>
+        <item>中等质量的时间段</item>
+        <item>完全属于自己的时间段</item>
     </string-array>
 
 </resources>

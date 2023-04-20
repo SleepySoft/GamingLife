@@ -20,7 +20,7 @@
             android:layout_marginBottom="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:entries="@array/TASK_GROUP_ARRAY" />
+            android:entries="@array/TASK_GROUP_DISPLAY_ARRAY" />
     </TableRow>
 
     <TableRow>
@@ -55,6 +55,54 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:entries="@array/TASK_PERIOD_ARRAY" />
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:text="@string/LABEL_TASK_TIME_REQUIREMENT"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="3dip" />
+        <Spinner
+            android:id="@+id/spinner_task_time_quality"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/TASK_TIME_QUALITY_ARRAY" />
+    </TableRow>
+
+    <TableRow>
+        <TextView
+            android:text="@string/LABEL_TASK_TIME_ESTIMATION"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="3dip" />
+
+        <LinearLayout
+            android:orientation="horizontal">
+            <SeekBar
+                android:id="@+id/seek_time_estimation"
+                android:max="48"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_weight="9"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
+            <EditText
+                android:id="@+id/edit_time_estimation"
+                android:inputType="number"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:autofillHints="5" />
+        </LinearLayout>
     </TableRow>
 
     <TableRow>
@@ -121,11 +169,13 @@
                 android:layout_height="match_parent" />
             <EditText
                 android:id="@+id/edit_batch_size"
+                android:inputType="number"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:layout_weight="1"
                 android:layout_width="0dp"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:autofillHints="1" />
         </LinearLayout>
     </TableRow>
 

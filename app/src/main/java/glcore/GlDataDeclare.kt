@@ -129,6 +129,8 @@ open class PeriodicTask : IGlDeclare() {
     var name: String = ""
     var classification: String = ""
     var periodic: UInt = 0u
+    var timeQuality: UInt = 0u
+    var timeEstimation: UInt = 0u
     var batch: UInt = 0u
     var batchSize: UInt = 0u
     
@@ -138,6 +140,8 @@ open class PeriodicTask : IGlDeclare() {
         "name" to String::class, 
         "classification" to String::class, 
         "periodic" to UInt::class, 
+        "timeQuality" to UInt::class, 
+        "timeEstimation" to UInt::class, 
         "batch" to UInt::class, 
         "batchSize" to UInt::class
     )
@@ -165,6 +169,8 @@ open class PeriodicTask : IGlDeclare() {
             name = anyStruct.get("name") as String
             classification = anyStruct.get("classification") as String
             periodic = anyStruct.get("periodic") as UInt
+            timeQuality = anyStruct.get("timeQuality") as UInt
+            timeEstimation = anyStruct.get("timeEstimation") as UInt
             batch = anyStruct.get("batch") as UInt
             batchSize = anyStruct.get("batchSize") as UInt
             true
@@ -182,6 +188,8 @@ open class PeriodicTask : IGlDeclare() {
             "name" to name, 
             "classification" to classification, 
             "periodic" to periodic, 
+            "timeQuality" to timeQuality, 
+            "timeEstimation" to timeEstimation, 
             "batch" to batch, 
             "batchSize" to batchSize
         )

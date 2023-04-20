@@ -32,6 +32,11 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
 
     private lateinit var spinnerTaskPeriod: Spinner
 
+    private lateinit var spinnerTaskTimeQuality: Spinner
+
+    private lateinit var seekTimeEstimation: SeekBar
+    private lateinit var editTimeEstimation: EditText
+
     private lateinit var radioSingle: RadioButton
     private lateinit var radioBatch: RadioButton
 
@@ -54,6 +59,11 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
 
         spinnerTaskPeriod = findViewById(R.id.spinner_task_period)
 
+        spinnerTaskTimeQuality = findViewById(R.id.spinner_task_time_quality)
+
+        seekTimeEstimation = findViewById(R.id.seek_time_estimation)
+        editTimeEstimation = findViewById(R.id.edit_time_estimation)
+
         radioSingle = findViewById(R.id.radio_single)
         radioBatch = findViewById(R.id.radio_batch)
 
@@ -68,10 +78,23 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
         buttonOk = findViewById(R.id.button_ok)
         buttonCancel = findViewById(R.id.button_cancel)
 
+        // ----------------------------------------------------------
+
+        seekTimeEstimation.progress = 1
+        editTimeEstimation.setText("5")
+
+        seekBatchSize.progress = 1
+        editBatchSize.setText("1")
+
         buttonOk.setOnClickListener {
             val taskGroup = spinnerTaskGroup.selectedItemPosition
             val taskName = textTaskName.text.toString()
             val taskPeriod = spinnerTaskPeriod.selectedItemPosition
+
+            val taskTimeQuality = spinnerTaskTimeQuality.selectedItemPosition
+            val timeEstimationText = editTimeEstimation.text.toString()
+            val timeEstimation = timeEstimationText.toIntOrNull() ?: 0
+
             val single = radioSingle.isChecked
             val batch = radioBatch.isChecked
             val batchSpinner = spinnerBatch.selectedItemPosition
@@ -90,6 +113,8 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
                     this.name = taskName
                     this.classification = SPINNER_TASK_GROUP_ORDER[taskGroup]
                     this.periodic = SPINNER_TASK_PERIOD_ORDER[taskPeriod].toUInt()
+                    this.timeQuality = taskTimeQuality.toUInt()
+                    this.timeEstimation = timeEstimation.toUInt()
                     this.batch = (if (single) 1 else batchSpinner + 1).toUInt()
                     this.batchSize =  batchSize.toUInt()
                 }
@@ -124,6 +149,30 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
                 val progress = s.toString().toIntOrNull()
                 if (progress != null) {
                     seekBatchSize.progress = progress
+                }
+            }
+        })
+
+        seekTimeEstimation.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val value = progress * 5
+                editTimeEstimation.setText(value.toString())
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        editTimeEstimation.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                val value = s.toString().toIntOrNull()
+                if (value != null && value >= 0) {
+                    seekTimeEstimation.progress = value / 5
                 }
             }
         })
