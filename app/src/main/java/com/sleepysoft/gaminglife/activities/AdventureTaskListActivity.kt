@@ -1,6 +1,7 @@
 package com.sleepysoft.gaminglife.activities
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -27,7 +28,7 @@ import glenv.GlApp
 
 
 class AdventureTaskListAdapter(
-    private val onEditAction: (uuid: String) -> Unit) :
+    private val onEditAction: (action: String, uuid: String) -> Unit) :
     RecyclerView.Adapter< AdventureTaskListAdapter.ViewHolder >() {
 
     private var mPeriodicTasks: List< PeriodicTask > =
@@ -46,9 +47,9 @@ class AdventureTaskListAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) : ViewHolder {
+        refreshPeriodicTaskList()
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.layout_task_list_item, parent, false)
-
         return ViewHolder(view)
     }
 
@@ -62,13 +63,11 @@ class AdventureTaskListAdapter(
             holder.textTaskPeriod.text = ptask.periodic.toString()
 
             holder.buttonEdit.setOnClickListener {
-                onEditAction(ptask.uuid)
+                onEditAction("edit", ptask.uuid)
             }
 
             holder.buttonDelete.setOnClickListener {
-                GlRoot.systemConfig.periodicTaskEditor.removeGlData(ptask.uuid)
-                refreshPeriodicTaskList()
-                notifyDataSetChanged()
+                onEditAction("delete", ptask.uuid)
             }
 
             holder.layoutEdit.visibility = View.VISIBLE
@@ -78,7 +77,7 @@ class AdventureTaskListAdapter(
             holder.layoutCreate.visibility = View.VISIBLE
 
             holder.buttonCreate.setOnClickListener {
-                onEditAction("")
+                onEditAction("create", "")
             }
         }
     }
@@ -102,8 +101,7 @@ class AdventureTaskListActivity : AppCompatActivity() {
     val startForResult = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
         if (result.resultCode() == GlControllerContext.RESULT_ACCEPTED) {
-            recycleViewAdapter.refreshPeriodicTaskList()
-            recycleViewAdapter.notifyDataSetChanged()
+            onDataChanged()
         }
     }
 
@@ -111,10 +109,25 @@ class AdventureTaskListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adventure_task_list)
 
-        recycleViewAdapter = AdventureTaskListAdapter { uuid: String ->
-            val intent = Intent(GlApp.applicationContext(), AdventureTaskEditorActivity::class.java)
-            intent.putExtra("edit", uuid)
-            startForResult.launch(intent)
+        recycleViewAdapter = AdventureTaskListAdapter { action: String, uuid: String ->
+            if (action == "delete") {
+                val builder = AlertDialog.Builder(this)
+                builder.setMessage("是否确定删除此项任务？\n\n任务删除后无法恢复")
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.BUTTON_YES) { _, _ ->
+                        GlRoot.systemConfig.periodicTaskEditor.removeGlData(uuid)
+                        onDataChanged()
+                    }
+                    .setNegativeButton(R.string.BUTTON_NO) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                val alert = builder.create()
+                alert.show()
+            } else {
+                val intent = Intent(GlApp.applicationContext(), AdventureTaskEditorActivity::class.java)
+                intent.putExtra("edit", uuid)
+                startForResult.launch(intent)
+            }
         }
 
         mTaskRecycleVew = findViewById(R.id.recycler_view_task)
@@ -126,5 +139,12 @@ class AdventureTaskListActivity : AppCompatActivity() {
                 DividerItemDecoration.HORIZONTAL
             )
         )
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun onDataChanged() {
+        GlRoot.systemConfig.saveSystemConfig()
+        recycleViewAdapter.refreshPeriodicTaskList()
+        recycleViewAdapter.notifyDataSetChanged()
     }
 }

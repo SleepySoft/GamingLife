@@ -58,6 +58,37 @@ const val GROUP_ID_PROMOTE  = "1841978a-3adc-413a-a9ae-a34e019205f8"
 const val GROUP_ID_CREATE = "fa94a546-beeb-4570-b266-c066a4a31233"
 
 
+// --------------------------------------------- Enum ----------------------------------------------
+
+const val ENUM_TASK_PERIOD_DAILY = 1
+const val ENUM_TASK_PERIOD_WEEKLY = 7
+const val ENUM_TASK_PERIOD_BI_WEEK = 14
+const val ENUM_TASK_PERIOD_MONTHLY = 30
+const val ENUM_TASK_PERIOD_QUARTERLY = 90
+
+val ENUM_TASK_PERIOD_ARRAY = listOf(
+    ENUM_TASK_PERIOD_DAILY,
+    ENUM_TASK_PERIOD_WEEKLY,
+    ENUM_TASK_PERIOD_BI_WEEK,
+    ENUM_TASK_PERIOD_MONTHLY,
+    ENUM_TASK_PERIOD_QUARTERLY)
+
+const val ENUM_TIME_QUALITY_UNSPECIFIED = 0     // 不指定
+const val ENUM_TIME_QUALITY_FRAGMENTED = 1      // 碎片时间
+const val ENUM_TIME_QUALITY_STOLEN = 2          // 忙里偷闲的时间
+const val ENUM_TIME_QUALITY_LOW = 3             // 低质量的时间段
+const val ENUM_TIME_QUALITY_MEDIUM = 4          // 中等质量的时间段
+const val ENUM_TIME_QUALITY_HIGH = 5            // 完余属于自己的时间段
+
+val ENUM_TIME_QUALITY_ARRAY = listOf(
+    ENUM_TIME_QUALITY_UNSPECIFIED,
+    ENUM_TIME_QUALITY_FRAGMENTED,
+    ENUM_TIME_QUALITY_STOLEN,
+    ENUM_TIME_QUALITY_LOW,
+    ENUM_TIME_QUALITY_MEDIUM,
+    ENUM_TIME_QUALITY_HIGH
+)
+
 // --------------------------------------------- Color ---------------------------------------------
 
 // https://material.io/design/color/the-color-system.html#tools-for-picking-colors

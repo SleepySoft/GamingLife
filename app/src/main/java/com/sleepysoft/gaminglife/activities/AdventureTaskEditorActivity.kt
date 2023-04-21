@@ -8,24 +8,13 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.sleepysoft.gaminglife.R
+import com.sleepysoft.gaminglife.UiRes
 import com.sleepysoft.gaminglife.finishWithResult
 import glcore.*
 
 
 class AdventureTaskEditorActivity : AppCompatActivity() {
-
-    companion object {
-        val SPINNER_TASK_GROUP_ORDER = listOf(
-            GROUP_ID_CREATE,
-            GROUP_ID_PROMOTE,
-            GROUP_ID_LIFE,
-            GROUP_ID_IDLE,
-            GROUP_ID_ENJOY,
-            GROUP_ID_WORK
-        )
-
-        val SPINNER_TASK_PERIOD_ORDER = listOf(1, 7, 14, 30, 90)
-    }
+    private var editDatUuid = ""
 
     private lateinit var spinnerTaskGroup: Spinner
     private lateinit var textTaskName: EditText
@@ -78,67 +67,13 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
 
         // ----------------------------------------------------------
 
-        val uuid = intent.getStringExtra("edit")
-        val data: PeriodicTask? =
-            if (uuid?.isNotEmpty() == true) {
-                GlRoot.systemConfig.periodicTaskEditor.getGlData(uuid)
-            } else {
-                null
-            }
-
-        if (data != null) {
-
-            this.name = taskName
-            this.classification = SPINNER_TASK_GROUP_ORDER[taskGroup]
-            this.periodic = SPINNER_TASK_PERIOD_ORDER[taskPeriod].toUInt()
-            this.timeQuality = taskTimeQuality.toUInt()
-            this.timeEstimation = timeEstimation.toUInt()
-            this.batch = (if (single) 1 else batchSpinner + 1).toUInt()
-            this.batchSize =  batchSize.toUInt()
-        } else {
-            seekTimeEstimation.progress = 1
-            editTimeEstimation.setText("5")
-
-            seekBatchSize.progress = 1
-            editBatchSize.setText("1")
-        }
-
-        // ----------------------------------------------------------
-
         buttonOk.setOnClickListener {
-            val taskGroup = spinnerTaskGroup.selectedItemPosition
-            val taskName = textTaskName.text.toString()
-            val taskPeriod = spinnerTaskPeriod.selectedItemPosition
-
-            val taskTimeQuality = spinnerTaskTimeQuality.selectedItemPosition
-            val timeEstimationText = editTimeEstimation.text.toString()
-            val timeEstimation = timeEstimationText.toIntOrNull() ?: 0
-
-            val single = radioSingle.isChecked
-            val batch = radioBatch.isChecked
-            val batchSpinner = spinnerBatch.selectedItemPosition
-            val batchSizeText = editBatchSize.text.toString()
-            val batchSize = batchSizeText.toIntOrNull() ?: 0
-
-            if (batch && (batchSize <= 0)) {
-                // 弹出错误框
-                AlertDialog.Builder(this)
-                    .setTitle("错误")
-                    .setMessage("批批次必须为大于0的整数")
-                    .setPositiveButton("确定", null)
-                    .show()
-            } else {
-                val periodicTaskData = PeriodicTask().apply {
-                    this.name = taskName
-                    this.classification = SPINNER_TASK_GROUP_ORDER[taskGroup]
-                    this.periodic = SPINNER_TASK_PERIOD_ORDER[taskPeriod].toUInt()
-                    this.timeQuality = taskTimeQuality.toUInt()
-                    this.timeEstimation = timeEstimation.toUInt()
-                    this.batch = (if (single) 1 else batchSpinner + 1).toUInt()
-                    this.batchSize =  batchSize.toUInt()
+            val periodicTaskData = ui_to_data()
+            if (periodicTaskData.uuid.isNotEmpty()) {
+                if (editDatUuid.isNotEmpty()) {
+                    periodicTaskData.uuid = editDatUuid
                 }
                 GlRoot.systemConfig.periodicTaskEditor.upsertGlData(periodicTaskData)
-
                 finishWithResult(mapOf(), true)
             }
         }
@@ -195,5 +130,98 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
                 }
             }
         })
+
+        // ----------------------------------------------------------
+
+        editDatUuid = intent.getStringExtra("edit") ?: ""
+        val data: PeriodicTask? =
+            if (editDatUuid.isNotEmpty()) {
+                GlRoot.systemConfig.periodicTaskEditor.getGlData(editDatUuid)
+            } else {
+                null
+            }
+
+        if (data != null) {
+            data_to_ui(data)
+        } else {
+            editTimeEstimation.setText("5")
+            editBatchSize.setText("1")
+        }
+    }
+
+    // ----------------------- Thanks new bing -----------------------
+
+    fun ui_to_data(): PeriodicTask {
+        val taskGroup = spinnerTaskGroup.selectedItemPosition
+        val taskGroupId = UiRes.TASK_GROUP_SELECT_ORDER[taskGroup]
+
+        val taskName = textTaskName.text.toString().trim()
+        val taskPeriod = spinnerTaskPeriod.selectedItemPosition
+
+        val taskTimeQuality = spinnerTaskTimeQuality.selectedItemPosition
+        val timeEstimationText = editTimeEstimation.text.toString()
+        val timeEstimation = timeEstimationText.toIntOrNull() ?: 5
+
+        val single = radioSingle.isChecked
+        val batch = radioBatch.isChecked
+
+        val batchSpinner = spinnerBatch.selectedItemPosition
+        val batchSizeText = editBatchSize.text.toString()
+        val batchSize = batchSizeText.toIntOrNull() ?: 1
+
+        if (taskName.isEmpty()) {
+            AlertDialog.Builder(this)
+                .setTitle("错误")
+                .setMessage("必须填写任务名")
+                .setPositiveButton("确定", null)
+                .show()
+            return PeriodicTask().apply { uuid = "" }
+        }
+
+        if (batch && (batchSize <= 0)) {
+            // 弹出错误框
+            AlertDialog.Builder(this)
+                .setTitle("错误")
+                .setMessage("批批次必须为大于0的整数")
+                .setPositiveButton("确定", null)
+                .show()
+            return PeriodicTask().apply { uuid = "" }
+        }
+
+        return PeriodicTask().apply {
+            this.name = taskName
+            this.classification = taskGroupId
+            this.periodic = ENUM_TASK_PERIOD_ARRAY[taskPeriod]
+            this.timeQuality = ENUM_TIME_QUALITY_ARRAY[taskTimeQuality]
+            this.timeEstimation = timeEstimation
+            this.batch = (if (single) 1 else batchSpinner + 1)
+            this.batchSize = batchSize
+        }
+    }
+
+    fun data_to_ui(task: PeriodicTask) {
+        val taskGroupIndex = UiRes.TASK_GROUP_SELECT_ORDER.indexOf(task.classification)
+        spinnerTaskGroup.setSelection(taskGroupIndex)
+
+        textTaskName.setText(task.name)
+
+        val taskPeriodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(task.periodic.toInt())
+        spinnerTaskPeriod.setSelection(taskPeriodIndex)
+
+        val timeQualityIndex = ENUM_TIME_QUALITY_ARRAY.indexOf(task.timeQuality.toInt())
+        spinnerTaskTimeQuality.setSelection(timeQualityIndex)
+
+        editTimeEstimation.setText(task.timeEstimation.toString())
+
+        if (task.batch == 1) {
+            radioSingle.isChecked = true
+            radioBatch.isChecked = false
+        } else {
+            radioSingle.isChecked = false
+            radioBatch.isChecked = true
+            spinnerBatch.setSelection((task.batch - 1).toInt())
+        }
+
+        editBatchSize.setText(task.batchSize.toString())
     }
 }

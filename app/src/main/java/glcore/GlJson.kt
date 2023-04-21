@@ -5,6 +5,9 @@ package glcore
 // I don't use existing JSon library because they are not fit for this program  //
 // ============================================================================ //
 
+// 在 Kotlin 中，除了 UInt 之外，还有 UByte、UShort 和 ULong 这些无符号整数类型也不是 Number 类型的子类。
+//这些无符号整数类型不是 Number 类型的子类，是因为它们是在 Kotlin 1.3 版本中引入的实验性功能，目前仍处于实验阶段。
+// 由于这些类型与其他数字类型在语义和行为上有所不同，因此它们并未被设计为 Number 类型的子类。
 
 object GlJson {
 
@@ -56,7 +59,10 @@ object GlJson {
             is Boolean -> wrapQuotes(if (data) "true" else "false")
             is List< * > -> serializeList(data)
             is Map< *, * > -> serializeDict(data)
-            else -> wrapQuotes("null")
+            else -> {
+                println("Warning: Unknown data type in serialize any")
+                wrapQuotes("null")
+            }
         }
     }
 

@@ -128,22 +128,22 @@ open class TaskRecord : IGlDeclare() {
 open class PeriodicTask : IGlDeclare() {
     var name: String = ""
     var classification: String = ""
-    var periodic: UInt = 0u
-    var timeQuality: UInt = 0u
-    var timeEstimation: UInt = 0u
-    var batch: UInt = 0u
-    var batchSize: UInt = 0u
+    var periodic: Int = 0
+    var timeQuality: Int = 0
+    var timeEstimation: Int = 0
+    var batch: Int = 0
+    var batchSize: Int = 0
     
     override var uuid: String = randomUUID()
     
     val structDeclare = mapOf< String, KClass< * > >(
         "name" to String::class, 
         "classification" to String::class, 
-        "periodic" to UInt::class, 
-        "timeQuality" to UInt::class, 
-        "timeEstimation" to UInt::class, 
-        "batch" to UInt::class, 
-        "batchSize" to UInt::class
+        "periodic" to Int::class, 
+        "timeQuality" to Int::class, 
+        "timeEstimation" to Int::class, 
+        "batch" to Int::class, 
+        "batchSize" to Int::class
     )
     
     companion object {
@@ -168,11 +168,11 @@ open class PeriodicTask : IGlDeclare() {
             
             name = anyStruct.get("name") as String
             classification = anyStruct.get("classification") as String
-            periodic = anyStruct.get("periodic") as UInt
-            timeQuality = anyStruct.get("timeQuality") as UInt
-            timeEstimation = anyStruct.get("timeEstimation") as UInt
-            batch = anyStruct.get("batch") as UInt
-            batchSize = anyStruct.get("batchSize") as UInt
+            periodic = anyStruct.get("periodic") as Int
+            timeQuality = anyStruct.get("timeQuality") as Int
+            timeEstimation = anyStruct.get("timeEstimation") as Int
+            batch = anyStruct.get("batch") as Int
+            batchSize = anyStruct.get("batchSize") as Int
             true
         }
         else {

@@ -14,11 +14,11 @@
   "PeriodicTask": {
     "name": "String",
     "classification": "String",
-    "periodic": "UInt",
-    "timeQuality": "UInt",
-    "timeEstimation": "UInt",
-    "batch": "UInt",
-    "batchSize": "UInt"
+    "periodic": "Int",
+    "timeQuality": "Int",
+    "timeEstimation": "Int",
+    "batch": "Int",
+    "batchSize": "Int"
   },
 
   "StageGoal": {
