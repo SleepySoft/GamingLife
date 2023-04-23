@@ -7,21 +7,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sleepysoft.gaminglife.R
+import com.sleepysoft.gaminglife.UiRes
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import com.sleepysoft.gaminglife.resultCode
 import com.sleepysoft.gaminglife.taskGroupIcon
+import glcore.ENUM_TASK_PERIOD_ARRAY
 import glcore.GlRoot
 import glcore.PeriodicTask
 import glenv.GlApp
@@ -38,6 +36,7 @@ class AdventureTaskListAdapter(
         val iconTask: ImageView = view.findViewById(R.id.icon_task_icon)
         val textTaskName: TextView = view.findViewById(R.id.text_task_name)
         val textTaskPeriod: TextView = view.findViewById(R.id.text_task_period)
+        val textTaskBatch: TextView = view.findViewById(R.id.text_task_batch)
         val buttonEdit: ImageButton = view.findViewById(R.id.button_edit)
         val buttonDelete: ImageButton = view.findViewById(R.id.button_delete)
         val layoutEdit: LinearLayout = view.findViewById(R.id.layout_edit)
@@ -53,14 +52,29 @@ class AdventureTaskListAdapter(
         return ViewHolder(view)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    @SuppressLint("NotifyDataSetChanged", "SetTextI18n")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         if (position < mPeriodicTasks.size) {
             val ptask = mPeriodicTasks[position]
 
             holder.iconTask.setImageResource(taskGroupIcon(ptask.classification))
             holder.textTaskName.text = ptask.name
-            holder.textTaskPeriod.text = ptask.periodic.toString()
+
+            val periodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(ptask.periodic)
+            holder.textTaskPeriod.text = UiRes.stringArray("TASK_PERIOD_ARRAY")[periodIndex]
+
+            if ((ptask.batch > 1) && (ptask.batchSize > 1)) {
+                holder.textTaskBatch.text = "%dx%d".format(ptask.batch, ptask.batchSize)
+                holder.textTaskBatch.visibility = View.VISIBLE
+                val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
+                layoutParams.removeRule(RelativeLayout.CENTER_IN_PARENT)
+                holder.textTaskPeriod.setLayoutParams(layoutParams)
+            } else {
+                holder.textTaskBatch.visibility = View.GONE
+                val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
+                layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
+                holder.textTaskPeriod.setLayoutParams(layoutParams)
+            }
 
             holder.buttonEdit.setOnClickListener {
                 onEditAction("edit", ptask.uuid)

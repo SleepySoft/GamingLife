@@ -205,10 +205,10 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
 
         textTaskName.setText(task.name)
 
-        val taskPeriodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(task.periodic.toInt())
+        val taskPeriodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(task.periodic)
         spinnerTaskPeriod.setSelection(taskPeriodIndex)
 
-        val timeQualityIndex = ENUM_TIME_QUALITY_ARRAY.indexOf(task.timeQuality.toInt())
+        val timeQualityIndex = ENUM_TIME_QUALITY_ARRAY.indexOf(task.timeQuality)
         spinnerTaskTimeQuality.setSelection(timeQualityIndex)
 
         editTimeEstimation.setText(task.timeEstimation.toString())
@@ -219,7 +219,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
         } else {
             radioSingle.isChecked = false
             radioBatch.isChecked = true
-            spinnerBatch.setSelection((task.batch - 1).toInt())
+            spinnerBatch.setSelection(task.batch - 1)
         }
 
         editBatchSize.setText(task.batchSize.toString())
