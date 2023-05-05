@@ -303,28 +303,23 @@ class GlDataListEditor<T : IGlDeclare>(
     }
 
     fun getGlDataList() : MutableList< T > {
-        syncUp()
         return dataList
     }
 
     fun upsertGlData(glData: T) {
-        syncUp()
         val index = dataList.indexOfFirst { it.uuid == glData.uuid }
         if (index != -1) {
             dataList[index] = glData
         } else {
             dataList.add(glData)
         }
-        syncDown()
     }
 
     fun removeGlData(uuid: String) {
-        syncUp()
         dataList.removeAll { it.uuid == uuid }
-        syncDown()
     }
 
-    private fun syncUp() {
+    fun syncUp() {
         val anyStructList = pathDict.getListDictAny(dataPath)
         dataList = mutableListOf< T >().apply {
             for (anyStruct in anyStructList) {
@@ -336,7 +331,7 @@ class GlDataListEditor<T : IGlDeclare>(
         }
     }
 
-    private fun syncDown() {
+    fun syncDown() {
         val anyStructList = IGlDeclare.toAnyStructList(dataList)
         pathDict.set(dataPath, anyStructList, forceWrite = true)
     }

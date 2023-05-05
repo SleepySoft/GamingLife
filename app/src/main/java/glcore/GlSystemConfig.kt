@@ -11,7 +11,11 @@ import java.util.*
 /**
  * The thinking of GL serialization mechanism.
  * 
- *
+ *    Use GlDataListEditor to cache manage list content uniformly.
+ *    After the PathDict data is updated,
+ *      call syncUp() to cache the data structured in the Editor;
+ *      call syncDown() to write the data back to PathDict before saving.
+ *    Do not update data outside the Editor, otherwise the data will be out of sync and cause data loss
  */
 
 class GlSystemConfig() {
@@ -27,10 +31,18 @@ class GlSystemConfig() {
     // ---------------------------------------------------------------------------------------------
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun loadSystemConfig() : Boolean =
-        loadPathDict(GL_FILE_SYSTEM_CONFIG, systemConfig) && parseSystemConfig()
+    fun loadSystemConfig() : Boolean {
+        val result = loadPathDict(GL_FILE_SYSTEM_CONFIG, systemConfig) && parseSystemConfig()
+        if (result) {
+            periodicTaskEditor.syncUp()
+        }
+        return result
+    }
 
-    fun saveSystemConfig() : Boolean = savePathDict(GL_FILE_SYSTEM_CONFIG, systemConfig)
+    fun saveSystemConfig() : Boolean {
+        periodicTaskEditor.syncDown()
+        return savePathDict(GL_FILE_SYSTEM_CONFIG, systemConfig)
+    }
 
     fun rebuildSystemConfig() : Boolean {
         GlLog.i("Rebuild System Config")
