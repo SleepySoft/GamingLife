@@ -110,6 +110,62 @@ class AutoFitTextDecorator(context: GraphContext, decoratedItem: GraphItem)
     }
 }
 
+// ---------------------------------------------------------------------------------------------
+
+class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
+                          var corner: Int = CORNER_UPPER_RIGHT,
+                          var ratio: Float = 0.2f)
+    : GraphItemDecorator(context, decoratedItem) {
+
+    companion object {
+        const val CORNER_UPPER_LEFT = 0b00
+        const val CORNER_UPPER_RIGHT = 0b01
+        const val CORNER_BOTTOM_LEFT = 0b10
+        const val CORNER_BOTTOM_RIGHT = 0b11
+    }
+
+    var mainText: String = ""
+        set(value) {
+            field = value
+        }
+    var fontPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    var textArea: Rect = Rect()
+        private set
+
+    var textBound: Rect = Rect()
+        private set
+
+    private var textPrev: String = ""
+
+    override fun paintAfterGraph(canvas: Canvas) {
+        val boundRect = decoratedItem.boundRect()
+        val textWidth = boundRect.width() * ratio
+        val textHeight = boundRect.height() * ratio
+        val textRect = RectF()
+
+        textRect.left = if (corner and 0b01 == 0) boundRect.left else boundRect.right - textWidth
+        textRect.top = if (corner and 0b10 == 0) boundRect.top else boundRect.bottom - textHeight
+        textRect.right = textRect.left + textWidth
+        textRect.bottom = textRect.top + textHeight
+
+        if ((textArea != textRect.toRect()) || (textPrev.length != mainText.length)) {
+            textPrev = mainText
+            textArea = textRect.toRect()
+            textBound = decoratedItem.boundRect().apply { inflate(0.7f) }.toRect()
+            val fontSize = calculateFontSize(textBound, textArea, mainText)
+            fontPaint.textSize = fontSize
+        }
+        val halfTextHeight: Float = textBound.height() / 2.0f
+        canvas.drawText(
+            mainText,
+            textArea.centerX().toFloat(),
+            (textArea.centerY().toFloat() + halfTextHeight),
+            fontPaint
+        )
+    }
+}
+
 
 // ---------------------------------------------------------------------------------------------
 
