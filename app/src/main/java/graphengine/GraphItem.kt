@@ -22,6 +22,7 @@ abstract class GraphItem(
     var itemLayer: GraphLayer? = null
     var shapePaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
+    var service: GraphService = GraphService()
     val graphItemDecorator = mutableListOf< GraphItemDecorator >()
     val graphActionDecorator = mutableListOf< GraphActionDecorator >()
 

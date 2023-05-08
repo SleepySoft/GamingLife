@@ -74,8 +74,18 @@ open class GraphActionDecorator(context: GraphContext, decoratedItem: GraphItem)
 
 // ---------------------------------------------------------------------------------------------
 
-class AutoFitTextDecorator(context: GraphContext, decoratedItem: GraphItem)
-    : GraphItemDecorator(context, decoratedItem) {
+class AutoFitTextDecorator(context: GraphContext, decoratedItem: GraphItem) :
+    GraphItemDecorator(context, decoratedItem) {
+
+    init {
+        decoratedItem.service.serviceRegister("AutoFitTextDecorator") {
+            return@serviceRegister this
+        }
+        decoratedItem.service.serviceRegister("AutoFitTextDecorator.setText") { text: String ->
+            mainText = text
+            return@serviceRegister true
+        }
+    }
 
     var mainText: String = ""
         set(value) {
@@ -116,6 +126,16 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
                           var corner: Int = CORNER_UPPER_RIGHT,
                           var ratio: Float = 0.2f)
     : GraphItemDecorator(context, decoratedItem) {
+
+    init {
+        decoratedItem.service.serviceRegister("CornerTextDecorator") {
+            return@serviceRegister this
+        }
+        decoratedItem.service.serviceRegister("CornerTextDecorator.setText") { text: String ->
+            mainText = text
+            return@serviceRegister true
+        }
+    }
 
     companion object {
         const val CORNER_UPPER_LEFT = 0b00
