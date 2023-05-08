@@ -3,9 +3,9 @@ import kotlin.reflect.KClass
 
 // --------------------------------------------- Path ----------------------------------------------
 
-const val PATH_SYSTEM_TASK_GROUP_TOP = "/Config/Meta/TaskGroup/TopGroups"           // v as STRUCT_DEC_TASK_DATA
-const val PATH_SYSTEM_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"           // v as STRUCT_DEC_TASK_DATA
-const val PATH_SYSTEM_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"         // v as MutableMap< String, String >
+const val PATH_SYSTEM_TASK_GROUP_TOP_LEVEL = "/Config/Meta/TaskGroup/TopGroups"           // v as STRUCT_DEC_TASK_DATA
+// const val PATH_SYSTEM_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"           // v as STRUCT_DEC_TASK_DATA
+// const val PATH_SYSTEM_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"         // v as MutableMap< String, String >
 
 const val PATH_SYSTEM_TASK_RECORD_THRESHOLD = "/Config/User/TaskRecordThreshold"    // v as Long, in ms
 const val PATH_SYSTEM_PRIVATE_KEY_HASH = "/Config/User/Key/Account/PrivateKeyHash"

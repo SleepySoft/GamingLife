@@ -57,7 +57,7 @@ class AdventureTaskListAdapter(
         if (position < mPeriodicTasks.size) {
             val ptask = mPeriodicTasks[position]
 
-            holder.iconTask.setImageResource(taskGroupIcon(ptask.classification))
+            holder.iconTask.setImageResource(taskGroupIcon(ptask.group))
             holder.textTaskName.text = ptask.name
 
             val periodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(ptask.periodic)

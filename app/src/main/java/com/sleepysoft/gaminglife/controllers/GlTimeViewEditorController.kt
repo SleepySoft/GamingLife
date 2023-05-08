@@ -157,7 +157,7 @@ class GlTimeViewEditorController(
     }
 
     private fun buildTaskGroupGraph(layer: GraphLayer) {
-        val taskGroupTop = GlRoot.systemConfig.getTopTasks()
+        val taskGroupTop = GlRoot.systemConfig.taskGroupEditor.getGlDataList()
         for (taskData in taskGroupTop) {
             val item = GraphCircle().apply {
                 this.id = "TimeView.${taskData.id}"
@@ -461,7 +461,7 @@ class GlTimeViewEditorController(
     private fun buildPaintForTask(task: TaskRecord) =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor(
-                GlRoot.systemConfig.getTaskData(task.groupID)?.color ?: COLOR_DAILY_BAR_BASE)
+                GlRoot.systemConfig.taskGroupEditor.getGlData(task.groupID)?.color ?: COLOR_DAILY_BAR_BASE)
             this.style = Paint.Style.FILL
         }
 }

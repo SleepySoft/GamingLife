@@ -172,7 +172,7 @@ class GlDailyStatisticsController(
     }
 
     private fun updateStatistics() {
-        val taskDatas = GlRoot.systemConfig.getTopTasks()
+        val taskDatas = GlRoot.systemConfig.taskGroupEditor.getGlDataList()
         val groupStatistics = mDailyRecord.groupStatistics()
 
         multipleStatisticsDecorator.barDatas.clear()
@@ -197,7 +197,7 @@ class GlDailyStatisticsController(
     private fun buildPaintForTask(task: TaskRecord) =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor(
-                GlRoot.systemConfig.getTaskData(task.groupID)?.color ?: COLOR_DAILY_BAR_BASE)
+                GlRoot.systemConfig.taskGroupEditor.getGlData(task.groupID)?.color ?: COLOR_DAILY_BAR_BASE)
             this.style = Paint.Style.FILL
         }
 }

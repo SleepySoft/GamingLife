@@ -27,7 +27,7 @@ fun verifyJsonText(text: String) {
 
 fun generateSystemGeneralPathDict() : PathDict {
     return PathDict().apply {
-        this.set(PATH_SYSTEM_TASK_GROUP_TOP, TASK_GROUP_TOP_PRESET)
+        this.set(PATH_SYSTEM_TASK_GROUP_TOP_LEVEL, TASK_GROUP_TOP_PRESET)
         this.set(PATH_RUNTIME_CURRENT_TASK, TASK_RECORD_TEMPLATE)
         this.set(
             PATH_DAILY_TASK_RECORD, listOf(

@@ -238,8 +238,8 @@ class GlTimeViewController(
 
             val currentTaskInfo = GlRoot.glService.getCurrentTaskInfo()
             val currentTaskGroupData: TaskData =
-                GlRoot.systemConfig.getTopTaskData(currentTaskInfo.groupID) ?:
-                GlRoot.systemConfig.getTopTaskData(GROUP_ID_IDLE) ?: TaskData()
+                GlRoot.systemConfig.taskGroupEditor.getGlData(currentTaskInfo.groupID) ?:
+                GlRoot.systemConfig.taskGroupEditor.getGlData(GROUP_ID_IDLE) ?: TaskData()
 
             mCenterItem = GraphCircle().apply {
                 this.id = "TimeView.CenterItem"
@@ -270,8 +270,10 @@ class GlTimeViewController(
             mCenterItem.graphActionDecorator.add(LongPressProgressDecorator(
                 mCtrlContext, mCenterItem, mProgressItem, 30.0f, this).apply { init() })
 
-            val taskGroupTop = GlRoot.systemConfig.getTopTasks()
+            val taskGroupTop = GlRoot.systemConfig.taskGroupEditor.getGlDataList()
             for (taskData in taskGroupTop) {
+                val ptasks = GlService().getGroupPeriodicTasks(taskData.id)
+
                 val item = GraphCircle().apply {
                     this.id = "TimeView.${taskData.id}"
                     this.itemData = taskData
@@ -288,7 +290,14 @@ class GlTimeViewController(
                         this.textAlign = Paint.Align.CENTER
                     }
                 }
+
+                val cornerText = CornerTextDecorator(mCtrlContext, item,
+                    CornerTextDecorator.CORNER_UPPER_RIGHT, 0.3f).apply {
+                    this.mainText = ptasks.size.toString()
+                }
+
                 item.graphItemDecorator.add(text)
+                item.graphItemDecorator.add(cornerText)
                 item.graphActionDecorator.add(InteractiveDecorator(mCtrlContext, item, true, this))
                 layer.addGraphItem(item)
 

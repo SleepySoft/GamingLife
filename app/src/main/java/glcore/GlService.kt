@@ -11,7 +11,7 @@ class GlService {
         checkSettleDailyData()
         GlRoot.dailyRecord.addTask(TaskRecord().apply {
             taskID = taskData.id
-            groupID = GlRoot.systemConfig.getTopGroupOfTask(taskData.id)
+            groupID = taskData.id       //GlRoot.systemConfig.getTopGroupOfTask(taskData.id)
             startTime = GlDateTime.datetime().time
         })
         GlRoot.dailyRecord.saveDailyRecord()
@@ -28,7 +28,7 @@ class GlService {
 
     fun getCurrentTaskName() : String {
         val taskRecord = getCurrentTaskInfo()
-        val taskData = GlRoot.systemConfig.getTaskData(taskRecord.groupID)
+        val taskData = GlRoot.systemConfig.taskGroupEditor.getGlData(taskRecord.groupID)
         return taskData?.name ?: ""
     }
 
@@ -54,6 +54,13 @@ class GlService {
         else {
             "%02d:%02d".format(minutes, seconds)
         }
+    }
+
+    // ---------------------------------------------------------------------
+
+    fun getGroupPeriodicTasks(groupID: String) : List< PeriodicTask > {
+        val ptasks = GlRoot.systemConfig.periodicTaskEditor.getGlDataList()
+        return ptasks.filter { it.group == groupID }
     }
 
     // ---------------------------------------- Daily data ----------------------------------------

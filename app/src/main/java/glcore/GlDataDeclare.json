@@ -13,7 +13,7 @@
 
   "PeriodicTask": {
     "name": "String",
-    "classification": "String",
+    "group": "String",
     "periodic": "Int",
     "timeQuality": "Int",
     "timeEstimation": "Int",

@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.sleepysoft.gaminglife.R
@@ -190,7 +189,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
 
         return PeriodicTask().apply {
             this.name = taskName
-            this.classification = taskGroupId
+            this.group = taskGroupId
             this.periodic = ENUM_TASK_PERIOD_ARRAY[taskPeriod]
             this.timeQuality = ENUM_TIME_QUALITY_ARRAY[taskTimeQuality]
             this.timeEstimation = timeEstimation
@@ -200,7 +199,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
     }
 
     fun data_to_ui(task: PeriodicTask) {
-        val taskGroupIndex = UiRes.TASK_GROUP_SELECT_ORDER.indexOf(task.classification)
+        val taskGroupIndex = UiRes.TASK_GROUP_SELECT_ORDER.indexOf(task.group)
         spinnerTaskGroup.setSelection(taskGroupIndex)
 
         textTaskName.setText(task.name)

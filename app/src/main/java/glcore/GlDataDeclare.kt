@@ -127,7 +127,7 @@ open class TaskRecord : IGlDeclare() {
 
 open class PeriodicTask : IGlDeclare() {
     var name: String = ""
-    var classification: String = ""
+    var group: String = ""
     var periodic: Int = 0
     var timeQuality: Int = 0
     var timeEstimation: Int = 0
@@ -138,7 +138,7 @@ open class PeriodicTask : IGlDeclare() {
     
     val structDeclare = mapOf< String, KClass< * > >(
         "name" to String::class, 
-        "classification" to String::class, 
+        "group" to String::class, 
         "periodic" to Int::class, 
         "timeQuality" to Int::class, 
         "timeEstimation" to Int::class, 
@@ -167,7 +167,7 @@ open class PeriodicTask : IGlDeclare() {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
             name = anyStruct.get("name") as String
-            classification = anyStruct.get("classification") as String
+            group = anyStruct.get("group") as String
             periodic = anyStruct.get("periodic") as Int
             timeQuality = anyStruct.get("timeQuality") as Int
             timeEstimation = anyStruct.get("timeEstimation") as Int
@@ -186,7 +186,7 @@ open class PeriodicTask : IGlDeclare() {
             "uuid" to uuid,
             
             "name" to name, 
-            "classification" to classification, 
+            "group" to group, 
             "periodic" to periodic, 
             "timeQuality" to timeQuality, 
             "timeEstimation" to timeEstimation, 
