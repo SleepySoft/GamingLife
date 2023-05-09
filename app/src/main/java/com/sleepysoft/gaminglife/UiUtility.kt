@@ -46,7 +46,7 @@ fun Intent.setRequestCode(code: Int) {
 }
 
 
-@RequiresApi(Build.VERSION_CODES.R)
+/*@RequiresApi(Build.VERSION_CODES.R)
 fun Activity.getActivitySize() : Size {
     val display = windowManager.currentWindowMetrics
     val windowInsets = display.windowInsets
@@ -57,8 +57,25 @@ fun Activity.getActivitySize() : Size {
     val width = display.bounds.width() - insetsWidth
     val height = display.bounds.height() - insetsHeight
     return Size(width, height)
-}
+}*/
 
+fun Activity.getActivitySize(): Size {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        val display = windowManager.currentWindowMetrics
+        val windowInsets = display.windowInsets
+        val insets = windowInsets.getInsetsIgnoringVisibility(
+            WindowInsets.Type.navigationBars() or WindowInsets.Type.displayCutout())
+        val insetsWidth = insets.right + insets.left
+        val insetsHeight = insets.top + insets.bottom
+        val width = display.bounds.width() - insetsWidth
+        val height = display.bounds.height() - insetsHeight
+        Size(width, height)
+    } else {
+        val displayMetrics = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+        Size(displayMetrics.widthPixels, displayMetrics.heightPixels)
+    }
+}
 
 fun AppCompatActivity.finishWithResult(data: Map< String , Any >, accepted: Boolean) {
     val resultCode = if (accepted)

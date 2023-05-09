@@ -10,9 +10,19 @@ object GlService {
 
     fun saveSystemConfig() = GlRoot.systemConfig.saveSystemConfig()
 
+    fun saveContentToDailyFolder(content: ByteArray, fileSuffix: String, offsetDays: Int = 0) =
+        GlRoot.saveContentToDailyFolder(content, fileSuffix, offsetDays)
+
+    fun archiveRootPathFileToDailyFolder(fileName: String, offsetDays: Int = 0) =
+        GlRoot.archiveRootPathFileToDailyFolder(fileName, offsetDays)
+
     // ---------------------------------------------------------------------
 
     fun getServerSession() = GlRoot.glServerSession
+
+    // ---------------------------------------------------------------------
+
+    fun getCurrentDayRecord() = GlRoot.dailyRecord
 
     // ---------------------------------------------------------------------
 
@@ -22,6 +32,12 @@ object GlService {
     @RequiresApi(Build.VERSION_CODES.O)
     fun setMainKeyPair(keyPair: GlKeyPair) = run { GlRoot.systemConfig.mainKeyPair = keyPair }
     fun getMainKeyPair() = GlRoot.systemConfig.mainKeyPair
+
+    // ---------------------------------------------------------------------
+
+    fun getTopTaskGroupsData() = GlRoot.systemConfig.taskGroupEditor.getGlDataList()
+    fun getTaskGroupData(groupID: String) =
+        GlRoot.systemConfig.taskGroupEditor.getGlDataList().firstOrNull { it.id == groupID }
 
     // ---------------------------------------------------------------------
 
@@ -57,9 +73,9 @@ object GlService {
     fun getCurrentTaskInfo() : TaskRecord {
         // checkSettleDailyData()
         return GlRoot.dailyRecord.lastTask() ?: TaskRecord().apply {
-            var taskID: String = ""
-            var groupID: String = GROUP_ID_IDLE
-            var startTime: Long = GlDateTime.datetime().time
+            taskID = ""
+            groupID = GROUP_ID_IDLE
+            startTime = GlDateTime.datetime().time
         }
     }
 

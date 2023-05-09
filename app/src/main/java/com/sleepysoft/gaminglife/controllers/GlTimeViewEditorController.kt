@@ -3,7 +3,6 @@ package com.sleepysoft.gaminglife.controllers
 import android.graphics.*
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.sleepysoft.gaminglife.R
 import glcore.*
 import graphengine.*
 import java.text.SimpleDateFormat
@@ -110,7 +109,7 @@ class GlTimeViewEditorController(
     override fun onItemTriggered(item: GraphItem) {
         if ((item == mEnsureButtonL) || (item == mEnsureButtonR)) {
             mDailyRecord.saveDailyRecord()
-            GlRoot.dailyRecord.reloadDailyRecord()
+            GlService.getCurrentDayRecord().reloadDailyRecord()
             mCtrlContext.toast("保存成功")
         }
     }
@@ -156,7 +155,7 @@ class GlTimeViewEditorController(
     }
 
     private fun buildTaskGroupGraph(layer: GraphLayer) {
-        val taskGroupTop = GlRoot.systemConfig.taskGroupEditor.getGlDataList()
+        val taskGroupTop = GlService.getTopTaskGroupsData()
         for (taskData in taskGroupTop) {
             val item = GraphCircle().apply {
                 this.id = "TimeView.${taskData.id}"
@@ -460,7 +459,7 @@ class GlTimeViewEditorController(
     private fun buildPaintForTask(task: TaskRecord) =
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor(
-                GlRoot.systemConfig.taskGroupEditor.getGlData(task.groupID)?.color ?: COLOR_DAILY_BAR_BASE)
+                GlService.getTaskGroupData(task.groupID)?.color ?: COLOR_DAILY_BAR_BASE)
             this.style = Paint.Style.FILL
         }
 }

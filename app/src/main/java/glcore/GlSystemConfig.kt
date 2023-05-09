@@ -65,7 +65,7 @@ class GlSystemConfig() {
     @RequiresApi(Build.VERSION_CODES.O)
     private fun parseSystemConfig(): Boolean {
         return try {
-            // loadTaskGroup() || rebuildTaskGroup()
+            checkTaskGroupData() || rebuildTaskGroup()
             loadGLIDAndKeyPairs()
             true
         } catch (e: Exception) {
@@ -123,6 +123,19 @@ class GlSystemConfig() {
 
     // --------------------------- Private ---------------------------
 
+    private fun checkTaskGroupData() : Boolean {
+        return try {
+            val taskTopList = systemConfig.get(PATH_SYSTEM_TASK_GROUP_TOP_LEVEL) as List< * >
+            taskTopList.isNotEmpty()
+        } catch (e: Exception) {
+            GlLog.e("Load task group fail.")
+            GlLog.e(e.stackTraceToString())
+            false
+        } finally {
+
+        }
+    }
+
 /*    private fun loadTaskGroup() : Boolean {
         return try {
             val taskTopList = systemConfig.get(PATH_SYSTEM_TASK_GROUP_TOP) as List< * >
@@ -144,12 +157,12 @@ class GlSystemConfig() {
         }
     }*/
 
-/*    private fun rebuildTaskGroup() : Boolean {
-        systemConfig.set(PATH_SYSTEM_TASK_GROUP_TOP, TASK_GROUP_TOP_PRESET.toMutableList())
-        systemConfig.set(PATH_SYSTEM_TASK_GROUP_SUB, mutableListOf< TaskData >())
-        systemConfig.set(PATH_SYSTEM_TASK_GROUP_LINK, mutableMapOf< String, String >())
+    private fun rebuildTaskGroup() : Boolean {
+        systemConfig.set(PATH_SYSTEM_TASK_GROUP_TOP_LEVEL, TASK_GROUP_TOP_PRESET.toMutableList())
+        // systemConfig.set(PATH_SYSTEM_TASK_GROUP_SUB, mutableListOf< TaskData >())
+        // systemConfig.set(PATH_SYSTEM_TASK_GROUP_LINK, mutableMapOf< String, String >())
         return true
-    }*/
+    }
 
 /*    @RequiresApi(Build.VERSION_CODES.N)
     fun removeSubTask(glId: String) {

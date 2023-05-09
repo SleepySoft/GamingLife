@@ -236,8 +236,8 @@ class GlTimeViewController(
 
             val currentTaskInfo = GlService.getCurrentTaskInfo()
             val currentTaskGroupData: TaskData =
-                GlRoot.systemConfig.taskGroupEditor.getGlData(currentTaskInfo.groupID) ?:
-                GlRoot.systemConfig.taskGroupEditor.getGlData(GROUP_ID_IDLE) ?: TaskData()
+                GlService.getTaskGroupData(currentTaskInfo.groupID) ?:
+                GlService.getTaskGroupData(GROUP_ID_IDLE) ?: TaskData()
 
             mCenterItem = GraphCircle().apply {
                 this.id = "TimeView.CenterItem"
@@ -268,7 +268,7 @@ class GlTimeViewController(
             mCenterItem.graphActionDecorator.add(LongPressProgressDecorator(
                 mCtrlContext, mCenterItem, mProgressItem, 30.0f, this).apply { init() })
 
-            val taskGroupTop = GlRoot.systemConfig.taskGroupEditor.getGlDataList()
+            val taskGroupTop = GlService.getTopTaskGroupsData()
             for (taskData in taskGroupTop) {
                 val ptasks = GlService.getPeriodicTasksByGroup(taskData.id)
 
@@ -489,10 +489,10 @@ class GlTimeViewController(
     private fun handleInputComplete(inputType: String, result: String) {
         when (inputType) {
             "Text" -> {
-                GlRoot.saveContentToDailyFolder(result.toByteArray(), "md")
+                GlService.saveContentToDailyFolder(result.toByteArray(), "md")
             }
             "Audio" -> {
-                GlRoot.archiveRootPathFileToDailyFolder(RECORD_FILE_NAME_AUDIO)
+                GlService.archiveRootPathFileToDailyFolder(RECORD_FILE_NAME_AUDIO)
             }
             else -> {
 
