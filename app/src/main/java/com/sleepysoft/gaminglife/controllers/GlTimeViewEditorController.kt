@@ -13,8 +13,7 @@ import kotlin.math.min
 
 class GlTimeViewEditorController(
     private val mCtrlContext: GlControllerContext,
-    private val mDailyRecord: GlDailyRecord,
-    private val mGlSystemConfig: GlSystemConfig)
+    private val mDailyRecord: GlDailyRecord)
     : GraphInteractiveListener(), GraphViewObserver {
 
     private var selectedProgressData: MultipleSectionProgressDecorator.ProgressData? = null

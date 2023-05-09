@@ -1,9 +1,46 @@
 package glcore
 
+import android.os.Build
+import androidx.annotation.RequiresApi
+import glenv.GlKeyPair
 import java.util.*
 
 
-class GlService {
+object GlService {
+
+    fun saveSystemConfig() = GlRoot.systemConfig.saveSystemConfig()
+
+    // ---------------------------------------------------------------------
+
+    fun getServerSession() = GlRoot.glServerSession
+
+    // ---------------------------------------------------------------------
+
+    fun setPlayerGlID(glid: String) = run { GlRoot.systemConfig.GLID = glid }
+    fun getPlayerGlID() = GlRoot.systemConfig.GLID
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun setMainKeyPair(keyPair: GlKeyPair) = run { GlRoot.systemConfig.mainKeyPair = keyPair }
+    fun getMainKeyPair() = GlRoot.systemConfig.mainKeyPair
+
+    // ---------------------------------------------------------------------
+
+    fun upsertPeriodicTask(task: PeriodicTask) =
+        GlRoot.systemConfig.periodicTaskEditor.upsertGlData(task)
+
+    fun removePeriodicTask(uuid: String) =
+        GlRoot.systemConfig.periodicTaskEditor.removeGlData(uuid)
+
+    fun getPeriodicTask(uuid: String) : PeriodicTask? =
+        GlRoot.systemConfig.periodicTaskEditor.getGlData(uuid)
+
+    fun getPeriodicTasks() : List< PeriodicTask > =
+        GlRoot.systemConfig.periodicTaskEditor.getGlDataList()
+
+    fun getPeriodicTasksByGroup(groupID: String) : List< PeriodicTask > {
+        val ptasks = GlRoot.systemConfig.periodicTaskEditor.getGlDataList()
+        return ptasks.filter { it.group == groupID }
+    }
 
     // ----------------------- Task Switching -----------------------
 
@@ -54,25 +91,6 @@ class GlService {
         else {
             "%02d:%02d".format(minutes, seconds)
         }
-    }
-
-    // ---------------------------------------------------------------------
-
-    fun upsertPeriodicTask(task: PeriodicTask) =
-        GlRoot.systemConfig.periodicTaskEditor.upsertGlData(task)
-
-    fun removePeriodicTask(uuid: String) =
-        GlRoot.systemConfig.periodicTaskEditor.removeGlData(uuid)
-
-    fun getPeriodicTask(uuid: String) : PeriodicTask? =
-        GlRoot.systemConfig.periodicTaskEditor.getGlData(uuid)
-
-    fun getPeriodicTasks() : List< PeriodicTask > =
-        GlRoot.systemConfig.periodicTaskEditor.getGlDataList()
-
-    fun getPeriodicTasksByGroup(groupID: String) : List< PeriodicTask > {
-        val ptasks = GlRoot.systemConfig.periodicTaskEditor.getGlDataList()
-        return ptasks.filter { it.group == groupID }
     }
 
     // ---------------------------------------- Daily data ----------------------------------------

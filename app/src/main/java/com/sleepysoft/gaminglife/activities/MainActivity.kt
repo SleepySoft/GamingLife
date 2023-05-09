@@ -211,8 +211,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         } else {
             timeViewEditorController = GlTimeViewEditorController(
                 mCtrlContext,
-                GlDailyRecord().apply { loadDailyRecord(GlDateTime.datetime()) },
-                GlRoot.systemConfig).apply { init() }
+                GlDailyRecord().apply { loadDailyRecord(GlDateTime.datetime()) }).apply { init() }
         }
 
         // timeViewControllerEx = GlTimeViewEditorController(mCtrlContext, GlRoot.glTaskModule).apply { init() }

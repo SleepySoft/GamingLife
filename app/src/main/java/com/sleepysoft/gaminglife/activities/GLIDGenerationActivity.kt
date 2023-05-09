@@ -14,6 +14,7 @@ import com.sleepysoft.gaminglife.R
 import com.sleepysoft.gaminglife.finishWithResult
 import glcore.GlEncryption
 import glcore.GlRoot
+import glcore.GlService
 
 
 const val THRESHOLD_POW = 8
@@ -106,9 +107,12 @@ class GeneratePairActivity : AppCompatActivity() {
 
         mButtonAcceptGlId = findViewById(R.id.id_button_accept)
         mButtonAcceptGlId.setOnClickListener {
-            GlRoot.systemConfig.GLID = glId()
-            GlRoot.systemConfig.mainKeyPair = mGlEncryption.powKeyPair
-            GlRoot.systemConfig.saveSystemConfig()
+            // GlRoot.systemConfig.GLID = glId()
+            // GlRoot.systemConfig.mainKeyPair = mGlEncryption.powKeyPair
+            // GlRoot.systemConfig.saveSystemConfig()
+            GlService.setPlayerGlID(glId())
+            GlService.setMainKeyPair(mGlEncryption.powKeyPair)
+            GlService.saveSystemConfig()
             finishWithResult(mapOf(), true)
         }
     }

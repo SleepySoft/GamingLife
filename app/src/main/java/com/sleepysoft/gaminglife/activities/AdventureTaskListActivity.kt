@@ -21,6 +21,7 @@ import com.sleepysoft.gaminglife.resultCode
 import com.sleepysoft.gaminglife.taskGroupIcon
 import glcore.ENUM_TASK_PERIOD_ARRAY
 import glcore.GlRoot
+import glcore.GlService
 import glcore.PeriodicTask
 import glenv.GlApp
 
@@ -29,7 +30,7 @@ class AdventureTaskListAdapter(
     private val onEditAction: (action: String, uuid: String) -> Unit) :
     RecyclerView.Adapter< AdventureTaskListAdapter.ViewHolder >() {
 
-    private var mPeriodicTasks: List< PeriodicTask > = GlRoot.glService.getPeriodicTasks()
+    private var mPeriodicTasks: List< PeriodicTask > = GlService.getPeriodicTasks()
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val iconTask: ImageView = view.findViewById(R.id.icon_task_icon)
@@ -98,7 +99,7 @@ class AdventureTaskListAdapter(
     override fun getItemCount() = mPeriodicTasks.size + 1
 
     fun refreshPeriodicTaskList() =
-        GlRoot.systemConfig.periodicTaskEditor.getGlDataList().let {
+        GlService.getPeriodicTasks().let {
             mPeriodicTasks = it
         }
 }
@@ -128,7 +129,7 @@ class AdventureTaskListActivity : AppCompatActivity() {
                 builder.setMessage("是否确定删除此项任务？\n\n任务删除后无法恢复")
                     .setCancelable(false)
                     .setPositiveButton(R.string.BUTTON_YES) { _, _ ->
-                        GlRoot.systemConfig.periodicTaskEditor.removeGlData(uuid)
+                        glcore.GlService.removePeriodicTask(uuid)
                         onDataChanged()
                     }
                     .setNegativeButton(R.string.BUTTON_NO) { dialog, _ ->
@@ -156,7 +157,7 @@ class AdventureTaskListActivity : AppCompatActivity() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun onDataChanged() {
-        GlRoot.systemConfig.saveSystemConfig()
+        GlService.saveSystemConfig()
         recycleViewAdapter.refreshPeriodicTaskList()
         recycleViewAdapter.notifyDataSetChanged()
     }

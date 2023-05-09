@@ -72,7 +72,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
                 if (editDatUuid.isNotEmpty()) {
                     periodicTaskData.uuid = editDatUuid
                 }
-                GlRoot.systemConfig.periodicTaskEditor.upsertGlData(periodicTaskData)
+                GlService.upsertPeriodicTask(periodicTaskData)
                 finishWithResult(mapOf(), true)
             }
         }
@@ -135,7 +135,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
         editDatUuid = intent.getStringExtra("edit") ?: ""
         val data: PeriodicTask? =
             if (editDatUuid.isNotEmpty()) {
-                GlRoot.systemConfig.periodicTaskEditor.getGlData(editDatUuid)
+                GlService.getPeriodicTask(editDatUuid)
             } else {
                 null
             }

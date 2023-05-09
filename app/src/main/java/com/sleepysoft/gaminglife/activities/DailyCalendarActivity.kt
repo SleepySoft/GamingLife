@@ -305,7 +305,7 @@ class DailyCalendarActivity
                 mCtrlContext, mDailyRecord).apply { init() }
         } else {
             timeViewEditorController = GlTimeViewEditorController(
-                mCtrlContext, mDailyRecord, GlRoot.systemConfig).apply { init() }
+                mCtrlContext, mDailyRecord).apply { init() }
         }
     }
 

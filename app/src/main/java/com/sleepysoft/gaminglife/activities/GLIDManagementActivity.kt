@@ -19,6 +19,7 @@ import com.sleepysoft.gaminglife.*
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import glcore.GlEncryption
 import glcore.GlRoot
+import glcore.GlService
 import glenv.GlKeyPair
 import glenv.KeyPairUtility
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -87,13 +88,13 @@ class GLIDManagementActivity : AppCompatActivity() {
 
         mButtonViewGlid.setOnClickListener {
             val intent = Intent(this, QRCodeViewerActivity::class.java)
-            intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, GlRoot.systemConfig.GLID)
+            intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, GlService.getPlayerGlID())
             ActivityCompat.startActivity(this, intent, null)
         }
 
         mButtonViewPubKey.setOnClickListener {
             val intent = Intent(this, QRCodeViewerActivity::class.java)
-            val publicKeySerialized = GlRoot.systemConfig.mainKeyPair.publicKeyString
+            val publicKeySerialized = GlService.getMainKeyPair().publicKeyString
             if (publicKeySerialized.isNotEmpty()) {
                 intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, publicKeySerialized)
                 ActivityCompat.startActivity(this, intent, null)
@@ -102,7 +103,7 @@ class GLIDManagementActivity : AppCompatActivity() {
 
         mButtonViewPrvKey.setOnClickListener {
             val intent = Intent(this, QRCodeViewerActivity::class.java)
-            val privateKeySerialized = GlRoot.systemConfig.mainKeyPair.privateKeyString
+            val privateKeySerialized = GlService.getMainKeyPair().privateKeyString
             if (privateKeySerialized.isNotEmpty()) {
                 intent.putExtra(QRCodeViewerActivity.KEY_QR_CODE, privateKeySerialized)
                 ActivityCompat.startActivity(this, intent, null)
@@ -112,16 +113,20 @@ class GLIDManagementActivity : AppCompatActivity() {
         mButtonRegOrCreate.setOnClickListener {
             if (networkJob == null) {
                 networkJob = GlobalScope.launch {
-                    GlRoot.glServerSession.register(
+                    GlService.getServerSession().register(
                         GlEncryption.GLID_VERSION, GlRoot.systemConfig.mainKeyPair)
+                    // GlRoot.glServerSession.register(
+                    //    GlEncryption.GLID_VERSION, GlRoot.systemConfig.mainKeyPair)
                     networkJob = null
                 }
             }
         }
 
         mButtonSignOut.setOnClickListener {
-            GlRoot.systemConfig.GLID = ""
-            GlRoot.systemConfig.mainKeyPair = GlKeyPair()
+            GlService.setPlayerGlID("")
+            GlService.setMainKeyPair(GlKeyPair())
+            // GlRoot.systemConfig.GLID = ""
+            // GlRoot.systemConfig.mainKeyPair = GlKeyPair()
             loadGlId()
         }
 
@@ -183,7 +188,8 @@ class GLIDManagementActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun loadGlId() {
-        val mainKeyPair = GlRoot.systemConfig.mainKeyPair
+        // val mainKeyPair = GlRoot.systemConfig.mainKeyPair
+        val mainKeyPair = GlService.getMainKeyPair()
         if (mainKeyPair.keyPairValid()) {
             mLayoutGroupWithKey.visibility = View.VISIBLE
             mLayoutGroupWithoutKey.visibility = View.GONE
@@ -257,8 +263,10 @@ class GLIDManagementActivity : AppCompatActivity() {
         val keyPair = KeyPairUtility.deserializeKeyPair(result)
         val glKeyPair = GlKeyPair().apply { fromJavaKeyPair(keyPair) }
         if (glKeyPair.keyPairValid()) {
-            GlRoot.systemConfig.mainKeyPair= glKeyPair
-            GlRoot.systemConfig.saveSystemConfig()
+            // GlRoot.systemConfig.mainKeyPair= glKeyPair
+            // GlRoot.systemConfig.saveSystemConfig()
+            GlService.setMainKeyPair(glKeyPair)
+            GlService.saveSystemConfig()
             loadGlId()
         } else {
             toast(getString(R.string.HINT_LOAD_PRIVATE_KEY_ERROR))

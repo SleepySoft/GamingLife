@@ -48,7 +48,7 @@ class GlTimeViewController(
     }
 
     fun polling() {
-        mCenterItemText.mainText = GlRoot.glService.getCurrentTaskLastTimeFormatted()
+        mCenterItemText.mainText = GlService.getCurrentTaskLastTimeFormatted()
         mCtrlContext.refresh()
         mHandler.postDelayed(mRunnable, 100)
     }
@@ -234,7 +234,7 @@ class GlTimeViewController(
             val layer = GraphLayer("TimeView.BaseLayer", true, graphView)
             graphView.addLayer(layer)
 
-            val currentTaskInfo = GlRoot.glService.getCurrentTaskInfo()
+            val currentTaskInfo = GlService.getCurrentTaskInfo()
             val currentTaskGroupData: TaskData =
                 GlRoot.systemConfig.taskGroupEditor.getGlData(currentTaskInfo.groupID) ?:
                 GlRoot.systemConfig.taskGroupEditor.getGlData(GROUP_ID_IDLE) ?: TaskData()
@@ -270,7 +270,7 @@ class GlTimeViewController(
 
             val taskGroupTop = GlRoot.systemConfig.taskGroupEditor.getGlDataList()
             for (taskData in taskGroupTop) {
-                val ptasks = GlService().getPeriodicTasksByGroup(taskData.id)
+                val ptasks = GlService.getPeriodicTasksByGroup(taskData.id)
 
                 val item = GraphCircle().apply {
                     this.id = "TimeView.${taskData.id}"
@@ -450,7 +450,7 @@ class GlTimeViewController(
 
         }
         toTask?.run {
-            GlRoot.glService.switchToTask(toTask)
+            GlService.switchToTask(toTask)
         }
     }
 

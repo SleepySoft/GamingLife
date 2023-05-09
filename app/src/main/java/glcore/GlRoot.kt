@@ -21,7 +21,6 @@ object GlRoot {
 
     lateinit var env: GlEnv
 
-    val glService = GlService()
     val dailyRecord = GlDailyRecord()
     val systemConfig = GlSystemConfig()
 

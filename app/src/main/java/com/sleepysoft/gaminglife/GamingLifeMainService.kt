@@ -95,7 +95,7 @@ class GamingLifeMainService : Service() {
     private fun servicePolling() {
         if (fistRun) {
             fistRun = false
-            GlRoot.glService.checkSettleDailyData()
+            GlService.checkSettleDailyData()
         }
         updateNotification()
     }
@@ -145,10 +145,10 @@ class GamingLifeMainService : Service() {
 
     private fun updateNotification() {
         mNotification?.run {
-            this.setContentTitle(GlRoot.glService.getCurrentTaskName())
-            this.setContentText(GlRoot.glService.getCurrentTaskLastTimeFormatted())
+            this.setContentTitle(GlService.getCurrentTaskName())
+            this.setContentText(GlService.getCurrentTaskLastTimeFormatted())
 
-            setSmallIcon(taskGroupIcon(GlRoot.glService.getCurrentTaskInfo().groupID))
+            setSmallIcon(taskGroupIcon(GlService.getCurrentTaskInfo().groupID))
 
             val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
             manager.notify(NOTIFICATION_ID_DEFAULT_INT, this.build())
