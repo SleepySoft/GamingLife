@@ -148,7 +148,9 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
         set(value) {
             field = value
         }
-    var fontPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    var fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE }
+
+    var textBkPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.RED }
 
     var textArea: Rect = Rect()
         private set
@@ -172,10 +174,15 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
         if ((textArea != textRect.toRect()) || (textPrev.length != mainText.length)) {
             textPrev = mainText
             textArea = textRect.toRect()
-            textBound = decoratedItem.boundRect().apply { inflate(0.7f) }.toRect()
+            textBound = Rect(textArea)
             val fontSize = calculateFontSize(textBound, textArea, mainText)
             fontPaint.textSize = fontSize
         }
+
+        val textBkRect = RectF(textArea).apply { inflate(1.2f) }
+        canvas.drawRoundRect(
+            textBkRect, textBkRect.height() / 2, textBkRect.height() / 2, textBkPaint)
+
         val halfTextHeight: Float = textBound.height() / 2.0f
         canvas.drawText(
             mainText,
