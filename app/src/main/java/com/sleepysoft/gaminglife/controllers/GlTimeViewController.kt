@@ -6,8 +6,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.RequiresApi
-import com.sleepysoft.gaminglife.activities.DailyCalendarActivity
-import com.sleepysoft.gaminglife.activities.GLIDManagementActivity
 import glcore.*
 import graphengine.*
 import kotlin.math.cos
@@ -272,7 +270,7 @@ class GlTimeViewController(
 
             val taskGroupTop = GlRoot.systemConfig.taskGroupEditor.getGlDataList()
             for (taskData in taskGroupTop) {
-                val ptasks = GlService().getGroupPeriodicTasks(taskData.id)
+                val ptasks = GlService().getPeriodicTasksByGroup(taskData.id)
 
                 val item = GraphCircle().apply {
                     this.id = "TimeView.${taskData.id}"

@@ -58,7 +58,19 @@ class GlService {
 
     // ---------------------------------------------------------------------
 
-    fun getGroupPeriodicTasks(groupID: String) : List< PeriodicTask > {
+    fun upsertPeriodicTask(task: PeriodicTask) =
+        GlRoot.systemConfig.periodicTaskEditor.upsertGlData(task)
+
+    fun removePeriodicTask(uuid: String) =
+        GlRoot.systemConfig.periodicTaskEditor.removeGlData(uuid)
+
+    fun getPeriodicTask(uuid: String) : PeriodicTask? =
+        GlRoot.systemConfig.periodicTaskEditor.getGlData(uuid)
+
+    fun getPeriodicTasks() : List< PeriodicTask > =
+        GlRoot.systemConfig.periodicTaskEditor.getGlDataList()
+
+    fun getPeriodicTasksByGroup(groupID: String) : List< PeriodicTask > {
         val ptasks = GlRoot.systemConfig.periodicTaskEditor.getGlDataList()
         return ptasks.filter { it.group == groupID }
     }

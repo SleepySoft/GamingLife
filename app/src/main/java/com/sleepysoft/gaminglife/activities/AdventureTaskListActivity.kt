@@ -29,8 +29,7 @@ class AdventureTaskListAdapter(
     private val onEditAction: (action: String, uuid: String) -> Unit) :
     RecyclerView.Adapter< AdventureTaskListAdapter.ViewHolder >() {
 
-    private var mPeriodicTasks: List< PeriodicTask > =
-        GlRoot.systemConfig.periodicTaskEditor.getGlDataList()
+    private var mPeriodicTasks: List< PeriodicTask > = GlRoot.glService.getPeriodicTasks()
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val iconTask: ImageView = view.findViewById(R.id.icon_task_icon)
