@@ -60,6 +60,8 @@ class GlTimeViewController(
                 val ptasks = GlService.getPeriodicTasksByGroup(taskData.id)
                 item.service.serviceCall(
                     "CornerTextDecorator.setText", ptasks.size.toString())
+                item.service.serviceCall(
+                    "CornerTextDecorator.setVisible", ptasks.isNotEmpty())
             }
         }
         mCtrlContext.refresh()

@@ -135,6 +135,10 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
             mainText = text
             return@serviceRegister true
         }
+        decoratedItem.service.serviceRegister("CornerTextDecorator.setVisible") { vis: Boolean ->
+            visible = vis
+            return@serviceRegister true
+        }
     }
 
     companion object {
@@ -144,6 +148,8 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
         const val CORNER_BOTTOM_RIGHT = 0b11
     }
 
+    var visible = true
+
     var mainText: String = ""
         set(value) {
             field = value
@@ -152,38 +158,32 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
 
     var textBkPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.RED }
 
-    var textArea: Rect = Rect()
-        private set
-
-    var textBound: Rect = Rect()
-        private set
-
-    private var textPrev: String = ""
-
     override fun paintAfterGraph(canvas: Canvas) {
-        val boundRect = decoratedItem.boundRect()
-        val textBkHeight = boundRect.height() * ratio
+        if (visible) {
+            val boundRect = decoratedItem.boundRect()
+            val textBkHeight = boundRect.height() * ratio
 
-        val textHeight = textBkHeight * 0.7f
-        fontPaint.textSize = textHeight
-        val textWidth = fontPaint.measureText(mainText)
+            val textHeight = textBkHeight * 0.7f
+            fontPaint.textSize = textHeight
+            val textWidth = fontPaint.measureText(mainText)
 
-        var textBkWidth = textWidth * 1.2f
-        if (textBkWidth < textBkHeight) {
-            textBkWidth = textBkHeight
+            var textBkWidth = textWidth * 1.2f
+            if (textBkWidth < textBkHeight) {
+                textBkWidth = textBkHeight
+            }
+
+            val textBkRect = RectF().apply {
+                left = if (corner and 0b01 == 0) boundRect.left else boundRect.right - textBkWidth
+                top = if (corner and 0b10 == 0) boundRect.top else boundRect.bottom - textBkHeight
+                right = left + textBkWidth
+                bottom = top + textBkHeight
+            }
+
+            canvas.drawRoundRect(
+                textBkRect, textBkRect.height() / 2, textBkRect.height() / 2, textBkPaint)
+            canvas.drawText(
+                mainText, textBkRect, ALIGN_HORIZON_MIDDLE, ALIGN_VERTICAL_CENTER,  fontPaint)
         }
-
-        val textBkRect = RectF().apply {
-            left = if (corner and 0b01 == 0) boundRect.left else boundRect.right - textBkWidth
-            top = if (corner and 0b10 == 0) boundRect.top else boundRect.bottom - textBkHeight
-            right = left + textBkWidth
-            bottom = top + textBkHeight
-        }
-
-        canvas.drawRoundRect(
-            textBkRect, textBkRect.height() / 2, textBkRect.height() / 2, textBkPaint)
-        canvas.drawText(
-            mainText, textBkRect, ALIGN_HORIZON_MIDDLE, ALIGN_VERTICAL_CENTER,  fontPaint)
     }
 }
 

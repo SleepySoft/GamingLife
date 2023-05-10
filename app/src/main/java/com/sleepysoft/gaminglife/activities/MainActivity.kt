@@ -72,11 +72,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 Manifest.permission.RECORD_AUDIO)
         }
 
-        val orientation = resources.configuration.orientation
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // GlFloatViewFactory.hideFloatView(FloatMenuView::class.java)
-        } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-
+        if (isPortrait()) {
             GlFloatViewFactory.createFloatView(this, FloatMenuView::class.java)
             // GlFloatViewFactory.showFloatView(FloatMenuView::class.java)
 
@@ -86,6 +82,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 GlFloatViewFactory.stretchFloatViewAs(
                     this, FloatMenuView::class.java, true, false)
             }
+        } else {
+            // GlFloatViewFactory.hideFloatView(FloatMenuView::class.java)
         }
     }
 
@@ -96,7 +94,9 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     override fun onResume() {
         super.onResume()
-        timeViewController.refreshPeriodicTaskData()
+        if (isPortrait()) {
+            timeViewController.refreshPeriodicTaskData()
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -131,6 +131,11 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     }
 
     // ---------------------------------------------------------------------------------------------
+
+    private fun isPortrait() : Boolean {
+        val orientation = this.resources.configuration.orientation
+        return orientation == Configuration.ORIENTATION_PORTRAIT
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun doInitialization(useInternalStorage: Boolean) {
@@ -204,9 +209,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
         // Optimization: Only one controller will be activated on specific orientation.
         // Once orientation change. The Activity will be rebuilt and re-inited.
-
-        val orientation = this.resources.configuration.orientation
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (isPortrait()) {
             audioRecordController = GlAudioRecordLayerController(mCtrlContext).apply { init() }
             timeViewController = GlTimeViewController(mCtrlContext, audioRecordController).apply { init() }
         } else {
@@ -214,8 +217,6 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 mCtrlContext,
                 GlDailyRecord().apply { loadDailyRecord(GlDateTime.datetime()) }).apply { init() }
         }
-
-        // timeViewControllerEx = GlTimeViewEditorController(mCtrlContext, GlRoot.glTaskModule).apply { init() }
     }
 
     private fun startGlService() {
