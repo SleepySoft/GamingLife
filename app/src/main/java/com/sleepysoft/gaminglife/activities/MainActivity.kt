@@ -92,11 +92,12 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 /*    override fun onStart() {
         super.onStart()
         // GlFloatViewFactory.moveFloatViewUnderActionBar(this, FloatMenuView::class.java)
-    }
+    }*/
 
     override fun onResume() {
         super.onResume()
-    }*/
+        timeViewController.refreshPeriodicTaskData()
+    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

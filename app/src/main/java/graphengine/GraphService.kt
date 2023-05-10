@@ -77,6 +77,13 @@ class GraphService {
 
     fun serviceCall(serviceName: String, vararg params: Any): Any? {
         val serviceFunction = serviceMap[serviceName] ?: return null
-        return serviceFunction.invoke(params)
+        return try {
+            serviceFunction.invoke(params)
+        } catch (e: Exception) {
+            println(e.stackTraceToString())
+            null
+        } finally {
+
+        }
     }
 }

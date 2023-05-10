@@ -53,6 +53,18 @@ class GlTimeViewController(
         mHandler.postDelayed(mRunnable, 100)
     }
 
+    fun refreshPeriodicTaskData() {
+        for (item in mSurroundItems) {
+            val taskData = item.itemData as? TaskData
+            taskData?.let {
+                val ptasks = GlService.getPeriodicTasksByGroup(taskData.id)
+                item.service.serviceCall(
+                    "CornerTextDecorator.setText", ptasks.size.toString())
+            }
+        }
+        mCtrlContext.refresh()
+    }
+
     // -------------------------- Implements GraphViewObserver interface ---------------------------
 
     override fun onItemLayout() {
@@ -270,7 +282,7 @@ class GlTimeViewController(
 
             val taskGroupTop = GlService.getTopTaskGroupsData()
             for (taskData in taskGroupTop) {
-                val ptasks = GlService.getPeriodicTasksByGroup(taskData.id)
+                // val ptasks = GlService.getPeriodicTasksByGroup(taskData.id)
 
                 val item = GraphCircle().apply {
                     this.id = "TimeView.${taskData.id}"
@@ -290,8 +302,10 @@ class GlTimeViewController(
                 }
 
                 val cornerText = CornerTextDecorator(mCtrlContext, item,
-                    CornerTextDecorator.CORNER_UPPER_RIGHT, 0.3f).apply {
-                    this.mainText = ptasks.size.toString()
+                    CornerTextDecorator.CORNER_UPPER_RIGHT, 0.4f).apply {
+                    // this.mainText = ptasks.size.toString()
+                    // Will update in refreshPeriodicTaskData()
+                    this.mainText = "0"
                 }
 
                 item.graphItemDecorator.add(text)

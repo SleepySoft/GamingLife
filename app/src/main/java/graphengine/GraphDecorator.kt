@@ -124,7 +124,7 @@ class AutoFitTextDecorator(context: GraphContext, decoratedItem: GraphItem) :
 
 class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
                           var corner: Int = CORNER_UPPER_RIGHT,
-                          var ratio: Float = 0.2f)
+                          var ratio: Float = 0.4f)
     : GraphItemDecorator(context, decoratedItem) {
 
     init {
@@ -148,10 +148,7 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
         set(value) {
             field = value
         }
-    var fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE
-        textSize = 8.0f
-    }
+    var fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE }
 
     var textBkPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.RED }
 
@@ -165,40 +162,28 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
 
     override fun paintAfterGraph(canvas: Canvas) {
         val boundRect = decoratedItem.boundRect()
-        val fontMetrics = fontPaint.fontMetrics
+        val textBkHeight = boundRect.height() * ratio
+
+        val textHeight = textBkHeight * 0.7f
+        fontPaint.textSize = textHeight
         val textWidth = fontPaint.measureText(mainText)
-        val textHeight = fontMetrics.bottom - fontMetrics.top
 
-/*        val textWidth = boundRect.width() * ratio
-        val textHeight = boundRect.height() * ratio*/
-        val textRect = RectF()
-
-        textRect.left = if (corner and 0b01 == 0) boundRect.left else boundRect.right - textWidth
-        textRect.top = if (corner and 0b10 == 0) boundRect.top else boundRect.bottom - textHeight
-        textRect.right = textRect.left + textWidth
-        textRect.bottom = textRect.top + textHeight
-
-        canvas.drawRect(textRect.toRect(), textBkPaint)
-
-/*        if ((textArea != textRect.toRect()) || (textPrev.length != mainText.length)) {
-            textPrev = mainText
-            textArea = textRect.toRect()
-            textBound = Rect(textArea)
-            val fontSize = calculateFontSize(textBound, textArea, mainText)
-            fontPaint.textSize = fontSize
+        var textBkWidth = textWidth * 1.2f
+        if (textBkWidth < textBkHeight) {
+            textBkWidth = textBkHeight
         }
 
-        val textBkRect = RectF(textArea).apply { inflate(1.3f) }
+        val textBkRect = RectF().apply {
+            left = if (corner and 0b01 == 0) boundRect.left else boundRect.right - textBkWidth
+            top = if (corner and 0b10 == 0) boundRect.top else boundRect.bottom - textBkHeight
+            right = left + textBkWidth
+            bottom = top + textBkHeight
+        }
+
         canvas.drawRoundRect(
             textBkRect, textBkRect.height() / 2, textBkRect.height() / 2, textBkPaint)
-
-        val halfTextHeight: Float = textBound.height() / 2.0f
         canvas.drawText(
-            mainText,
-            textArea.centerX().toFloat(),
-            (textArea.centerY().toFloat() + halfTextHeight),
-            fontPaint
-        )*/
+            mainText, textBkRect, ALIGN_HORIZON_MIDDLE, ALIGN_VERTICAL_CENTER,  fontPaint)
     }
 }
 
@@ -357,7 +342,7 @@ class MultipleHorizonStatisticsBarDecorator(context: GraphContext, decoratedItem
 
             canvas.drawRect(fullRect, emptyAreaPaint)
             canvas.drawRect(barRect, barDatas[i].barPaint)
-            canvas.drawText(displayText, textRect, ALIGN_HORIZON_RIGHT, ALIGN_HORIZON_CENTER, barDatas[i].textPaint)
+            canvas.drawText(displayText, textRect, ALIGN_HORIZON_RIGHT, ALIGN_VERTICAL_CENTER, barDatas[i].textPaint)
         }
     }
 

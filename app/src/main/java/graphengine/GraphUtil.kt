@@ -126,7 +126,7 @@ const val ALIGN_HORIZON_MIDDLE = 1
 const val ALIGN_HORIZON_RIGHT = 2
 
 const val ALIGN_VERTICAL_TOP = 4
-const val ALIGN_HORIZON_CENTER = 8
+const val ALIGN_VERTICAL_CENTER = 8
 const val ALIGN_VERTICAL_BOTTOM = 16
 
 
@@ -142,8 +142,8 @@ fun Canvas.drawText(text: String, rect: RectF, horizonAlign: Int, verticalAlign:
     }
 
     val cy = when (verticalAlign) {
-        ALIGN_VERTICAL_TOP -> rect.top + textBounds.height()
-        ALIGN_HORIZON_CENTER -> rect.centerY() + textBounds.height() / 2
+        ALIGN_VERTICAL_TOP -> rect.top
+        ALIGN_VERTICAL_CENTER -> rect.centerY() + textBounds.height() / 2
         ALIGN_VERTICAL_BOTTOM -> rect.bottom - textBounds.height()
         else -> rect.centerY() + textBounds.height() / 2
     }
