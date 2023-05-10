@@ -58,7 +58,7 @@
             android:id="@+id/button_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_edit_24"
+            android:src="@drawable/ic_baseline_edit_48"
             android:layout_gravity="center_vertical"
             android:minWidth="0dp"
             android:minHeight="0dp" />
@@ -67,7 +67,7 @@
             android:id="@+id/button_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_baseline_delete_24"
+            android:src="@drawable/ic_baseline_delete_48"
             android:layout_gravity="center_vertical"
             android:minWidth="0dp"
             android:minHeight="0dp"  />
@@ -85,7 +85,7 @@
             android:id="@+id/button_create"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_baseline_add_24"
+            android:src="@drawable/ic_baseline_add_48"
             android:minWidth="0dp"
             android:minHeight="0dp"  />
     </LinearLayout>
