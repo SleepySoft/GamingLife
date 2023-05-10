@@ -148,7 +148,10 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
         set(value) {
             field = value
         }
-    var fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE }
+    var fontPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        textSize = 8.0f
+    }
 
     var textBkPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.RED }
 
@@ -162,8 +165,12 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
 
     override fun paintAfterGraph(canvas: Canvas) {
         val boundRect = decoratedItem.boundRect()
-        val textWidth = boundRect.width() * ratio
-        val textHeight = boundRect.height() * ratio
+        val fontMetrics = fontPaint.fontMetrics
+        val textWidth = fontPaint.measureText(mainText)
+        val textHeight = fontMetrics.bottom - fontMetrics.top
+
+/*        val textWidth = boundRect.width() * ratio
+        val textHeight = boundRect.height() * ratio*/
         val textRect = RectF()
 
         textRect.left = if (corner and 0b01 == 0) boundRect.left else boundRect.right - textWidth
@@ -171,7 +178,9 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
         textRect.right = textRect.left + textWidth
         textRect.bottom = textRect.top + textHeight
 
-        if ((textArea != textRect.toRect()) || (textPrev.length != mainText.length)) {
+        canvas.drawRect(textRect.toRect(), textBkPaint)
+
+/*        if ((textArea != textRect.toRect()) || (textPrev.length != mainText.length)) {
             textPrev = mainText
             textArea = textRect.toRect()
             textBound = Rect(textArea)
@@ -179,7 +188,7 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
             fontPaint.textSize = fontSize
         }
 
-        val textBkRect = RectF(textArea).apply { inflate(1.2f) }
+        val textBkRect = RectF(textArea).apply { inflate(1.3f) }
         canvas.drawRoundRect(
             textBkRect, textBkRect.height() / 2, textBkRect.height() / 2, textBkPaint)
 
@@ -189,7 +198,7 @@ class CornerTextDecorator(context: GraphContext, decoratedItem: GraphItem,
             textArea.centerX().toFloat(),
             (textArea.centerY().toFloat() + halfTextHeight),
             fontPaint
-        )
+        )*/
     }
 }
 
