@@ -126,6 +126,7 @@ open class TaskRecord : IGlDeclare() {
 // -------------------------------------------------------------------------------------------------
 
 open class PeriodicTask : IGlDeclare() {
+    var id: String = ""
     var name: String = ""
     var group: String = ""
     var periodic: Int = 0
@@ -133,11 +134,17 @@ open class PeriodicTask : IGlDeclare() {
     var timeEstimation: Int = 0
     var batch: Int = 0
     var batchSize: Int = 0
+    // This section is for Task Planning
     var dueDateTime: Long = 0L
+    // This section is for Task Execution and Conclusion
+    var batchRemaining: Int = 0
+    var conclusion: Int = 0
+    var conclusionTs: Long = 0L
     
     override var uuid: String = randomUUID()
     
     val structDeclare = mapOf< String, KClass< * > >(
+        "id" to String::class, 
         "name" to String::class, 
         "group" to String::class, 
         "periodic" to Int::class, 
@@ -145,7 +152,10 @@ open class PeriodicTask : IGlDeclare() {
         "timeEstimation" to Int::class, 
         "batch" to Int::class, 
         "batchSize" to Int::class, 
-        "dueDateTime" to Long::class
+        "dueDateTime" to Long::class, 
+        "batchRemaining" to Int::class, 
+        "conclusion" to Int::class, 
+        "conclusionTs" to Long::class
     )
     
     companion object {
@@ -168,6 +178,7 @@ open class PeriodicTask : IGlDeclare() {
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
+            id = anyStruct.get("id") as String
             name = anyStruct.get("name") as String
             group = anyStruct.get("group") as String
             periodic = anyStruct.get("periodic") as Int
@@ -176,6 +187,9 @@ open class PeriodicTask : IGlDeclare() {
             batch = anyStruct.get("batch") as Int
             batchSize = anyStruct.get("batchSize") as Int
             dueDateTime = anyStruct.get("dueDateTime") as Long
+            batchRemaining = anyStruct.get("batchRemaining") as Int
+            conclusion = anyStruct.get("conclusion") as Int
+            conclusionTs = anyStruct.get("conclusionTs") as Long
             true
         }
         else {
@@ -188,6 +202,7 @@ open class PeriodicTask : IGlDeclare() {
         return mutableMapOf(
             "uuid" to uuid,
             
+            "id" to id, 
             "name" to name, 
             "group" to group, 
             "periodic" to periodic, 
@@ -195,7 +210,10 @@ open class PeriodicTask : IGlDeclare() {
             "timeEstimation" to timeEstimation, 
             "batch" to batch, 
             "batchSize" to batchSize, 
-            "dueDateTime" to dueDateTime
+            "dueDateTime" to dueDateTime, 
+            "batchRemaining" to batchRemaining, 
+            "conclusion" to conclusion, 
+            "conclusionTs" to conclusionTs
         )
     }
 }
@@ -203,14 +221,14 @@ open class PeriodicTask : IGlDeclare() {
 // -------------------------------------------------------------------------------------------------
 
 open class StageGoal : IGlDeclare() {
-    var periodicTask: String = ""
+    var taskID: String = ""
     var goalCount: String = ""
     var continuous: Boolean = false
     
     override var uuid: String = randomUUID()
     
     val structDeclare = mapOf< String, KClass< * > >(
-        "periodicTask" to String::class, 
+        "taskID" to String::class, 
         "goalCount" to String::class, 
         "continuous" to Boolean::class
     )
@@ -235,7 +253,7 @@ open class StageGoal : IGlDeclare() {
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
-            periodicTask = anyStruct.get("periodicTask") as String
+            taskID = anyStruct.get("taskID") as String
             goalCount = anyStruct.get("goalCount") as String
             continuous = anyStruct.get("continuous") as Boolean
             true
@@ -250,7 +268,7 @@ open class StageGoal : IGlDeclare() {
         return mutableMapOf(
             "uuid" to uuid,
             
-            "periodicTask" to periodicTask, 
+            "taskID" to taskID, 
             "goalCount" to goalCount, 
             "continuous" to continuous
         )

@@ -3,9 +3,9 @@ import kotlin.reflect.KClass
 
 // --------------------------------------------- Path ----------------------------------------------
 
-const val PATH_SYSTEM_TASK_GROUP_TOP_LEVEL = "/Config/Meta/TaskGroup/TopGroups"           // v as STRUCT_DEC_TASK_DATA
-// const val PATH_SYSTEM_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"           // v as STRUCT_DEC_TASK_DATA
-// const val PATH_SYSTEM_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"         // v as MutableMap< String, String >
+const val PATH_SYSTEM_TASK_GROUP_TOP_LEVEL = "/Config/Meta/TaskGroup/TopGroups"
+// const val PATH_SYSTEM_TASK_GROUP_SUB = "/Config/Meta/TaskGroup/SubGroups"
+// const val PATH_SYSTEM_TASK_GROUP_LINK = "/Config/Meta/TaskGroup/GroupLinks"
 
 const val PATH_SYSTEM_TASK_RECORD_THRESHOLD = "/Config/User/TaskRecordThreshold"    // v as Long, in ms
 const val PATH_SYSTEM_PRIVATE_KEY_HASH = "/Config/User/Key/Account/PrivateKeyHash"
@@ -15,10 +15,27 @@ const val PATH_SYSTEM_GLID = "/Config/User/Key/Account/GLID"
 
 const val PATH_SYSTEM_PERIODIC_TASK = "/Config/User/Adventure/PeriodicTaskList"
 
+// -------------------------------------------------------------------------------------------------
+
 const val PATH_RUNTIME_CURRENT_TASK = "/Runtime/TimeModule/CurrentTask"             // v as STRUCT_DEC_TASK_RECORD
+
+const val PATH_RUNTIME_PERIOD_DAILY_START_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/Daily"
+const val PATH_RUNTIME_PERIOD_WEEKLY_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/Weekly"
+const val PATH_RUNTIME_PERIOD_BIWEEKLY_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/BiWeekly"
+const val PATH_RUNTIME_PERIOD_MONTHLY_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/Monthly"
+const val PATH_RUNTIME_PERIOD_QUARTERLY_START_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/Quarterly"
+
+const val PATH_RUNTIME_ONGOING_PERIODIC_TASKS = "/Runtime/TimeModule/OnGoingPeriodicTasks"
+const val PATH_RUNTIME_PROCESSED_PERIODIC_TASK_IDS = "/Runtime/TimeModule/ProcessedPeriodicTaskIDs"
+
+// -------------------------------------------------------------------------------------------------
 
 const val PATH_DAILY_START_TS = "/Daily/StartTimestamp"                             // The start seconds of the day since January 1, 1970, 00:00:00 GMT
 const val PATH_DAILY_TASK_RECORD = "/Daily/TimeModule/TaskHistory"                  // v as list of STRUCT_DEC_TASK_RECORD
+
+/*const val PATH_DAILY_TASK_RECORD = "/Daily/TaskModule/OnGoingPeriodicTasks"
+const val PATH_DAILY_TASK_RECORD = "/Daily/TaskModule/FinishedPeriodicTasks"
+const val PATH_DAILY_TASK_RECORD = "/Daily/TaskModule/AbandonedPeriodicTasks"*/
 
 
 // --------------------------------------------- Value ---------------------------------------------
@@ -58,38 +75,6 @@ const val GROUP_ID_PROMOTE  = "1841978a-3adc-413a-a9ae-a34e019205f8"
 const val GROUP_ID_CREATE = "fa94a546-beeb-4570-b266-c066a4a31233"
 
 
-// --------------------------------------------- Enum ----------------------------------------------
-
-const val ENUM_TASK_PERIOD_ONESHOT = 0
-const val ENUM_TASK_PERIOD_DAILY = 1
-const val ENUM_TASK_PERIOD_WEEKLY = 7
-const val ENUM_TASK_PERIOD_BI_WEEK = 14
-const val ENUM_TASK_PERIOD_MONTHLY = 30
-const val ENUM_TASK_PERIOD_QUARTERLY = 90
-
-val ENUM_TASK_PERIOD_ARRAY = listOf(
-    ENUM_TASK_PERIOD_ONESHOT,
-    ENUM_TASK_PERIOD_DAILY,
-    ENUM_TASK_PERIOD_WEEKLY,
-    ENUM_TASK_PERIOD_BI_WEEK,
-    ENUM_TASK_PERIOD_MONTHLY,
-    ENUM_TASK_PERIOD_QUARTERLY)
-
-const val ENUM_TIME_QUALITY_UNSPECIFIED = 0     // 不指定
-const val ENUM_TIME_QUALITY_FRAGMENTED = 1      // 碎片时间
-const val ENUM_TIME_QUALITY_STOLEN = 2          // 忙里偷闲的时间
-const val ENUM_TIME_QUALITY_LOW = 3             // 低质量的时间段
-const val ENUM_TIME_QUALITY_MEDIUM = 4          // 中等质量的时间段
-const val ENUM_TIME_QUALITY_HIGH = 5            // 完余属于自己的时间段
-
-val ENUM_TIME_QUALITY_ARRAY = listOf(
-    ENUM_TIME_QUALITY_UNSPECIFIED,
-    ENUM_TIME_QUALITY_FRAGMENTED,
-    ENUM_TIME_QUALITY_STOLEN,
-    ENUM_TIME_QUALITY_LOW,
-    ENUM_TIME_QUALITY_MEDIUM,
-    ENUM_TIME_QUALITY_HIGH
-)
 
 // --------------------------------------------- Color ---------------------------------------------
 
@@ -217,7 +202,7 @@ abstract class IGlDeclare : IGlObject {
     abstract fun toAnyStruct() : GlAnyStruct
 }
 
-val STRUCT_DEC_TASK_DATA : GlStructDeclare = mapOf< String, KClass< * > >(
+/*val STRUCT_DEC_TASK_DATA : GlStructDeclare = mapOf< String, KClass< * > >(
     "id" to String::class,
     "name" to String::class,
     "color" to String::class
@@ -227,7 +212,7 @@ val STRUCT_DEC_TASK_RECORD : GlStructDeclare = mapOf< String, KClass< * > >(
     "taskID" to String::class,
     "groupID" to String::class,
     "startTime" to Long::class
-)
+)*/
 
 
 // -------------------------------------------- Preset ---------------------------------------------

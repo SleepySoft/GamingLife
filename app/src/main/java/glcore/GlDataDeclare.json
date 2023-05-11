@@ -12,6 +12,7 @@
   },
 
   "PeriodicTask": {
+    "id": "String",
     "name": "String",
     "group": "String",
     "periodic": "Int",
@@ -19,11 +20,18 @@
     "timeEstimation": "Int",
     "batch": "Int",
     "batchSize": "Int",
-    "dueDateTime": "Long"
+
+    "@comments_1": "This section is for Task Planning",
+    "dueDateTime": "Long",
+
+    "@comments_2": "This section is for Task Execution and Conclusion",
+    "batchRemaining": "Int",
+    "conclusion": "Int",
+    "conclusionTs": "Long"
   },
 
   "StageGoal": {
-    "periodicTask": "String",
+    "taskID": "String",
     "goalCount": "String",
     "continuous": "Boolean"
   }

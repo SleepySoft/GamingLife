@@ -87,6 +87,7 @@
     </string-array>
 
     <string-array name="TASK_PERIOD_ARRAY">
+        <item>一次性</item>
         <item>每日</item>
         <item>每周</item>
         <item>每两周</item>

@@ -14,6 +14,9 @@ INIT_VALUE_TABLE = {
 }
 
 
+SPECIAL_COMMENTS_MARK = "@comments"
+
+
 GL_FILE_TEMPLATE = """package glcore
 
 import kotlin.reflect.KClass
@@ -89,10 +92,16 @@ try:
             from_any_struct_area = []
             to_any_struct_area = []
             for member, member_type in class_declare.items():
-                member_area.append('    var %s: %s = %s' % (member, member_type, INIT_VALUE_TABLE[member_type]))
-                struct_dec_area.append('        "%s" to %s::class' % (member, member_type))
-                from_any_struct_area.append('            %s = anyStruct.get("%s") as %s' % (member, member, member_type))
-                to_any_struct_area.append('            "%s" to %s' % (member, member))
+                if member.startswith('@'):
+                    if SPECIAL_COMMENTS_MARK in member:
+                        member_area.append('    // ' + member_type)
+                    else:
+                        pass
+                else:
+                    member_area.append('    var %s: %s = %s' % (member, member_type, INIT_VALUE_TABLE[member_type]))
+                    struct_dec_area.append('        "%s" to %s::class' % (member, member_type))
+                    from_any_struct_area.append('            %s = anyStruct.get("%s") as %s' % (member, member, member_type))
+                    to_any_struct_area.append('            "%s" to %s' % (member, member))
             data_declare_code = GL_DATA_CLASS_TEMPLATE.\
                 replace('<<class_name>>', class_name).\
                 replace('<<member_area>>', '\n'.join(member_area)).\
