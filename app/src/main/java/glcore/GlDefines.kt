@@ -25,16 +25,16 @@ const val PATH_RUNTIME_PERIOD_BIWEEKLY_TS = "/Runtime/TimeModule/PeriodStartTime
 const val PATH_RUNTIME_PERIOD_MONTHLY_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/Monthly"
 const val PATH_RUNTIME_PERIOD_QUARTERLY_START_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/Quarterly"
 
-const val PATH_RUNTIME_ONGOING_PERIODIC_TASKS = "/Runtime/TimeModule/OnGoingPeriodicTasks"
-const val PATH_RUNTIME_PROCESSED_PERIODIC_TASK_IDS = "/Runtime/TimeModule/ProcessedPeriodicTaskIDs"
+const val PATH_RUNTIME_PERIODIC_TASKS_STARTED = "/Runtime/TimeModule/PeriodicTasksThatStarted"
 
 // -------------------------------------------------------------------------------------------------
 
 const val PATH_DAILY_START_TS = "/Daily/StartTimestamp"                             // The start seconds of the day since January 1, 1970, 00:00:00 GMT
 const val PATH_DAILY_TASK_RECORD = "/Daily/TimeModule/TaskHistory"                  // v as list of STRUCT_DEC_TASK_RECORD
 
-/*const val PATH_DAILY_TASK_RECORD = "/Daily/TaskModule/OnGoingPeriodicTasks"
-const val PATH_DAILY_TASK_RECORD = "/Daily/TaskModule/FinishedPeriodicTasks"
+const val PATH_DAILY_PERIODIC_TASK_RECORD = "/Daily/TaskModule/PeriodicTaskRecords"
+
+/*const val PATH_DAILY_TASK_RECORD = "/Daily/TaskModule/FinishedPeriodicTasks"
 const val PATH_DAILY_TASK_RECORD = "/Daily/TaskModule/AbandonedPeriodicTasks"*/
 
 
@@ -216,6 +216,15 @@ val STRUCT_DEC_TASK_RECORD : GlStructDeclare = mapOf< String, KClass< * > >(
 
 
 // -------------------------------------------- Preset ---------------------------------------------
+
+/*val TASK_GROUP_TOP_PRESET = mutableListOf(
+    TaskData().apply { id = GROUP_ID_IDLE;      name = "放松"; color = COLOR_TASK_IDLE },
+    TaskData().apply { id = GROUP_ID_ENJOY;     name = "玩乐"; color = COLOR_TASK_ENJOY },
+    TaskData().apply { id = GROUP_ID_LIFE;      name = "生活"; color = COLOR_TASK_LIFE },
+    TaskData().apply { id = GROUP_ID_WORK;      name = "工作"; color = COLOR_TASK_WORK },
+    TaskData().apply { id = GROUP_ID_PROMOTE;   name = "提升"; color = COLOR_TASK_PROMOTE },
+    TaskData().apply { id = GROUP_ID_CREATE;    name = "创作"; color = COLOR_TASK_CREATE }
+)*/
 
 val TASK_GROUP_TOP_PRESET = listOf(
 

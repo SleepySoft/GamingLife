@@ -58,6 +58,14 @@ object GlService {
         return ptasks.filter { it.group == groupID }
     }
 
+    fun getStartedPeriodicTasks() : List< PeriodicTask > {
+        return GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+    }
+
+    fun syncPeriodicTaskToRuntime() {
+        val configPeriodicTask = GlRoot.systemConfig.periodicTaskEditor.getGlDataList()
+    }
+
     // ----------------------- Task Switching -----------------------
 
     fun switchToTask(taskData: TaskData) {

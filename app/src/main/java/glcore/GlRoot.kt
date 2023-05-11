@@ -15,13 +15,15 @@ object GlRoot {
 
     const val ERROR_FILE_PERMISSION = 16
     const val ERROR_SYSTEM_CONFIG = 32
-    const val ERROR_DAILY_RECORD = 64
+    const val ERROR_RUNTIME_DATA = 64
+    const val ERROR_DAILY_RECORD = 128
 
     private var mInited = false
 
     lateinit var env: GlEnv
 
     val dailyRecord = GlDailyRecord()
+    val runtimeData = GlRuntimeData()
     val systemConfig = GlSystemConfig()
 
     val glHttpRequest = GlHttpRequest(SERVICE_LOCAL)
@@ -46,6 +48,10 @@ object GlRoot {
 
         if (!(systemConfig.loadSystemConfig() || systemConfig.rebuildSystemConfig())) {
             errorCode = errorCode and ERROR_SYSTEM_CONFIG
+        }
+
+        if (!(runtimeData.loadRuntimeData() || runtimeData.buildRuntimeData())) {
+            errorCode = errorCode and ERROR_RUNTIME_DATA
         }
 
         if (!(dailyRecord.loadDailyRecord(0) || dailyRecord.newDailyRecord())) {

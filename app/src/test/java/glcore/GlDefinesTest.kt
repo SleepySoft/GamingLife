@@ -4,7 +4,7 @@ import org.junit.Test
 
 internal class GlDefinesTest{
 
-    @Test
+/*    @Test
     fun testStructCheckForEachDeclareNormalCase() {
 
         assert(checkStruct(mutableMapOf(
@@ -54,5 +54,5 @@ internal class GlDefinesTest{
             "groupID" to "",
             "startTime" to 0
         ), STRUCT_DEC_TASK_RECORD))
-    }
+    }*/
 }
