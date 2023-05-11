@@ -18,7 +18,8 @@
     "timeQuality": "Int",
     "timeEstimation": "Int",
     "batch": "Int",
-    "batchSize": "Int"
+    "batchSize": "Int",
+    "dueDateTime": "Long"
   },
 
   "StageGoal": {

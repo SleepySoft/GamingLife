@@ -133,6 +133,7 @@ open class PeriodicTask : IGlDeclare() {
     var timeEstimation: Int = 0
     var batch: Int = 0
     var batchSize: Int = 0
+    var dueDateTime: Long = 0L
     
     override var uuid: String = randomUUID()
     
@@ -143,7 +144,8 @@ open class PeriodicTask : IGlDeclare() {
         "timeQuality" to Int::class, 
         "timeEstimation" to Int::class, 
         "batch" to Int::class, 
-        "batchSize" to Int::class
+        "batchSize" to Int::class, 
+        "dueDateTime" to Long::class
     )
     
     companion object {
@@ -173,6 +175,7 @@ open class PeriodicTask : IGlDeclare() {
             timeEstimation = anyStruct.get("timeEstimation") as Int
             batch = anyStruct.get("batch") as Int
             batchSize = anyStruct.get("batchSize") as Int
+            dueDateTime = anyStruct.get("dueDateTime") as Long
             true
         }
         else {
@@ -191,7 +194,8 @@ open class PeriodicTask : IGlDeclare() {
             "timeQuality" to timeQuality, 
             "timeEstimation" to timeEstimation, 
             "batch" to batch, 
-            "batchSize" to batchSize
+            "batchSize" to batchSize, 
+            "dueDateTime" to dueDateTime
         )
     }
 }

@@ -60,6 +60,7 @@ const val GROUP_ID_CREATE = "fa94a546-beeb-4570-b266-c066a4a31233"
 
 // --------------------------------------------- Enum ----------------------------------------------
 
+const val ENUM_TASK_PERIOD_ONESHOT = 0
 const val ENUM_TASK_PERIOD_DAILY = 1
 const val ENUM_TASK_PERIOD_WEEKLY = 7
 const val ENUM_TASK_PERIOD_BI_WEEK = 14
@@ -67,6 +68,7 @@ const val ENUM_TASK_PERIOD_MONTHLY = 30
 const val ENUM_TASK_PERIOD_QUARTERLY = 90
 
 val ENUM_TASK_PERIOD_ARRAY = listOf(
+    ENUM_TASK_PERIOD_ONESHOT,
     ENUM_TASK_PERIOD_DAILY,
     ENUM_TASK_PERIOD_WEEKLY,
     ENUM_TASK_PERIOD_BI_WEEK,
