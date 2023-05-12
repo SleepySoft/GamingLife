@@ -93,9 +93,21 @@ object GlService {
     fun finishPeriodicTask(taskId: String) {
         val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
         startedPeriodicTask.find { it.id == taskId }?.run {
-            conclusion = ENUM_TASK_CONCLUSION_FINISHED
-            GlRoot.dailyRecord.periodicTaskRecord.upsertGlData(this.copy() as PeriodicTask)
-            GlRoot.dailyRecord.saveDailyRecord()
+            if (this.batchRemaining > this.batch) {
+                // Should not enter here
+                this.batchRemaining = this.batch
+                println("Warning: Remaining batch is larger than batch.")
+            }
+            if (this.batchRemaining > 0) {
+                this.batchRemaining -= 1
+            }
+            if (this.batchRemaining == 0) {
+                conclusion = ENUM_TASK_CONCLUSION_FINISHED
+                GlRoot.dailyRecord.periodicTaskRecord.upsertGlData(this.copy() as PeriodicTask)
+                GlRoot.dailyRecord.saveDailyRecord()
+            } else {
+                conclusion = ENUM_TASK_CONCLUSION_NONE
+            }
             GlRoot.runtimeData.saveRuntimeData()
         }
     }

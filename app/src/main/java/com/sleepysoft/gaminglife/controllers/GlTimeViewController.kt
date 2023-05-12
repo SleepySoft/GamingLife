@@ -86,6 +86,7 @@ class GlTimeViewController(
             val taskData = item.itemData as? TaskData
             taskData?.run {
                 val ptasks = GlService.getStartedPeriodicTasksByGroup(taskData.id)
+                // Optional: Task count or busy task count
                 // if (GlService.countBusyPeriodicTask(ptasks) > 0) {
                 if (ptasks.isNotEmpty()) {
                     mCtrlContext.launchActivity(AdventureTaskExecuteActivity::class.java, null) {
