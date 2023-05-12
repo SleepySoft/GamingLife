@@ -206,6 +206,7 @@ abstract class IGlDeclare : IGlObject {
 
     abstract fun fromAnyStruct(data: Any?) : Boolean
     abstract fun toAnyStruct() : GlAnyStruct
+    abstract fun copy() : IGlDeclare
 }
 
 /*val STRUCT_DEC_TASK_DATA : GlStructDeclare = mapOf< String, KClass< * > >(

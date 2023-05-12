@@ -1,0 +1,32 @@
+AdventureTaskListActivity
+
+
+生成android的TableLayout，两列。下面的描述用|分隔列，用换行分隔行
+
+“任务类型” | 6个imageview，默认显示ic_main
+“任务名” | textview
+“任务周期” | combox，可以选择“每日，每周，每两周，每月，每季度”
+"任务量化" | 单选radio：“不可分割任务“，”批次任务”
+“批次” | 可输入数字的combox，可以选择1 - 10
+“单次数量” | 一个可拖动bar，范围1 - 100；一个输入框，联动bar
+
+按我后续提示生成
+
+
+
+
+spinnerTaskGroup = findViewById<View>(R.id.spinner_task_group) as Spinner
+seekBatchSize = findViewById(R.id.seek_batch_size)
+editBatchSize = findViewById(R.id.edit_batch_size)
+textTaskName = findViewById(R.id.text_task_name)
+spinnerBatch = findViewById(R.id.spinner_batch)
+spinnerTaskPeriod = findViewById(R.id.spinner_task_period)
+radioSingle = findViewById(R.id.radio_single)
+radioBatch = findViewById(R.id.radio_batch)
+
+
+当seekBatchSize变化的时候editBatchSize的值同步更新，反之亦然
+
+分别获取spinnerTaskGroup，textTaskName，spinnerTaskPeriod，radioSingle， radioBatch，spinnerBatch，editBatchSize的当前值。radioSingle， radioBatch被选中分别为0和1。editBatchSize为整数。
+
+

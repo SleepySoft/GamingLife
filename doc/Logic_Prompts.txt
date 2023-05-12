@@ -1,0 +1,102 @@
+有configPeriodicTask和startedPeriodicTask两个列表，里面的内容是
+
+open class PeriodicTask {
+	val uuid: String
+    var id: String = ""
+    var name: String = ""
+    var group: String = ""
+    var periodic: Int = 0
+    var timeQuality: Int = 0
+    var timeEstimation: Int = 0
+    var batch: Int = 0
+    var batchSize: Int = 0
+    // This section is for Task Planning
+    var dueDateTime: Long = 0L
+    // This section is for Task Execution and Conclusion
+    var batchRemaining: Int = 0
+    var conclusion: Int = 0
+    var conclusionTs: Long = 0L
+}
+
+PeriodicTask.id为对象的唯一标识
+我希望
+1.根据id从startedPeriodicTask中移除configPeriodicTask中不存在的元素
+2.对于configPeriodicTask的所有元素，如果同时存在于startedPeriodicTask中，则将startedPeriodicTask中的该元素除dueDateTime， batchRemaining，conclusion，conclusionTs之外的所有属性更新成configPeriodicTask中的内容。否则直接将元素复制并更加入startedPeriodicTask。
+
+
+
+
+
+
+
+根据语义，帮我完成这个函数：fun checkRefreshPeriodicTask() {
+ val dayStartTs = GlDateTime.dayStartTimeStamp()
+ val weekStartTs = GlDateTime.weekStartTimeStamp()
+ val monthStartTs = GlDateTime.monthStartTimeStamp()
+ val quarterStartTs = GlDateTime.quarterStartTimeStamp()
+
+ val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+ for (startedTask in startedPeriodicTask) {
+ if (startedTask.periodic == ENUM_TASK_PERIOD_ONESHOT) {
+ // Do nothing
+ } else if (startedTask.periodic == ENUM_TASK_PERIOD_DAILY) {
+ if (startedTask.refreshTs != dayStartTs) {
+ startedTask.dueDateTime = 0
+ startedTask.batchRemaining = startedTask.batch
+ startedTask.conclusion = ENUM_TASK_CONCLUSION_NONE
+ startedTask.conclusionTs = 0L
+ }
+ } else if (startedTask.periodic == ENUM_TASK_PERIOD_WEEKLY) {
+
+ } else if (startedTask.periodic == ENUM_TASK_PERIOD_BI_WEEK) {
+
+ } else if (startedTask.periodic == ENUM_TASK_PERIOD_MONTHLY) {
+
+ } else if (startedTask.periodic == ENUM_TASK_PERIOD_QUARTERLY) {
+
+ }
+ }
+}
+
+
+
+
+
+fun executePeriodicTask(newTaskId: String, pervTaskConclusion: Int = ENUM_TASK_CONCLUSION_NONE) {
+	val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+}
+完成这个函数。遍历列表通过id找到对应task，把它的conclusion置为ENUM_TASK_CONCLUSION_DOING。如果存在其它的task的conclusion为ENUM_TASK_CONCLUSION_DOING，则将其conclusion置为pervTaskConclusion。
+
+
+
+
+holder.buttonPlay.setOnClickListener {
+	GlService.executePeriodicTask(ptask.id, ENUM_TASK_CONCLUSION_NONE)
+}
+
+holder.buttonGoal.setOnClickListener {
+	GlService.setPeriodicTaskConclusion(ptask.id, ENUM_TASK_CONCLUSION_FINISHED)
+}
+
+holder.buttonPause.setOnClickListener {
+	GlService.setPeriodicTaskConclusion(ptask.id, ENUM_TASK_CONCLUSION_NONE)
+}
+
+holder.buttonAbandon.setOnClickListener {
+	GlService.setPeriodicTaskConclusion(ptask.id, ENUM_TASK_CONCLUSION_ABANDONED)
+}
+			
+帮我加上弹出确认提示，分别是“是否开始/完成/挂起/取消这个任务？”。如果选是，则继续执行，否则不做任何事情。
+
+
+
+
+private var mPeriodicTasks: List< PeriodicTask > =
+	if (filterGroup.isNotEmpty()) {
+		GlService.getPeriodicTasksByGroup(filterGroup)
+	} else {
+		GlService.getPeriodicTasks()
+	}
+把获得的列表按其中元素的conclusion成员的值进行排序：ENUM_TASK_CONCLUSION_DOING > ENUM_TASK_CONCLUSION_NONE > ENUM_TASK_CONCLUSION_FINISHED > ENUM_TASK_CONCLUSION_ABANDONED
+
+

@@ -315,6 +315,10 @@ class GlDataListEditor<T : IGlDeclare>(
         }
     }
 
+    fun clearGlData() {
+        dataList.clear()
+    }
+
     fun removeGlData(uuid: String) {
         dataList.removeAll { it.uuid == uuid }
     }

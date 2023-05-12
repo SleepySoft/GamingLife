@@ -70,6 +70,14 @@ open class TaskData : IGlDeclare() {
             "color" to color
         )
     }
+
+    override fun copy() : IGlDeclare {
+        return TaskData().apply {
+            id = this@TaskData.id
+            name = this@TaskData.name
+            color = this@TaskData.color
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -132,6 +140,14 @@ open class TaskRecord : IGlDeclare() {
             "groupID" to groupID, 
             "startTime" to startTime
         )
+    }
+
+    override fun copy() : IGlDeclare {
+        return TaskRecord().apply {
+            taskID = this@TaskRecord.taskID
+            groupID = this@TaskRecord.groupID
+            startTime = this@TaskRecord.startTime
+        }
     }
 }
 
@@ -239,6 +255,24 @@ open class PeriodicTask : IGlDeclare() {
             "conclusionTs" to conclusionTs
         )
     }
+
+    override fun copy() : IGlDeclare {
+        return PeriodicTask().apply {
+            id = this@PeriodicTask.id
+            name = this@PeriodicTask.name
+            group = this@PeriodicTask.group
+            periodic = this@PeriodicTask.periodic
+            timeQuality = this@PeriodicTask.timeQuality
+            timeEstimation = this@PeriodicTask.timeEstimation
+            batch = this@PeriodicTask.batch
+            batchSize = this@PeriodicTask.batchSize
+            dueDateTime = this@PeriodicTask.dueDateTime
+            refreshTs = this@PeriodicTask.refreshTs
+            batchRemaining = this@PeriodicTask.batchRemaining
+            conclusion = this@PeriodicTask.conclusion
+            conclusionTs = this@PeriodicTask.conclusionTs
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -301,6 +335,14 @@ open class StageGoal : IGlDeclare() {
             "goalCount" to goalCount, 
             "continuous" to continuous
         )
+    }
+
+    override fun copy() : IGlDeclare {
+        return StageGoal().apply {
+            taskID = this@StageGoal.taskID
+            goalCount = this@StageGoal.goalCount
+            continuous = this@StageGoal.continuous
+        }
     }
 }
 

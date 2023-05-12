@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import androidx.annotation.RequiresApi
+import com.sleepysoft.gaminglife.activities.AdventureTaskExecuteActivity
 import glcore.*
 import graphengine.*
 import kotlin.math.cos
@@ -58,10 +59,11 @@ class GlTimeViewController(
             val taskData = item.itemData as? TaskData
             taskData?.let {
                 val ptasks = GlService.getStartedPeriodicTasksByGroup(taskData.id)
+                val busyCount = GlService.countBusyPeriodicTask(ptasks)
                 item.service.serviceCall(
-                    "CornerTextDecorator.setText", ptasks.size.toString())
+                    "CornerTextDecorator.setText", busyCount.toString())
                 item.service.serviceCall(
-                    "CornerTextDecorator.setVisible", ptasks.isNotEmpty())
+                    "CornerTextDecorator.setVisible", busyCount > 0)
             }
         }
         mCtrlContext.refresh()
@@ -80,6 +82,18 @@ class GlTimeViewController(
     // ----------------------- Implements GraphInteractiveListener interface -----------------------
 
     override fun onItemClicked(item: GraphItem) {
+        if (item in mSurroundItems) {
+            val taskData = item.itemData as? TaskData
+            taskData?.run {
+                val ptasks = GlService.getStartedPeriodicTasksByGroup(taskData.id)
+                // if (GlService.countBusyPeriodicTask(ptasks) > 0) {
+                if (ptasks.isNotEmpty()) {
+                    mCtrlContext.launchActivity(AdventureTaskExecuteActivity::class.java, null) {
+                        it.putExtra("group", this.id)
+                    }
+                }
+            }
+        }
 /*        if (item == mMenuDailyStatistics) {
             // mCtrlContext.launchActivity(DailyBrowseActivity::class.java)
             mCtrlContext.launchActivity(DailyCalendarActivity::class.java)

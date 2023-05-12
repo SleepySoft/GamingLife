@@ -4,11 +4,13 @@ package glcore
 // --------------------------------------------- Enum ----------------------------------------------
 
 const val ENUM_TASK_CONCLUSION_NONE = 0
-const val ENUM_TASK_CONCLUSION_FINISHED = 1
-const val ENUM_TASK_CONCLUSION_ABANDONED = 2
+const val ENUM_TASK_CONCLUSION_DOING = 1
+const val ENUM_TASK_CONCLUSION_FINISHED = 2
+const val ENUM_TASK_CONCLUSION_ABANDONED = 3
 
 val ENUM_TASK_CONCLUSION_ARRAY = listOf(
     ENUM_TASK_CONCLUSION_NONE,
+    ENUM_TASK_CONCLUSION_DOING,
     ENUM_TASK_CONCLUSION_FINISHED,
     ENUM_TASK_CONCLUSION_ABANDONED
 )

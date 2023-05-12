@@ -40,6 +40,10 @@ class GlDailyRecord {
     var dailyTs: Long = 0
     var originDate: Date = Date()
     var taskRecords: MutableList< TaskRecord > = mutableListOf()
+
+    var periodicTaskRecord: GlDataListEditor< PeriodicTask > =
+        GlDataListEditor(dailyRecord, PATH_DAILY_PERIODIC_TASK_RECORD) { PeriodicTask.factory() }
+
     // val dailyGroupTime: MutableMap< String , Long > = mutableMapOf()
 
     // --------------------------------------- New Save Load ---------------------------------------
@@ -63,6 +67,9 @@ class GlDailyRecord {
         dailyTs = GlDateTime.dayStartTimeStamp()
         taskRecords = mutableListOf()
 
+        periodicTaskRecord.clearGlData()
+
+
         return saveDailyRecord()
     }
 
@@ -74,6 +81,7 @@ class GlDailyRecord {
         dailyTs = 0
         originDate = Date()
         taskRecords = mutableListOf()
+        periodicTaskRecord.clearGlData()
     }
 
     fun loadDailyRecord(dateTime: Date) : Boolean {
@@ -107,6 +115,7 @@ class GlDailyRecord {
     fun saveDailyRecord() : Boolean {
         val pathDict = IGlDeclare.toAnyStructList(taskRecords)
         dailyRecord.set(PATH_DAILY_TASK_RECORD, pathDict)
+        periodicTaskRecord.syncDown()
         return savePathDict(dailyFile, dailyRecord)
 
 /*        if (dailyTs == GlDateTime.dayStartTimeStamp()) {
@@ -180,6 +189,8 @@ class GlDailyRecord {
             if ((dailyTs == 0L) || (dailyRecord == null)) {
                 return false
             }
+
+            periodicTaskRecord.syncUp()
 
             GlLog.i("Parsing daily data ${Date(dailyTs)} ...")
 

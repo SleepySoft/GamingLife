@@ -85,6 +85,12 @@ open class <<class_name>> : IGlDeclare() {
 <<to_any_struct_area>>
         )
     }
+
+    override fun copy() : IGlDeclare {
+        return <<class_name>>().apply {
+<<copy_area>>
+        }
+    }
 }
 """
 
@@ -93,6 +99,7 @@ try:
     with open('GlDataDeclare.json', 'rt', encoding='utf-8') as f:
         json_dict = json.load(f)
         for class_name, class_declare in json_dict.items():
+            copy_area = []
             member_area = []
             struct_dec_area = []
             from_any_struct_area = []
@@ -104,12 +111,14 @@ try:
                     else:
                         pass
                 else:
+                    copy_area.append('            %s = this@%s.%s' % (member, class_name, member))
                     member_area.append('    var %s: %s = %s' % (member, member_type, INIT_VALUE_TABLE[member_type]))
                     struct_dec_area.append('        "%s" to %s::class' % (member, member_type))
                     from_any_struct_area.append('            %s = anyStruct["%s"] as? %s ?: %s' % (member, member, member_type, INIT_VALUE_TABLE[member_type]))
                     to_any_struct_area.append('            "%s" to %s' % (member, member))
             data_declare_code = GL_DATA_CLASS_TEMPLATE.\
                 replace('<<class_name>>', class_name).\
+                replace('<<copy_area>>', '\n'.join(copy_area)).\
                 replace('<<member_area>>', '\n'.join(member_area)).\
                 replace('<<struct_dec_area>>', ', \n'.join(struct_dec_area)).\
                 replace('<<from_any_struct_area>>', '\n'.join(from_any_struct_area)).\

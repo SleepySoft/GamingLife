@@ -476,13 +476,19 @@ class InteractiveDecorator(
         }
     }
 
-/*    override fun onActionClick(pos: PointF) : ActionHandler.ACT {
-        GlLog.i("InteractiveDecorator.onActionClick [$decoratedItem]")
+    override fun onActionClick(pos: PointF) : ActionHandler.ACT {
+        return if (decoratedItem.visible &&
+            decoratedItem.boundRect().contains(pos.x, pos.y)) {
 
-        interactiveListener?.onItemClicked(decoratedItem)
-        context.invalidate()
-        return ActionHandler.ACT.HANDLED
-    }*/
+            GlLog.i("InteractiveDecorator.onActionClick [$decoratedItem]")
+
+            interactiveListener?.onItemClicked(decoratedItem)
+
+            ActionHandler.ACT.HANDLED
+        } else {
+            ActionHandler.ACT.IGNORED
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onActionSelect(pos: PointF): ActionHandler.ACT {

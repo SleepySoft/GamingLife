@@ -60,6 +60,15 @@ object GlService {
         return ptasks.filter { it.group == groupID }
     }
 
+    // ---------------------------------------------------------------------------------------------
+
+    fun countBusyPeriodicTask(tasks: List<PeriodicTask>): Int {
+        return tasks.filter {
+            it.conclusion != ENUM_TASK_CONCLUSION_FINISHED &&
+            it.conclusion != ENUM_TASK_CONCLUSION_ABANDONED
+        }.count()
+    }
+
     fun getStartedPeriodicTasks() : List< PeriodicTask > {
         return GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
     }
@@ -67,6 +76,44 @@ object GlService {
     fun getStartedPeriodicTasksByGroup(groupID: String) : List< PeriodicTask > {
         val ptasks = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
         return ptasks.filter { it.group == groupID }
+    }
+
+    fun executePeriodicTask(newTaskId: String, pervTaskConclusion: Int = ENUM_TASK_CONCLUSION_NONE) {
+        val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+        for (task in startedPeriodicTask) {
+            if (task.id == newTaskId) {
+                task.conclusion = ENUM_TASK_CONCLUSION_DOING
+            } else if (task.conclusion == ENUM_TASK_CONCLUSION_DOING) {
+                task.conclusion = pervTaskConclusion
+            }
+        }
+        GlRoot.runtimeData.saveRuntimeData()
+    }
+
+    fun finishPeriodicTask(taskId: String) {
+        val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+        startedPeriodicTask.find { it.id == taskId }?.run {
+            conclusion = ENUM_TASK_CONCLUSION_FINISHED
+            GlRoot.dailyRecord.periodicTaskRecord.upsertGlData(this.copy() as PeriodicTask)
+            GlRoot.dailyRecord.saveDailyRecord()
+            GlRoot.runtimeData.saveRuntimeData()
+        }
+    }
+
+    fun suspendPeriodicTask(taskId: String) {
+        val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+        startedPeriodicTask.find { it.id == taskId }?.conclusion = ENUM_TASK_CONCLUSION_NONE
+        GlRoot.runtimeData.saveRuntimeData()
+    }
+
+    fun abandonPeriodicTask(taskId: String) {
+        val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+        startedPeriodicTask.find { it.id == taskId }?.run {
+            conclusion = ENUM_TASK_CONCLUSION_ABANDONED
+            GlRoot.dailyRecord.periodicTaskRecord.upsertGlData(this.copy() as PeriodicTask)
+            GlRoot.dailyRecord.saveDailyRecord()
+            GlRoot.runtimeData.saveRuntimeData()
+        }
     }
 
     fun syncPeriodicTaskToRuntime() {
@@ -102,6 +149,7 @@ object GlService {
                 startedPeriodicTask.add(newStartedTask)
             }
         }
+        GlRoot.runtimeData.saveRuntimeData()
     }
 
     fun checkRefreshPeriodicTask() {
@@ -121,6 +169,7 @@ object GlService {
                 ENUM_TASK_PERIOD_QUARTERLY -> quarterStartTs
                 else -> null
             }
+            var refreshed = false
             if (refreshTs != null && startedTask.refreshTs != refreshTs) {
                 if (startedTask.conclusion != ENUM_TASK_CONCLUSION_NONE) {
                     // TODO: Process Un-finished task
@@ -130,10 +179,16 @@ object GlService {
                 startedTask.batchRemaining = startedTask.batch
                 startedTask.conclusion = ENUM_TASK_CONCLUSION_NONE
                 startedTask.conclusionTs = 0L
+
+                refreshed = true
+            }
+            if (refreshed) {
+                GlRoot.runtimeData.saveRuntimeData()
             }
         }
     }
 
+    // ---------------------------------------------------------------------------------------------
 
 
     // ----------------------- Task Switching -----------------------
