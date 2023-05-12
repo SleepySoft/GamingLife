@@ -41,16 +41,22 @@ open class TaskData : IGlDeclare() {
 
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = castToAnyStruct(data)
-        dataValid = if (checkStruct(anyStruct, structDeclare)) {
+        
+        // Only show warnings
+        checkStruct(anyStruct, structDeclare, checkAll=true)
+        
+        dataValid = try {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
             id = anyStruct["id"] as? String ?: ""
             name = anyStruct["name"] as? String ?: ""
             color = anyStruct["color"] as? String ?: ""
             true
-        }
-        else {
+        } catch (e: Exception) {
+            println("Parse TaskData fail: $e")
             false
+        } finally {
+        
         }
         return dataValid
     }
@@ -98,16 +104,22 @@ open class TaskRecord : IGlDeclare() {
 
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = castToAnyStruct(data)
-        dataValid = if (checkStruct(anyStruct, structDeclare)) {
+        
+        // Only show warnings
+        checkStruct(anyStruct, structDeclare, checkAll=true)
+        
+        dataValid = try {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
             taskID = anyStruct["taskID"] as? String ?: ""
             groupID = anyStruct["groupID"] as? String ?: ""
             startTime = anyStruct["startTime"] as? Long ?: 0L
             true
-        }
-        else {
+        } catch (e: Exception) {
+            println("Parse TaskRecord fail: $e")
             false
+        } finally {
+        
         }
         return dataValid
     }
@@ -178,7 +190,11 @@ open class PeriodicTask : IGlDeclare() {
 
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = castToAnyStruct(data)
-        dataValid = if (checkStruct(anyStruct, structDeclare)) {
+        
+        // Only show warnings
+        checkStruct(anyStruct, structDeclare, checkAll=true)
+        
+        dataValid = try {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
             id = anyStruct["id"] as? String ?: ""
@@ -195,9 +211,11 @@ open class PeriodicTask : IGlDeclare() {
             conclusion = anyStruct["conclusion"] as? Int ?: 0
             conclusionTs = anyStruct["conclusionTs"] as? Long ?: 0L
             true
-        }
-        else {
+        } catch (e: Exception) {
+            println("Parse PeriodicTask fail: $e")
             false
+        } finally {
+        
         }
         return dataValid
     }
@@ -255,16 +273,22 @@ open class StageGoal : IGlDeclare() {
 
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = castToAnyStruct(data)
-        dataValid = if (checkStruct(anyStruct, structDeclare)) {
+        
+        // Only show warnings
+        checkStruct(anyStruct, structDeclare, checkAll=true)
+        
+        dataValid = try {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
             taskID = anyStruct["taskID"] as? String ?: ""
             goalCount = anyStruct["goalCount"] as? String ?: ""
             continuous = anyStruct["continuous"] as? Boolean ?: false
             true
-        }
-        else {
+        } catch (e: Exception) {
+            println("Parse StageGoal fail: $e")
             false
+        } finally {
+        
         }
         return dataValid
     }

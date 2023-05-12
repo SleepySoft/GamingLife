@@ -154,20 +154,24 @@ fun castToStrStruct(data: Any?) : GlStrStruct {
 
 
 fun checkStruct(structDict: GlAnyStruct,
-                structDeclare: GlStructDeclare) : Boolean {
+                structDeclare: GlStructDeclare,
+                checkAll: Boolean = false) : Boolean {
+    var result = true
     for ((k, v) in structDeclare) {
         if (v == Any::class) {
             // Accept all
             continue
         }
         if ((structDict[k] == null) || (structDict[k]!!::class != v)) {
-            // User println for Unit Test
-            System.out.println(
-                "Structure mismatch: Field [$k], Expect [$v], But [${structDict[k]}]")
-            return false
+            // TODO: Long type check may fail here (the digits from json are all Int). Should fix this.
+            println("Structure mismatch: Field [$k], Expect [$v], But [${structDict[k]}]")
+            result = false
+            if (!checkAll) {
+                break
+            }
         }
     }
-    return true;
+    return result
 }
 
 fun checkListOfStruct(structDictList: List< GlAnyStruct >,

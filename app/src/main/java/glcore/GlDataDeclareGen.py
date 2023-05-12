@@ -60,14 +60,20 @@ open class <<class_name>> : IGlDeclare() {
 
     override fun fromAnyStruct(data: Any?): Boolean {
         val anyStruct = castToAnyStruct(data)
-        dataValid = if (checkStruct(anyStruct, structDeclare)) {
+        
+        // Only show warnings
+        checkStruct(anyStruct, structDeclare, checkAll=true)
+        
+        dataValid = try {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
 <<from_any_struct_area>>
             true
-        }
-        else {
+        } catch (e: Exception) {
+            println("Parse <<class_name>> fail: $e")
             false
+        } finally {
+        
         }
         return dataValid
     }
