@@ -24,7 +24,10 @@
     "@comments_1": "This section is for Task Planning",
     "dueDateTime": "Long",
 
-    "@comments_2": "This section is for Task Execution and Conclusion",
+    "@comments_2": "This section is for Task refresh time check",
+    "refreshTs": "Long",
+
+    "@comments_3": "This section is for Task Execution and Conclusion",
     "batchRemaining": "Int",
     "conclusion": "Int",
     "conclusionTs": "Long"

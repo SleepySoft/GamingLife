@@ -19,11 +19,13 @@ const val PATH_SYSTEM_PERIODIC_TASK = "/Config/User/Adventure/PeriodicTaskList"
 
 const val PATH_RUNTIME_CURRENT_TASK = "/Runtime/TimeModule/CurrentTask"             // v as STRUCT_DEC_TASK_RECORD
 
+/*
 const val PATH_RUNTIME_PERIOD_DAILY_START_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/Daily"
 const val PATH_RUNTIME_PERIOD_WEEKLY_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/Weekly"
 const val PATH_RUNTIME_PERIOD_BIWEEKLY_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/BiWeekly"
 const val PATH_RUNTIME_PERIOD_MONTHLY_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/Monthly"
 const val PATH_RUNTIME_PERIOD_QUARTERLY_START_TS = "/Runtime/TimeModule/PeriodStartTimeStamp/Quarterly"
+*/
 
 const val PATH_RUNTIME_PERIODIC_TASKS_STARTED = "/Runtime/TimeModule/PeriodicTasksThatStarted"
 

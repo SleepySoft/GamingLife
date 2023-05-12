@@ -8,6 +8,8 @@ import java.util.*
 
 object GlService {
 
+    fun saveDailyRecord() = GlRoot.dailyRecord.saveDailyRecord()
+    fun saveRuntimeData() = GlRoot.runtimeData.saveRuntimeData()
     fun saveSystemConfig() = GlRoot.systemConfig.saveSystemConfig()
 
     fun saveContentToDailyFolder(content: ByteArray, fileSuffix: String, offsetDays: Int = 0) =
@@ -62,9 +64,77 @@ object GlService {
         return GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
     }
 
+    fun getStartedPeriodicTasksByGroup(groupID: String) : List< PeriodicTask > {
+        val ptasks = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+        return ptasks.filter { it.group == groupID }
+    }
+
     fun syncPeriodicTaskToRuntime() {
         val configPeriodicTask = GlRoot.systemConfig.periodicTaskEditor.getGlDataList()
+        val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+
+        val configIds = configPeriodicTask.map { it.id }.toSet()
+        startedPeriodicTask.removeIf { it.id !in configIds }
+
+        val startedMap = startedPeriodicTask.associateBy { it.id }
+        for (configTask in configPeriodicTask) {
+            val startedTask = startedMap[configTask.id]
+            if (startedTask != null) {
+                startedTask.id = configTask.id
+                startedTask.name = configTask.name
+                startedTask.group = configTask.group
+                startedTask.periodic = configTask.periodic
+                startedTask.timeQuality = configTask.timeQuality
+                startedTask.timeEstimation = configTask.timeEstimation
+                startedTask.batch = configTask.batch
+                startedTask.batchSize = configTask.batchSize
+            } else {
+                val newStartedTask = PeriodicTask().apply {
+                    id = configTask.id
+                    name = configTask.name
+                    group = configTask.group
+                    periodic = configTask.periodic
+                    timeQuality = configTask.timeQuality
+                    timeEstimation = configTask.timeEstimation
+                    batch = configTask.batch
+                    batchSize = configTask.batchSize
+                }
+                startedPeriodicTask.add(newStartedTask)
+            }
+        }
     }
+
+    fun checkRefreshPeriodicTask() {
+        val dayStartTs = GlDateTime.dayStartTimeStamp()
+        val weekStartTs = GlDateTime.weekStartTimeStamp()
+        val monthStartTs = GlDateTime.monthStartTimeStamp()
+        val quarterStartTs = GlDateTime.quarterStartTimeStamp()
+
+        val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+        for (startedTask in startedPeriodicTask) {
+            val refreshTs = when (startedTask.periodic) {
+                ENUM_TASK_PERIOD_ONESHOT -> null
+                ENUM_TASK_PERIOD_DAILY -> dayStartTs
+                ENUM_TASK_PERIOD_WEEKLY -> weekStartTs
+                ENUM_TASK_PERIOD_BI_WEEK -> if (startedTask.refreshTs < weekStartTs - 7 * 24 * 3600) weekStartTs else null
+                ENUM_TASK_PERIOD_MONTHLY -> monthStartTs
+                ENUM_TASK_PERIOD_QUARTERLY -> quarterStartTs
+                else -> null
+            }
+            if (refreshTs != null && startedTask.refreshTs != refreshTs) {
+                if (startedTask.conclusion != ENUM_TASK_CONCLUSION_NONE) {
+                    // TODO: Process Un-finished task
+                }
+                startedTask.dueDateTime = 0
+                startedTask.refreshTs = refreshTs
+                startedTask.batchRemaining = startedTask.batch
+                startedTask.conclusion = ENUM_TASK_CONCLUSION_NONE
+                startedTask.conclusionTs = 0L
+            }
+        }
+    }
+
+
 
     // ----------------------- Task Switching -----------------------
 

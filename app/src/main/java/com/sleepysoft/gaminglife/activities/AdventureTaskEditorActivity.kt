@@ -13,7 +13,8 @@ import glcore.*
 
 
 class AdventureTaskEditorActivity : AppCompatActivity() {
-    private var editDatUuid = ""
+    private var editTaskId = ""
+    private var editDataUuid = ""
 
     private lateinit var spinnerTaskGroup: Spinner
     private lateinit var textTaskName: EditText
@@ -69,8 +70,8 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
         buttonOk.setOnClickListener {
             val periodicTaskData = ui_to_data()
             if (periodicTaskData.uuid.isNotEmpty()) {
-                if (editDatUuid.isNotEmpty()) {
-                    periodicTaskData.uuid = editDatUuid
+                if (editDataUuid.isNotEmpty()) {
+                    periodicTaskData.uuid = editDataUuid
                 }
                 GlService.upsertPeriodicTask(periodicTaskData)
                 finishWithResult(mapOf(), true)
@@ -132,19 +133,21 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
 
         // ----------------------------------------------------------
 
-        editDatUuid = intent.getStringExtra("edit") ?: ""
+        editDataUuid = intent.getStringExtra("edit") ?: ""
         val data: PeriodicTask? =
-            if (editDatUuid.isNotEmpty()) {
-                GlService.getPeriodicTask(editDatUuid)
+            if (editDataUuid.isNotEmpty()) {
+                GlService.getPeriodicTask(editDataUuid)
             } else {
                 null
             }
 
-        if (data != null) {
+        editTaskId = if (data != null) {
             data_to_ui(data)
+            data.id
         } else {
             editTimeEstimation.setText("5")
             editBatchSize.setText("1")
+            randomUUID()
         }
     }
 
@@ -188,6 +191,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
         }
 
         return PeriodicTask().apply {
+            this.id = editTaskId
             this.name = taskName
             this.group = taskGroupId
             this.periodic = ENUM_TASK_PERIOD_ARRAY[taskPeriod]

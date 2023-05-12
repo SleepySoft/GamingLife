@@ -57,7 +57,7 @@ class GlTimeViewController(
         for (item in mSurroundItems) {
             val taskData = item.itemData as? TaskData
             taskData?.let {
-                val ptasks = GlService.getPeriodicTasksByGroup(taskData.id)
+                val ptasks = GlService.getStartedPeriodicTasksByGroup(taskData.id)
                 item.service.serviceCall(
                     "CornerTextDecorator.setText", ptasks.size.toString())
                 item.service.serviceCall(

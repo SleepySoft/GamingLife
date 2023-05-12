@@ -100,7 +100,7 @@ try:
                 else:
                     member_area.append('    var %s: %s = %s' % (member, member_type, INIT_VALUE_TABLE[member_type]))
                     struct_dec_area.append('        "%s" to %s::class' % (member, member_type))
-                    from_any_struct_area.append('            %s = anyStruct.get("%s") as %s' % (member, member, member_type))
+                    from_any_struct_area.append('            %s = anyStruct["%s"] as? %s ?: %s' % (member, member, member_type, INIT_VALUE_TABLE[member_type]))
                     to_any_struct_area.append('            "%s" to %s' % (member, member))
             data_declare_code = GL_DATA_CLASS_TEMPLATE.\
                 replace('<<class_name>>', class_name).\

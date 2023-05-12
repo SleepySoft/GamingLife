@@ -157,7 +157,10 @@ class AdventureTaskListActivity : AppCompatActivity() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun onDataChanged() {
+        GlService.syncPeriodicTaskToRuntime()
+        GlService.checkRefreshPeriodicTask()
         GlService.saveSystemConfig()
+        GlService.saveRuntimeData()
         recycleViewAdapter.refreshPeriodicTaskList()
         recycleViewAdapter.notifyDataSetChanged()
     }

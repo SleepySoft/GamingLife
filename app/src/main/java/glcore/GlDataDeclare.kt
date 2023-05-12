@@ -44,9 +44,9 @@ open class TaskData : IGlDeclare() {
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
-            id = anyStruct.get("id") as String
-            name = anyStruct.get("name") as String
-            color = anyStruct.get("color") as String
+            id = anyStruct["id"] as? String ?: ""
+            name = anyStruct["name"] as? String ?: ""
+            color = anyStruct["color"] as? String ?: ""
             true
         }
         else {
@@ -101,9 +101,9 @@ open class TaskRecord : IGlDeclare() {
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
-            taskID = anyStruct.get("taskID") as String
-            groupID = anyStruct.get("groupID") as String
-            startTime = anyStruct.get("startTime") as Long
+            taskID = anyStruct["taskID"] as? String ?: ""
+            groupID = anyStruct["groupID"] as? String ?: ""
+            startTime = anyStruct["startTime"] as? Long ?: 0L
             true
         }
         else {
@@ -136,6 +136,8 @@ open class PeriodicTask : IGlDeclare() {
     var batchSize: Int = 0
     // This section is for Task Planning
     var dueDateTime: Long = 0L
+    // This section is for Task refresh time check
+    var refreshTs: Long = 0L
     // This section is for Task Execution and Conclusion
     var batchRemaining: Int = 0
     var conclusion: Int = 0
@@ -153,6 +155,7 @@ open class PeriodicTask : IGlDeclare() {
         "batch" to Int::class, 
         "batchSize" to Int::class, 
         "dueDateTime" to Long::class, 
+        "refreshTs" to Long::class, 
         "batchRemaining" to Int::class, 
         "conclusion" to Int::class, 
         "conclusionTs" to Long::class
@@ -178,18 +181,19 @@ open class PeriodicTask : IGlDeclare() {
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
-            id = anyStruct.get("id") as String
-            name = anyStruct.get("name") as String
-            group = anyStruct.get("group") as String
-            periodic = anyStruct.get("periodic") as Int
-            timeQuality = anyStruct.get("timeQuality") as Int
-            timeEstimation = anyStruct.get("timeEstimation") as Int
-            batch = anyStruct.get("batch") as Int
-            batchSize = anyStruct.get("batchSize") as Int
-            dueDateTime = anyStruct.get("dueDateTime") as Long
-            batchRemaining = anyStruct.get("batchRemaining") as Int
-            conclusion = anyStruct.get("conclusion") as Int
-            conclusionTs = anyStruct.get("conclusionTs") as Long
+            id = anyStruct["id"] as? String ?: ""
+            name = anyStruct["name"] as? String ?: ""
+            group = anyStruct["group"] as? String ?: ""
+            periodic = anyStruct["periodic"] as? Int ?: 0
+            timeQuality = anyStruct["timeQuality"] as? Int ?: 0
+            timeEstimation = anyStruct["timeEstimation"] as? Int ?: 0
+            batch = anyStruct["batch"] as? Int ?: 0
+            batchSize = anyStruct["batchSize"] as? Int ?: 0
+            dueDateTime = anyStruct["dueDateTime"] as? Long ?: 0L
+            refreshTs = anyStruct["refreshTs"] as? Long ?: 0L
+            batchRemaining = anyStruct["batchRemaining"] as? Int ?: 0
+            conclusion = anyStruct["conclusion"] as? Int ?: 0
+            conclusionTs = anyStruct["conclusionTs"] as? Long ?: 0L
             true
         }
         else {
@@ -211,6 +215,7 @@ open class PeriodicTask : IGlDeclare() {
             "batch" to batch, 
             "batchSize" to batchSize, 
             "dueDateTime" to dueDateTime, 
+            "refreshTs" to refreshTs, 
             "batchRemaining" to batchRemaining, 
             "conclusion" to conclusion, 
             "conclusionTs" to conclusionTs
@@ -253,9 +258,9 @@ open class StageGoal : IGlDeclare() {
         dataValid = if (checkStruct(anyStruct, structDeclare)) {
             uuid = (anyStruct.get("uuid") as? String) ?: uuid
             
-            taskID = anyStruct.get("taskID") as String
-            goalCount = anyStruct.get("goalCount") as String
-            continuous = anyStruct.get("continuous") as Boolean
+            taskID = anyStruct["taskID"] as? String ?: ""
+            goalCount = anyStruct["goalCount"] as? String ?: ""
+            continuous = anyStruct["continuous"] as? Boolean ?: false
             true
         }
         else {
