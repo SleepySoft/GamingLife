@@ -1,10 +1,7 @@
 package com.sleepysoft.gaminglife
 
-import android.annotation.SuppressLint
 import android.app.*
-import android.content.Context
 import android.content.Intent
-import android.graphics.PixelFormat
 import android.media.MediaRecorder
 import android.os.*
 import android.view.*
@@ -95,7 +92,7 @@ class GamingLifeMainService : Service() {
     private fun servicePolling() {
         if (fistRun) {
             fistRun = false
-            GlService.checkSettleDailyData()
+            GlService.checkSettle()
         }
         updateNotification()
     }

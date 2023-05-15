@@ -3,16 +3,18 @@ package glcore
 
 // --------------------------------------------- Enum ----------------------------------------------
 
-const val ENUM_TASK_CONCLUSION_NONE = 0
-const val ENUM_TASK_CONCLUSION_DOING = 1
-const val ENUM_TASK_CONCLUSION_FINISHED = 2
-const val ENUM_TASK_CONCLUSION_ABANDONED = 3
+const val ENUM_TASK_CONCLUSION_NONE = 0             // Init state
+const val ENUM_TASK_CONCLUSION_DOING = 1            // After clicking start
+const val ENUM_TASK_CONCLUSION_FINISHED = 2         // Mark as finished
+const val ENUM_TASK_CONCLUSION_ABANDONED = 3        // Voluntarily give up
+const val ENUM_TASK_CONCLUSION_FAILED = 4           // Timed out and not processed
 
 val ENUM_TASK_CONCLUSION_ARRAY = listOf(
     ENUM_TASK_CONCLUSION_NONE,
     ENUM_TASK_CONCLUSION_DOING,
     ENUM_TASK_CONCLUSION_FINISHED,
-    ENUM_TASK_CONCLUSION_ABANDONED
+    ENUM_TASK_CONCLUSION_ABANDONED,
+    ENUM_TASK_CONCLUSION_FAILED,
 )
 
 const val ENUM_TASK_PERIOD_ONESHOT = 0

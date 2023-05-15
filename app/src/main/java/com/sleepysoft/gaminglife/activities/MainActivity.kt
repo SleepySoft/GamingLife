@@ -35,9 +35,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private lateinit var mVibrator: Vibrator
     private val mCtrlContext = GlControllerContext()
 
-    private lateinit var timeViewController: GlTimeViewController
-    private lateinit var timeViewEditorController: GlTimeViewEditorController
-    private lateinit var audioRecordController: GlAudioRecordLayerController
+    private var timeViewController: GlTimeViewController? = null
+    private var timeViewEditorController: GlTimeViewEditorController? = null
 
     private val requestDataLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()) { result ->
@@ -95,7 +94,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     override fun onResume() {
         super.onResume()
         if (isPortrait()) {
-            timeViewController.refreshPeriodicTaskData()
+            timeViewController?.refreshPeriodicTaskData()
         }
     }
 
@@ -210,7 +209,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         // Optimization: Only one controller will be activated on specific orientation.
         // Once orientation change. The Activity will be rebuilt and re-inited.
         if (isPortrait()) {
-            audioRecordController = GlAudioRecordLayerController(mCtrlContext).apply { init() }
+            val audioRecordController = GlAudioRecordLayerController(mCtrlContext).apply { init() }
             timeViewController = GlTimeViewController(mCtrlContext, audioRecordController).apply { init() }
         } else {
             timeViewEditorController = GlTimeViewEditorController(

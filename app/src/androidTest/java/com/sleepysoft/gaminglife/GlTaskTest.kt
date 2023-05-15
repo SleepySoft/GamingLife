@@ -8,6 +8,6 @@ internal class GlTaskTest {
 
     @Test
     fun testDailyDataSettle() {
-        GlService().checkSettleDailyData()
+        GlService.checkSettleDailyData()
     }
 }

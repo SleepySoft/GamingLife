@@ -8,6 +8,11 @@ import java.util.*
 
 object GlService {
 
+    fun checkSettle() {
+        checkSettlePeriodicTask()
+        checkSettleDailyData()
+    }
+
     fun saveDailyRecord() = GlRoot.dailyRecord.saveDailyRecord()
     fun saveRuntimeData() = GlRoot.runtimeData.saveRuntimeData()
     fun saveSystemConfig() = GlRoot.systemConfig.saveSystemConfig()
@@ -165,6 +170,9 @@ object GlService {
     }
 
     fun checkRefreshPeriodicTask() {
+        var refreshed = false
+        var syncDaily = false
+
         val dayStartTs = GlDateTime.dayStartTimeStamp()
         val weekStartTs = GlDateTime.weekStartTimeStamp()
         val monthStartTs = GlDateTime.monthStartTimeStamp()
@@ -181,10 +189,12 @@ object GlService {
                 ENUM_TASK_PERIOD_QUARTERLY -> quarterStartTs
                 else -> null
             }
-            var refreshed = false
             if (refreshTs != null && startedTask.refreshTs != refreshTs) {
                 if (startedTask.conclusion != ENUM_TASK_CONCLUSION_NONE) {
-                    // TODO: Process Un-finished task
+                    // Process Un-finished task
+                    syncDaily = true
+                    startedTask.conclusion = ENUM_TASK_CONCLUSION_FAILED
+                    GlRoot.dailyRecord.periodicTaskRecord.upsertGlData(startedTask.copy() as PeriodicTask)
                 }
                 startedTask.dueDateTime = 0
                 startedTask.refreshTs = refreshTs
@@ -194,10 +204,18 @@ object GlService {
 
                 refreshed = true
             }
-            if (refreshed) {
-                GlRoot.runtimeData.saveRuntimeData()
-            }
         }
+        if (refreshed) {
+            GlRoot.runtimeData.saveRuntimeData()
+        }
+        if (syncDaily) {
+            GlRoot.dailyRecord.saveDailyRecord()
+        }
+    }
+
+    fun checkSettlePeriodicTask() {
+        syncPeriodicTaskToRuntime()
+        checkRefreshPeriodicTask()
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -206,7 +224,7 @@ object GlService {
     // ----------------------- Task Switching -----------------------
 
     fun switchToTask(taskData: TaskData) {
-        checkSettleDailyData()
+        checkSettle()
         GlRoot.dailyRecord.addTask(TaskRecord().apply {
             taskID = taskData.id
             groupID = taskData.id       //GlRoot.systemConfig.getTopGroupOfTask(taskData.id)
@@ -301,6 +319,8 @@ object GlService {
             GlLog.i("> Not need to settle.")
         }
     }
+
+
 
 /*
 
