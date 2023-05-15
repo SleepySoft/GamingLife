@@ -190,6 +190,10 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
             return PeriodicTask().apply { uuid = "" }
         }
 
+        if (editTaskId.isEmpty()) {
+            editTaskId = randomUUID()
+        }
+
         return PeriodicTask().apply {
             this.id = editTaskId
             this.name = taskName

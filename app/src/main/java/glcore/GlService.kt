@@ -114,11 +114,15 @@ object GlService {
 
     // ---------------------------------------------------------------------
 
-    fun upsertPeriodicTask(task: PeriodicTask) =
+    fun upsertPeriodicTask(task: PeriodicTask) {
         GlRoot.systemConfig.periodicTaskEditor.upsertGlData(task)
+        syncConfigPeriodicTaskToStarted()
+    }
 
-    fun removePeriodicTask(uuid: String) =
+    fun removePeriodicTask(uuid: String) {
         GlRoot.systemConfig.periodicTaskEditor.removeGlData(uuid)
+        syncConfigPeriodicTaskToStarted()
+    }
 
     fun getPeriodicTask(uuid: String) : PeriodicTask? =
         GlRoot.systemConfig.periodicTaskEditor.getGlData(uuid)
