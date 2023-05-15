@@ -306,12 +306,16 @@ class GlDataListEditor<T : IGlDeclare>(
         return dataList
     }
 
-    fun upsertGlData(glData: T) {
-        val index = dataList.indexOfFirst { it.uuid == glData.uuid }
-        if (index != -1) {
-            dataList[index] = glData
-        } else {
-            dataList.add(glData)
+    fun upsertGlData(glData: T) = upsertGlData(listOf(glData))
+
+    fun upsertGlData(glDatas: List< T >) {
+        glDatas.forEach { glData ->
+            val index = dataList.indexOfFirst { it.uuid == glData.uuid }
+            if (index != -1) {
+                dataList[index] = glData
+            } else {
+                dataList.add(glData)
+            }
         }
     }
 
@@ -319,8 +323,12 @@ class GlDataListEditor<T : IGlDeclare>(
         dataList.clear()
     }
 
-    fun removeGlData(uuid: String) {
-        dataList.removeAll { it.uuid == uuid }
+    fun removeGlData(uuid: String) = removeGlData(listOf(uuid))
+
+    fun removeGlData(uuids: List<String>) {
+        uuids.forEach { uuid ->
+            dataList.removeAll { it.uuid == uuid }
+        }
     }
 
     fun syncUp() {

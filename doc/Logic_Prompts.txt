@@ -91,12 +91,100 @@ holder.buttonAbandon.setOnClickListener {
 
 
 
-private var mPeriodicTasks: List< PeriodicTask > =
-	if (filterGroup.isNotEmpty()) {
-		GlService.getPeriodicTasksByGroup(filterGroup)
-	} else {
-		GlService.getPeriodicTasks()
+
+
+
+
+
+
+
+open class PeriodicTask : IGlDeclare() {
+    var id: String = ""
+    var name: String = ""
+    var group: String = ""
+    var periodic: Int = 0
+    var timeQuality: Int = 0
+    var timeEstimation: Int = 0
+    var batch: Int = 0
+    var batchSize: Int = 0
+    // This section is for Task Planning
+    var dueDateTime: Long = 0L
+    // This section is for Task refresh time check
+    var refreshTs: Long = 0L
+    // This section is for Task Execution and Conclusion
+    var batchRemaining: Int = 0
+    var conclusion: Int = 0
+    var conclusionTs: Long = 0L
+}
+
+
+const val ENUM_TASK_CONCLUSION_NONE = 0             // Init state
+const val ENUM_TASK_CONCLUSION_DOING = 1            // After clicking start
+const val ENUM_TASK_CONCLUSION_FINISHED = 2         // Mark as finished
+const val ENUM_TASK_CONCLUSION_ABANDONED = 3        // Voluntarily give up
+const val ENUM_TASK_CONCLUSION_FAILED = 4           // Timed out and not processed
+
+
+
+fun checkRefreshPeriodicTask(baseDate: Date,
+							 startedTasks: List< PeriodicTask >,
+							 refreshedTasks: MutableList< PeriodicTask >,
+							 archivedTasks: MutableList< PeriodicTask >) {
+	val dayStartTs = GlDateTime.dayStartTimeStamp(baseDate)
+	val weekStartTs = GlDateTime.weekStartTimeStamp(baseDate)
+	val monthStartTs = GlDateTime.monthStartTimeStamp(baseDate)
+	val quarterStartTs = GlDateTime.quarterStartTimeStamp(baseDate)
+
+	for (startedTask in startedTasks) {
+		val refreshTs = when (startedTask.periodic) {
+			ENUM_TASK_PERIOD_ONESHOT -> null
+			ENUM_TASK_PERIOD_DAILY -> dayStartTs
+			ENUM_TASK_PERIOD_WEEKLY -> weekStartTs
+			ENUM_TASK_PERIOD_BI_WEEK -> if (startedTask.refreshTs < weekStartTs - 7 * 24 * 3600) weekStartTs else null
+			ENUM_TASK_PERIOD_MONTHLY -> monthStartTs
+			ENUM_TASK_PERIOD_QUARTERLY -> quarterStartTs
+			else -> null
+		}
+		if (refreshTs != null && startedTask.refreshTs != refreshTs) {
+			if (startedTask.conclusion == ENUM_TASK_CONCLUSION_NONE ||
+				startedTask.conclusion == ENUM_TASK_CONCLUSION_DOING) {
+				// Process Un-finished task
+				startedTask.conclusion = ENUM_TASK_CONCLUSION_FAILED
+				archivedTasks.add(startedTask.copy() as PeriodicTask)
+			}
+			startedTask.dueDateTime = 0
+			startedTask.refreshTs = refreshTs
+			startedTask.batchRemaining = startedTask.batch
+			startedTask.conclusion = ENUM_TASK_CONCLUSION_NONE
+			startedTask.conclusionTs = 0L
+			refreshedTasks.add(startedTask)
+		}
 	}
-把获得的列表按其中元素的conclusion成员的值进行排序：ENUM_TASK_CONCLUSION_DOING > ENUM_TASK_CONCLUSION_NONE > ENUM_TASK_CONCLUSION_FINISHED > ENUM_TASK_CONCLUSION_ABANDONED
+}
+
+
+使用中文回答问题。
+
+帮我为GlService.CoreLogic.checkRefreshPeriodicTask()写testcase。
+这个函数的功能是根据startedTask.periodic和startedTask.refreshTs判断当前任务是否在对应的周期内。如果是，则首先检查该任务是否完成，再更新一系列数据并将其加入refreshedTasks；否则不做任何事情。
+注意date不能取当前时间，而是按需要构造。
+
+要求测试以下所有情况：
+1.在本周期内 => 不需要更新，字段(dueDateTime, refreshTs, batchRemaining, conclusion, conclusionTs)不变
+2.不在本周期内（startedTask.refreshTs小于本周期） => 需要更新，对应字段需更新到特定的值。
+3.不在本周期内（startedTask.refreshTs大于本周期） =>需要更新，对应字段需更新到特定的值。
+4.startedTask.refreshTs为0 => 需要更新，对应字段需更新到特定的值。
+需要更新的情况需要同时穿插测试conclusion为各种值的情况，检查结果。
+
+分批次写test case，每次写一个，内容不要太长。我说继续，写下一个。
+
+
+先写ENUM_TASK_PERIOD_ONESHOT周期（任何情况都不应该被更新）
+
+注意date不能取当前时间，而是按需要构造。然后是ENUM_TASK_PERIOD_DAILY
+
+
+
+
 
 

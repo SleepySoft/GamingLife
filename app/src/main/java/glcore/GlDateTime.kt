@@ -9,6 +9,8 @@ object GlDateTime {
 
     var debugDateTime: Date? = null
 
+    fun now() = datetime()
+
     fun datetime() : Date {
         return debugDateTime ?: Calendar.getInstance().time
     }
@@ -83,7 +85,9 @@ object GlDateTime {
         }.time
     }
 
-    fun dayStartTimeStamp(offsetDays: Int = 0) = zeroDateHMS(datetime(offsetDays)).time
+    fun dayStartTimeStamp(offsetDays: Int = 0) = dayStartTimeStamp(datetime(offsetDays))
+
+    fun dayStartTimeStamp(date: Date) = zeroDateHMS(date).time
 
     fun weekStartTimeStamp(date: Date? = null): Long {
         val calendar = Calendar.getInstance()

@@ -8,6 +8,72 @@ import java.util.*
 
 object GlService {
 
+    object CoreLogic {
+        fun checkRefreshPeriodicTask(baseDate: Date,
+                                     startedTasks: List< PeriodicTask >,
+                                     refreshedTasks: MutableList< PeriodicTask >,
+                                     archivedTasks: MutableList< PeriodicTask >) {
+            val dayStartTs = GlDateTime.dayStartTimeStamp(baseDate)
+            val weekStartTs = GlDateTime.weekStartTimeStamp(baseDate)
+            val monthStartTs = GlDateTime.monthStartTimeStamp(baseDate)
+            val quarterStartTs = GlDateTime.quarterStartTimeStamp(baseDate)
+
+            for (startedTask in startedTasks) {
+                val refreshTs = when (startedTask.periodic) {
+                    ENUM_TASK_PERIOD_ONESHOT -> null
+                    ENUM_TASK_PERIOD_DAILY -> dayStartTs
+                    ENUM_TASK_PERIOD_WEEKLY -> weekStartTs
+                    ENUM_TASK_PERIOD_BI_WEEK -> if (startedTask.refreshTs < weekStartTs - 7 * 24 * 3600) weekStartTs else null
+                    ENUM_TASK_PERIOD_MONTHLY -> monthStartTs
+                    ENUM_TASK_PERIOD_QUARTERLY -> quarterStartTs
+                    else -> null
+                }
+                if (refreshTs != null && startedTask.refreshTs != refreshTs) {
+                    if (startedTask.conclusion == ENUM_TASK_CONCLUSION_NONE ||
+                        startedTask.conclusion == ENUM_TASK_CONCLUSION_DOING) {
+                        // Process Un-finished task
+                        startedTask.conclusion = ENUM_TASK_CONCLUSION_FAILED
+                        archivedTasks.add(startedTask.copy() as PeriodicTask)
+                    }
+                    startedTask.dueDateTime = 0
+                    startedTask.refreshTs = refreshTs
+                    startedTask.batchRemaining = startedTask.batch
+                    startedTask.conclusion = ENUM_TASK_CONCLUSION_NONE
+                    startedTask.conclusionTs = 0L
+                    refreshedTasks.add(startedTask)
+                }
+            }
+        }
+
+        fun syncConfigPeriodicTaskToStarted(
+            configPeriodicTask: List< PeriodicTask >,
+            startedPeriodicTask: List< PeriodicTask >,
+            updateTasks: MutableList< PeriodicTask >,
+            removeTasks: MutableList< String >) {
+
+            val configIds = configPeriodicTask.map { it.id }.toSet()
+            startedPeriodicTask.forEach {
+                if (it.id !in configIds) {
+                    removeTasks.add(it.id)
+                }
+            }
+
+            val startedMap = startedPeriodicTask.associateBy { it.id }
+            for (configTask in configPeriodicTask) {
+                val updateTask = startedMap[configTask.id] ?: PeriodicTask()
+                updateTask.id = configTask.id
+                updateTask.name = configTask.name
+                updateTask.group = configTask.group
+                updateTask.periodic = configTask.periodic
+                updateTask.timeQuality = configTask.timeQuality
+                updateTask.timeEstimation = configTask.timeEstimation
+                updateTask.batch = configTask.batch
+                updateTask.batchSize = configTask.batchSize
+                updateTasks.add(updateTask)
+            }
+        }
+    }
+
     fun checkSettle() {
         checkSettlePeriodicTask()
         checkSettleDailyData()
@@ -133,88 +199,41 @@ object GlService {
         }
     }
 
-    fun syncPeriodicTaskToRuntime() {
+    fun syncConfigPeriodicTaskToStarted() {
         val configPeriodicTask = GlRoot.systemConfig.periodicTaskEditor.getGlDataList()
         val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+        val updateTasks = mutableListOf< PeriodicTask >()
+        val removeTasks = mutableListOf< String >()
 
-        val configIds = configPeriodicTask.map { it.id }.toSet()
-        startedPeriodicTask.removeIf { it.id !in configIds }
+        CoreLogic.syncConfigPeriodicTaskToStarted(
+            configPeriodicTask, startedPeriodicTask, updateTasks, removeTasks)
 
-        val startedMap = startedPeriodicTask.associateBy { it.id }
-        for (configTask in configPeriodicTask) {
-            val startedTask = startedMap[configTask.id]
-            if (startedTask != null) {
-                startedTask.id = configTask.id
-                startedTask.name = configTask.name
-                startedTask.group = configTask.group
-                startedTask.periodic = configTask.periodic
-                startedTask.timeQuality = configTask.timeQuality
-                startedTask.timeEstimation = configTask.timeEstimation
-                startedTask.batch = configTask.batch
-                startedTask.batchSize = configTask.batchSize
-            } else {
-                val newStartedTask = PeriodicTask().apply {
-                    id = configTask.id
-                    name = configTask.name
-                    group = configTask.group
-                    periodic = configTask.periodic
-                    timeQuality = configTask.timeQuality
-                    timeEstimation = configTask.timeEstimation
-                    batch = configTask.batch
-                    batchSize = configTask.batchSize
-                }
-                startedPeriodicTask.add(newStartedTask)
-            }
-        }
+        GlRoot.runtimeData.startedPeriodicTask.removeGlData(removeTasks)
+        GlRoot.runtimeData.startedPeriodicTask.upsertGlData(updateTasks)
         GlRoot.runtimeData.saveRuntimeData()
     }
 
     fun checkRefreshPeriodicTask() {
-        var refreshed = false
-        var syncDaily = false
+        val startedPeriodicTasks = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
+        val refreshedTasks = mutableListOf< PeriodicTask >()
+        val archivedTasks = mutableListOf< PeriodicTask >()
 
-        val dayStartTs = GlDateTime.dayStartTimeStamp()
-        val weekStartTs = GlDateTime.weekStartTimeStamp()
-        val monthStartTs = GlDateTime.monthStartTimeStamp()
-        val quarterStartTs = GlDateTime.quarterStartTimeStamp()
+        CoreLogic.checkRefreshPeriodicTask(
+            GlDateTime.now(), startedPeriodicTasks, refreshedTasks, archivedTasks)
 
-        val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
-        for (startedTask in startedPeriodicTask) {
-            val refreshTs = when (startedTask.periodic) {
-                ENUM_TASK_PERIOD_ONESHOT -> null
-                ENUM_TASK_PERIOD_DAILY -> dayStartTs
-                ENUM_TASK_PERIOD_WEEKLY -> weekStartTs
-                ENUM_TASK_PERIOD_BI_WEEK -> if (startedTask.refreshTs < weekStartTs - 7 * 24 * 3600) weekStartTs else null
-                ENUM_TASK_PERIOD_MONTHLY -> monthStartTs
-                ENUM_TASK_PERIOD_QUARTERLY -> quarterStartTs
-                else -> null
-            }
-            if (refreshTs != null && startedTask.refreshTs != refreshTs) {
-                if (startedTask.conclusion != ENUM_TASK_CONCLUSION_NONE) {
-                    // Process Un-finished task
-                    syncDaily = true
-                    startedTask.conclusion = ENUM_TASK_CONCLUSION_FAILED
-                    GlRoot.dailyRecord.periodicTaskRecord.upsertGlData(startedTask.copy() as PeriodicTask)
-                }
-                startedTask.dueDateTime = 0
-                startedTask.refreshTs = refreshTs
-                startedTask.batchRemaining = startedTask.batch
-                startedTask.conclusion = ENUM_TASK_CONCLUSION_NONE
-                startedTask.conclusionTs = 0L
-
-                refreshed = true
-            }
-        }
-        if (refreshed) {
+        if (refreshedTasks.isNotEmpty()) {
+            GlRoot.runtimeData.startedPeriodicTask.upsertGlData(refreshedTasks)
             GlRoot.runtimeData.saveRuntimeData()
         }
-        if (syncDaily) {
+
+        if (archivedTasks.isNotEmpty()) {
+            GlRoot.dailyRecord.periodicTaskRecord.upsertGlData(archivedTasks)
             GlRoot.dailyRecord.saveDailyRecord()
         }
     }
 
     fun checkSettlePeriodicTask() {
-        syncPeriodicTaskToRuntime()
+        syncConfigPeriodicTaskToStarted()
         checkRefreshPeriodicTask()
     }
 
