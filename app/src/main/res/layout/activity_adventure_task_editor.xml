@@ -4,189 +4,199 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingLeft="4dp"
+    android:paddingRight="4dp"
     android:stretchColumns="1" >
 
-    <TableRow>
+    <TableRow
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
         <TextView
             android:text="@string/LABEL_TASK_TYPE"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="3dip" />
+            android:padding="6dp" />
         <Spinner
             android:id="@+id/spinner_task_group"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:entries="@array/TASK_GROUP_DISPLAY_ARRAY" />
     </TableRow>
 
-    <TableRow>
+    <TableRow
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
         <TextView
             android:text="@string/LABEL_TASK_NAME"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="3dip" />
+            android:padding="6dp" />
         <EditText
             android:id="@+id/text_task_name"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:autofillHints="" />
     </TableRow>
 
-    <TableRow>
+    <TableRow
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
         <TextView
             android:text="@string/LABEL_TASK_PERIOD"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="3dip" />
+            android:padding="6dp" />
         <Spinner
             android:id="@+id/spinner_task_period"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:entries="@array/TASK_PERIOD_ARRAY" />
     </TableRow>
 
-    <TableRow>
-        <TextView
+    <TableRow
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
+    <TextView
             android:text="@string/LABEL_TASK_TIME_REQUIREMENT"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="3dip" />
+            android:padding="6dp" />
         <Spinner
             android:id="@+id/spinner_task_time_quality"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:entries="@array/TASK_TIME_QUALITY_ARRAY" />
     </TableRow>
 
-    <TableRow>
+    <TableRow
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
         <TextView
             android:text="@string/LABEL_TASK_TIME_ESTIMATION"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="3dip" />
+            android:padding="6dp" />
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <SeekBar
                 android:id="@+id/seek_time_estimation"
                 android:max="48"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
+                android:paddingTop="4dp"
                 android:layout_weight="9"
                 android:layout_width="0dp"
                 android:layout_height="match_parent" />
+
             <EditText
                 android:id="@+id/edit_time_estimation"
                 android:inputType="number"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:layout_width="0dp"
+                android:padding="6dp"
                 android:layout_height="match_parent"
                 android:autofillHints="5" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="6dp"
+                android:text="@string/LABEL_MINUTES" />
         </LinearLayout>
     </TableRow>
 
-    <TableRow>
+    <TableRow
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
         <TextView
             android:text="@string/LABEL_TASK_QUANTIFY"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="3dip" />
-        <RadioGroup>
+            android:padding="6dp" />
+
+        <RadioGroup
+            android:orientation="horizontal">
+
             <RadioButton
                 android:id="@+id/radio_single"
                 android:text="@string/LABEL_TASK_SINGLE"
                 android:checked="true"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
+            <Space
+                android:layout_width="40dp"
+                android:layout_height="match_parent" />
             <RadioButton
                 android:id="@+id/radio_batch"
                 android:text="@string/LABEL_TASK_BATCH"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </RadioGroup>
     </TableRow>
 
-    <TableRow>
+    <TableRow
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
         <TextView
             android:text="@string/LABEL_TASK_BATCH_COUNT"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="3dip" />
+            android:padding="6dp" />
         <Spinner
             android:id="@+id/spinner_batch"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:entries="@array/ARRAY_1_TO_10" />
     </TableRow>
 
-    <TableRow>
+    <TableRow
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
         <TextView
             android:text="@string/LABEL_TASK_BATCH_SIZE"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="3dip" />
+            android:padding="6dp" />
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
             <SeekBar
                 android:id="@+id/seek_batch_size"
                 android:max="100"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
                 android:layout_weight="9"
                 android:layout_width="0dp"
                 android:layout_height="match_parent" />
             <EditText
                 android:id="@+id/edit_batch_size"
                 android:inputType="number"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_weight="1"
+                android:padding="6dp"
+                android:layout_weight="2"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:autofillHints="1" />
         </LinearLayout>
     </TableRow>
 
-    <TableRow>
+    <TableRow
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
         <TextView
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="3dip" />
+            android:padding="6dp" />
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -194,16 +204,16 @@
 
             <Button
                 android:id="@+id/button_ok"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="OK" />
 
+            <Space
+                android:layout_width="60dp"
+                android:layout_height="match_parent" />
+
             <Button
                 android:id="@+id/button_cancel"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Cancel" />

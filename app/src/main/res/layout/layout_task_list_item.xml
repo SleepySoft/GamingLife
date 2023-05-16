@@ -15,6 +15,8 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_gravity="center_vertical"
+            android:paddingStart="4dp"
+            android:paddingEnd="2dp"
             android:src="@drawable/ic_main" />
 
         <TextView
@@ -24,8 +26,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:gravity="center_vertical"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
             android:textSize="18sp"
             android:text="" />
 
@@ -33,8 +35,8 @@
             android:layout_weight="3"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp">
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp">
 
             <TextView
                 android:id="@+id/text_task_period"
@@ -89,60 +91,4 @@
             android:minWidth="0dp"
             android:minHeight="0dp"  />
     </LinearLayout>
-
-    <!--    <LinearLayout
-            android:id="@+id/layout_create"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" >
-
-            <ImageButton
-                android:id="@+id/button_new_create"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_create" />
-
-            <ImageButton
-                android:id="@+id/button_new_promote"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_promote" />
-
-            <ImageButton
-                android:id="@+id/button_new_work"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_work" />
-
-            <ImageButton
-                android:id="@+id/button_new_enjoy"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_enjoy" />
-
-            <ImageButton
-                android:id="@+id/button_new_life"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_life" />
-
-            <ImageButton
-                android:id="@+id/button_new_idle"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_idle" />
-        </LinearLayout>-->
 </LinearLayout>

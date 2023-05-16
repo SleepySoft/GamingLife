@@ -72,6 +72,7 @@
     <string name="LABEL_TASK_TYPE">任务类型</string>
     <string name="LABEL_TASK_BATCH_COUNT">批次</string>
     <string name="LABEL_TASK_BATCH_SIZE">单次数量</string>
+    <string name="LABEL_MINUTES">分钟</string>
 
     <string-array name="ARRAY_1_TO_10">
         <item>1</item>
