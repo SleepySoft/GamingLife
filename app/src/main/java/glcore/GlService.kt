@@ -54,7 +54,7 @@ object GlService {
             val configIds = configPeriodicTask.map { it.id }.toSet()
             startedPeriodicTask.forEach {
                 if (it.id !in configIds) {
-                    removeTasks.add(it.id)
+                    removeTasks.add(it.uuid)
                 }
             }
 
