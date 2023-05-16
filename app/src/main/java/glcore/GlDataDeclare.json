@@ -16,6 +16,7 @@
     "name": "String",
     "group": "String",
     "periodic": "Int",
+    "property": "Int",
     "timeQuality": "Int",
     "timeEstimation": "Int",
     "batch": "Int",

@@ -158,6 +158,7 @@ open class PeriodicTask : IGlDeclare() {
     var name: String = ""
     var group: String = ""
     var periodic: Int = 0
+    var property: Int = 0
     var timeQuality: Int = 0
     var timeEstimation: Int = 0
     var batch: Int = 0
@@ -178,6 +179,7 @@ open class PeriodicTask : IGlDeclare() {
         "name" to String::class, 
         "group" to String::class, 
         "periodic" to Int::class, 
+        "property" to Int::class, 
         "timeQuality" to Int::class, 
         "timeEstimation" to Int::class, 
         "batch" to Int::class, 
@@ -217,6 +219,7 @@ open class PeriodicTask : IGlDeclare() {
             name = anyStruct["name"] as? String ?: ""
             group = anyStruct["group"] as? String ?: ""
             periodic = anyStruct["periodic"] as? Int ?: 0
+            property = anyStruct["property"] as? Int ?: 0
             timeQuality = anyStruct["timeQuality"] as? Int ?: 0
             timeEstimation = anyStruct["timeEstimation"] as? Int ?: 0
             batch = anyStruct["batch"] as? Int ?: 0
@@ -244,6 +247,7 @@ open class PeriodicTask : IGlDeclare() {
             "name" to name, 
             "group" to group, 
             "periodic" to periodic, 
+            "property" to property, 
             "timeQuality" to timeQuality, 
             "timeEstimation" to timeEstimation, 
             "batch" to batch, 
@@ -262,6 +266,7 @@ open class PeriodicTask : IGlDeclare() {
             name = this@PeriodicTask.name
             group = this@PeriodicTask.group
             periodic = this@PeriodicTask.periodic
+            property = this@PeriodicTask.property
             timeQuality = this@PeriodicTask.timeQuality
             timeEstimation = this@PeriodicTask.timeEstimation
             batch = this@PeriodicTask.batch

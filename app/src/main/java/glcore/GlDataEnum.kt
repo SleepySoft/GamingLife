@@ -3,6 +3,9 @@ package glcore
 
 // --------------------------------------------- Enum ----------------------------------------------
 
+const val ENUM_TASK_PROPERTY_NORMAL = 0
+const val ENUM_TASK_PROPERTY_OPTIONAL = 1
+
 const val ENUM_TASK_CONCLUSION_NONE = 0             // Init state
 const val ENUM_TASK_CONCLUSION_DOING = 1            // After clicking start
 const val ENUM_TASK_CONCLUSION_FINISHED = 2         // Mark as finished

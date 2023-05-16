@@ -20,6 +20,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
     private lateinit var textTaskName: EditText
 
     private lateinit var spinnerTaskPeriod: Spinner
+    private lateinit var checkOptionalTask: CheckBox
 
     private lateinit var spinnerTaskTimeQuality: Spinner
 
@@ -45,6 +46,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
         textTaskName = findViewById(R.id.text_task_name)
 
         spinnerTaskPeriod = findViewById(R.id.spinner_task_period)
+        checkOptionalTask = findViewById(R.id.check_optional)
 
         spinnerTaskTimeQuality = findViewById(R.id.spinner_task_time_quality)
 
@@ -153,12 +155,14 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
 
     // ----------------------- Thanks new bing -----------------------
 
-    fun ui_to_data(): PeriodicTask {
+    private fun ui_to_data(): PeriodicTask {
         val taskGroup = spinnerTaskGroup.selectedItemPosition
         val taskGroupId = UiRes.TASK_GROUP_SELECT_ORDER[taskGroup]
 
         val taskName = textTaskName.text.toString().trim()
         val taskPeriod = spinnerTaskPeriod.selectedItemPosition
+
+        val taskProperty = if (checkOptionalTask.isChecked) ENUM_TASK_PROPERTY_OPTIONAL else ENUM_TASK_PROPERTY_NORMAL
 
         val taskTimeQuality = spinnerTaskTimeQuality.selectedItemPosition
         val timeEstimationText = editTimeEstimation.text.toString()
@@ -199,6 +203,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
             this.name = taskName
             this.group = taskGroupId
             this.periodic = ENUM_TASK_PERIOD_ARRAY[taskPeriod]
+            this.property = taskProperty
             this.timeQuality = ENUM_TIME_QUALITY_ARRAY[taskTimeQuality]
             this.timeEstimation = timeEstimation
             this.batch = (if (single) 1 else batchSpinner + 1)
@@ -206,7 +211,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
         }
     }
 
-    fun data_to_ui(task: PeriodicTask) {
+    private fun data_to_ui(task: PeriodicTask) {
         val taskGroupIndex = UiRes.TASK_GROUP_SELECT_ORDER.indexOf(task.group)
         spinnerTaskGroup.setSelection(taskGroupIndex)
 
@@ -214,6 +219,8 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
 
         val taskPeriodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(task.periodic)
         spinnerTaskPeriod.setSelection(taskPeriodIndex)
+
+        checkOptionalTask.isChecked = task.property == ENUM_TASK_PROPERTY_OPTIONAL
 
         val timeQualityIndex = ENUM_TIME_QUALITY_ARRAY.indexOf(task.timeQuality)
         spinnerTaskTimeQuality.setSelection(timeQualityIndex)

@@ -49,11 +49,27 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="6dp" />
-        <Spinner
-            android:id="@+id/spinner_task_period"
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:entries="@array/TASK_PERIOD_ARRAY" />
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/spinner_task_period"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:entries="@array/TASK_PERIOD_ARRAY" />
+
+            <CheckBox
+                android:id="@+id/check_optional"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/LABEL_OPTIONAL_TASK" />
+        </LinearLayout>
     </TableRow>
 
     <TableRow
