@@ -72,6 +72,36 @@ object GlService {
                 updateTasks.add(updateTask)
             }
         }
+
+        fun calculateTaskTolerance(tasks: List<PeriodicTask>, currentTime: Long): List<Float> {
+            val taskToleranceList = mutableListOf<Float>()
+            for (task in tasks) {
+                if ((task.conclusion == ENUM_TASK_CONCLUSION_NONE) ||
+                    (task.conclusion == ENUM_TASK_CONCLUSION_DOING)) {
+
+                    if ((task.periodic == ENUM_TASK_PERIOD_ONESHOT) ||
+                        (task.property == ENUM_TASK_PROPERTY_OPTIONAL) ||
+                        (task.refreshTs == 0L)) {
+                        taskToleranceList.add(1f)
+                    } else {
+                        val dueTime = if (task.dueDateTime != 0L) task.dueDateTime else task.refreshTs + when (task.periodic) {
+                            ENUM_TASK_PERIOD_DAILY -> 24 * 60 * 60 * 1000L
+                            ENUM_TASK_PERIOD_WEEKLY -> 7 * 24 * 60 * 60 * 1000L
+                            ENUM_TASK_PERIOD_BI_WEEK -> 14 * 24 * 60 * 60 * 1000L
+                            ENUM_TASK_PERIOD_MONTHLY -> 31 * 24 * 60 * 60 * 1000L
+                            ENUM_TASK_PERIOD_QUARTERLY -> 92 * 24 * 60 * 60 * 1000L
+                            else -> throw IllegalArgumentException("Invalid periodic value")
+                        }
+                        val tolerance = (dueTime - currentTime).toFloat() / (dueTime - task.refreshTs)
+                        taskToleranceList.add(tolerance)
+                    }
+                } else {
+                    taskToleranceList.add(1f)
+                }
+            }
+            return taskToleranceList
+        }
+
     }
 
     fun checkSettle() {

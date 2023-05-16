@@ -279,4 +279,206 @@ internal class GlServiceTest {
         assertEquals(0L, refreshedTasks[0].conclusionTs)
     }
 
+    // ---------------------------------------------------------------------------------------------
+
+    // 测试目的：测试当任务状态为 ENUM_TASK_CONCLUSION_NONE 且属性为 ENUM_TASK_PROPERTY_OPTIONAL 时，容忍度是否为 1
+    @Test
+    fun testTaskToleranceCase1() {
+        val task = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_NONE
+            property = ENUM_TASK_PROPERTY_OPTIONAL
+            refreshTs = 1000L
+        }
+        val currentTime = 2000L
+        val result = GlService.CoreLogic.calculateTaskTolerance(listOf(task), currentTime)
+        // 预计 dueTime: N/A
+        assert(result[0] == 1f)
+    }
+
+    // 测试目的：测试当任务状态为 ENUM_TASK_CONCLUSION_NONE 且 refreshTs 为 0 时，容忍度是否为 1
+    @Test
+    fun testTaskToleranceCase2() {
+        val task = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_NONE
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 0L
+        }
+        val currentTime = 2000L
+        val result = GlService.CoreLogic.calculateTaskTolerance(listOf(task), currentTime)
+        // 预计 dueTime: N/A
+        assert(result[0] == 1f)
+    }
+
+    // 测试目的：测试当任务状态为 ENUM_TASK_CONCLUSION_NONE 且周期为 ENUM_TASK_PERIOD_ONESHOT 时，容忍度是否正确
+    @Test
+    fun testTaskToleranceCase3() {
+        val task = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_NONE
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 1000L
+            periodic = ENUM_TASK_PERIOD_ONESHOT
+        }
+        val currentTime = 2000L
+        val result = GlService.CoreLogic.calculateTaskTolerance(listOf(task), currentTime)
+        // 预计 dueTime: 1
+        assert(result[0] == 1f)
+    }
+
+    // 测试目的：测试当任务状态为 ENUM_TASK_CONCLUSION_NONE 且周期为 ENUM_TASK_PERIOD_DAILY 时，容忍度是否正确
+    @Test
+    fun testTaskToleranceCase4() {
+        val task = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_NONE
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 1000L
+            periodic = ENUM_TASK_PERIOD_DAILY
+        }
+        val currentTime = 2000L
+        val result = GlService.CoreLogic.calculateTaskTolerance(listOf(task), currentTime)
+        // 预计 dueTime: 1000 + 24 * 60 * 60 * 1000L
+        val dueTime = task.refreshTs + 24 * 60 * 60 * 1000L
+        val tolerance = (dueTime - currentTime).toFloat() / (dueTime - task.refreshTs)
+        assert(result[0] == tolerance)
+    }
+
+    // 测试目的：测试当任务状态为 ENUM_TASK_CONCLUSION_DOING 且周期为 ENUM_TASK_PERIOD_WEEKLY 时，容忍度是否正确
+    @Test
+    fun testTaskToleranceCase5() {
+        val task = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_DOING
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 1000L
+            periodic = ENUM_TASK_PERIOD_WEEKLY
+        }
+        val currentTime = 2000L
+        val result = GlService.CoreLogic.calculateTaskTolerance(listOf(task), currentTime)
+        // 预计 dueTime: 1000 + 7 * 24 * 60 * 60 * 1000L
+        val dueTime = task.refreshTs + 7 * 24 * 60 * 60 * 1000L
+        val tolerance = (dueTime - currentTime).toFloat() / (dueTime - task.refreshTs)
+        assert(result[0] == tolerance)
+    }
+
+    // 测试目的：测试当任务状态为 ENUM_TASK_CONCLUSION_DONE 时，容忍度是否为 1
+    @Test
+    fun testTaskToleranceCase6() {
+        val task1 = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_FINISHED
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 1000L
+        }
+        val task2 = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_ABANDONED
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 1000L
+        }
+        val task3 = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_FAILED
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 1000L
+        }
+
+        val currentTime = 2000L
+        val result = GlService.CoreLogic.calculateTaskTolerance(
+            listOf(task1, task2, task3), currentTime)
+
+        assert(result[0] == 1f)
+        assert(result[1] == 1f)
+        assert(result[2] == 1f)
+    }
+
+    // 测试目的：测试当任务状态为 ENUM_TASK_CONCLUSION_NONE 且周期为 ENUM_TASK_PERIOD_BI_WEEK 时，容忍度是否正确
+    @Test
+    fun testTaskToleranceCase8() {
+        val task = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_NONE
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 1000L
+            periodic = ENUM_TASK_PERIOD_BI_WEEK
+        }
+        val currentTime = 2000L
+        val result = GlService.CoreLogic.calculateTaskTolerance(listOf(task), currentTime)
+        // 预计 dueTime: 1000 + 14 * 24 * 60 * 60 * 1000L
+        val dueTime = task.refreshTs + 14 * 24 * 60 * 60 * 1000L
+        val tolerance = (dueTime - currentTime).toFloat() / (dueTime - task.refreshTs)
+        assert(result[0] == tolerance)
+    }
+
+    // 测试目的：测试当任务状态为 ENUM_TASK_CONCLUSION_NONE 且周期为 ENUM_TASK_PERIOD_MONTHLY 时，容忍度是否正确
+    @Test
+    fun testTaskToleranceCase9() {
+        val task = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_NONE
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 1000L
+            periodic = ENUM_TASK_PERIOD_MONTHLY
+        }
+        val currentTime = 2000L
+        val result = GlService.CoreLogic.calculateTaskTolerance(listOf(task), currentTime)
+        // 预计 dueTime: 1000 + 31 * 24 * 60 * 60 * 1000L
+        val dueTime = task.refreshTs + 31 * 24 * 60 * 60 * 1000L
+        val tolerance = (dueTime - currentTime).toFloat() / (dueTime - task.refreshTs)
+        assert(result[0] == tolerance)
+    }
+
+    // 测试目的：测试当任务状态为 ENUM_TASK_CONCLUSION_NONE 且周期为 ENUM_TASK_PERIOD_QUARTERLY 时，容忍度是否正确
+    @Test
+    fun testTaskToleranceCase10() {
+        val task = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_NONE
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 1000L
+            periodic = ENUM_TASK_PERIOD_QUARTERLY
+        }
+        val currentTime = 2000L
+        val result = GlService.CoreLogic.calculateTaskTolerance(listOf(task), currentTime)
+        // 预计 dueTime: 1000 + 92 * 24 * 60 * 60 * 1000L
+        val dueTime = task.refreshTs + 92 * 24 * 60 * 60 * 1000L
+        val tolerance = (dueTime - currentTime).toFloat() / (dueTime - task.refreshTs)
+        assert(result[0] == tolerance)
+    }
+
+    // 测试目的：测试当任务状态为 ENUM_TASK_CONCLUSION_NONE 且周期为无效值时，是否抛出异常
+    @Test
+    fun testTaskToleranceCase11() {
+        val task = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_NONE
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 1000L
+            periodic = -1
+        }
+        val currentTime = 2000L
+        try {
+            GlService.CoreLogic.calculateTaskTolerance(listOf(task), currentTime)
+            assert(false) // 如果没有抛出异常，则断言失败
+        } catch (e: IllegalArgumentException) {
+            // 预计 dueTime: N/A
+            assert(e.message == "Invalid periodic value")
+        }
+    }
+
+    // 测试目的：测试当任务列表为空时，返回的容忍度列表是否为空
+    @Test
+    fun testTaskToleranceCase12() {
+        val tasks = emptyList<PeriodicTask>()
+        val currentTime = 2000L
+        val result = GlService.CoreLogic.calculateTaskTolerance(tasks, currentTime)
+        // 预计 dueTime: N/A
+        assert(result.isEmpty())
+    }
+
+    // 测试目的：测试当任务状态为 ENUM_TASK_CONCLUSION_NONE 且 dueDateTime 不为 0 时，容忍度是否正确
+    fun testTaskToleranceCase13() {
+        val task = PeriodicTask().apply {
+            conclusion = ENUM_TASK_CONCLUSION_NONE
+            property = ENUM_TASK_PROPERTY_NORMAL
+            refreshTs = 1000L
+            periodic = ENUM_TASK_PERIOD_DAILY
+            dueDateTime = 2000L
+        }
+        val currentTime = 3000L
+        val result = GlService.CoreLogic.calculateTaskTolerance(listOf(task), currentTime)
+        // 预计 dueTime: 2000
+        val tolerance = (task.dueDateTime - currentTime).toFloat() / (task.dueDateTime - task.refreshTs)
+        assert(result[0] == tolerance)
+    }
 }

@@ -188,3 +188,123 @@ fun checkRefreshPeriodicTask(baseDate: Date,
 
 
 
+open class PeriodicTask : IGlDeclare() {
+    var id: String = ""
+    var name: String = ""
+    var group: String = ""
+    var periodic: Int = 0
+    var property: Int = 0
+    var timeQuality: Int = 0
+    var timeEstimation: Int = 0
+    var batch: Int = 0
+    var batchSize: Int = 0
+    // This section is for Task Planning
+    var dueDateTime: Long = 0L
+    // This section is for Task refresh time check
+    var refreshTs: Long = 0L
+    // This section is for Task Execution and Conclusion
+    var batchRemaining: Int = 0
+    var conclusion: Int = 0
+    var conclusionTs: Long = 0L
+}
+
+object GlService {
+
+    object CoreLogic {
+		fun calculateTaskTolerance(tasks: List< PeriodicTask >) : List< Float > {
+
+		}
+	}
+}
+
+返回一个与tasks长度相等的列表taskToleranceList。Tolerance判断如下：
+
+仅当conclusion为ENUM_TASK_CONCLUSION_NONE或ENUM_TASK_CONCLUSION_DOING执行下面判断，否则直接为1。
+如果property为ENUM_TASK_PROPERTY_OPTIONAL，也为1。
+
+refreshTs属性指明了这个task开始周期的时间戳（毫秒），periodic为任务的周期，共有下列类型：
+
+const val ENUM_TASK_PERIOD_ONESHOT = 0
+const val ENUM_TASK_PERIOD_DAILY = 1
+const val ENUM_TASK_PERIOD_WEEKLY = 7
+const val ENUM_TASK_PERIOD_BI_WEEK = 14
+const val ENUM_TASK_PERIOD_MONTHLY = 30
+const val ENUM_TASK_PERIOD_QUARTERLY = 90
+
+
+如果dueDateTime不为0，则它就是截止时间。否则根据周期和refreshTs计算截止时间。
+通过GlDateTime.timeStamp()可以取得当前时间戳
+Tolerance为剩余时间和截止时间的比值
+
+
+
+
+
+
+
+
+
+
+
+open class PeriodicTask : IGlDeclare() {
+    var id: String = ""
+    var name: String = ""
+    var group: String = ""
+    var periodic: Int = 0
+    var property: Int = 0
+    var timeQuality: Int = 0
+    var timeEstimation: Int = 0
+    var batch: Int = 0
+    var batchSize: Int = 0
+    // This section is for Task Planning
+    var dueDateTime: Long = 0L
+    // This section is for Task refresh time check
+    var refreshTs: Long = 0L
+    // This section is for Task Execution and Conclusion
+    var batchRemaining: Int = 0
+    var conclusion: Int = 0
+    var conclusionTs: Long = 0L
+}
+
+
+object GlService {
+
+    object CoreLogic {
+
+        fun calculateTaskTolerance(tasks: List<PeriodicTask>, currentTime: Long): List<Float> {
+            val taskToleranceList = mutableListOf<Float>()
+            for (task in tasks) {
+                if ((task.conclusion == ENUM_TASK_CONCLUSION_NONE) ||
+                    (task.conclusion == ENUM_TASK_CONCLUSION_DOING)) {
+
+                    if ((task.property == ENUM_TASK_PROPERTY_OPTIONAL) || (task.refreshTs == 0L)) {
+                        taskToleranceList.add(1f)
+                    } else {
+                        val dueTime = if (task.dueDateTime != 0L) task.dueDateTime else task.refreshTs + when (task.periodic) {
+                            ENUM_TASK_PERIOD_ONESHOT -> 0
+                            ENUM_TASK_PERIOD_DAILY -> 24 * 60 * 60 * 1000L
+                            ENUM_TASK_PERIOD_WEEKLY -> 7 * 24 * 60 * 60 * 1000L
+                            ENUM_TASK_PERIOD_BI_WEEK -> 14 * 24 * 60 * 60 * 1000L
+                            ENUM_TASK_PERIOD_MONTHLY -> 31 * 24 * 60 * 60 * 1000L
+                            ENUM_TASK_PERIOD_QUARTERLY -> 92 * 24 * 60 * 60 * 1000L
+                            else -> throw IllegalArgumentException("Invalid periodic value")
+                        }
+                        val tolerance = (dueTime - currentTime).toFloat() / (dueTime - task.refreshTs)
+                        taskToleranceList.add(tolerance)
+                    }
+                } else {
+                    taskToleranceList.add(1f)
+                }
+            }
+            return taskToleranceList
+        }
+
+
+
+
+用中文进行后续对话。
+
+这个函数检查一个task剩余时间和本周期时间的比值。开始时间是refreshTs，当前时间是currentTime，dueTime根据不同情况不一样。
+
+为calculateTaskTolerance编写测试代码，考虑正常异常及边界情况。时间不要取系统时间，要自己构造，并且将预计的dueTime输出为注释。测试时refreshTs不能初始为0。一次输出一条test case，包含测试目的在内的注释。我说继续输出下一条。
+

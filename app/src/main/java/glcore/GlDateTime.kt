@@ -85,6 +85,8 @@ object GlDateTime {
         }.time
     }
 
+    fun timeStamp() = now().time
+
     fun dayStartTimeStamp(offsetDays: Int = 0) = dayStartTimeStamp(datetime(offsetDays))
 
     fun dayStartTimeStamp(date: Date) = zeroDateHMS(date).time
