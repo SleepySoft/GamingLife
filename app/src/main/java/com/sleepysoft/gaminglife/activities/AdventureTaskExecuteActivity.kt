@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -47,6 +48,7 @@ class AdventureTaskExecListAdapter(filterGroup: String)
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textTaskName: TextView = view.findViewById(R.id.text_task_name)
         val textTaskPeriod: TextView = view.findViewById(R.id.text_task_period)
+        val textTaskBatch: TextView = view.findViewById(R.id.text_task_batch)
 
         val buttonPlay: ImageButton = view.findViewById(R.id.button_play)
         val buttonGoal: ImageButton = view.findViewById(R.id.button_goal)
@@ -73,6 +75,19 @@ class AdventureTaskExecListAdapter(filterGroup: String)
                 ENUM_TASK_CONCLUSION_DOING, ENUM_TASK_CONCLUSION_NONE -> {
                     val periodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(ptask.periodic)
                     holder.textTaskPeriod.text = UiRes.stringArray("TASK_PERIOD_ARRAY")[periodIndex]
+
+                    if ((ptask.batch > 1) && (ptask.batchSize > 1)) {
+                        holder.textTaskBatch.text = "剩余%d组".format(ptask.batchRemaining)
+                        holder.textTaskBatch.visibility = View.VISIBLE
+                        val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
+                        layoutParams.removeRule(RelativeLayout.CENTER_IN_PARENT)
+                        holder.textTaskPeriod.layoutParams = layoutParams
+                    } else {
+                        holder.textTaskBatch.visibility = View.GONE
+                        val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
+                        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
+                        holder.textTaskPeriod.layoutParams = layoutParams
+                    }
 
                     holder.imageFinished.visibility = View.GONE
                     holder.imageAbandoned.visibility = View.GONE
