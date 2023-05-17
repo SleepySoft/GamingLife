@@ -55,15 +55,24 @@ class GlTimeViewController(
     }
 
     fun refreshPeriodicTaskData() {
+        // Only shows the count that have to be finished in
         for (item in mSurroundItems) {
             val taskData = item.itemData as? TaskData
             taskData?.let {
+                var text = ""
                 val ptasks = GlService.getStartedPeriodicTasksByGroup(taskData.id)
                 val busyCount = GlService.countBusyPeriodicTask(ptasks)
+
+                if (busyCount > 0) {
+                    val urgency = GlService.CoreLogic.calculateTaskUrgency(ptasks, GlDateTime.timeStamp())
+                    val urgencyCount = urgency.count { it >= 0.5f }
+                    text = if (urgencyCount > 0) urgencyCount.toString() else ""
+                }
+
                 item.service.serviceCall(
-                    "CornerTextDecorator.setText", busyCount.toString())
+                    "CornerTextDecorator.setText", text)
                 item.service.serviceCall(
-                    "CornerTextDecorator.setVisible", busyCount > 0)
+                    "CornerTextDecorator.setVisible", text.isNotEmpty())
             }
         }
         mCtrlContext.refresh()

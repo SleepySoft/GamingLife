@@ -3,7 +3,9 @@ package glcore
 import android.os.Build
 import androidx.annotation.RequiresApi
 import glenv.GlKeyPair
+import java.lang.Float.max
 import java.util.*
+import kotlin.math.log10
 
 
 object GlService {
@@ -73,8 +75,8 @@ object GlService {
             }
         }
 
-        fun calculateTaskTolerance(tasks: List<PeriodicTask>, currentTime: Long): List<Float> {
-            val taskToleranceList = mutableListOf<Float>()
+        fun calculateTaskDueTime(tasks: List<PeriodicTask>) : List<Long> {
+            val taskDueTimeList = mutableListOf<Long>()
             for (task in tasks) {
                 if ((task.conclusion == ENUM_TASK_CONCLUSION_NONE) ||
                     (task.conclusion == ENUM_TASK_CONCLUSION_DOING)) {
@@ -82,7 +84,7 @@ object GlService {
                     if ((task.periodic == ENUM_TASK_PERIOD_ONESHOT) ||
                         (task.property == ENUM_TASK_PROPERTY_OPTIONAL) ||
                         (task.refreshTs == 0L)) {
-                        taskToleranceList.add(1f)
+                        taskDueTimeList.add(0L)
                     } else {
                         val dueTime = if (task.dueDateTime != 0L) task.dueDateTime else task.refreshTs + when (task.periodic) {
                             ENUM_TASK_PERIOD_DAILY -> 24 * 60 * 60 * 1000L
@@ -92,16 +94,54 @@ object GlService {
                             ENUM_TASK_PERIOD_QUARTERLY -> 92 * 24 * 60 * 60 * 1000L
                             else -> throw IllegalArgumentException("Invalid periodic value")
                         }
-                        val tolerance = (dueTime - currentTime).toFloat() / (dueTime - task.refreshTs)
-                        taskToleranceList.add(tolerance)
+                        taskDueTimeList.add(dueTime)
                     }
                 } else {
-                    taskToleranceList.add(1f)
+                    taskDueTimeList.add(0L)
                 }
+            }
+            return taskDueTimeList
+        }
+
+        fun calculateTaskRemainingTime(tasks: List<PeriodicTask>, currentTime: Long) : List<Long> {
+            val remainingTimeList = mutableListOf<Long>()
+            val taskDueTimeList = calculateTaskDueTime(tasks)
+            for (dueTime in taskDueTimeList) {
+                remainingTimeList.add(dueTime - currentTime)
+            }
+            return remainingTimeList
+        }
+
+        fun calculateTaskTolerance(tasks: List<PeriodicTask>, currentTime: Long): List<Float> {
+            val taskToleranceList = mutableListOf<Float>()
+            val taskDueTimeList = calculateTaskDueTime(tasks)
+            for (item in tasks zip taskDueTimeList) {
+                val task = item.first
+                val dueTime = item.second
+                val tolerance = if (dueTime != 0L)
+                        ((dueTime - currentTime).toFloat() / (dueTime - task.refreshTs))  else 1f
+                taskToleranceList.add(tolerance)
             }
             return taskToleranceList
         }
 
+        // Using -log(x) to calculate task basic urgency
+        // If this task have to be done today. The urgency will not less than 0.5
+
+        fun calculateTaskUrgency(tasks: List<PeriodicTask>, currentTime: Long): List<Float> {
+            val taskDueTimeList = calculateTaskDueTime(tasks)
+            val taskToleranceList = calculateTaskTolerance(tasks, currentTime)
+            val taskUrgencyList = mutableListOf<Float>()
+
+            for (item in taskToleranceList zip taskDueTimeList) {
+                var urgency = -log10(1.0 - item.first).toFloat()
+                if (item.second < TIMESTAMP_COUNT_IN_DAY) {
+                    urgency = max(0.5f, urgency)
+                }
+                taskUrgencyList.add(urgency)
+            }
+            return taskUrgencyList
+        }
     }
 
     fun checkSettle() {
