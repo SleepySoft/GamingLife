@@ -67,6 +67,7 @@ object GlService {
                 updateTask.name = configTask.name
                 updateTask.group = configTask.group
                 updateTask.periodic = configTask.periodic
+                updateTask.property = configTask.property
                 updateTask.timeQuality = configTask.timeQuality
                 updateTask.timeEstimation = configTask.timeEstimation
                 updateTask.batch = configTask.batch
