@@ -134,9 +134,15 @@ object GlService {
             val taskUrgencyList = mutableListOf<Float>()
 
             for (item in taskToleranceList zip taskDueTimeList) {
-                var urgency = -log10(1.0 - item.first).toFloat()
-                if (item.second < TIMESTAMP_COUNT_IN_DAY) {
-                    urgency = max(0.5f, urgency)
+                val urgency = if (item.second == 0L) {
+                    0f
+                } else {
+                    val baseUrgency = -log10(item.first)
+                    if (item.second < TIMESTAMP_COUNT_IN_DAY) {
+                        max(0.5f, baseUrgency)
+                    } else {
+                        max(0f, baseUrgency, )
+                    }
                 }
                 taskUrgencyList.add(urgency)
             }
@@ -148,6 +154,9 @@ object GlService {
         checkSettlePeriodicTask()
         checkSettleDailyData()
     }
+
+    fun calculateTaskUrgency(tasks: List<PeriodicTask>): List<Float> =
+        CoreLogic.calculateTaskUrgency(tasks, GlDateTime.timeStamp())
 
     fun saveDailyRecord() = GlRoot.dailyRecord.saveDailyRecord()
     fun saveRuntimeData() = GlRoot.runtimeData.saveRuntimeData()

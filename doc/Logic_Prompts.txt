@@ -241,32 +241,6 @@ Tolerance为剩余时间和截止时间的比值
 
 
 
-
-
-
-
-
-open class PeriodicTask : IGlDeclare() {
-    var id: String = ""
-    var name: String = ""
-    var group: String = ""
-    var periodic: Int = 0
-    var property: Int = 0
-    var timeQuality: Int = 0
-    var timeEstimation: Int = 0
-    var batch: Int = 0
-    var batchSize: Int = 0
-    // This section is for Task Planning
-    var dueDateTime: Long = 0L
-    // This section is for Task refresh time check
-    var refreshTs: Long = 0L
-    // This section is for Task Execution and Conclusion
-    var batchRemaining: Int = 0
-    var conclusion: Int = 0
-    var conclusionTs: Long = 0L
-}
-
-
 object GlService {
 
     object CoreLogic {
@@ -307,4 +281,36 @@ object GlService {
 这个函数检查一个task剩余时间和本周期时间的比值。开始时间是refreshTs，当前时间是currentTime，dueTime根据不同情况不一样。
 
 为calculateTaskTolerance编写测试代码，考虑正常异常及边界情况。时间不要取系统时间，要自己构造，并且将预计的dueTime输出为注释。测试时refreshTs不能初始为0。一次输出一条test case，包含测试目的在内的注释。我说继续输出下一条。
+
+
+
+
+
+
+
+
+
+
+
+
+init {
+	mPeriodicTasks = if (filterGroup.isNotEmpty()) {
+		GlService.getStartedPeriodicTasksByGroup(filterGroup)
+	} else {
+		GlService.getPeriodicTasks()
+	}
+	mTaskUrgency = GlService.calculateTaskUrgency(mPeriodicTasks)
+	
+	// TODO:
+}
+mPeriodicTasks和mTaskUrgency长度一致，mTaskUrgency为float列表。
+1.将mPeriodicTasks按mTaskUrgency对应位置的值排序。
+2.mPeriodicTasks的元素的it.conclusion属性如果为以下值之一，排在最后：
+const val ENUM_TASK_CONCLUSION_FINISHED = 2         // Mark as finished
+const val ENUM_TASK_CONCLUSION_ABANDONED = 3        // Voluntarily give up
+const val ENUM_TASK_CONCLUSION_FAILED = 4           // Timed out and not processed
+
+
+
+
 

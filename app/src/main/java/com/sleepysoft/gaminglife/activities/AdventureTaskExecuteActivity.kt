@@ -1,8 +1,9 @@
 package com.sleepysoft.gaminglife.activities
 
+import android.animation.ArgbEvaluator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Intent
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -17,33 +18,42 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sleepysoft.gaminglife.R
 import com.sleepysoft.gaminglife.UiRes
+import glcore.ENUM_TASK_CONCLUDED_ARRAY
 import glcore.ENUM_TASK_CONCLUSION_ABANDONED
 import glcore.ENUM_TASK_CONCLUSION_DOING
 import glcore.ENUM_TASK_CONCLUSION_FINISHED
 import glcore.ENUM_TASK_CONCLUSION_NONE
 import glcore.ENUM_TASK_PERIOD_ARRAY
+import glcore.ENUM_TASK_PROPERTY_OPTIONAL
 import glcore.GlService
 import glcore.PeriodicTask
-import glenv.GlApp
 
 
 class AdventureTaskExecListAdapter(filterGroup: String)
     : RecyclerView.Adapter< AdventureTaskExecListAdapter.ViewHolder >() {
 
-    private var mPeriodicTasks: List< PeriodicTask > =
-        if (filterGroup.isNotEmpty()) {
+    private var mTaskUrgency: List< Float > = mutableListOf()
+    private var mPeriodicTasks: List< PeriodicTask > = mutableListOf()
+    private var mPeriodicTasksSorted: List< Pair<PeriodicTask, Float> > = mutableListOf()
+
+    init {
+        mPeriodicTasks = if (filterGroup.isNotEmpty()) {
             GlService.getStartedPeriodicTasksByGroup(filterGroup)
         } else {
             GlService.getPeriodicTasks()
-        }.sortedWith(compareBy {
-            when (it.conclusion) {
-                ENUM_TASK_CONCLUSION_DOING -> 0
-                ENUM_TASK_CONCLUSION_NONE -> 1
-                ENUM_TASK_CONCLUSION_FINISHED -> 2
-                ENUM_TASK_CONCLUSION_ABANDONED -> 3
-                else -> 99
-            }
-        })
+        }
+        mTaskUrgency = GlService.calculateTaskUrgency(mPeriodicTasks)
+
+        val sortedPairs = mPeriodicTasks.zip(mTaskUrgency).sortedByDescending { it.second }
+        mPeriodicTasksSorted =
+            sortedPairs.filter { it.first.conclusion !in ENUM_TASK_CONCLUDED_ARRAY } +
+            sortedPairs.filter { it.first.conclusion in ENUM_TASK_CONCLUDED_ARRAY }
+
+/*        mPeriodicTasksSorted = mPeriodicTasks.zip(mTaskUrgency)
+            .sortedBy { it.second }
+            .filter { it.first.conclusion !in ENUM_TASK_CONCLUDED_ARRAY }
+            .map { it.first } + mPeriodicTasks.filter { it.conclusion in ENUM_TASK_CONCLUDED_ARRAY }*/
+    }
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val textTaskName: TextView = view.findViewById(R.id.text_task_name)
@@ -66,107 +76,129 @@ class AdventureTaskExecListAdapter(filterGroup: String)
 
     @SuppressLint("NotifyDataSetChanged")
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if (position < mPeriodicTasks.size) {
-            val ptask = mPeriodicTasks[position]
+        if (position < mPeriodicTasksSorted.size) {
+            val ptask = mPeriodicTasksSorted[position].first
+            val urgency = mPeriodicTasksSorted[position].second
 
             holder.textTaskName.text = ptask.name
+            if (ptask.property == ENUM_TASK_PROPERTY_OPTIONAL) {
+                holder.textTaskName.setBackgroundColor(Color.parseColor("#99CCFF"))
+            } else {
+                holder.textTaskName.setBackgroundColor(urgencyToColor(urgency))
+            }
 
-            when(ptask.conclusion) {
-                ENUM_TASK_CONCLUSION_DOING, ENUM_TASK_CONCLUSION_NONE -> {
-                    val periodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(ptask.periodic)
-                    holder.textTaskPeriod.text = UiRes.stringArray("TASK_PERIOD_ARRAY")[periodIndex]
-
-                    if ((ptask.batch > 1) && (ptask.batchSize > 1)) {
-                        holder.textTaskBatch.text = "剩余%d组".format(ptask.batchRemaining)
-                        holder.textTaskBatch.visibility = View.VISIBLE
-                        val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
-                        layoutParams.removeRule(RelativeLayout.CENTER_IN_PARENT)
-                        holder.textTaskPeriod.layoutParams = layoutParams
-                    } else {
-                        holder.textTaskBatch.visibility = View.GONE
-                        val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
-                        layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
-                        holder.textTaskPeriod.layoutParams = layoutParams
-                    }
-
-                    holder.imageFinished.visibility = View.GONE
-                    holder.imageAbandoned.visibility = View.GONE
-
-                    if (ptask.conclusion == ENUM_TASK_CONCLUSION_DOING) {
-                        holder.buttonPlay.visibility = View.GONE
-
-                        holder.buttonPause.visibility = View.VISIBLE
-                        holder.buttonPause.setOnClickListener {
-                            AlertDialog.Builder(it.context)
-                                .setMessage("是否挂起这个任务？")
-                                .setPositiveButton("是") { _, _ ->
-                                    GlService.suspendPeriodicTask(ptask.id)
-                                    notifyDataSetChanged()
-                                }
-                                .setNegativeButton("否", null)
-                                .show()
-                        }
-                    } else {
-                        holder.buttonPause.visibility = View.GONE
-
-                        holder.buttonPlay.visibility = View.VISIBLE
-                        holder.buttonPlay.setOnClickListener {
-                            AlertDialog.Builder(it.context)
-                                .setMessage("是否开始这个任务？")
-                                .setPositiveButton("是") { _, _ ->
-                                    GlService.executePeriodicTask(ptask.id, ENUM_TASK_CONCLUSION_NONE)
-                                    notifyDataSetChanged()
-                                }
-                                .setNegativeButton("否", null)
-                                .show()
-                        }
-                    }
-
-                    holder.buttonGoal.visibility = View.VISIBLE
-                    holder.buttonGoal.setOnClickListener {
-                        AlertDialog.Builder(it.context)
-                            .setMessage("是否完成这个任务？")
-                            .setPositiveButton("是") { _, _ ->
-                                GlService.finishPeriodicTask(ptask.id)
-                                notifyDataSetChanged()
-                            }
-                            .setNegativeButton("否", null)
-                            .show()
-                    }
-
-                    holder.buttonAbandon.visibility = View.VISIBLE
-                    holder.buttonAbandon.setOnClickListener {
-                        AlertDialog.Builder(it.context)
-                            .setMessage("是否取消这个任务？")
-                            .setPositiveButton("是") { _, _ ->
-                                GlService.abandonPeriodicTask(ptask.id)
-                                notifyDataSetChanged()
-                            }
-                            .setNegativeButton("否", null)
-                            .show()
-                    }
-                }
-                ENUM_TASK_CONCLUSION_FINISHED, ENUM_TASK_CONCLUSION_ABANDONED -> {
-                    holder.buttonPlay.visibility = View.GONE
-                    holder.buttonGoal.visibility = View.GONE
-                    holder.buttonPause.visibility = View.GONE
-                    holder.imageFinished.visibility = View.GONE
-                    holder.buttonAbandon.visibility = View.GONE
-
-                    if (ptask.conclusion == ENUM_TASK_CONCLUSION_FINISHED) {
-                        holder.imageAbandoned.visibility = View.GONE
-                        holder.imageFinished.visibility = View.VISIBLE
-                    }
-                    if (ptask.conclusion == ENUM_TASK_CONCLUSION_ABANDONED) {
-                        holder.imageFinished.visibility = View.GONE
-                        holder.imageAbandoned.visibility = View.VISIBLE
-                    }
-                }
+            if (ptask.conclusion !in ENUM_TASK_CONCLUDED_ARRAY) {
+                layoutUnProcessTask(holder, ptask)
+            } else {
+                layoutConcludedTask(holder, ptask)
             }
         }
     }
 
-    override fun getItemCount() = mPeriodicTasks.size
+    override fun getItemCount() = mPeriodicTasksSorted.size
+
+    // ---------------------------------------------------------------------------------------------
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun layoutUnProcessTask(holder: ViewHolder, ptask: PeriodicTask) {
+        val periodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(ptask.periodic)
+        holder.textTaskPeriod.text = UiRes.stringArray("TASK_PERIOD_ARRAY")[periodIndex]
+
+        if ((ptask.batch > 1) && (ptask.batchSize > 1)) {
+            holder.textTaskBatch.text = "剩余%d组".format(ptask.batchRemaining)
+            holder.textTaskBatch.visibility = View.VISIBLE
+            val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
+            layoutParams.removeRule(RelativeLayout.CENTER_IN_PARENT)
+            holder.textTaskPeriod.layoutParams = layoutParams
+        } else {
+            holder.textTaskBatch.visibility = View.GONE
+            val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
+            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
+            holder.textTaskPeriod.layoutParams = layoutParams
+        }
+
+        holder.imageFinished.visibility = View.GONE
+        holder.imageAbandoned.visibility = View.GONE
+
+        if (ptask.conclusion == ENUM_TASK_CONCLUSION_DOING) {
+            holder.buttonPlay.visibility = View.GONE
+
+            holder.buttonPause.visibility = View.VISIBLE
+            holder.buttonPause.setOnClickListener {
+                AlertDialog.Builder(it.context)
+                    .setMessage("是否挂起这个任务？")
+                    .setPositiveButton("是") { _, _ ->
+                        GlService.suspendPeriodicTask(ptask.id)
+                        notifyDataSetChanged()
+                    }
+                    .setNegativeButton("否", null)
+                    .show()
+            }
+        } else {
+            holder.buttonPause.visibility = View.GONE
+
+            holder.buttonPlay.visibility = View.VISIBLE
+            holder.buttonPlay.setOnClickListener {
+                AlertDialog.Builder(it.context)
+                    .setMessage("是否开始这个任务？")
+                    .setPositiveButton("是") { _, _ ->
+                        GlService.executePeriodicTask(ptask.id, ENUM_TASK_CONCLUSION_NONE)
+                        notifyDataSetChanged()
+                    }
+                    .setNegativeButton("否", null)
+                    .show()
+            }
+        }
+
+        holder.buttonGoal.visibility = View.VISIBLE
+        holder.buttonGoal.setOnClickListener {
+            AlertDialog.Builder(it.context)
+                .setMessage("是否完成这个任务？")
+                .setPositiveButton("是") { _, _ ->
+                    GlService.finishPeriodicTask(ptask.id)
+                    notifyDataSetChanged()
+                }
+                .setNegativeButton("否", null)
+                .show()
+        }
+
+        holder.buttonAbandon.visibility = View.VISIBLE
+        holder.buttonAbandon.setOnClickListener {
+            AlertDialog.Builder(it.context)
+                .setMessage("是否取消这个任务？")
+                .setPositiveButton("是") { _, _ ->
+                    GlService.abandonPeriodicTask(ptask.id)
+                    notifyDataSetChanged()
+                }
+                .setNegativeButton("否", null)
+                .show()
+        }
+    }
+
+    private fun layoutConcludedTask(holder: ViewHolder, ptask: PeriodicTask) {
+        holder.buttonPlay.visibility = View.GONE
+        holder.buttonGoal.visibility = View.GONE
+        holder.buttonPause.visibility = View.GONE
+        holder.imageFinished.visibility = View.GONE
+        holder.buttonAbandon.visibility = View.GONE
+        holder.textTaskPeriod.visibility = View.GONE
+
+        if (ptask.conclusion == ENUM_TASK_CONCLUSION_FINISHED) {
+            holder.imageAbandoned.visibility = View.GONE
+            holder.imageFinished.visibility = View.VISIBLE
+        }
+        if (ptask.conclusion == ENUM_TASK_CONCLUSION_ABANDONED) {
+            holder.imageFinished.visibility = View.GONE
+            holder.imageAbandoned.visibility = View.VISIBLE
+        }
+    }
+
+    private fun urgencyToColor(urgency: Float) : Int {
+        val evaluator = ArgbEvaluator()
+        val startColor = Color.WHITE
+        val endColor = Color.parseColor("#CC3333")
+        return evaluator.evaluate(urgency, startColor, endColor) as Int
+    }
 }
 
 

@@ -64,7 +64,7 @@ class GlTimeViewController(
                 val busyCount = GlService.countBusyPeriodicTask(ptasks)
 
                 if (busyCount > 0) {
-                    val urgency = GlService.CoreLogic.calculateTaskUrgency(ptasks, GlDateTime.timeStamp())
+                    val urgency = GlService.calculateTaskUrgency(ptasks)
                     val urgencyCount = urgency.count { it >= 0.5f }
                     text = if (urgencyCount > 0) urgencyCount.toString() else ""
                 }
