@@ -9,59 +9,65 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <LinearLayout
-        android:id="@+id/layout_task_running"
+    <androidx.cardview.widget.CardView
+        android:layout_margin="8dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/text_on_going_task"
-            android:paddingVertical="8dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="20sp"
-            android:layout_gravity="center_horizontal"/>
-
-        <TextView
-            android:id="@+id/text_on_going_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00:00"
-            android:textSize="24sp"
-            android:layout_gravity="center_horizontal"/>
+        android:layout_height="wrap_content">
 
         <LinearLayout
-            android:paddingVertical="8dp"
+            android:id="@+id/layout_task_running"
+            android:paddingHorizontal="4dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            android:visibility="gone">
 
-            <Button
-                android:id="@+id/button_pause"
+            <TextView
+                android:id="@+id/text_on_going_task"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/LABEL_PAUSE"
-                android:drawableStart="@drawable/ic_baseline_pause_48"
-                android:layout_weight="1"/>
+                android:text=""
+                android:textSize="20sp"
+                android:layout_gravity="center_horizontal"/>
 
-            <Button
-                android:id="@+id/button_goal"
+            <TextView
+                android:id="@+id/text_on_going_time"
+                android:paddingVertical="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/LABEL_FINISHED"
-                android:drawableStart="@drawable/ic_baseline_flag_48"
-                android:layout_weight="1"/>
+                android:text="00:00"
+                android:textSize="24sp"
+                android:layout_gravity="center_horizontal"/>
 
-            <Button
-                android:id="@+id/button_abandon"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/LABEL_CANCEL"
-                android:drawableStart="@drawable/ic_baseline_stop_48"
-                android:layout_weight="1"/>
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/button_pause"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/LABEL_PAUSE"
+                    android:drawableStart="@drawable/ic_baseline_pause_48"
+                    android:layout_weight="1"/>
+
+                <Button
+                    android:id="@+id/button_goal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/LABEL_FINISHED"
+                    android:drawableStart="@drawable/ic_baseline_flag_48"
+                    android:layout_weight="1"/>
+
+                <Button
+                    android:id="@+id/button_abandon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/LABEL_CANCEL"
+                    android:drawableStart="@drawable/ic_baseline_stop_48"
+                    android:layout_weight="1"/>
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </androidx.cardview.widget.CardView>
 </LinearLayout>
