@@ -35,6 +35,7 @@ object GlService {
                         startedTask.conclusion == ENUM_TASK_CONCLUSION_DOING) {
                         // Process Un-finished task
                         startedTask.conclusion = ENUM_TASK_CONCLUSION_FAILED
+                        startedTask.conclusionTs = GlDateTime.timeStamp()
                         archivedTasks.add(startedTask.copy() as PeriodicTask)
                     }
                     startedTask.dueDateTime = 0
@@ -179,6 +180,12 @@ object GlService {
 
     // ---------------------------------------------------------------------
 
+    fun getTimeStamp() = GlDateTime.timeStamp()
+
+    fun formatTimeStamp(ts: Long) = GlDateTime.smartFormatSec(ts / 1000)
+
+    // ---------------------------------------------------------------------
+
     fun setPlayerGlID(glid: String) = run { GlRoot.systemConfig.GLID = glid }
     fun getPlayerGlID() = GlRoot.systemConfig.GLID
 
@@ -224,6 +231,10 @@ object GlService {
         }.count()
     }
 
+    fun getOnGoingPeriodicTask() : PeriodicTask? =
+        GlRoot.runtimeData.startedPeriodicTask.getGlDataList().firstOrNull {
+            it.conclusion == ENUM_TASK_CONCLUSION_DOING }
+
     fun getStartedPeriodicTasks() : List< PeriodicTask > {
         return GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
     }
@@ -238,8 +249,10 @@ object GlService {
         for (task in startedPeriodicTask) {
             if (task.id == newTaskId) {
                 task.conclusion = ENUM_TASK_CONCLUSION_DOING
+                task.conclusionTs = GlDateTime.timeStamp()
             } else if (task.conclusion == ENUM_TASK_CONCLUSION_DOING) {
                 task.conclusion = pervTaskConclusion
+                task.conclusionTs  = GlDateTime.timeStamp()
             }
         }
         GlRoot.runtimeData.saveRuntimeData()
@@ -258,10 +271,12 @@ object GlService {
             }
             if (this.batchRemaining == 0) {
                 conclusion = ENUM_TASK_CONCLUSION_FINISHED
+                conclusionTs = GlDateTime.timeStamp()
                 GlRoot.dailyRecord.periodicTaskRecord.upsertGlData(this.copy() as PeriodicTask)
                 GlRoot.dailyRecord.saveDailyRecord()
             } else {
                 conclusion = ENUM_TASK_CONCLUSION_NONE
+                conclusionTs = GlDateTime.timeStamp()
             }
             GlRoot.runtimeData.saveRuntimeData()
         }
@@ -269,7 +284,10 @@ object GlService {
 
     fun suspendPeriodicTask(taskId: String) {
         val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
-        startedPeriodicTask.find { it.id == taskId }?.conclusion = ENUM_TASK_CONCLUSION_NONE
+        startedPeriodicTask.find { it.id == taskId }?.run {
+            conclusion = ENUM_TASK_CONCLUSION_NONE
+            conclusionTs = GlDateTime.timeStamp()
+        }
         GlRoot.runtimeData.saveRuntimeData()
     }
 
@@ -277,6 +295,7 @@ object GlService {
         val startedPeriodicTask = GlRoot.runtimeData.startedPeriodicTask.getGlDataList()
         startedPeriodicTask.find { it.id == taskId }?.run {
             conclusion = ENUM_TASK_CONCLUSION_ABANDONED
+            conclusionTs = GlDateTime.timeStamp()
             GlRoot.dailyRecord.periodicTaskRecord.upsertGlData(this.copy() as PeriodicTask)
             GlRoot.dailyRecord.saveDailyRecord()
             GlRoot.runtimeData.saveRuntimeData()
@@ -316,7 +335,7 @@ object GlService {
         }
     }
 
-    fun checkSettlePeriodicTask() {
+    private fun checkSettlePeriodicTask() {
         syncConfigPeriodicTaskToStarted()
         checkRefreshPeriodicTask()
     }

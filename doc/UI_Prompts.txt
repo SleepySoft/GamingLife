@@ -30,3 +30,8 @@ radioBatch = findViewById(R.id.radio_batch)
 分别获取spinnerTaskGroup，textTaskName，spinnerTaskPeriod，radioSingle， radioBatch，spinnerBatch，editBatchSize的当前值。radioSingle， radioBatch被选中分别为0和1。editBatchSize为整数。
 
 
+
+创建一个android studio的子布局。最上方用中等字体居中显示进行中的任务名，中间用稍大字体显示计时，下方水平均匀排列三个按钮，都是小图标 + 文字的风格，分别为：暂停，完成和取消。
+
+
+

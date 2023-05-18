@@ -6,11 +6,15 @@ import android.app.AlertDialog
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -206,6 +210,19 @@ class AdventureTaskExecuteActivity : AppCompatActivity() {
     lateinit var mTaskRecycleVew: RecyclerView
     lateinit var recycleViewAdapter: AdventureTaskExecListAdapter
 
+    private lateinit var layoutTaskRunning: LinearLayout
+    private lateinit var textTaskName: TextView
+    private lateinit var textTaskTimer: TextView
+    private lateinit var buttonPause: Button
+    private lateinit var buttonFinish: Button
+    private lateinit var buttonCancel: Button
+
+    private var mHandler = Handler(Looper.getMainLooper())
+    private val mRunnable = Runnable { updateTaskLastingTime() }
+
+    private var prevOnGoingTask: PeriodicTask? = null
+
+    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adventure_task_execute)
@@ -223,5 +240,74 @@ class AdventureTaskExecuteActivity : AppCompatActivity() {
                 DividerItemDecoration.HORIZONTAL
             )
         )
+
+        layoutTaskRunning = findViewById(R.id.layout_task_running)
+        textTaskName = findViewById(R.id.text_on_going_task)
+        textTaskTimer = findViewById(R.id.text_on_going_time)
+        buttonPause = findViewById(R.id.button_pause)
+        buttonFinish = findViewById(R.id.button_goal)
+        buttonCancel = findViewById(R.id.button_abandon)
+
+        buttonPause.setOnClickListener {
+            val onGoingTask = GlService.getOnGoingPeriodicTask()
+            onGoingTask?.run {
+                AlertDialog.Builder(it.context)
+                    .setMessage("是否挂起这个任务？")
+                    .setPositiveButton("是") { _, _ ->
+                        GlService.suspendPeriodicTask(id)
+                        recycleViewAdapter.notifyDataSetChanged()
+                    }
+                    .setNegativeButton("否", null)
+                    .show()
+            }
+        }
+
+        buttonFinish.setOnClickListener {
+            val onGoingTask = GlService.getOnGoingPeriodicTask()
+            onGoingTask?.run {
+                AlertDialog.Builder(it.context)
+                    .setMessage("是否完成这个任务？")
+                    .setPositiveButton("是") { _, _ ->
+                        GlService.finishPeriodicTask(id)
+                        recycleViewAdapter.notifyDataSetChanged()
+                    }
+                    .setNegativeButton("否", null)
+                    .show()
+            }
+        }
+
+        buttonCancel.setOnClickListener {
+            val onGoingTask = GlService.getOnGoingPeriodicTask()
+            onGoingTask?.run {
+                AlertDialog.Builder(it.context)
+                    .setMessage("是否完成这个任务？")
+                    .setPositiveButton("是") { _, _ ->
+                        GlService.finishPeriodicTask(id)
+                        recycleViewAdapter.notifyDataSetChanged()
+                    }
+                    .setNegativeButton("否", null)
+                    .show()
+            }
+        }
+
+        mHandler.postDelayed(mRunnable, 500)
+    }
+
+    private fun updateTaskLastingTime() {
+        val onGoingTask = GlService.getOnGoingPeriodicTask()
+        if (onGoingTask != null) {
+            layoutTaskRunning.visibility = View.VISIBLE
+
+            if (prevOnGoingTask != onGoingTask) {
+                prevOnGoingTask = onGoingTask
+                textTaskName.text = onGoingTask.name
+            }
+
+            val lastingTime = GlService.getTimeStamp() - onGoingTask.conclusionTs
+            textTaskTimer.text = GlService.formatTimeStamp(lastingTime)
+        } else {
+            layoutTaskRunning.visibility = View.GONE
+        }
+        mHandler.postDelayed(mRunnable, 500)
     }
 }
