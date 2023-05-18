@@ -139,7 +139,7 @@ object GlService {
                     0f
                 } else {
                     val baseUrgency = -log10(item.first)
-                    if (item.second < TIMESTAMP_COUNT_IN_DAY) {
+                    if ((item.second - currentTime) < TIMESTAMP_COUNT_IN_DAY) {
                         max(0.5f, baseUrgency)
                     } else {
                         max(0f, baseUrgency, )

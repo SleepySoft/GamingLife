@@ -196,7 +196,7 @@ class AdventureTaskExecListAdapter(filterGroup: String)
     private fun urgencyToColor(urgency: Float) : Int {
         val evaluator = ArgbEvaluator()
         val startColor = Color.WHITE
-        val endColor = Color.parseColor("#CC3333")
+        val endColor = Color.parseColor("#FF0000")
         return evaluator.evaluate(urgency, startColor, endColor) as Int
     }
 }

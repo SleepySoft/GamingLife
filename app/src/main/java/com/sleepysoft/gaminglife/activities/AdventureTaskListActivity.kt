@@ -3,6 +3,7 @@ package com.sleepysoft.gaminglife.activities
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -20,6 +21,7 @@ import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import com.sleepysoft.gaminglife.resultCode
 import com.sleepysoft.gaminglife.taskGroupIcon
 import glcore.ENUM_TASK_PERIOD_ARRAY
+import glcore.ENUM_TASK_PROPERTY_OPTIONAL
 import glcore.GlRoot
 import glcore.GlService
 import glcore.PeriodicTask
@@ -58,7 +60,11 @@ class AdventureTaskListAdapter(
             val ptask = mPeriodicTasks[position]
 
             holder.iconTask.setImageResource(taskGroupIcon(ptask.group))
+
             holder.textTaskName.text = ptask.name
+            if (ptask.property == ENUM_TASK_PROPERTY_OPTIONAL) {
+                holder.textTaskName.setBackgroundColor(Color.parseColor("#99CCFF"))
+            }
 
             val periodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(ptask.periodic)
             holder.textTaskPeriod.text = UiRes.stringArray("TASK_PERIOD_ARRAY")[periodIndex]
