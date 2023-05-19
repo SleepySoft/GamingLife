@@ -27,6 +27,9 @@
         android:theme="@style/Theme.GamingLife"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".activities.RecordCalendarActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.AdventureTaskExecuteActivity"
             android:exported="false" />
         <activity

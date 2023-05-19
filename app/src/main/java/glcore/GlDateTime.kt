@@ -85,6 +85,17 @@ object GlDateTime {
         }.time
     }
 
+    fun datesInMonth(year: Int, month: Int): List<Date> {
+        val dates = mutableListOf<Date>()
+        val cal = Calendar.getInstance()
+        cal.set(year, month - 1, 1)
+        while (cal.get(Calendar.MONTH) == month - 1) {
+            dates.add(cal.time)
+            cal.add(Calendar.DATE, 1)
+        }
+        return dates
+    }
+
     fun timeStamp() = now().time
 
     fun dayStartTimeStamp(offsetDays: Int = 0) = dayStartTimeStamp(datetime(offsetDays))

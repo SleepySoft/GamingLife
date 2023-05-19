@@ -184,6 +184,8 @@ object GlService {
 
     fun formatTimeStamp(ts: Long) = GlDateTime.smartFormatSec(ts / 1000)
 
+    fun getMonthDates(year: Int, month: Int) = GlDateTime.datesInMonth(year, month)
+
     // ---------------------------------------------------------------------
 
     fun setPlayerGlID(glid: String) = run { GlRoot.systemConfig.GLID = glid }
@@ -338,6 +340,24 @@ object GlService {
     private fun checkSettlePeriodicTask() {
         syncConfigPeriodicTaskToStarted()
         checkRefreshPeriodicTask()
+    }
+
+    fun getPeriodicTaskInMonth(year: Int, month: Int) : List< List< PeriodicTask > > {
+        val today = Date()
+        val dates = getMonthDates(year, month)
+        val taskRecords = mutableListOf< List< PeriodicTask > >()
+
+        for (d in dates) {
+            if (d.before(today)) {
+                GlDailyRecord().apply { loadDailyRecord(d) }
+            } else if (d == today) {
+                GlRoot.dailyRecord
+            } else {
+                null
+            }?.run { taskRecords.add(periodicTaskRecord.getGlDataList()) }
+        }
+
+        return taskRecords
     }
 
     // ---------------------------------------------------------------------------------------------

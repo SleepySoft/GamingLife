@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical">
+
+    <com.sleepysoft.gaminglife.views.GlView
+        android:id="@+id/id_view_statistics_landscape"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+    <RelativeLayout
+        android:id="@+id/rl_tool"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="@color/white">
+
+        <TextView
+            android:id="@+id/tv_month_day"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:textColor="#000000"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            tools:ignore="RtlSymmetry" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toEndOf="@+id/tv_month_day"
+            android:orientation="vertical"
+            android:paddingBottom="12dp"
+            android:paddingLeft="6dp"
+            android:paddingRight="6dp"
+            android:paddingTop="12dp"
+            tools:ignore="RelativeOverlap">
+
+            <TextView
+                android:id="@+id/tv_year"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="#000000"
+                android:textSize="10sp"
+                tools:ignore="SmallSp" />
+
+            <TextView
+                android:id="@+id/tv_lunar"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="#000000"
+                android:textSize="10sp"
+                tools:ignore="SmallSp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/text_today"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="@string/VIEW_BACK_TO_TODAY"
+            android:paddingEnd="16dp"
+            android:layout_alignParentEnd="true"
+            tools:ignore="RelativeOverlap,SmallSp" />
+    </RelativeLayout>
+
+    <com.haibin.calendarview.CalendarLayout
+        android:id="@+id/calendarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#fff"
+        android:orientation="vertical"
+        app:calendar_content_view_id="@+id/nestedScrollView"
+        app:calendar_show_mode="both_month_week_view">
+
+        <com.haibin.calendarview.CalendarView
+            android:id="@+id/calendarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#fff"
+            app:calendar_padding_left="22dp"
+            app:calendar_padding_right="10dp"
+            app:current_day_lunar_text_color="#ff0000"
+            app:current_day_text_color="#ff0000"
+            app:current_month_lunar_text_color="#CFCFCF"
+            app:current_month_text_color="#333333"
+            app:lunar_text_size="10sp"
+            app:max_year="2050"
+            app:max_year_day="31"
+            app:max_year_month="12"
+            app:min_year="2008"
+            app:min_year_day="1"
+            app:min_year_month="1"
+            app:month_view_show_mode="mode_only_current"
+            app:other_month_lunar_text_color="#e1e1e1"
+            app:other_month_text_color="#e1e1e1"
+            app:scheme_lunar_text_color="#CFCFCF"
+            app:scheme_text="假"
+            app:scheme_text_color="#333"
+            app:scheme_theme_color="#128c4b"
+            app:selected_lunar_text_color="#128c4b"
+            app:selected_text_color="#128c4b"
+            app:selected_theme_color="#80cfcfcf"
+            app:week_background="#fff"
+            app:week_bar_height="46dp"
+            app:week_line_background="#00000000"
+            app:week_line_margin="16dp"
+            app:week_start_with="sun"
+            app:week_text_size="10sp"
+            app:year_view_background="#f6f6f6"
+            app:year_view_day_text_color="#333333"
+            app:year_view_day_text_size="8sp"
+            app:year_view_month_text_color="#ff0000"
+            app:year_view_month_text_size="20sp"
+            app:year_view_scheme_color="#f17706"
+            app:year_view_week_height="0dp"
+            app:year_view_week_text_color="#666666"
+            app:month_view_auto_select_day="last_select_day_ignore_current"
+            app:year_view_week_text_size="7sp" />
+    </com.haibin.calendarview.CalendarLayout>
+</LinearLayout>

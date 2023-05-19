@@ -62,6 +62,10 @@ class AdventureTaskListAdapter(
             holder.iconTask.setImageResource(taskGroupIcon(ptask.group))
 
             holder.textTaskName.text = ptask.name
+            holder.textTaskName.setOnClickListener {
+
+            }
+
             if (ptask.property == ENUM_TASK_PROPERTY_OPTIONAL) {
                 holder.textTaskName.setBackgroundColor(Color.parseColor("#99CCFF"))
             }
