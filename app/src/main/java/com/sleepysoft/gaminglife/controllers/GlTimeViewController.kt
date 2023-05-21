@@ -35,6 +35,8 @@ class GlTimeViewController(
     private var mHandler = Handler(Looper.getMainLooper())
     private val mRunnable = Runnable { polling() }
 
+    private var mPrevTaskGroup = ""
+
 /*    private var mRecording: Boolean = false
     private lateinit var mRecordController: GlAudioRecordLayerController*/
 
@@ -49,7 +51,17 @@ class GlTimeViewController(
     }
 
     fun polling() {
+        val currentTaskGroup = GlService.getCurrentTaskInfo()
+        if (currentTaskGroup.groupID != mPrevTaskGroup) {
+            val currentTaskGroupData: TaskData =
+                GlService.getTaskGroupData(currentTaskGroup.groupID) ?:
+                GlService.getTaskGroupData(GROUP_ID_IDLE) ?: TaskData()
+            mPrevTaskGroup = currentTaskGroup.groupID
+            mCenterItem.itemData = currentTaskGroupData
+            mCenterItem.shapePaint.color = Color.parseColor(currentTaskGroupData.color)
+        }
         mCenterItemText.mainText = GlService.getCurrentTaskLastTimeFormatted()
+
         mCtrlContext.refresh()
         mHandler.postDelayed(mRunnable, 100)
     }
@@ -272,16 +284,16 @@ class GlTimeViewController(
             val layer = GraphLayer("TimeView.BaseLayer", true, graphView)
             graphView.addLayer(layer)
 
-            val currentTaskInfo = GlService.getCurrentTaskInfo()
+/*            val currentTaskInfo = GlService.getCurrentTaskInfo()
             val currentTaskGroupData: TaskData =
                 GlService.getTaskGroupData(currentTaskInfo.groupID) ?:
-                GlService.getTaskGroupData(GROUP_ID_IDLE) ?: TaskData()
+                GlService.getTaskGroupData(GROUP_ID_IDLE) ?: TaskData()*/
 
             mCenterItem = GraphCircle().apply {
                 this.id = "TimeView.CenterItem"
-                this.itemData = currentTaskGroupData
+                this.itemData = null
                 this.shapePaint = Paint(ANTI_ALIAS_FLAG).apply {
-                    this.color = Color.parseColor(currentTaskGroupData.color)
+                    this.color = Color.parseColor("#FFFFFF")
                     this.style = Paint.Style.FILL
                 }
             }

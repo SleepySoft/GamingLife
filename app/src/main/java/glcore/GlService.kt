@@ -252,6 +252,24 @@ object GlService {
             if (task.id == newTaskId) {
                 task.conclusion = ENUM_TASK_CONCLUSION_DOING
                 task.conclusionTs = GlDateTime.timeStamp()
+
+                // Auto switch the current task group to period task's group.
+                switchToTask(TaskData().apply { id = task.group })
+
+/*                if (isGroupIdValid(task.group)) {
+                    val currentTaskGroup = getCurrentTaskInfo()
+                    if (currentTaskGroup.groupID != task.group) {
+                        GlRoot.dailyRecord.addTask(TaskRecord().apply {
+                            taskID = task.group
+                            groupID = task.group
+                            startTime = GlDateTime.datetime().time
+                        })
+                        GlRoot.dailyRecord.saveDailyRecord()
+                    }
+                } else {
+                    // Should not reach here.
+                    GlLog.e("An invalid group id has been found: $task.group")
+                }*/
             } else if (task.conclusion == ENUM_TASK_CONCLUSION_DOING) {
                 task.conclusion = pervTaskConclusion
                 task.conclusionTs  = GlDateTime.timeStamp()
@@ -362,18 +380,30 @@ object GlService {
 
     // ---------------------------------------------------------------------------------------------
 
-
     // ----------------------- Task Switching -----------------------
 
     fun switchToTask(taskData: TaskData) {
         checkSettle()
-        GlRoot.dailyRecord.addTask(TaskRecord().apply {
-            taskID = taskData.id
-            groupID = taskData.id       //GlRoot.systemConfig.getTopGroupOfTask(taskData.id)
-            startTime = GlDateTime.datetime().time
-        })
-        GlRoot.dailyRecord.saveDailyRecord()
+
+        // History reason: Actually now we only top level task group.
+        if (isGroupIdValid(taskData.id)) {
+            val currentTaskGroup = getCurrentTaskInfo()
+            if (currentTaskGroup.groupID != taskData.id) {
+                GlRoot.dailyRecord.addTask(TaskRecord().apply {
+                    taskID = taskData.id
+                    groupID = taskData.id   //GlRoot.systemConfig.getTopGroupOfTask(taskData.id)
+                    startTime = GlDateTime.datetime().time
+                })
+                GlRoot.dailyRecord.saveDailyRecord()
+            }
+        } else {
+            // Should not reach here.
+            GlLog.e("An invalid group id has been found: $taskData.id")
+        }
     }
+
+    fun isGroupIdValid(taskId: String) : Boolean =
+        GlRoot.systemConfig.taskGroupEditor.getGlDataList().any { it.id == taskId }
 
     fun getCurrentTaskInfo() : TaskRecord {
         // checkSettleDailyData()
