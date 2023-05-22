@@ -100,6 +100,11 @@ const val COLOR_STAT_BK         = "#E5E5E5"
 const val COLOR_SCHEME_NORMAL   = "#87CEEB"
 const val COLOR_SCHEME_EXTREME  = "#FFBC40"
 
+const val COLOR_PERIODIC_TASK_OPTIONAL_BK           = "#99CCFF"
+const val COLOR_PERIODIC_TASK_URGENCY_DAILY_START   = "#FFFFFF"
+const val COLOR_PERIODIC_TASK_URGENCY_LONG_START    = "#FFE367"
+const val COLOR_PERIODIC_TASK_URGENCY_FINAL         = "#FF0000"
+
 
 // ---------------------------------------- Struct Support -----------------------------------------
 

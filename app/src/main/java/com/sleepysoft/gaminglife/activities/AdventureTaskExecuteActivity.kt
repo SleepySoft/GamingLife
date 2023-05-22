@@ -22,12 +22,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sleepysoft.gaminglife.R
 import com.sleepysoft.gaminglife.UiRes
+import glcore.COLOR_PERIODIC_TASK_OPTIONAL_BK
+import glcore.COLOR_PERIODIC_TASK_URGENCY_FINAL
+import glcore.COLOR_PERIODIC_TASK_URGENCY_DAILY_START
+import glcore.COLOR_PERIODIC_TASK_URGENCY_LONG_START
 import glcore.ENUM_TASK_CONCLUDED_ARRAY
 import glcore.ENUM_TASK_CONCLUSION_ABANDONED
 import glcore.ENUM_TASK_CONCLUSION_DOING
 import glcore.ENUM_TASK_CONCLUSION_FINISHED
 import glcore.ENUM_TASK_CONCLUSION_NONE
 import glcore.ENUM_TASK_PERIOD_ARRAY
+import glcore.ENUM_TASK_PERIOD_DAILY
 import glcore.ENUM_TASK_PROPERTY_OPTIONAL
 import glcore.GlService
 import glcore.PeriodicTask
@@ -86,9 +91,18 @@ class AdventureTaskExecListAdapter(filterGroup: String)
 
             holder.textTaskName.text = ptask.name
             if (ptask.property == ENUM_TASK_PROPERTY_OPTIONAL) {
-                holder.textTaskName.setBackgroundColor(Color.parseColor("#99CCFF"))
+                holder.textTaskName.setBackgroundColor(
+                    Color.parseColor(COLOR_PERIODIC_TASK_OPTIONAL_BK))
             } else {
-                holder.textTaskName.setBackgroundColor(urgencyToColor(urgency))
+/*                val startColor = if (ptask.periodic == ENUM_TASK_PERIOD_DAILY) {
+                    COLOR_PERIODIC_TASK_URGENCY_DAILY_START
+                } else {
+                    COLOR_PERIODIC_TASK_URGENCY_LONG_START
+                }
+                holder.textTaskName.setBackgroundColor(
+                    urgencyToColor(urgency, Color.parseColor(startColor)))*/
+                holder.textTaskName.setBackgroundColor(urgencyToColor(
+                    urgency, Color.parseColor(COLOR_PERIODIC_TASK_URGENCY_DAILY_START)))
             }
 
             if (ptask.conclusion !in ENUM_TASK_CONCLUDED_ARRAY) {
@@ -111,15 +125,20 @@ class AdventureTaskExecListAdapter(filterGroup: String)
         if ((ptask.batch > 1) && (ptask.batchSize > 1)) {
             holder.textTaskBatch.text = "剩余%d组".format(ptask.batchRemaining)
             holder.textTaskBatch.visibility = View.VISIBLE
+
             val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
             layoutParams.removeRule(RelativeLayout.CENTER_IN_PARENT)
             holder.textTaskPeriod.layoutParams = layoutParams
         } else {
             holder.textTaskBatch.visibility = View.GONE
+
             val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
             layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE)
             holder.textTaskPeriod.layoutParams = layoutParams
         }
+
+        // If remove this line, textTaskPeriod will be invisible after clicking buttonGoal.
+        holder.textTaskPeriod.visibility = View.VISIBLE
 
         holder.imageFinished.visibility = View.GONE
         holder.imageAbandoned.visibility = View.GONE
@@ -197,10 +216,9 @@ class AdventureTaskExecListAdapter(filterGroup: String)
         }
     }
 
-    private fun urgencyToColor(urgency: Float) : Int {
+    private fun urgencyToColor(urgency: Float, startColor: Int) : Int {
         val evaluator = ArgbEvaluator()
-        val startColor = Color.WHITE
-        val endColor = Color.parseColor("#FF0000")
+        val endColor = Color.parseColor(COLOR_PERIODIC_TASK_URGENCY_FINAL)
         return evaluator.evaluate(urgency, startColor, endColor) as Int
     }
 }

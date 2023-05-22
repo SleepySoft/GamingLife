@@ -21,7 +21,11 @@ import com.sleepysoft.gaminglife.UiRes
 import com.sleepysoft.gaminglife.controllers.GlControllerContext
 import com.sleepysoft.gaminglife.resultCode
 import com.sleepysoft.gaminglife.taskGroupIcon
+import glcore.COLOR_PERIODIC_TASK_OPTIONAL_BK
+import glcore.COLOR_PERIODIC_TASK_URGENCY_LONG_START
 import glcore.ENUM_TASK_PERIOD_ARRAY
+import glcore.ENUM_TASK_PERIOD_DAILY
+import glcore.ENUM_TASK_PERIOD_ONESHOT
 import glcore.ENUM_TASK_PROPERTY_OPTIONAL
 import glcore.GlRoot
 import glcore.GlService
@@ -71,8 +75,11 @@ class AdventureTaskListAdapter(
             }
 
             if (ptask.property == ENUM_TASK_PROPERTY_OPTIONAL) {
-                holder.textTaskName.setBackgroundColor(Color.parseColor("#99CCFF"))
-            }
+                holder.textTaskName.setBackgroundColor(Color.parseColor(COLOR_PERIODIC_TASK_OPTIONAL_BK))
+            }/* else if ((ptask.periodic != ENUM_TASK_PERIOD_ONESHOT) &&
+                       (ptask.periodic != ENUM_TASK_PERIOD_DAILY)) {
+                holder.textTaskName.setBackgroundColor(Color.parseColor(COLOR_PERIODIC_TASK_URGENCY_LONG_START))
+            }*/
 
             val periodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(ptask.periodic)
             holder.textTaskPeriod.text = UiRes.stringArray("TASK_PERIOD_ARRAY")[periodIndex]
