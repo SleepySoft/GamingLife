@@ -6,6 +6,7 @@ import glenv.GlKeyPair
 import java.lang.Float.max
 import java.util.*
 import kotlin.math.log10
+import kotlin.system.measureTimeMillis
 
 
 object GlService {
@@ -360,20 +361,29 @@ object GlService {
         checkRefreshPeriodicTask()
     }
 
-    fun getPeriodicTaskInMonth(year: Int, month: Int) : List< List< PeriodicTask > > {
+    fun getPeriodicTaskInMonth(year: Int, month: Int) : Map< Date, List< PeriodicTask > > {
         val today = Date()
         val dates = getMonthDates(year, month)
-        val taskRecords = mutableListOf< List< PeriodicTask > >()
+        val taskRecords = mutableMapOf< Date, List< PeriodicTask > >()
 
-        for (d in dates) {
-            if (d.before(today)) {
-                GlDailyRecord().apply { loadDailyRecord(d) }
-            } else if (d == today) {
-                GlRoot.dailyRecord
-            } else {
-                null
-            }?.run { taskRecords.add(periodicTaskRecord.getGlDataList()) }
+        val time = measureTimeMillis {
+            for (d in dates) {
+                val dailyRecord = if (d.before(today)) {
+                    GlDailyRecord().apply { loadDailyRecord(d) }
+                } else if (d == today) {
+                    GlRoot.dailyRecord
+                } else {
+                    null
+                }
+                dailyRecord?.run {
+                    val ptasks = periodicTaskRecord.getGlDataList()
+                    if (ptasks.isNotEmpty()) {
+                        taskRecords[d] = ptasks
+                    }
+                }
+            }
         }
+        GlLog.i("Collect Periodic Task In Month spends $time ms")
 
         return taskRecords
     }

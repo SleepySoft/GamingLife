@@ -2,6 +2,7 @@ package com.sleepysoft.gaminglife.activities
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -29,6 +30,7 @@ import glenv.GlApp
 
 
 class AdventureTaskListAdapter(
+    private val context: Context,
     private val onEditAction: (action: String, uuid: String) -> Unit) :
     RecyclerView.Adapter< AdventureTaskListAdapter.ViewHolder >() {
 
@@ -63,7 +65,9 @@ class AdventureTaskListAdapter(
 
             holder.textTaskName.text = ptask.name
             holder.textTaskName.setOnClickListener {
-
+                val intent = Intent(context, RecordCalendarActivity::class.java)
+                intent.putExtra("task_id", ptask.id)
+                context.startActivity(intent)
             }
 
             if (ptask.property == ENUM_TASK_PROPERTY_OPTIONAL) {
@@ -133,7 +137,7 @@ class AdventureTaskListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adventure_task_list)
 
-        recycleViewAdapter = AdventureTaskListAdapter { action: String, uuid: String ->
+        recycleViewAdapter = AdventureTaskListAdapter(this) { action: String, uuid: String ->
             if (action == "delete") {
                 val builder = AlertDialog.Builder(this)
                 builder.setMessage("是否确定删除此项任务？\n\n任务删除后无法恢复")

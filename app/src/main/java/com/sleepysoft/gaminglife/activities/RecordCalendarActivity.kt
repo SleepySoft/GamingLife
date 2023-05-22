@@ -1,6 +1,7 @@
 package com.sleepysoft.gaminglife.activities
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.media.MediaPlayer
@@ -22,8 +23,17 @@ import com.haibin.calendarview.CalendarView
 import com.sleepysoft.gaminglife.R
 import glcore.COLOR_SCHEME_EXTREME
 import glcore.COLOR_SCHEME_NORMAL
+import glcore.ENUM_TASK_CONCLUSION_FINISHED
 import glcore.GlDailyRecord
 import glcore.GlService
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Date
 
 
@@ -41,6 +51,11 @@ class RecordCalendarActivity
 
     // ----------------------------------------------
 
+    private var job: Job? = null
+    private val scope = CoroutineScope(Dispatchers.Main)
+    private var mDisplayTaskId = ""
+
+
     private lateinit var mTextYear: TextView
     private lateinit var mTextLunar: TextView
     private lateinit var mTextMonthDay: TextView
@@ -55,6 +70,8 @@ class RecordCalendarActivity
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_record_calendar)
+
+        mDisplayTaskId = intent.getStringExtra("task_id").toString()
 
         // -----------------------------------------------------------------------------------------
 
@@ -89,6 +106,12 @@ class RecordCalendarActivity
         })
 
         updateCalendarTopDisplay()
+        updateCalendarMarksByCurrentDate()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -119,24 +142,30 @@ class RecordCalendarActivity
     // ---------------------------------------------------------------------------------------------
 
     private fun updateCalendarMarks(year: Int, month: Int) {
-        val daysWithData = listOf<String>()
-        val daysDateWithData = listOf<String>()
+        job?.cancel()
+        mCalendarView.clearSchemeDate()
 
+        job = scope.launch(Dispatchers.Main) {
+            val daysTaskFinished = withContext(Dispatchers.IO) {
+                updateMonthlyDataForPeriodicTask(year, month)
+            }
+            job = null
+            updateCalendarMarks(daysTaskFinished)
+        }
+    }
+
+    private fun updateCalendarMarks(daysTaskFinished: List< Date >) {
         val schemeMap = mutableMapOf< String, Calendar>()
 
-        for (dateStr in daysDateWithData) {
+        for (d in daysTaskFinished) {
+            val cal = java.util.Calendar.getInstance().apply { time = d }
+
             val calendar = Calendar()
-            val extFiles = GlDailyRecord.listDailyExtraFiles(dateStr)
-            val dayInt = dateStr.substring(dateStr.length - 2).toInt()
-
-            calendar.year = year
-            calendar.month = month
-            calendar.day = dayInt
-            calendar.scheme = "GL"
-            calendar.schemeColor = Color.parseColor(
-                if (extFiles.isNotEmpty()) COLOR_SCHEME_EXTREME else COLOR_SCHEME_NORMAL
-            )
-
+            calendar.year = cal.get(java.util.Calendar.YEAR)
+            calendar.month = cal.get(java.util.Calendar.MONTH) + 1
+            calendar.day = cal.get(java.util.Calendar.DAY_OF_MONTH)
+            calendar.scheme = "\uD83D\uDC51"
+            calendar.schemeColor = Color.parseColor("#FFFFFF")
             schemeMap[calendar.toString()] = calendar
         }
 
@@ -155,17 +184,23 @@ class RecordCalendarActivity
 
     // ---------------------------------------------------------------------------------------------
 
-    fun updateMonthlyDataForPeriodicTask(year: Int, month: Int) {
+    private fun updateMonthlyDataForPeriodicTask(year: Int, month: Int) : List< Date > {
         val taskRecords = GlService.getPeriodicTaskInMonth(year, month)
+        val filteredDates = taskRecords.filter {
+            it.value.any { task ->
+                task.id == mDisplayTaskId &&
+                task.conclusion == ENUM_TASK_CONCLUSION_FINISHED
+            } }.keys
+        return filteredDates.toList()
+    }
+
+    private fun updateCalendarMarksByCurrentDate() {
+        updateCalendarMarks(mCalendarView.curYear, mCalendarView.curMonth)
     }
 
 /*    private fun updateDailyStatisticsByCalendar(calendar: Calendar) {
         val dateStr = "%04d%02d%02d".format(calendar.year, calendar.month, calendar.day)
         updateDailyStatistics(dateStr)
-    }
-
-    private fun updateCalendarMarksByCurrentDate() {
-        updateCalendarMarks(mCalendarView.curYear, mCalendarView.curMonth)
     }
 
     private fun newPlayer(uri: String) {

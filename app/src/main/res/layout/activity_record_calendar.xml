@@ -7,12 +7,6 @@
     android:background="#ffffff"
     android:orientation="vertical">
 
-    <com.sleepysoft.gaminglife.views.GlView
-        android:id="@+id/id_view_statistics_landscape"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
-
     <RelativeLayout
         android:id="@+id/rl_tool"
         android:layout_width="match_parent"
