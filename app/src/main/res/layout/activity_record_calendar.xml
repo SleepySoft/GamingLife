@@ -123,5 +123,29 @@
             app:year_view_week_text_color="#666666"
             app:month_view_auto_select_day="last_select_day_ignore_current"
             app:year_view_week_text_size="7sp" />
+
+
+        <LinearLayout
+            android:id="@+id/layout_loading"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            android:orientation="vertical">
+
+            <ProgressBar
+                android:layout_width="128dp"
+                android:layout_height="128dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="20dp"
+                android:indeterminateBehavior="repeat"
+                android:indeterminateDrawable="@drawable/anime_loading" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp"
+                android:text="@string/HINT_LOADING" />
+        </LinearLayout>
     </com.haibin.calendarview.CalendarLayout>
 </LinearLayout>

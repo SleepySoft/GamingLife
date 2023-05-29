@@ -1,33 +1,19 @@
 package com.sleepysoft.gaminglife.activities
 
-import android.annotation.SuppressLint
-import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Color
-import android.media.MediaPlayer
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.SurfaceHolder
-import android.view.SurfaceView
 import android.view.View
 import android.widget.LinearLayout
-import android.widget.MediaController
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.haibin.calendarview.Calendar
 import com.haibin.calendarview.CalendarLayout
 import com.haibin.calendarview.CalendarView
 import com.sleepysoft.gaminglife.R
-import glcore.COLOR_SCHEME_EXTREME
-import glcore.COLOR_SCHEME_NORMAL
 import glcore.ENUM_TASK_CONCLUSION_FINISHED
-import glcore.GlDailyRecord
 import glcore.GlService
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -60,6 +46,7 @@ class RecordCalendarActivity
     private lateinit var mTextLunar: TextView
     private lateinit var mTextMonthDay: TextView
     private lateinit var mTextToday: TextView
+    private lateinit var mLayoutLoading: LinearLayout
 
     private lateinit var mCalendarView: CalendarView
     private lateinit var mRelativeLayout: RelativeLayout
@@ -79,6 +66,7 @@ class RecordCalendarActivity
         mTextLunar = findViewById(R.id.tv_lunar)
         mTextMonthDay = findViewById(R.id.tv_month_day)
         mTextToday = findViewById(R.id.text_today)
+        mLayoutLoading = findViewById(R.id.layout_loading)
 
         mCalendarView = findViewById(R.id.calendarView)
         mRelativeLayout = findViewById(R.id.rl_tool)
@@ -106,6 +94,10 @@ class RecordCalendarActivity
         })
 
         updateCalendarTopDisplay()
+    }
+
+    override fun onResume() {
+        super.onResume()
         updateCalendarMarksByCurrentDate()
     }
 
@@ -145,12 +137,15 @@ class RecordCalendarActivity
         job?.cancel()
         mCalendarView.clearSchemeDate()
 
+        mLayoutLoading.visibility = View.VISIBLE
+
         job = scope.launch(Dispatchers.Main) {
             val daysTaskFinished = withContext(Dispatchers.IO) {
                 updateMonthlyDataForPeriodicTask(year, month)
             }
             job = null
             updateCalendarMarks(daysTaskFinished)
+            mLayoutLoading.visibility = View.GONE
         }
     }
 
