@@ -10,7 +10,7 @@ data class MarkSub(
 
 fun extractMarksFromText(text: String) : List<MarkSub> {
     val marks = mutableListOf<MarkSub>()
-    val pattern = "<!--(.*?)-->".toRegex()
+    val pattern = "<!--(.*?)-->".toRegex(setOf(RegexOption.DOT_MATCHES_ALL))
     for (match in pattern.findAll(text)) {
         val markStartPos = match.range.first
         val markEndPos = match.range.last

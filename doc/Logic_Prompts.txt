@@ -326,6 +326,15 @@ const val ENUM_TASK_CONCLUSION_FAILED = 4           // Timed out and not process
 
 
 
-为上面的代码写测试函数，考虑所有情况，包括边界和异常情况，每个测试内容必须包含多个标记，一次输入一条test case，我说“继续”输出下一条。
+为上面的代码写测试函数，考虑所有情况，包括边界和异常情况。
+正确性的检查可以调用以下函数：
+
+fun checkMarkText(text: String, markSub: MarkSub, expect: String) : Boolean {
+    val textWithWrapper = text.substring(markSub.markStartPos, markSub.markEndPos + 1).trim()
+    val textInWrapper = textWithWrapper.removePrefix("<!--").removeSuffix("-->")
+    return (textInWrapper == markSub.markText) && (textInWrapper == expect)
+}
+
+一次输出一条test case，我说“继续”输出下一条。
 
 
