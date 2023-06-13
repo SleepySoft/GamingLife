@@ -1,13 +1,12 @@
 package glcore
 
 import org.junit.Test
-import org.junit.jupiter.api.Assertions.*
 
 
-fun checkMarkText(text: String, markSub: MarkSub, expect: String) : Boolean {
-    val textWithWrapper = text.substring(markSub.markStartPos, markSub.markEndPos + 1).trim()
+fun checkMarkText(text: String, markBlock: MarkBlock, expect: String) : Boolean {
+    val textWithWrapper = text.substring(markBlock.markStartPos, markBlock.markEndPos + 1).trim()
     val textInWrapper = textWithWrapper.removePrefix("<!--").removeSuffix("-->").trim()
-    return (textInWrapper == markSub.markText) && (textInWrapper == expect)
+    return (textInWrapper == markBlock.markText) && (textInWrapper == expect)
 }
 
 
@@ -87,12 +86,32 @@ internal class GalTextEngineTest {
 
     @Test
     fun testExtractMarksFromText5() {
-        var text = "This is a <!--comment--> with <!--multiple-->\n<!--marks--> on multiple lines"
-        var marks = extractMarksFromText(text)
+        val text = "This is a <!--comment--> with <!--multiple-->\n<!--marks--> on multiple lines"
+        val marks = extractMarksFromText(text)
         assert(marks.size == 3)
         assert(checkMarkText(text, marks[0], "comment"))
         assert(checkMarkText(text, marks[1], "multiple"))
         assert(checkMarkText(text, marks[2], "marks"))
+    }
+
+    @Test
+    fun testExtractMarksFromText6() {
+        val text = "This is a <!--comment--> with <!--multiple-->\n<!--marks--> on multiple lines"
+        val marks = extractMarksFromText(text)
+        assert(marks.size == 3)
+        assert(checkMarkText(text, marks[0], "comment"))
+        assert(checkMarkText(text, marks[1], "multiple"))
+        assert(checkMarkText(text, marks[2], "marks"))
+    }
+
+    @Test
+    fun testExtractMarksFromText7() {
+        val text = "This is a <!--comment with\nnew line--> and <!--multiple\ttabs--> and <!--  spaces  -->"
+        val marks = extractMarksFromText(text)
+        assert(marks.size == 3)
+        assert(checkMarkText(text, marks[0], "comment with\nnew line"))
+        assert(checkMarkText(text, marks[1], "multiple\ttabs"))
+        assert(checkMarkText(text, marks[2], "spaces"))
     }
 
 }
