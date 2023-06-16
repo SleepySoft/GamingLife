@@ -8,7 +8,8 @@ import org.json.JSONObject
 data class MarkBlock(
     var markStartPos: Int,
     var markEndPos: Int,
-    var markText: String
+    var markText: String,
+    var marks: List< MarkData > = mutableListOf()
 )
 
 
@@ -38,9 +39,20 @@ fun extractMarksFromText(text: String) : List<MarkBlock> {
 }
 
 
+fun markBlockFromPos(position: Int, markBlockList: List<MarkBlock>): MarkBlock? =
+    markBlockList.firstOrNull { it.markStartPos <= position && position <= it.markEndPos }
+
+fun prevMarkBlockOfPos(position: Int, markBlockList: List<MarkBlock>): MarkBlock? =
+    markBlockList.lastOrNull { it.markEndPos < position }
+
+fun nextMarkBlockOfPos(position: Int, markBlockList: List<MarkBlock>): MarkBlock? =
+    markBlockList.firstOrNull { it.markStartPos > position }
+
+
 fun parseMarksFromBlock(markBlocks: List<MarkBlock>): List<MarkData> {
     val result = mutableListOf<MarkData>()
     for (block in markBlocks) {
+        val marksInBlock = mutableListOf< MarkData >()
         val lines = block.markText.split("\n").map { it.trim() }.filter { it.isNotEmpty() }
         for (line in lines) {
             val parts = line.split(":", limit = 2)
@@ -76,12 +88,52 @@ fun parseMarksFromBlock(markBlocks: List<MarkBlock>): List<MarkData> {
                 }
                 else -> MarkDataString(labelData)
             }
-            result.add(MarkData(block, label, markDataValue))
+            marksInBlock.add(MarkData(block, label, markDataValue))
         }
+        result += marksInBlock
+        block.marks = marksInBlock
     }
     return result
 }
 
 
 class GalTextEngine {
+    companion object {
+        const val MARK_LABEL = "label"
+        const val MARK_JUMP = "jump"
+        const val MARK_END = "end"
+        const val MARK_ACTION = "action"
+        const val MARK_SELECTION = "selection"
+        const val MARK_GLOBAL_STATUS = "global_status"
+        const val MARK_SESSION_STATUS = "session_status"
+        const val MARK_COMMENTS = "comments"
+    }
+
+    private var markBlocks = mutableListOf< MarkBlock >()
+    private var markData = mutableListOf< MarkData >()
+    private var galText: String = ""
+
+    var markLabelPosition = mutableMapOf< String, Int >()           // { LabelName: Position }
+
+    fun loadText(text: String) {
+        galText = text
+        markBlocks = extractMarksFromText(text).toMutableList()
+        markData = parseMarksFromBlock(markBlocks).toMutableList()
+        
+        indexLabelMarks()
+    }
+
+    fun indexLabelMarks() {
+        markLabelPosition.clear()
+        for (mark in markData) {
+            if (mark.markName == MARK_LABEL) {
+                if (mark.markData is MarkDataString) {
+                    val labelName = (mark.markData as MarkDataString).value
+                    val labelBlock = mark.markBlock
+                    markLabelPosition[labelName] = labelBlock.markEndPos + 1
+                }
+            }
+        }
+    }
+
 }

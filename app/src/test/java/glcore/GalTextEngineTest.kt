@@ -10,7 +10,7 @@ fun checkMarkText(text: String, markBlock: MarkBlock, expect: String) : Boolean 
 }
 
 
-internal class GalTextEngineTest {
+internal class GalTextEngineTest01 {
 
     @Test
     fun testExtractMarksFromText1() {
@@ -113,6 +113,8 @@ internal class GalTextEngineTest {
         assert(checkMarkText(text, marks[1], "multiple\ttabs"))
         assert(checkMarkText(text, marks[2], "spaces"))
     }
+
+    // ---------------------------------------------------------------------------------------------
 
     @Test
     fun testParseMarksFromBlock1() {
@@ -289,5 +291,37 @@ internal class GalTextEngineTest {
         assert(markData2.markName == "label2")
         assert(markData2.markData is MarkDataString)
         assert((markData2.markData as MarkDataString).value == "[invalid]")
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    @Test
+    fun testMarkBlockFromPos() {
+        for ((position, expectedMarkBlock) in markBlockFromPosTestCaseList) {
+            val result = markBlockFromPos(position, markBlockTestDataList)
+            assert(result == expectedMarkBlock) {
+                "Failed for position $position. Expected $expectedMarkBlock but got $result"
+            }
+        }
+    }
+
+    @Test
+    fun testPrevMarkBlockOfPos() {
+        for ((position, expectedMarkBlock) in prevMarkBlockOfPosTestCaseList) {
+            val result = prevMarkBlockOfPos(position, markBlockTestDataList)
+            assert(result == expectedMarkBlock) {
+                "Failed for position $position. Expected $expectedMarkBlock but got $result"
+            }
+        }
+    }
+
+    @Test
+    fun testNextMarkBlockOfPos() {
+        for ((position, expectedMarkBlock) in nextMarkBlockOfPosTestCaseList) {
+            val result = nextMarkBlockOfPos(position, markBlockTestDataList)
+            assert(result == expectedMarkBlock) {
+                "Failed for position $position. Expected $expectedMarkBlock but got $result"
+            }
+        }
     }
 }

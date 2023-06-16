@@ -338,3 +338,32 @@ fun checkMarkText(text: String, markSub: MarkSub, expect: String) : Boolean {
 一次输出一条test case，我说“继续”输出下一条。
 
 
+
+这是一个Kotlin程序。我的设计是在文本中加入标记，首先扫描并识别每个标记的开始和结束位置，保存在MarkBlock的markStartPos和markEndPos中，最终返回List<MarkBlock>。
+
+data class MarkBlock(
+    var markStartPos: Int,
+    var markEndPos: Int,
+    var markText: String
+)
+
+请实现markBlockFromPos(position: Int) : MarkBlock?
+
+要求：如果position在某个MarkBlock中（markStartPos <= position <= markEndPos），那么返回该MarkBlock。否则返回null。
+
+注意理论上markBlockList是排序的。
+
+再写两个函数：prevMarkBlockOfPos,nextMarkBlockOfPos。分别返回该pos的上一个及下一个MarkBlock，没有则返回null。
+
+
+
+请继续编写下面这个函数：
+'''
+fun createMarkBlocksForTest(): List< MarkBlock > = listOf(
+		MarkBlock(0, 3, "mark1"),
+	)'''
+要求继续生成50项，markStartPos每次随机递增0 - 1000，markEndPos比markStartPos随机大1 - 100。
+
+写test case，一次输出一条，我说“继续”输出下一条。
+
+
