@@ -1,5 +1,6 @@
 package glcore
 
+import kotlinx.coroutines.yield
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -97,6 +98,44 @@ fun parseMarksFromBlock(markBlocks: List<MarkBlock>): List<MarkData> {
 }
 
 
+open class GalTextHandler {
+
+    fun onBlockHit(markBlock: MarkBlock) {
+
+    }
+
+    fun onMarkHit(markData: MarkData) {
+
+    }
+
+    // --------------------------------------------------------
+
+    fun onMarkJump(jumpLabel: String) {
+
+    }
+
+    fun onMarkEnd(blockPos: Int) {
+
+    }
+
+    fun onMarkAction(actionData: MarkData) {
+
+    }
+
+    fun onMarkSelection(selectionData: MarkDataDict) {
+
+    }
+
+    fun onMarkCustomize(jumpLabel: String) {
+
+    }
+
+    fun onMarkUnknown(markData: MarkData) {
+
+    }
+}
+
+
 class GalTextEngine {
     companion object {
         const val MARK_LABEL = "label"
@@ -113,7 +152,57 @@ class GalTextEngine {
     private var markData = mutableListOf< MarkData >()
     private var galText: String = ""
 
+    var galTextHandler = GalTextHandler()
     var markLabelPosition = mutableMapOf< String, Int >()           // { LabelName: Position }
+
+    // ---------------------------------------------------------------------------------------------
+
+    var galTextPosition: Int = 0
+        set(value) {
+            // TODO: Check and handle tp changing.
+            if (value < 0) {
+                field = 0
+            } else if (value >= galText.length) {
+                field = galText.length - 1
+            } else {
+                field = value
+            }
+        }
+
+    fun tpJump(label: String) {
+        markLabelPosition[label]?.let {
+            galTextPosition = it
+        }
+    }
+
+    fun tpJumpAfterBlock(markBlock: MarkBlock) {
+        galTextPosition = markBlock.markEndPos + 1
+    }
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun nextChar() : String {
+        return ""
+    }
+
+    suspend fun yieldText() = sequence {
+        val markBlock = markBlockFromPos(galTextPosition)
+        markBlock?.run {
+            // Assign the tp first. Because tp can be updated in GalTextHandler
+            galTextPosition = markBlock.markEndPos + 1
+
+            galTextHandler.onBlockHit(this)
+            for (mark in markBlock.marks) {
+                galTextHandler.onMarkHit(mark)
+            }
+        }
+        if (galTextPosition >= 0) {
+            yield(galText[galTextPosition])
+            galTextPosition += 1
+        } else {
+            yield("")
+        }
+    }
 
     fun loadText(text: String) {
         galText = text
@@ -123,7 +212,15 @@ class GalTextEngine {
         indexLabelMarks()
     }
 
-    fun indexLabelMarks() {
+    fun markBlockFromPos(position: Int): MarkBlock? = markBlockFromPos(position, markBlocks)
+
+    fun prevMarkBlockOfPos(position: Int): MarkBlock? = prevMarkBlockOfPos(position, markBlocks)
+
+    fun nextMarkBlockOfPos(position: Int): MarkBlock? = nextMarkBlockOfPos(position, markBlocks)
+
+    // ---------------------------------------------------------------------------------------------
+
+    private fun indexLabelMarks() {
         markLabelPosition.clear()
         for (mark in markData) {
             if (mark.markName == MARK_LABEL) {
@@ -135,5 +232,4 @@ class GalTextEngine {
             }
         }
     }
-
 }
