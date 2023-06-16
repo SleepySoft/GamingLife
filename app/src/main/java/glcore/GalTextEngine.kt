@@ -55,7 +55,7 @@ fun parseMarksFromBlock(markBlocks: List<MarkBlock>): List<MarkData> {
                         val keys = json.keys()
                         while (keys.hasNext()) {
                             val key = keys.next()
-                            map[key] = json.getString(key)
+                            map[key] = json.get(key).toString()
                         }
                         MarkDataDict(map)
                     } catch (e: JSONException) {
@@ -67,7 +67,7 @@ fun parseMarksFromBlock(markBlocks: List<MarkBlock>): List<MarkData> {
                         val json = JSONArray(labelData)
                         val list = mutableListOf<String>()
                         for (i in 0 until json.length()) {
-                            list.add(json.getString(i))
+                            list.add(json.get(i).toString())
                         }
                         MarkDataList(list)
                     } catch (e: JSONException) {
