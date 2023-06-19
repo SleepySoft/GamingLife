@@ -368,13 +368,34 @@ internal class GalTextEngineTest01 {
             |Hello World.<!-- jump: label2 -->
             |<!-- label: label1 -->You run to label1
             |<!-- label: label2 -->You run to label2<!-- jump: label1 -->
-            """.trimMargin()
+            |""".trimMargin()
         val gte = GalTextEngine().apply { loadText(text) }
 
         verifyCharStream(gte, "Hello World.")
         verifyCharStream(gte, "You run to label2")
         verifyCharStream(gte, "You run to label1\n")
         verifyCharStream(gte, "You run to label2")
+    }
+
+    @Test
+    fun testGalTextEngineSelectionBranchOrder() {
+        val text =  """<!-- selection: { 
+            |    "10": "label10",
+            |    "0": "label0",
+            |    "01": "label01",
+            |    "999": "label999",
+            |    "08": "label08"
+            |}  -->
+            |""".trimMargin().replace("\n", "")
+
+        val gte = GalTextEngine().apply { loadText(text) }
+        val selectionDict = (gte.markData[0].markData as MarkDataDict).value
+
+        val keyList = selectionDict.keys.toList()
+        val valueList = selectionDict.values.toList()
+
+        assert(keyList == listOf("10", "0", "01", "999", "08"))
+        assert(valueList == listOf("label10", "label0", "label01", "label999", "label08"))
     }
 
 /*    @Test

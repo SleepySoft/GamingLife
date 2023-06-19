@@ -1,8 +1,66 @@
 package glcore
 
-import org.json.JSONArray
-import org.json.JSONException
+/*import org.json.JSONArray
 import org.json.JSONObject
+import org.json.JSONTokener
+import org.json.JSONException*/
+
+import java.io.StringReader
+import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.google.gson.stream.JsonReader
+import com.google.gson.reflect.TypeToken
+
+
+// -------------------------------------------------------------------------------------------------
+
+fun parseJson(jsonString: String): Any {
+    val gson = Gson()
+    val reader = StringReader(jsonString)
+    val jsonReader = JsonReader(reader)
+    val element: JsonElement
+
+    try {
+        element = gson.fromJson(jsonReader, JsonElement::class.java)
+    } catch (e: Exception) {
+        return jsonString
+    }
+
+    return when {
+        element.isJsonObject -> {
+            val type = object : TypeToken<LinkedHashMap<String, Any>>() {}.type
+            gson.fromJson(element, type)
+        }
+        element.isJsonArray -> gson.fromJson(element, List::class.java)
+        else -> jsonString
+    }
+}
+
+
+
+/*fun parseJson(jsonString: String): Any {
+    val tokener = JSONTokener(jsonString)
+    val value = tokener.nextValue()
+    return when (value) {
+        is JSONObject -> {
+            val map = mutableMapOf<String, Any>()
+            val keys = value.keys()
+            while (keys.hasNext()) {
+                val key = keys.next()
+                map[key] = parseJson(value.get(key).toString())
+            }
+            map
+        }
+        is JSONArray -> {
+            val list = mutableListOf<Any>()
+            for (i in 0 until value.length()) {
+                list.add(parseJson(value.get(i).toString()))
+            }
+            list
+        }
+        else -> value.toString()
+    }
+}*/
 
 
 // -------------------------------------------------------------------------------------------------
@@ -18,8 +76,8 @@ data class MarkBlock(
 sealed class MarkDataValue
 data class MarkDataString(val value: String) : MarkDataValue()
 data class MarkDataEmpty(val value: String = "") : MarkDataValue()
-data class MarkDataList(val value: List<String>) : MarkDataValue()
-data class MarkDataDict(val value: Map<String, String>) : MarkDataValue()
+data class MarkDataList(val value: List<Any>) : MarkDataValue()
+data class MarkDataDict(val value: LinkedHashMap<String, Any>) : MarkDataValue()
 
 data class MarkData(
     var markBlock: MarkBlock,
@@ -53,6 +111,7 @@ fun nextMarkBlockOfPos(position: Int, markBlockList: List<MarkBlock>): MarkBlock
     markBlockList.firstOrNull { it.markStartPos > position }
 
 
+@Suppress("UNCHECKED_CAST")
 fun parseMarksFromBlock(markBlocks: List<MarkBlock>): List<MarkData> {
     val result = mutableListOf<MarkData>()
     for (block in markBlocks) {
@@ -62,35 +121,34 @@ fun parseMarksFromBlock(markBlocks: List<MarkBlock>): List<MarkData> {
             val parts = line.split(":", limit = 2)
             val label = parts[0].trim()
             val labelData = if (parts.size > 1) parts[1].trim() else ""
+
             val markDataValue = when {
                 labelData.isEmpty() -> MarkDataEmpty()
-                labelData.startsWith("{") && labelData.endsWith("}") -> {
+                else -> {
+                    when (val value = parseJson(labelData)) {
+                        is List<*> -> MarkDataList(value as List<Any>)
+                        is LinkedHashMap<*,*> -> MarkDataDict(value as LinkedHashMap<String, Any>)
+                        else -> MarkDataString(value.toString())
+                    }
+                }
+
+/*                labelData.startsWith("{") && labelData.endsWith("}") -> {
                     try {
-                        val json = JSONObject(labelData)
-                        val map = mutableMapOf<String, String>()
-                        val keys = json.keys()
-                        while (keys.hasNext()) {
-                            val key = keys.next()
-                            map[key] = json.get(key).toString()
-                        }
-                        MarkDataDict(map)
+                        val map = parseJson(labelData) as Map<*, *>
+                        MarkDataDict(map as Map< String, Any >)
                     } catch (e: JSONException) {
                         MarkDataString(labelData)
                     }
                 }
                 labelData.startsWith("[") && labelData.endsWith("]") -> {
                     try {
-                        val json = JSONArray(labelData)
-                        val list = mutableListOf<String>()
-                        for (i in 0 until json.length()) {
-                            list.add(json.get(i).toString())
-                        }
-                        MarkDataList(list)
+                        val list = parseJson(labelData) as List< * >
+                        MarkDataList(list as List< Any >)
                     } catch (e: JSONException) {
                         MarkDataString(labelData)
                     }
                 }
-                else -> MarkDataString(labelData)
+                else -> MarkDataString(labelData)*/
             }
             marksInBlock.add(MarkData(block, label, markDataValue))
         }
@@ -164,8 +222,9 @@ open class GalTextHandler(private val gte: GalTextEngine) {
         // Override this function to handle action
     }
 
-    open fun onMarkSelection(selectionData: MarkDataDict) {
+    open fun onMarkSelection(selectionData: MarkDataDict) : Int {
         // Override this function to handle selection
+        return 0
     }
 
     open fun onMarkCustomize(markData: MarkData) {
@@ -194,9 +253,12 @@ class GalTextEngine {
         const val MARK_COMMENTS = "comments"
     }
 
-    private var markBlocks = mutableListOf< MarkBlock >()
-    private var markData = mutableListOf< MarkData >()
-    private var galText: String = ""
+    var markBlocks = mutableListOf< MarkBlock >()
+        private set
+    var markData = mutableListOf< MarkData >()
+        private set
+    var galText: String = ""
+        private set
 
     var galTextHandler = GalTextHandler(this)
     var markLabelPosition = mutableMapOf< String, Int >()           // { LabelName: Position }
