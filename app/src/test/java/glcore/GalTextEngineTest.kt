@@ -331,7 +331,8 @@ internal class GalTextEngineTest01 {
         for (c in expectCharSequence) {
             val text = gte.nextChar()
             assert(text == c.toString()) {
-                println("tp = ${gte.galTextPosition}: Expect '$c' but got '${gte.nextChar()}'")
+                println("Expect text: $expectCharSequence")
+                println("tp = ${gte.galTextPosition}: Expect '$c' but got '$text'")
             }
         }
     }
@@ -344,7 +345,48 @@ internal class GalTextEngineTest01 {
     }
 
     @Test
-    fun testGalTextEngineMarkHandling() {
+    fun testGalTextEngineLabelMark() {
+        val text =  """
+            |Hello World.<!-- end -->
+            |<!-- label: label1 -->You jump to label1
+            |<!-- label: label2 --> You jump to label2
+            """.trimMargin()
+        val gte = GalTextEngine().apply { loadText(text) }
 
+        verifyCharStream(gte, "Hello World.")
+
+        gte.tpJump("label2")
+        verifyCharStream(gte, " You jump to label2")
+
+        gte.tpJump("label1")
+        verifyCharStream(gte, "You jump to label1")
     }
+
+    @Test
+    fun testGalTextEngineJumpMark() {
+        val text =  """
+            |Hello World.<!-- jump: label2 -->
+            |<!-- label: label1 -->You run to label1
+            |<!-- label: label2 -->You run to label2<!-- jump: label1 -->
+            """.trimMargin()
+        val gte = GalTextEngine().apply { loadText(text) }
+
+        verifyCharStream(gte, "Hello World.")
+        verifyCharStream(gte, "You run to label2")
+        verifyCharStream(gte, "You run to label1\n")
+        verifyCharStream(gte, "You run to label2")
+    }
+
+/*    @Test
+    fun testGalTextEngineMarkHandling() {
+        val text =  """
+            |Hello World.  <!-- end -->
+            |<!-- label: label1 --> You jump to label1
+            |<!-- label: label1 --> You jump to label2
+            """.trimMargin()
+        val gte = GalTextEngine().apply { loadText(text) }
+        val galTextHandler = object : GalTextHandler(gte) {
+
+        }
+    }*/
 }

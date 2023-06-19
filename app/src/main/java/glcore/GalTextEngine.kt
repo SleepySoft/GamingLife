@@ -103,7 +103,7 @@ fun parseMarksFromBlock(markBlocks: List<MarkBlock>): List<MarkData> {
 
 // -------------------------------------------------------------------------------------------------
 
-open class GalTextHandler(val gte: GalTextEngine) {
+open class GalTextHandler(private val gte: GalTextEngine) {
 
     // ----- We don't have to override these 2 functions in normal case -----
 
