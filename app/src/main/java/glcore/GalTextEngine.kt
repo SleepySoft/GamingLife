@@ -1,10 +1,11 @@
 package glcore
 
-import kotlinx.coroutines.yield
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 
+
+// -------------------------------------------------------------------------------------------------
 
 data class MarkBlock(
     var markStartPos: Int,
@@ -26,6 +27,8 @@ data class MarkData(
     var markData: MarkDataValue
 )
 
+
+// -------------------------------------------------------------------------------------------------
 
 fun extractMarksFromText(text: String) : List<MarkBlock> {
     val marks = mutableListOf<MarkBlock>()
@@ -98,43 +101,86 @@ fun parseMarksFromBlock(markBlocks: List<MarkBlock>): List<MarkData> {
 }
 
 
-open class GalTextHandler {
+// -------------------------------------------------------------------------------------------------
 
-    fun onBlockHit(markBlock: MarkBlock) {
+open class GalTextHandler(val gte: GalTextEngine) {
 
+    // ----- We don't have to override these 2 functions in normal case -----
+
+    open fun onBlockHit(markBlock: MarkBlock) {
+        for (mark in markBlock.marks) {
+            onMarkHit(mark)
+        }
     }
 
-    fun onMarkHit(markData: MarkData) {
-
+    open fun onMarkHit(markData: MarkData) {
+        when (markData.markName) {
+            GalTextEngine.MARK_LABEL, GalTextEngine.MARK_COMMENTS -> {
+                // Do nothing
+            }
+            GalTextEngine.MARK_JUMP -> {
+                if (markData.markData is MarkDataString) {
+                    onMarkJump((markData.markData as MarkDataString).value)
+                }
+            }
+            GalTextEngine.MARK_END -> {
+                onMarkEnd(markData.markBlock.markStartPos)
+            }
+            GalTextEngine.MARK_ACTION -> {
+                onMarkAction(markData)
+            }
+            GalTextEngine.MARK_SELECTION -> {
+                if (markData.markData is MarkDataDict) {
+                    onMarkSelection(markData.markData as MarkDataDict)
+                }
+            }
+            GalTextEngine.MARK_GLOBAL_STATUS -> {
+                // TODO: Reserved
+            }
+            GalTextEngine.MARK_SESSION_STATUS -> {
+                // TODO: Reserved
+            }
+            else -> {
+                if (markData.markName.startsWith("@")) {
+                    onMarkCustomize(markData)
+                } else {
+                    onMarkUnknown(markData)
+                }
+            }
+        }
     }
 
-    // --------------------------------------------------------
+    // ----------------------------------------------------------------------
 
-    fun onMarkJump(jumpLabel: String) {
-
+    open fun onMarkJump(jumpLabel: String) {
+        gte.tpJump(jumpLabel)
     }
 
-    fun onMarkEnd(blockPos: Int) {
-
+    open fun onMarkEnd(blockPos: Int) {
+        gte.galTextPosition = -1
     }
 
-    fun onMarkAction(actionData: MarkData) {
-
+    open fun onMarkAction(actionData: MarkData) {
+        // Override this function to handle action
     }
 
-    fun onMarkSelection(selectionData: MarkDataDict) {
-
+    open fun onMarkSelection(selectionData: MarkDataDict) {
+        // Override this function to handle selection
     }
 
-    fun onMarkCustomize(jumpLabel: String) {
-
+    open fun onMarkCustomize(markData: MarkData) {
+        // Override this function to handle customize mark
     }
 
-    fun onMarkUnknown(markData: MarkData) {
+    // ------------- Avoid overriding for forbidden mark abuse --------------
 
+    private fun onMarkUnknown(markData: MarkData) {
+        GlLog.i("[GalTextEngine] Unknown mark: ${markData.markName}")
     }
 }
 
+
+// -------------------------------------------------------------------------------------------------
 
 class GalTextEngine {
     companion object {
@@ -152,7 +198,7 @@ class GalTextEngine {
     private var markData = mutableListOf< MarkData >()
     private var galText: String = ""
 
-    var galTextHandler = GalTextHandler()
+    var galTextHandler = GalTextHandler(this)
     var markLabelPosition = mutableMapOf< String, Int >()           // { LabelName: Position }
 
     // ---------------------------------------------------------------------------------------------
@@ -182,26 +228,26 @@ class GalTextEngine {
     // ---------------------------------------------------------------------------------------------
 
     fun nextChar() : String {
-        return ""
-    }
+        var markBlock = markBlockFromPos(galTextPosition)
 
-    suspend fun yieldText() = sequence {
-        val markBlock = markBlockFromPos(galTextPosition)
-        markBlock?.run {
+        while (markBlock != null) {
+
             // Assign the tp first. Because tp can be updated in GalTextHandler
             galTextPosition = markBlock.markEndPos + 1
 
-            galTextHandler.onBlockHit(this)
-            for (mark in markBlock.marks) {
-                galTextHandler.onMarkHit(mark)
-            }
+            galTextHandler.onBlockHit(markBlock)
+
+            markBlock = markBlockFromPos(galTextPosition)
         }
-        if (galTextPosition >= 0) {
-            yield(galText[galTextPosition])
-            galTextPosition += 1
+
+        val ret = if (galTextPosition >= 0) {
+            galText[galTextPosition].toString()
         } else {
-            yield("")
+            ""
         }
+        galTextPosition += 1
+
+        return ret
     }
 
     fun loadText(text: String) {

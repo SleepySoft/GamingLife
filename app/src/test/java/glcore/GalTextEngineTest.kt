@@ -324,4 +324,27 @@ internal class GalTextEngineTest01 {
             }
         }
     }
+
+    // ---------------------------------------------------------------------------------------------
+
+    fun verifyCharStream(gte: GalTextEngine, expectCharSequence: String) {
+        for (c in expectCharSequence) {
+            val text = gte.nextChar()
+            assert(text == c.toString()) {
+                println("tp = ${gte.galTextPosition}: Expect '$c' but got '${gte.nextChar()}'")
+            }
+        }
+    }
+
+    @Test
+    fun testGalTextEngineNextChar() {
+        val text = "Hello <!-- comments: This is a comment. --> World"
+        val gte = GalTextEngine().apply { loadText(text) }
+        verifyCharStream(gte, "Hello  World")
+    }
+
+    @Test
+    fun testGalTextEngineMarkHandling() {
+
+    }
 }
