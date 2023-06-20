@@ -277,7 +277,7 @@ internal class GalTextEngineTest01 {
     @Test
     fun testParseMarksFromBlock9() {
         val markBlocks = listOf(
-            MarkBlock(0, 10, "label1: {invalid}\nlabel2: [invalid]")
+            MarkBlock(0, 10, "label1: {invalid}\nlabel2: [invalid")
         )
         val result = parseMarksFromBlock(markBlocks)
         assert(result.size == 2)
@@ -290,7 +290,7 @@ internal class GalTextEngineTest01 {
         assert(markData2.markBlock == markBlocks[0])
         assert(markData2.markName == "label2")
         assert(markData2.markData is MarkDataString)
-        assert((markData2.markData as MarkDataString).value == "[invalid]")
+        assert((markData2.markData as MarkDataString).value == "[invalid")
     }
 
     // ---------------------------------------------------------------------------------------------

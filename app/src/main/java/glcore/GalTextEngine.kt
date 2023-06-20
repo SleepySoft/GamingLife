@@ -20,22 +20,34 @@ fun parseJson(jsonString: String): Any {
     val jsonReader = JsonReader(reader)
     val element: JsonElement
 
-    try {
+    return try {
         element = gson.fromJson(jsonReader, JsonElement::class.java)
+        convertElement(element)
     } catch (e: Exception) {
-        return jsonString
-    }
-
-    return when {
-        element.isJsonObject -> {
-            val type = object : TypeToken<LinkedHashMap<String, Any>>() {}.type
-            gson.fromJson(element, type)
-        }
-        element.isJsonArray -> gson.fromJson(element, List::class.java)
-        else -> jsonString
+        jsonString
     }
 }
 
+fun convertElement(element: JsonElement): Any {
+    return when {
+        element.isJsonObject -> {
+            val map = LinkedHashMap<String, Any>()
+            for ((key, value) in element.asJsonObject.entrySet()) {
+                map[key] = convertElement(value)
+            }
+            map
+        }
+        element.isJsonArray -> {
+            val list = mutableListOf<Any>()
+            for (item in element.asJsonArray) {
+                list.add(convertElement(item))
+            }
+            list
+        }
+        element.isJsonPrimitive && element.asJsonPrimitive.isString -> element.asString
+        else -> element.toString()
+    }
+}
 
 
 /*fun parseJson(jsonString: String): Any {
