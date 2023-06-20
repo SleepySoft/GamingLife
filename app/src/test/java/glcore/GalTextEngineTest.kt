@@ -399,6 +399,24 @@ internal class GalTextEngineTest01 {
     }
 
 /*    @Test
+    fun manualTestSelectionBranch() {
+        val text =  """早餐想吃点什么呢？
+            |<!-- label: start -->
+            |<!-- selection: { "面包": "label0", "鸡蛋": "label1", "包子": "label2", "不了，谢谢": "label_end" }  -->
+            |<!-- label: label0 -->是面包啊，好的。<!-- jump: loop -->
+            |<!-- label: label1 -->是鸡蛋啊，好的。<!-- jump: loop -->
+            |<!-- label: label2 -->是包子啊，好的。<!-- jump: loop -->
+            |<!-- label: loop -->这位先生呢？
+            |<!-- label: label_end --><!-- end -->
+            |""".trimMargin()
+
+        val gte = GalTextEngine().apply { loadText(text) }
+        while (gte.galTextPosition >= 0) {
+            print(gte.nextChar())
+        }
+    }*/
+
+/*    @Test
     fun testGalTextEngineMarkHandling() {
         val text =  """
             |Hello World.  <!-- end -->

@@ -14,20 +14,6 @@ import com.google.gson.reflect.TypeToken
 
 // -------------------------------------------------------------------------------------------------
 
-fun parseJson(jsonString: String): Any {
-    val gson = Gson()
-    val reader = StringReader(jsonString)
-    val jsonReader = JsonReader(reader)
-    val element: JsonElement
-
-    return try {
-        element = gson.fromJson(jsonReader, JsonElement::class.java)
-        convertElement(element)
-    } catch (e: Exception) {
-        jsonString
-    }
-}
-
 fun convertElement(element: JsonElement): Any {
     return when {
         element.isJsonObject -> {
@@ -49,30 +35,19 @@ fun convertElement(element: JsonElement): Any {
     }
 }
 
+fun parseJson(jsonString: String): Any {
+    val gson = Gson()
+    val reader = StringReader(jsonString)
+    val jsonReader = JsonReader(reader)
+    val element: JsonElement
 
-/*fun parseJson(jsonString: String): Any {
-    val tokener = JSONTokener(jsonString)
-    val value = tokener.nextValue()
-    return when (value) {
-        is JSONObject -> {
-            val map = mutableMapOf<String, Any>()
-            val keys = value.keys()
-            while (keys.hasNext()) {
-                val key = keys.next()
-                map[key] = parseJson(value.get(key).toString())
-            }
-            map
-        }
-        is JSONArray -> {
-            val list = mutableListOf<Any>()
-            for (i in 0 until value.length()) {
-                list.add(parseJson(value.get(i).toString()))
-            }
-            list
-        }
-        else -> value.toString()
+    return try {
+        element = gson.fromJson(jsonReader, JsonElement::class.java)
+        convertElement(element)
+    } catch (e: Exception) {
+        jsonString
     }
-}*/
+}
 
 
 // -------------------------------------------------------------------------------------------------
@@ -143,24 +118,6 @@ fun parseMarksFromBlock(markBlocks: List<MarkBlock>): List<MarkData> {
                         else -> MarkDataString(value.toString())
                     }
                 }
-
-/*                labelData.startsWith("{") && labelData.endsWith("}") -> {
-                    try {
-                        val map = parseJson(labelData) as Map<*, *>
-                        MarkDataDict(map as Map< String, Any >)
-                    } catch (e: JSONException) {
-                        MarkDataString(labelData)
-                    }
-                }
-                labelData.startsWith("[") && labelData.endsWith("]") -> {
-                    try {
-                        val list = parseJson(labelData) as List< * >
-                        MarkDataList(list as List< Any >)
-                    } catch (e: JSONException) {
-                        MarkDataString(labelData)
-                    }
-                }
-                else -> MarkDataString(labelData)*/
             }
             marksInBlock.add(MarkData(block, label, markDataValue))
         }
@@ -236,6 +193,32 @@ open class GalTextHandler(private val gte: GalTextEngine) {
 
     open fun onMarkSelection(selectionData: MarkDataDict) : Int {
         // Override this function to handle selection
+        val selectionDict = selectionData.value
+        val selections = selectionDict.keys.toList()
+        val jumpLabels = selectionDict.values.toList()
+
+        selections.forEachIndexed { index, s ->
+            println("[$index] $s")
+        }
+
+        while (true) {
+            print("Input your selection: ")
+            val sel = readLine()
+            try {
+                val selIndex = sel?.toInt() ?: -1
+                if ((0 <= selIndex) && (selIndex < jumpLabels.size)) {
+                    gte.tpJump(jumpLabels[selIndex] as String)
+                    break
+                } else {
+                    println("选项错误哦")
+                }
+            } catch (e: Exception) {
+                println(e)
+            } finally {
+
+            }
+        }
+
         return 0
     }
 
