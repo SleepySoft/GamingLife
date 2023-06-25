@@ -150,17 +150,17 @@ class RecordCalendarActivity
         }
     }
 
-    private fun updateCalendarMarks(daysTaskFinished: List< Date >) {
+    private fun updateCalendarMarks(daysTaskFinished: List<Pair<Date, Int>>) {
         val schemeMap = mutableMapOf< String, Calendar>()
 
-        for (d in daysTaskFinished) {
-            val cal = java.util.Calendar.getInstance().apply { time = d }
+        for ((date, conclusion) in daysTaskFinished) {
+            val cal = java.util.Calendar.getInstance().apply { time = date }
 
             val calendar = Calendar()
             calendar.year = cal.get(java.util.Calendar.YEAR)
             calendar.month = cal.get(java.util.Calendar.MONTH) + 1
             calendar.day = cal.get(java.util.Calendar.DAY_OF_MONTH)
-            calendar.scheme = "\uD83D\uDC51"
+            calendar.scheme = if (conclusion == ENUM_TASK_CONCLUSION_FINISHED) "\uD83D\uDC51" else "\uD83D\uDC4D"
             calendar.schemeColor = Color.parseColor("#FFFFFF")
             schemeMap[calendar.toString()] = calendar
         }
@@ -180,7 +180,7 @@ class RecordCalendarActivity
 
     // ---------------------------------------------------------------------------------------------
 
-    private fun updateMonthlyDataForPeriodicTask(year: Int, month: Int) : List<Date> {
+/*    private fun updateMonthlyDataForPeriodicTask(year: Int, month: Int) : List<Date> {
         val taskRecords = GlService.getPeriodicTaskInMonth(year, month)
         val filteredDates = taskRecords.filterValues {
             it.any { task ->
@@ -189,8 +189,18 @@ class RecordCalendarActivity
             }
         }.keys
         return filteredDates.toList()
-    }
+    }*/
 
+    private fun updateMonthlyDataForPeriodicTask(year: Int, month: Int) : List<Pair<Date, Int>> {
+        val taskRecords = GlService.getPeriodicTaskInMonth(year, month)
+        val filteredDates = taskRecords.flatMap { entry ->
+            entry.value.filter { task ->
+                task.id == mDisplayTaskId && (task.conclusion == ENUM_TASK_CONCLUSION_FINISHED ||
+                        task.conclusion == ENUM_TASK_CONCLUSION_PARTIAL)
+            }.map { Pair(entry.key, it.conclusion) }
+        }
+        return filteredDates
+    }
 
     private fun updateCalendarMarksByCurrentDate() {
         updateCalendarMarks(mCalendarView.curYear, mCalendarView.curMonth)
