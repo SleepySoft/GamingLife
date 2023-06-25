@@ -33,6 +33,8 @@
     <string name="HINT_RISK_WHEN_RECORD_DENIED">无法使用录音功能，语音记录及对话功能无法使用</string>
     <string name="HINT_RISK_WHEN_USING_INTERNAL_STORAGE">"无法获取外部存储权限，尝试使用内部存储。\n\n注意：GamingLife的个人数据不会上传服务器，软件卸载后数据将会被系统删除。\n请注意备份数据。\n"</string>
 
+    <string name="FORMAT_BATCH_NUM">"%d组"</string>
+    <string name="FORMAT_BATCH_LEFT">"剩余%d组"</string>
     <string name="FORMAT_CALENDAR_M_D">"%d月%d日"</string>
 
     <string name="FORMAT_GLID_GEN_LOG">尝试次数: %d -> 最大工作量证明: %d\n</string>

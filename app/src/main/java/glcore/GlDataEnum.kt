@@ -11,6 +11,8 @@ const val ENUM_TASK_CONCLUSION_DOING = 1            // After clicking start
 const val ENUM_TASK_CONCLUSION_FINISHED = 2         // Mark as finished
 const val ENUM_TASK_CONCLUSION_ABANDONED = 3        // Voluntarily give up
 const val ENUM_TASK_CONCLUSION_FAILED = 4           // Timed out and not processed
+const val ENUM_TASK_CONCLUSION_PARTIAL = 5          // Only for daily record: If a task is lasting more than one day,
+                                                    //   we'll record the batch finished event into daily record as partial.
 
 val ENUM_TASK_CONCLUSION_ARRAY = listOf(
     ENUM_TASK_CONCLUSION_NONE,

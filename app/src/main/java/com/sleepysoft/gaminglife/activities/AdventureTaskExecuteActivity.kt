@@ -3,6 +3,7 @@ package com.sleepysoft.gaminglife.activities
 import android.animation.ArgbEvaluator
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -38,7 +39,8 @@ import glcore.GlService
 import glcore.PeriodicTask
 
 
-class AdventureTaskExecListAdapter(filterGroup: String)
+class AdventureTaskExecListAdapter(
+    private val context: Context, filterGroup: String)
     : RecyclerView.Adapter< AdventureTaskExecListAdapter.ViewHolder >() {
 
     private var mTaskUrgency: List< Float > = mutableListOf()
@@ -122,8 +124,9 @@ class AdventureTaskExecListAdapter(filterGroup: String)
         val periodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(ptask.periodic)
         holder.textTaskPeriod.text = UiRes.stringArray("TASK_PERIOD_ARRAY")[periodIndex]
 
-        if ((ptask.batch > 1) && (ptask.batchSize > 1)) {
-            holder.textTaskBatch.text = "剩余%d组".format(ptask.batchRemaining)
+        if (ptask.batch > 1) {
+            val formatString = context.resources.getString(R.string.FORMAT_BATCH_LEFT)
+            holder.textTaskBatch.text = formatString.format(ptask.batchRemaining)
             holder.textTaskBatch.visibility = View.VISIBLE
 
             val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
@@ -247,7 +250,7 @@ class AdventureTaskExecuteActivity : AppCompatActivity() {
 
         val filerGroup = intent.getStringExtra("group") ?: ""
 
-        recycleViewAdapter = AdventureTaskExecListAdapter(filerGroup)
+        recycleViewAdapter = AdventureTaskExecListAdapter(this, filerGroup)
 
         mTaskRecycleVew = findViewById(R.id.recycler_view_exec_task)
         mTaskRecycleVew.adapter = recycleViewAdapter

@@ -290,8 +290,11 @@ object GlService {
             if (this.batchRemaining > 0) {
                 this.batchRemaining -= 1
             }
-            if (this.batchRemaining == 0) {
-                conclusion = ENUM_TASK_CONCLUSION_FINISHED
+            if ((this.batchRemaining == 0) || (this.periodic > ENUM_TASK_PERIOD_DAILY)) {
+                // 20230625: For the long period task. We'll also record its partial complete.
+                conclusion = if (this.batchRemaining == 0)
+                    ENUM_TASK_CONCLUSION_FINISHED else
+                    ENUM_TASK_CONCLUSION_PARTIAL
                 conclusionTs = GlDateTime.timeStamp()
                 GlRoot.dailyRecord.periodicTaskRecord.upsertGlData(this.copy() as PeriodicTask)
                 GlRoot.dailyRecord.saveDailyRecord()

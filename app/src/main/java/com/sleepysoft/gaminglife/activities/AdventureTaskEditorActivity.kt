@@ -1,10 +1,12 @@
 package com.sleepysoft.gaminglife.activities
 
 import android.app.AlertDialog
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.sleepysoft.gaminglife.R
 import com.sleepysoft.gaminglife.UiRes
@@ -38,6 +40,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
     private lateinit var buttonOk: Button
     private lateinit var buttonCancel: Button
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_adventure_task_editor)
@@ -61,6 +64,7 @@ class AdventureTaskEditorActivity : AppCompatActivity() {
         seekBatchSize = findViewById(R.id.seek_batch_size)
         editBatchSize = findViewById(R.id.edit_batch_size)
 
+        seekBatchSize.min = 1
         seekBatchSize.progress = 1
         editBatchSize.setText("1")
 

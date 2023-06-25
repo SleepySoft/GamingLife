@@ -12,6 +12,7 @@ import com.haibin.calendarview.CalendarLayout
 import com.haibin.calendarview.CalendarView
 import com.sleepysoft.gaminglife.R
 import glcore.ENUM_TASK_CONCLUSION_FINISHED
+import glcore.ENUM_TASK_CONCLUSION_PARTIAL
 import glcore.GlService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -179,68 +180,19 @@ class RecordCalendarActivity
 
     // ---------------------------------------------------------------------------------------------
 
-    private fun updateMonthlyDataForPeriodicTask(year: Int, month: Int) : List< Date > {
+    private fun updateMonthlyDataForPeriodicTask(year: Int, month: Int) : List<Date> {
         val taskRecords = GlService.getPeriodicTaskInMonth(year, month)
-        val filteredDates = taskRecords.filter {
-            it.value.any { task ->
-                task.id == mDisplayTaskId &&
-                task.conclusion == ENUM_TASK_CONCLUSION_FINISHED
-            } }.keys
+        val filteredDates = taskRecords.filterValues {
+            it.any { task ->
+                task.id == mDisplayTaskId && (task.conclusion == ENUM_TASK_CONCLUSION_FINISHED ||
+                                              task.conclusion == ENUM_TASK_CONCLUSION_PARTIAL)
+            }
+        }.keys
         return filteredDates.toList()
     }
+
 
     private fun updateCalendarMarksByCurrentDate() {
         updateCalendarMarks(mCalendarView.curYear, mCalendarView.curMonth)
     }
-
-/*    private fun updateDailyStatisticsByCalendar(calendar: Calendar) {
-        val dateStr = "%04d%02d%02d".format(calendar.year, calendar.month, calendar.day)
-        updateDailyStatistics(dateStr)
-    }
-
-    private fun newPlayer(uri: String) {
-        *//*        val newSurfaceView = SurfaceView(this)
-                val newSurfaceHolder = newSurfaceView.holder
-                newSurfaceHolder.addCallback(this)*//*
-
-        mToBePlayedMediaUri = uri
-        *//*        mMediaController.setAnchorView(newSurfaceView)
-
-                // ------------------ Replace the SurfaceView ------------------
-
-                val index = mStatisticsLayout.indexOfChild(mSurfaceView)
-                val layoutParams = mSurfaceView.layoutParams as LinearLayout.LayoutParams
-
-                newSurfaceView.layoutParams = layoutParams
-
-                mStatisticsLayout.removeView(mSurfaceView)
-                mStatisticsLayout.addView(newSurfaceView, index)
-
-                mSurfaceView = newSurfaceView
-                mSurfaceHolder = newSurfaceHolder*//*
-    }
-
-    private fun doPlay(uri: String) {
-        try {
-            mMediaPlayer.setDataSource(uri)
-            mMediaPlayer.prepare()
-            // mMediaPlayer.start()
-        } catch (e: Exception) {
-            println("Play Error.")
-            GlLog.e(e.stackTraceToString())
-        } finally {
-
-        }
-    }
-
-    private fun checkEndPlay() {
-        try {
-            mMediaPlayer.stop()
-        } catch (e: Exception) {
-            // println("Stop play Error.")
-            // GlLog.e(e.stackTraceToString())
-        } finally {
-
-        }
-    }*/
 }

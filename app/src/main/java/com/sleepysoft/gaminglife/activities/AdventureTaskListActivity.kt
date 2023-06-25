@@ -84,8 +84,13 @@ class AdventureTaskListAdapter(
             val periodIndex = ENUM_TASK_PERIOD_ARRAY.indexOf(ptask.periodic)
             holder.textTaskPeriod.text = UiRes.stringArray("TASK_PERIOD_ARRAY")[periodIndex]
 
-            if ((ptask.batch > 1) && (ptask.batchSize > 1)) {
-                holder.textTaskBatch.text = "%dx%d".format(ptask.batch, ptask.batchSize)
+            if (ptask.batch > 1) {
+                holder.textTaskBatch.text = if (ptask.batchSize > 1) {
+                    "%dx%d".format(ptask.batch, ptask.batchSize)
+                } else {
+                    val formatString = context.resources.getString(R.string.FORMAT_BATCH_NUM)
+                    formatString.format(ptask.batch)
+                }
                 holder.textTaskBatch.visibility = View.VISIBLE
                 val layoutParams = holder.textTaskPeriod.layoutParams as RelativeLayout.LayoutParams
                 layoutParams.removeRule(RelativeLayout.CENTER_IN_PARENT)
