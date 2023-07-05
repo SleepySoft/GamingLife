@@ -18,6 +18,7 @@ object GlService {
                                      archivedTasks: MutableList< PeriodicTask >) {
             val dayStartTs = GlDateTime.dayStartTimeStamp(baseDate)
             val weekStartTs = GlDateTime.weekStartTimeStamp(baseDate)
+            val preWeekStartTs = weekStartTs - 7 * 24 * 3600
             val monthStartTs = GlDateTime.monthStartTimeStamp(baseDate)
             val quarterStartTs = GlDateTime.quarterStartTimeStamp(baseDate)
 
@@ -26,7 +27,7 @@ object GlService {
                     ENUM_TASK_PERIOD_ONESHOT -> null
                     ENUM_TASK_PERIOD_DAILY -> dayStartTs
                     ENUM_TASK_PERIOD_WEEKLY -> weekStartTs
-                    ENUM_TASK_PERIOD_BI_WEEK -> if (startedTask.refreshTs < weekStartTs - 7 * 24 * 3600) weekStartTs else null
+                    ENUM_TASK_PERIOD_BI_WEEK -> if (startedTask.refreshTs < preWeekStartTs) weekStartTs else preWeekStartTs
                     ENUM_TASK_PERIOD_MONTHLY -> monthStartTs
                     ENUM_TASK_PERIOD_QUARTERLY -> quarterStartTs
                     else -> null
