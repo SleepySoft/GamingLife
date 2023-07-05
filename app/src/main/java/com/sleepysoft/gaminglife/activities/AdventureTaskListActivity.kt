@@ -133,7 +133,7 @@ class AdventureTaskListAdapter(
 
 // -------------------------------------------------------------------------------------------------
 
-class AdventureTaskListActivity : AppCompatActivity() {
+class AdventureTaskListActivity : InteractiveActivity() {
     lateinit var mTaskRecycleVew: RecyclerView
     lateinit var recycleViewAdapter: AdventureTaskListAdapter
 

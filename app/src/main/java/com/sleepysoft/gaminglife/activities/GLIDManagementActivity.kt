@@ -28,7 +28,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import pub.devrel.easypermissions.EasyPermissions
 
-class GLIDManagementActivity : AppCompatActivity() {
+class GLIDManagementActivity : InteractiveActivity() {
 
     companion object {
         const val REQUEST_CODE_FROM_QR = 1

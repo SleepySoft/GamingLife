@@ -24,7 +24,7 @@ import pub.devrel.easypermissions.EasyPermissions
 import java.lang.ref.WeakReference
 
 
-class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
+class MainActivity : InteractiveActivity(), EasyPermissions.PermissionCallbacks {
     companion object {
         private const val REQUEST_CODE_PERMISSION = 1024
     }

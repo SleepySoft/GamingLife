@@ -86,7 +86,7 @@ class NotHideMediaController(context: Context) : MediaController(context) {
 // =================================================================================================
 
 class DailyCalendarActivity
-    : AppCompatActivity(),
+    : InteractiveActivity(),
       SurfaceHolder.Callback,
       CalendarView.OnWeekChangeListener,
       CalendarView.OnMonthChangeListener,

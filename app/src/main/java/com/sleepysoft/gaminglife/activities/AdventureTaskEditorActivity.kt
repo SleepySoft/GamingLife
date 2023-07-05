@@ -14,7 +14,7 @@ import com.sleepysoft.gaminglife.finishWithResult
 import glcore.*
 
 
-class AdventureTaskEditorActivity : AppCompatActivity() {
+class AdventureTaskEditorActivity : InteractiveActivity() {
     private var editTaskId = ""
     private var editDataUuid = ""
 

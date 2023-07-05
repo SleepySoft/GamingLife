@@ -227,7 +227,7 @@ class AdventureTaskExecListAdapter(
 }
 
 
-class AdventureTaskExecuteActivity : AppCompatActivity() {
+class AdventureTaskExecuteActivity : InteractiveActivity() {
     lateinit var mTaskRecycleVew: RecyclerView
     lateinit var recycleViewAdapter: AdventureTaskExecListAdapter
 

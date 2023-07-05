@@ -20,7 +20,7 @@ import glcore.GlService
 const val THRESHOLD_POW = 8
 
 
-class GeneratePairActivity : AppCompatActivity() {
+class GeneratePairActivity : InteractiveActivity() {
     // var mPrevPoW = 0
     var mExpectPoW = 0
     val mQuitFlag = mutableListOf(false)

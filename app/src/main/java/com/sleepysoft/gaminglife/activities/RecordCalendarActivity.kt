@@ -31,7 +31,7 @@ import java.util.Date
 // =================================================================================================
 
 class RecordCalendarActivity
-    : AppCompatActivity(),
+    : InteractiveActivity(),
     CalendarView.OnWeekChangeListener,
     CalendarView.OnMonthChangeListener,
     CalendarView.OnCalendarSelectListener {
