@@ -138,7 +138,7 @@
             android:layout_height="wrap_content"
             android:padding="6dp" />
 
-        <RadioGroup
+<!--        <RadioGroup
             android:orientation="horizontal">
 
             <RadioButton
@@ -155,7 +155,7 @@
                 android:text="@string/LABEL_TASK_BATCH"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
-        </RadioGroup>
+        </RadioGroup>-->
     </TableRow>
 
     <TableRow
@@ -203,6 +203,28 @@
                 android:layout_height="match_parent"
                 android:autofillHints="1" />
         </LinearLayout>
+    </TableRow>
+
+    <TableRow
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
+        <TextView
+            android:text="@string/LABEL_TASK_DETAIL"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="6dp" />
+
+        <EditText
+            android:id="@+id/id_text_editor_task_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minLines="5"
+            android:maxLines="5"
+            android:gravity="start|top"
+            android:inputType="textMultiLine"
+            tools:ignore="LabelFor,SpeakableTextPresentCheck"
+            android:autofillHints="" />
     </TableRow>
 
     <TableRow

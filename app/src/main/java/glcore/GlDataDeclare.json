@@ -21,6 +21,7 @@
     "timeEstimation": "Int",
     "batch": "Int",
     "batchSize": "Int",
+    "taskDetail": "String",
 
     "@comments_1": "This section is for Task Planning",
     "dueDateTime": "Long",

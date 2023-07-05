@@ -40,7 +40,7 @@
     <string name="FORMAT_GLID_GEN_LOG">尝试次数: %d -> 最大工作量证明: %d\n</string>
     <string name="FORMAT_GLID_GEN_FAIL">没有生成符合标准的GLID\n</string>
     <string name="FORMAT_GLID_GEN_SUCCESS">获得可用的GLID: %s\n工作量证明：%d\n</string>
-    <string name="COMMENTS_PRIVATE_KEY">私钥是你账号的唯一证明，请妥善保管且不要泄露给任何人，包括GaminLief官方。</string>
+    <string name="COMMENTS_PRIVATE_KEY">私钥是你账号的唯一证明，请妥善保管且不要泄露给任何人，包括GaminLife官方。</string>
     <string name="COMMENTS_PUBLIC_KEY">GaminLife官方会用你的公钥验证你的账号，你的朋友也可以通过公钥加密给你的信息。\n公钥是安全的，但非必要请不要向大众和陌生人公开你的公钥。</string>
     <string name="COMMENTS_GLID">GLID是你在GamingLife世界的账号，你可以放心公开你的GLID。\n公开你的GLID不会泄露你的任何私密信息。</string>
 
@@ -76,10 +76,11 @@
     <string name="LABEL_TASK_BATCH_SIZE">单次数量</string>
     <string name="LABEL_MINUTES">分钟</string>
     <string name="LABEL_OPTIONAL_TASK">可选任务</string>
+    <string name="LABEL_TASK_DETAIL">任务详情</string>
     <string name="LABEL_PAUSE">暂停</string>
     <string name="LABEL_FINISHED">完成</string>
     <string name="LABEL_CANCEL">取消</string>
-    <string name="HINT_LOADING">加载中...</string>
+    <string name="HINT_LOADING">加载中…</string>
 
     <string-array name="ARRAY_1_TO_10">
         <item>1</item>

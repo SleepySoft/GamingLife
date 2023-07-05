@@ -163,6 +163,7 @@ open class PeriodicTask : IGlDeclare() {
     var timeEstimation: Int = 0
     var batch: Int = 0
     var batchSize: Int = 0
+    var taskDetail: String = ""
     // This section is for Task Planning
     var dueDateTime: Long = 0L
     // This section is for Task refresh time check
@@ -184,6 +185,7 @@ open class PeriodicTask : IGlDeclare() {
         "timeEstimation" to Int::class, 
         "batch" to Int::class, 
         "batchSize" to Int::class, 
+        "taskDetail" to String::class, 
         "dueDateTime" to Long::class, 
         "refreshTs" to Long::class, 
         "batchRemaining" to Int::class, 
@@ -224,6 +226,7 @@ open class PeriodicTask : IGlDeclare() {
             timeEstimation = anyStruct["timeEstimation"] as? Int ?: 0
             batch = anyStruct["batch"] as? Int ?: 0
             batchSize = anyStruct["batchSize"] as? Int ?: 0
+            taskDetail = anyStruct["taskDetail"] as? String ?: ""
             dueDateTime = anyStruct["dueDateTime"] as? Long ?: 0L
             refreshTs = anyStruct["refreshTs"] as? Long ?: 0L
             batchRemaining = anyStruct["batchRemaining"] as? Int ?: 0
@@ -252,6 +255,7 @@ open class PeriodicTask : IGlDeclare() {
             "timeEstimation" to timeEstimation, 
             "batch" to batch, 
             "batchSize" to batchSize, 
+            "taskDetail" to taskDetail, 
             "dueDateTime" to dueDateTime, 
             "refreshTs" to refreshTs, 
             "batchRemaining" to batchRemaining, 
@@ -271,6 +275,7 @@ open class PeriodicTask : IGlDeclare() {
             timeEstimation = this@PeriodicTask.timeEstimation
             batch = this@PeriodicTask.batch
             batchSize = this@PeriodicTask.batchSize
+            taskDetail = this@PeriodicTask.taskDetail
             dueDateTime = this@PeriodicTask.dueDateTime
             refreshTs = this@PeriodicTask.refreshTs
             batchRemaining = this@PeriodicTask.batchRemaining

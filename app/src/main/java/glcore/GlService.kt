@@ -75,6 +75,7 @@ object GlService {
                 updateTask.timeEstimation = configTask.timeEstimation
                 updateTask.batch = configTask.batch
                 updateTask.batchSize = configTask.batchSize
+                updateTask.taskDetail = configTask.taskDetail
                 updateTasks.add(updateTask)
             }
         }

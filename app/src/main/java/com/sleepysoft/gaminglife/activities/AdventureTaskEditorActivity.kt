@@ -29,13 +29,15 @@ class AdventureTaskEditorActivity : InteractiveActivity() {
     private lateinit var seekTimeEstimation: SeekBar
     private lateinit var editTimeEstimation: EditText
 
-    private lateinit var radioSingle: RadioButton
-    private lateinit var radioBatch: RadioButton
+/*    private lateinit var radioSingle: RadioButton
+    private lateinit var radioBatch: RadioButton*/
 
     private lateinit var spinnerBatch: Spinner
 
     private lateinit var seekBatchSize: SeekBar
     private lateinit var editBatchSize: EditText
+
+    private lateinit var editTaskDetail: EditText
 
     private lateinit var buttonOk: Button
     private lateinit var buttonCancel: Button
@@ -56,8 +58,8 @@ class AdventureTaskEditorActivity : InteractiveActivity() {
         seekTimeEstimation = findViewById(R.id.seek_time_estimation)
         editTimeEstimation = findViewById(R.id.edit_time_estimation)
 
-        radioSingle = findViewById(R.id.radio_single)
-        radioBatch = findViewById(R.id.radio_batch)
+/*        radioSingle = findViewById(R.id.radio_single)
+        radioBatch = findViewById(R.id.radio_batch)*/
 
         spinnerBatch = findViewById(R.id.spinner_batch)
 
@@ -67,6 +69,8 @@ class AdventureTaskEditorActivity : InteractiveActivity() {
         seekBatchSize.min = 1
         seekBatchSize.progress = 1
         editBatchSize.setText("1")
+
+        editTaskDetail = findViewById(R.id.id_text_editor_task_detail)
 
         buttonOk = findViewById(R.id.button_ok)
         buttonCancel = findViewById(R.id.button_cancel)
@@ -172,12 +176,14 @@ class AdventureTaskEditorActivity : InteractiveActivity() {
         val timeEstimationText = editTimeEstimation.text.toString()
         val timeEstimation = timeEstimationText.toIntOrNull() ?: 5
 
-        val single = radioSingle.isChecked
-        val batch = radioBatch.isChecked
+/*        val single = radioSingle.isChecked
+        val batch = radioBatch.isChecked*/
 
         val batchSpinner = spinnerBatch.selectedItemPosition
         val batchSizeText = editBatchSize.text.toString()
         val batchSize = batchSizeText.toIntOrNull() ?: 1
+
+        val taskDetail = editTaskDetail.text.toString()
 
         if (taskName.isEmpty()) {
             AlertDialog.Builder(this)
@@ -188,7 +194,7 @@ class AdventureTaskEditorActivity : InteractiveActivity() {
             return PeriodicTask().apply { uuid = "" }
         }
 
-        if (batch && (batchSize <= 0)) {
+        if (/*batch && */(batchSize <= 0)) {
             // 弹出错误框
             AlertDialog.Builder(this)
                 .setTitle("错误")
@@ -210,8 +216,9 @@ class AdventureTaskEditorActivity : InteractiveActivity() {
             this.property = taskProperty
             this.timeQuality = ENUM_TIME_QUALITY_ARRAY[taskTimeQuality]
             this.timeEstimation = timeEstimation
-            this.batch = (if (single) 1 else batchSpinner + 1)
+            this.batch = batchSpinner + 1       // (if (single) 1 else batchSpinner + 1)
             this.batchSize = batchSize
+            this.taskDetail = taskDetail
         }
     }
 
@@ -231,15 +238,17 @@ class AdventureTaskEditorActivity : InteractiveActivity() {
 
         editTimeEstimation.setText(task.timeEstimation.toString())
 
-        if (task.batch == 1) {
+/*        if (task.batch == 1) {
             radioSingle.isChecked = true
             radioBatch.isChecked = false
         } else {
             radioSingle.isChecked = false
-            radioBatch.isChecked = true
+            radioBatch.isChecked = true*/
             spinnerBatch.setSelection(task.batch - 1)
-        }
+        // }
 
         editBatchSize.setText(task.batchSize.toString())
+
+        editTaskDetail.setText(task.taskDetail)
     }
 }

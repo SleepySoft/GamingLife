@@ -234,6 +234,7 @@ class AdventureTaskExecuteActivity : InteractiveActivity() {
     private lateinit var layoutTaskRunning: LinearLayout
     private lateinit var textTaskName: TextView
     private lateinit var textTaskTimer: TextView
+    private lateinit var textTaskDetail: TextView
     private lateinit var buttonPause: Button
     private lateinit var buttonFinish: Button
     private lateinit var buttonCancel: Button
@@ -265,6 +266,7 @@ class AdventureTaskExecuteActivity : InteractiveActivity() {
         layoutTaskRunning = findViewById(R.id.layout_task_running)
         textTaskName = findViewById(R.id.text_on_going_task)
         textTaskTimer = findViewById(R.id.text_on_going_time)
+        textTaskDetail = findViewById(R.id.text_task_detail)
         buttonPause = findViewById(R.id.button_pause)
         buttonFinish = findViewById(R.id.button_goal)
         buttonCancel = findViewById(R.id.button_abandon)
@@ -322,6 +324,13 @@ class AdventureTaskExecuteActivity : InteractiveActivity() {
             if (prevOnGoingTask != onGoingTask) {
                 prevOnGoingTask = onGoingTask
                 textTaskName.text = onGoingTask.name
+                if (onGoingTask.taskDetail.isEmpty()) {
+                    textTaskDetail.text = ""
+                    textTaskDetail.visibility = View.GONE
+                } else {
+                    textTaskDetail.text = onGoingTask.taskDetail
+                    textTaskDetail.visibility = View.VISIBLE
+                }
             }
 
             val lastingTime = GlService.getTimeStamp() - onGoingTask.conclusionTs
